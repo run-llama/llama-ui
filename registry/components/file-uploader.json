@@ -1,0 +1,26 @@
+{
+  "name": "file-uploader",
+  "type": "components:ui",
+  "dependencies": [
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "button",
+    "card",
+    "progress"
+  ],
+  "files": [
+    {
+      "name": "file-uploader.tsx",
+      "content": "// File uploader component - to be populated from src/ui/file-uploader/"
+    },
+    {
+      "name": "upload-progress.tsx",
+      "content": "// Upload progress component - to be populated from src/ui/file-uploader/"
+    },
+    {
+      "name": "file-utils.ts",
+      "content": "// File utilities - to be populated from src/ui/file-uploader/"
+    }
+  ]
+}

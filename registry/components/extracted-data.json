@@ -1,0 +1,26 @@
+{
+  "name": "extracted-data",
+  "type": "components:ui",
+  "dependencies": [
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "button",
+    "card",
+    "badge"
+  ],
+  "files": [
+    {
+      "name": "extracted-data-display.tsx",
+      "content": "// Extracted data display component - to be populated from src/ui/extracted-data/"
+    },
+    {
+      "name": "editable-field.tsx",
+      "content": "// Editable field component - to be populated from src/ui/extracted-data/"
+    },
+    {
+      "name": "confidence-utils.ts",
+      "content": "// Confidence utilities - to be populated from src/ui/extracted-data/"
+    }
+  ]
+}

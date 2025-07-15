@@ -1,0 +1,37 @@
+{
+  "name": "@llamaindex/ui",
+  "description": "LlamaIndex UI components built with Radix UI and Tailwind CSS",
+  "url": "https://github.com/llamaindex/ui",
+  "components": [
+    {
+      "name": "file-uploader",
+      "description": "File upload component with drag-and-drop, progress tracking, and preview",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["button", "card", "progress"]
+    },
+    {
+      "name": "extracted-data",
+      "description": "Display and edit extracted data with confidence indicators",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["button", "card", "badge"]
+    },
+    {
+      "name": "pdf-viewer",
+      "description": "PDF viewer with navigation and annotation support",
+      "dependencies": ["react-pdf", "lucide-react"],
+      "registryDependencies": ["button", "card"]
+    },
+    {
+      "name": "item-grid",
+      "description": "Data grid with filtering, sorting, and pagination",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["button", "table", "pagination"]
+    },
+    {
+      "name": "processing-steps",
+      "description": "Step-by-step processing indicator",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["badge", "progress"]
+    }
+  ]
+}
