@@ -1,0 +1,43 @@
+{
+  "name": "@llamaindex/ui-testing",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:unit": "vitest --project=unit",
+    "test:unit:watch": "vitest --project=unit --watch",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:storybook": "vitest --project=storybook"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@llamaindex/ui": "workspace:^",
+    "@playwright/test": "^1.54.1",
+    "@storybook/addon-a11y": "^9.0.13",
+    "@storybook/addon-vitest": "^9.0.13",
+    "@storybook/react-vite": "^9.0.13",
+    "@storybook/test-runner": "^0.22.0",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/node": "^20.17.47",
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.4.1",
+    "@vitest/browser": "^3.2.4",
+    "@vitest/coverage-v8": "^3.2.3",
+    "jsdom": "^26.1.0",
+    "msw": "^2.10.2",
+    "playwright": "^1.53.1",
+    "typescript": "~5.8.3",
+    "vite": "^6.3.5",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4"
+  }
+}
