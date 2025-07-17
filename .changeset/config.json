@@ -9,8 +9,7 @@
   "updateInternalDependencies": "patch",
   "ignore": [
     "@llamaindex/testing",
-    "example-nextjs",
-    "example-vite"
+    "example-nextjs"
   ],
   "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
     "onlyUpdatePeerDependentsWhenOutOfRange": true
