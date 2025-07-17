@@ -82,7 +82,6 @@ export const PdfPreviewImpl = ({ url, onDownload }: PdfPreviewImplProps) => {
       const response = await fetch(url);
       const blob = await response.blob();
       setFile(new File([blob], "document.pdf", { type: "application/pdf" }));
-      setFileLoadId((prev) => prev + 1);
       setIsLoading(false);
     };
     fetchFile();
