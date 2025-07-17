@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { TrashIcon, MoreVerticalIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/base/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/base/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,7 +16,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@/base/alert-dialog";
 
 export function ActionButton({ onDelete }: { onDelete: () => void }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);

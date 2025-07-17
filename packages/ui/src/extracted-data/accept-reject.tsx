@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/base/button";
 import { toast } from "sonner";
 import { type ItemHookData } from "./use-item-data";
 
@@ -11,7 +11,7 @@ export function AcceptReject<T extends Record<string, unknown>>({
 }) {
   const handleSave = (status: "approved" | "rejected") => {
     itemData
-      .save({ status })
+      .save(status)
       .then(() => {
         toast.success("Item " + status);
         onComplete?.();

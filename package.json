@@ -6,7 +6,8 @@
   "scripts": {
     "dev:ui": "pnpm --filter @llamaindex/ui dev",
     "build:ui": "pnpm --filter @llamaindex/ui build",
-    "test": "pnpm --filter @llamaindex/testing test",
+    "test": "pnpm --filter @llamaindex/ui test",
+    "coverage": "pnpm --filter @llamaindex/ui coverage",
     "storybook": "pnpm --filter @llamaindex/ui storybook",
     "build:all": "pnpm --filter @llamaindex/ui build",
     "lint": "pnpm --filter @llamaindex/ui lint",

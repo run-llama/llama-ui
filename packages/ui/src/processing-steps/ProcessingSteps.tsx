@@ -6,8 +6,8 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/base/card";
+import { Button } from "@/base/button";
 import type { ProcessingStepsProps, WorkflowEventStatus } from "./types";
 
 const getDefaultIcon = (status: WorkflowEventStatus) => {

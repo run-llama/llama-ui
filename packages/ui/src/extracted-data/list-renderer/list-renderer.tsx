@@ -1,7 +1,7 @@
 
 import { EditableField } from "../editable-field";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableRow } from "@/base/table";
+import { Button } from "@/base/button";
 import {
   isArrayItemChanged,
   getArrayItemDefaultValue,

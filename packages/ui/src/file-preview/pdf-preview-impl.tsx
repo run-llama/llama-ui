@@ -1,56 +1,26 @@
-import { useState, useEffect, useRef, type ComponentType } from "react";
+import { useState, useEffect, useRef } from "react";
+import { Document, Page, pdfjs } from "react-pdf";
 import { PdfNavigator } from "./pdf-navigator";
 
-// NOTE: We intentionally avoid a static import of `react-pdf` here because the
-// underlying `pdfjs-dist` package accesses browser-only globals (e.g.
-// `DOMMatrix`) at module evaluation time, which will crash during
-// server-side rendering.  Instead we dynamically load the library **only on the
-// client** and store the components in state.
+// Configure worker path for PDF.js
+if (typeof window !== "undefined") {
+  pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+}
 
-// Types for dynamically imported components
-type ReactPdfModule = typeof import("react-pdf");
-
-// Local component references (set after dynamic import)
-const useReactPdf = () => {
-  const [state, setState] = useState<{
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Document: ComponentType<any> | null;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Page: ComponentType<any> | null;
-  }>({ Document: null, Page: null });
-
-  useEffect(() => {
-    if (typeof window === "undefined") return; // SSR safeguard
-
-    let mounted = true;
-
-    import("react-pdf").then((module: ReactPdfModule) => {
-      if (!mounted) return;
-
-      // Configure worker path
-      module.pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${module.pdfjs.version}/build/pdf.worker.min.mjs`;
-
-      // Side-effect CSS imports – ignore TypeScript complaints
-      // @ts-expect-error react-pdf CSS import has no types
-      void import("react-pdf/dist/Page/AnnotationLayer.css");
-      // @ts-expect-error react-pdf CSS import has no types
-      void import("react-pdf/dist/Page/TextLayer.css");
-
-      setState({ Document: module.Document, Page: module.Page });
-    });
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  return state;
-};
+// Side-effect CSS imports – ignore TypeScript complaints
+// @ts-expect-error react-pdf CSS import has no types
+import("react-pdf/dist/Page/AnnotationLayer.css");
+// @ts-expect-error react-pdf CSS import has no types
+import("react-pdf/dist/Page/TextLayer.css");
 
 interface PdfPreviewImplProps {
   url: string;
   onDownload?: () => void;
 }
+
+const pdfOptions = {
+  cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+};
 
 export const PdfPreviewImpl = ({ url, onDownload }: PdfPreviewImplProps) => {
   const [numPages, setNumPages] = useState<number>();
@@ -58,11 +28,6 @@ export const PdfPreviewImpl = ({ url, onDownload }: PdfPreviewImplProps) => {
   const [scale, setScale] = useState<number>(1.0);
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  // fileLoadId is a workaround for this issue:
-  // https://github.com/wojtekmaj/react-pdf/issues/974
-  const [fileLoadId, setFileLoadId] = useState<number>(0);
-  // Dynamically loaded react-pdf components
-  const { Document: DocumentComponent, Page: PageComponent } = useReactPdf();
   const containerRef = useRef<HTMLDivElement>(null);
   const pageRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
@@ -195,7 +160,7 @@ export const PdfPreviewImpl = ({ url, onDownload }: PdfPreviewImplProps) => {
     goToPage(1);
   };
 
-  if (isLoading || !DocumentComponent || !PageComponent) {
+  if (isLoading) {
     return (
       <div className="relative h-full flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -209,11 +174,11 @@ export const PdfPreviewImpl = ({ url, onDownload }: PdfPreviewImplProps) => {
   return (
     <div className="relative h-full">
       <div ref={containerRef} className="overflow-auto h-full">
-        <DocumentComponent
-          key={fileLoadId}
+        <Document
           file={file}
           onLoadSuccess={onDocumentLoadSuccess}
           loading={isLoading}
+          options={pdfOptions}
         >
           {Array.from(new Array(numPages), (_, index) => (
             <div
@@ -223,7 +188,7 @@ export const PdfPreviewImpl = ({ url, onDownload }: PdfPreviewImplProps) => {
               }}
               className="mb-4 flex justify-center"
             >
-              <PageComponent
+              <Page
                 pageNumber={index + 1}
                 scale={scale}
                 renderTextLayer={true}
@@ -231,7 +196,7 @@ export const PdfPreviewImpl = ({ url, onDownload }: PdfPreviewImplProps) => {
               />
             </div>
           ))}
-        </DocumentComponent>
+        </Document>
       </div>
 
       {/* Navigation Component */}

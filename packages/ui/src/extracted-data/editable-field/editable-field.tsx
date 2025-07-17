@@ -3,17 +3,17 @@ import React, { useState, useRef, useLayoutEffect } from "react";
 import { getConfidenceBackgroundClass } from "../confidence-utils";
 import { isLowConfidence } from "@/lib";
 import { PrimitiveType, convertPrimitiveValue } from "../primitive-validation";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Popover, PopoverContent, PopoverTrigger } from "@/base/popover";
+import { Button } from "@/base/button";
+import { Input } from "@/base/input";
+import { Textarea } from "@/base/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/base/select";
 
 interface EditableFieldProps {
   value: unknown;

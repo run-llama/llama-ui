@@ -10,20 +10,22 @@ import { JSONSchema } from "zod/v4/core";
 // Remove reconciliation imports since ExtractedDataDisplay handles it internally
 
 export interface ItemHookData<T extends Record<string, unknown>> {
-  /** the full item object, loaded from the API, unmodified */
+  /** the complete item object from API containing both AI predictions and user corrections */
   item: TypedAgentData<ExtractedData<T>> | null;
   /** the JSON schema used for validation and reconciliation */
   jsonSchema: JSONSchema.ObjectSchema;
-  /** the extracted data from the API */
+  /** AI's original predictions (readonly reference) */
+  originalData: T | null;
+  /** current user-corrected data (what gets saved) */
   data: T | null;
-  /** whether the data is loading from the API. item and data are null while loading. */
+  /** whether the data is loading from the API */
   loading: boolean;
-  /** a load or parse error. Loading and data is false, null, if error */
+  /** a load or parse error */
   error: string | null;
-  /** sets the data, which will be saved to the server when save is called */
-  setData: (data: T) => void;
-  /** Saves the current data and any specified item edits (such as status updates) */
-  save: (update: Partial<ExtractedData<T>>) => Promise<void>;
+  /** updates the user-corrected data */
+  updateData: (data: T) => void;
+  /** saves the current user-corrected data and any metadata updates */
+  save: (status: "approved" | "rejected") => Promise<void>;
 }
 
 export interface UseItemDataOptions<T extends Record<string, unknown>> {
@@ -39,39 +41,55 @@ export function useItemData<T extends Record<string, unknown>>({
   isMock,
   client,
 }: UseItemDataOptions<T>): ItemHookData<T> {
-  const [data, setData] = useState<T | null>(null);
-
-  const [item, setItem] = useState<TypedAgentData<ExtractedData<T>> | null>(
-    null,
-  );
+  // Single source of truth - contains both original predictions and user corrections
+  const [item, setItem] = useState<TypedAgentData<ExtractedData<T>> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  /** Resets the state after reloading from the API */
-  const resetState = useCallback((item: TypedAgentData<ExtractedData<T>>) => {
-    try {
-      const extractedData = item.data.data as T;
+  /** Updates user-corrected data within the item */
+  const updateData = useCallback((newData: T) => {
+    setItem(currentItem => {
+      if (!currentItem) return null;
+      
+      return {
+        ...currentItem,
+        data: {
+          ...currentItem.data,
+          data: newData, // Update user-corrected data
+          // Keep original_data unchanged
+        }
+      };
+    });
+  }, []);
 
-      setItem(item);
-      setData(extractedData); // Use original API data - reconciliation happens in ExtractedDataDisplay
+  /** Resets the state after loading from API */
+  const resetState = useCallback((newItem: TypedAgentData<ExtractedData<T>>) => {
+    try {
+      // Validate that we have the expected data structure
+      if (!newItem.data.data) {
+        throw new Error("Invalid item structure: missing data field");
+      }
+
+      setItem(newItem);
       setError(null);
       setLoading(false);
     } catch (err) {
-      setError(`Failed to parse extracted data: ${err}`);
+      setError(`Failed to parse item data: ${err}`);
       setLoading(false);
       setItem(null);
-      setData(null);
     }
   }, []);
 
   useEffect(() => {
     const fetchItemData = async () => {
+      // Reset state when starting new fetch
       setLoading(true);
       setError(null);
+      setItem(null);
 
       try {
         if (isMock) {
-          // Simulate API delay for realistic experience
+          // Simulate API delay
           await new Promise((resolve) => setTimeout(resolve, 800));
 
           // 10% chance of error to simulate real world conditions
@@ -84,7 +102,6 @@ export function useItemData<T extends Record<string, unknown>>({
           ) as unknown as TypedAgentData<ExtractedData<T>>;
           resetState(mockData);
         } else {
-          //
           const response = await client.getItem(itemId);
           if (!response) {
             throw new Error(`Item not found: ${itemId}`);
@@ -98,35 +115,41 @@ export function useItemData<T extends Record<string, unknown>>({
         setError(
           err instanceof Error ? err.message : "Failed to load item data",
         );
-      } finally {
         setLoading(false);
       }
     };
 
     if (itemId) {
       fetchItemData();
+    } else {
+      // Handle empty itemId case
+      setLoading(false);
+      setError(null);
+      setItem(null);
     }
   }, [itemId, isMock, resetState, client]);
 
   const save = useCallback(
-    async (update: Partial<ExtractedData<T>>) => {
-      if (!data || !item) {
-        throw new Error("No data to save");
+    async (status: "approved" | "rejected") => {
+      if (!item) {
+        throw new Error("No item to save");
       }
-      const updated: ExtractedData<T> = {
+
+      const response = await client.updateItem(itemId, {
         ...item.data,
-        ...update,
-      };
-      const response = await client.updateItem(itemId, updated);
+        status,
+      });
       resetState(response);
     },
-    [data, item, itemId, resetState, client],
+    [item, itemId, resetState, client],
   );
+
   return {
     item,
     jsonSchema,
-    data,
-    setData,
+    originalData: item?.data.original_data || null,
+    data: item?.data.data || null,
+    updateData,
     loading,
     error,
     save,

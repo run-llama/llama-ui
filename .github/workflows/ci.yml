@@ -42,7 +42,7 @@ jobs:
         run: pnpm run lint
 
       - name: Run tests
-        run: pnpm run test
+        run: pnpm run coverage
 
       - name: Build packages
         run: pnpm run build:all
