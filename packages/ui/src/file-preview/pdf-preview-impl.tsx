@@ -58,6 +58,9 @@ export const PdfPreviewImpl = ({ url, onDownload }: PdfPreviewImplProps) => {
   const [scale, setScale] = useState<number>(1.0);
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  // fileLoadId is a workaround for this issue:
+  // https://github.com/wojtekmaj/react-pdf/issues/974
+  const [fileLoadId, setFileLoadId] = useState<number>(0);
   // Dynamically loaded react-pdf components
   const { Document: DocumentComponent, Page: PageComponent } = useReactPdf();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -101,12 +104,20 @@ export const PdfPreviewImpl = ({ url, onDownload }: PdfPreviewImplProps) => {
     }
   }, [numPages]);
 
+  const lastLoadedUrl = useRef<string | null>(null);
   useEffect(() => {
+    // prevent double effect runs that react likes to do in dev mode. Double load
+    // Causes the pdf library to crash with file identity changing, and causes a lot of flickering.
+    if (lastLoadedUrl.current === url) {
+      return;
+    }
+    lastLoadedUrl.current = url;
     const fetchFile = async () => {
       setIsLoading(true);
       const response = await fetch(url);
       const blob = await response.blob();
       setFile(new File([blob], "document.pdf", { type: "application/pdf" }));
+      setFileLoadId((prev) => prev + 1);
       setIsLoading(false);
     };
     fetchFile();
@@ -199,6 +210,7 @@ export const PdfPreviewImpl = ({ url, onDownload }: PdfPreviewImplProps) => {
     <div className="relative h-full">
       <div ref={containerRef} className="overflow-auto h-full">
         <DocumentComponent
+          key={fileLoadId}
           file={file}
           onLoadSuccess={onDocumentLoadSuccess}
           loading={isLoading}
