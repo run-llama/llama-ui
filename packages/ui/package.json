@@ -1,6 +1,28 @@
 {
   "name": "@llamaindex/ui",
   "version": "0.2.0",
+  "description": "A comprehensive UI component library built with React, TypeScript, and Tailwind CSS for LlamaIndex applications",
+  "keywords": [
+    "react",
+    "typescript",
+    "tailwindcss",
+    "ui-components",
+    "llamaindex",
+    "rag",
+    "ai",
+    "component-library",
+    "design-system"
+  ],
+  "homepage": "https://github.com/run-llama/llama-ui#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/run-llama/llama-ui.git",
+    "directory": "packages/ui"
+  },
+  "bugs": {
+    "url": "https://github.com/run-llama/llama-ui/issues"
+  },
+  "license": "MIT",
   "private": false,
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
