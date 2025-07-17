@@ -6,8 +6,8 @@ import {
   cancelFileUpload,
   cancelAllUploads,
   calculateUploadStats,
-} from "@llamaindex/ui/registry/new-york/file-uploader/upload-progress-utils";
-import type { FileUploadProgress } from "@llamaindex/ui/registry/new-york/file-uploader/upload-progress";
+} from "@llamaindex/ui/src/file-uploader/upload-progress-utils";
+import type { FileUploadProgress } from "@llamaindex/ui/src/file-uploader/upload-progress";
 
 /**
  * Integration tests for common upload flow scenarios

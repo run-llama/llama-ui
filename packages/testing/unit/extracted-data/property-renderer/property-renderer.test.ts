@@ -5,7 +5,7 @@ import {
   filterConfidenceForArray,
   isArrayOfObjects,
   shouldShowKeyOnSeparateLine,
-} from "@llamaindex/ui/registry/new-york/extracted-data/property-renderer/property-renderer-utils";
+} from "@llamaindex/ui/src/extracted-data/property-renderer/property-renderer-utils";
 
 describe("PropertyRenderer Utilities", () => {
   describe("formatFieldName", () => {

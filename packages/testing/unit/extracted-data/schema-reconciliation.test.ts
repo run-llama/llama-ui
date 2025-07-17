@@ -7,7 +7,7 @@ import {
   getFieldMetadataAtPath,
   getValidationErrorsAtPath,
   type FieldMetadata,
-} from "@llamaindex/ui/registry/new-york/extracted-data/schema-reconciliation";
+} from "@llamaindex/ui/src/extracted-data/schema-reconciliation";
 
 describe("JSON Schema-based Schema Reconciliation", () => {
   describe("reconcileDataWithJsonSchema", () => {

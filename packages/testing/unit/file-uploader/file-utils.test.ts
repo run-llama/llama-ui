@@ -12,7 +12,7 @@ import {
   FILE_TYPE_GROUPS,
   getFileTypesByCategory,
   createFileTypeValidator,
-} from "@llamaindex/ui/registry/new-york/file-uploader/file-utils";
+} from "@llamaindex/ui/src/file-uploader/file-utils";
 
 // Mock crypto.subtle for testing
 const mockCrypto = {

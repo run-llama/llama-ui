@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, within, screen } from "@storybook/test";
 import { useState } from "react";
-import { ExtractedDataDisplay } from "@/registry/new-york/extracted-data";
+import { ExtractedDataDisplay } from "../../src/extracted-data";
 import type { JSONSchema } from "zod/v4/core";
 
 const meta: Meta<typeof ExtractedDataDisplay> = {

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { PdfPreview } from "@/registry/new-york/file-preview/pdf-preview";
+import { PdfPreview } from "../../src/file-preview/pdf-preview";
 
 const meta: Meta<typeof PdfPreview> = {
   title: "Components/FilePreview/PdfPreview",

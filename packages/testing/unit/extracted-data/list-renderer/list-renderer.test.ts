@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import type { FieldMetadata } from "@llamaindex/ui/registry/new-york/extracted-data/schema-reconciliation";
+import type { FieldMetadata } from "@llamaindex/ui/src/extracted-data/schema-reconciliation";
 import {
   buildArrayItemPath,
   isArrayItemChanged,
   getArrayItemDefaultValue,
-} from "@llamaindex/ui/registry/new-york/extracted-data/list-renderer/list-renderer-utils";
+} from "@llamaindex/ui/src/extracted-data/list-renderer";
 
 describe("ListRenderer Utilities", () => {
   describe("buildArrayItemPath", () => {

@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect } from "@storybook/test";
 import { within, userEvent, screen } from "@storybook/test";
 import { useState } from "react";
-import { EditableField } from "@/registry/new-york/extracted-data/editable-field";
-import { PrimitiveType } from "@/registry/new-york/extracted-data/primitive-validation";
+import { EditableField } from "../../src/extracted-data/editable-field";
+import { PrimitiveType } from "../../src/extracted-data/primitive-validation";
 
 const meta: Meta<typeof EditableField> = {
   title: "Components/ExtractedData/EditableField",

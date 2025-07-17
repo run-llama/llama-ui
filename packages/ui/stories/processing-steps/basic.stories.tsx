@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 import { FileText, Clock, CheckCircle, Zap, Database } from "lucide-react";
-import { ProcessingSteps } from "@/registry/new-york/processing-steps/ProcessingSteps";
-import type { WorkflowEvent } from "@/registry/new-york/processing-steps/types";
+import { ProcessingSteps } from "../../src/processing-steps/ProcessingSteps";
+import type { WorkflowEvent } from "../../src/processing-steps/types";
 
 // Mock workflow events for different scenarios
 const invoiceWorkflowEvents: WorkflowEvent[] = [

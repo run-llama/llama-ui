@@ -7,8 +7,6 @@
     "dev:ui": "pnpm --filter @llamaindex/ui dev",
     "build:ui": "pnpm --filter @llamaindex/ui build",
     "test": "pnpm --filter @llamaindex/ui-testing test",
-    "test:unit": "pnpm --filter @llamaindex/ui-testing test:unit",
-    "test:storybook": "pnpm --filter @llamaindex/ui-testing test:storybook",
     "storybook": "pnpm --filter @llamaindex/ui storybook",
     "build:all": "pnpm --filter @llamaindex/ui build",
     "lint": "pnpm --filter @llamaindex/ui lint",

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { flattenConfidence } from "@llamaindex/ui/registry/new-york/extracted-data/confidence-utils";
+import { flattenConfidence } from "@llamaindex/ui/src/extracted-data/confidence-utils";
 
 describe("Confidence Flattening", () => {
   describe("flattenConfidence", () => {

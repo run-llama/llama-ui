@@ -7,7 +7,7 @@ import {
   isTableCellChanged,
   getTableRowDefaultValue,
   type ColumnDef,
-} from "@llamaindex/ui/registry/new-york/extracted-data/table-renderer/table-renderer-utils";
+} from "@llamaindex/ui/src/extracted-data/table-renderer/table-renderer-utils";
 
 describe("TableRenderer Utilities", () => {
   describe("formatFieldName", () => {

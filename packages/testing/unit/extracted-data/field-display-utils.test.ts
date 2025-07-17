@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { getFieldDisplayInfo } from "@llamaindex/ui/registry/new-york/extracted-data/field-display-utils";
-import type { FieldMetadata } from "@llamaindex/ui/registry/new-york/extracted-data/schema-reconciliation";
+import { getFieldDisplayInfo } from "@llamaindex/ui/src/extracted-data/field-display-utils";
+import type { FieldMetadata } from "@llamaindex/ui/src/extracted-data/schema-reconciliation";
 
 describe("field-display-utils path construction", () => {
   const mockFieldMetadata: Record<string, FieldMetadata> = {

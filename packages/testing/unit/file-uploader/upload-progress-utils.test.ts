@@ -9,8 +9,8 @@ import {
   calculateUploadStats,
   hasActiveUploads,
   getVisibleFiles,
-} from "@llamaindex/ui/registry/new-york/file-uploader/upload-progress-utils";
-import type { FileUploadProgress } from "@llamaindex/ui/registry/new-york/file-uploader/upload-progress";
+} from "@llamaindex/ui/src/file-uploader/upload-progress-utils";
+import type { FileUploadProgress } from "@llamaindex/ui/src/file-uploader/upload-progress";
 
 // Test utilities
 const createMockFile = (name: string): File => {

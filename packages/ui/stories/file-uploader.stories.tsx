@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 import { http, HttpResponse } from "msw";
-import { FileUploader, type FileUploadData } from "@/registry/new-york/file-uploader";
-import { FileType, FILE_TYPE_GROUPS } from "@/registry/new-york/file-uploader/file-utils";
+import { FileUploader, type FileUploadData } from "../src/file-uploader";
+import { FileType, FILE_TYPE_GROUPS } from "../src/file-uploader/file-utils";
 
 const meta: Meta<typeof FileUploader> = {
   title: "Components/FileUploader",

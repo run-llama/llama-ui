@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect } from "@storybook/test";
 import { within, userEvent, screen } from "@storybook/test";
 import { useState } from "react";
-import { ListRenderer } from "@/registry/new-york/extracted-data/list-renderer";
+import { ListRenderer } from "../../src/extracted-data/list-renderer";
 
 const meta: Meta<typeof ListRenderer> = {
   title: "Components/ExtractedData/ListRenderer",

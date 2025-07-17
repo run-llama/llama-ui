@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { PropertyRenderer } from "@/registry/new-york/extracted-data";
+import { PropertyRenderer } from "../../src/extracted-data";
 import { userEvent, within, expect, screen } from "@storybook/test";
 import { useState } from "react";
-import type { FieldMetadata } from "@/registry/new-york/extracted-data/schema-reconciliation";
+import type { FieldMetadata } from "../../src/extracted-data/schema-reconciliation";
 
 const meta: Meta<typeof PropertyRenderer> = {
   title: "Components/ExtractedData/PropertyRenderer",

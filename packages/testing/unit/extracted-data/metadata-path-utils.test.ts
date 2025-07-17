@@ -2,8 +2,8 @@ import { describe, it, expect } from "vitest";
 import {
   buildTableHeaderMetadataPath,
   findFieldMetadata,
-} from "@llamaindex/ui/registry/new-york/extracted-data/metadata-path-utils";
-import type { FieldMetadata } from "@llamaindex/ui/registry/new-york/extracted-data/schema-reconciliation";
+} from "@llamaindex/ui/src/extracted-data/metadata-path-utils";
+import type { FieldMetadata } from "@llamaindex/ui/src/extracted-data/schema-reconciliation";
 
 describe("metadata-path-utils", () => {
   describe("buildTableHeaderMetadataPath", () => {

@@ -1,25 +1,59 @@
 {
   "name": "@llamaindex/ui",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "src",
+    "components",
+    "lib"
+  ],
   "exports": {
-    "./styles.css": "./src/styles.css",
-    "./components/*": "./components/ui/*.tsx",
-    "./registry/*": "./registry/new-york/*"
+    "./styles.css": "./dist/styles.css",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./file-uploader": {
+      "types": "./dist/file-uploader.d.ts",
+      "import": "./dist/file-uploader.mjs",
+      "require": "./dist/file-uploader.cjs"
+    },
+    "./extracted-data": {
+      "types": "./dist/extracted-data.d.ts",
+      "import": "./dist/extracted-data.mjs",
+      "require": "./dist/extracted-data.cjs"
+    },
+    "./file-preview": {
+      "types": "./dist/file-preview.d.ts",
+      "import": "./dist/file-preview.mjs",
+      "require": "./dist/file-preview.cjs"
+    },
+    "./item-grid": {
+      "types": "./dist/item-grid.d.ts",
+      "import": "./dist/item-grid.mjs",
+      "require": "./dist/item-grid.cjs"
+    },
+    "./processing-steps": {
+      "types": "./dist/processing-steps.d.ts",
+      "import": "./dist/processing-steps.mjs",
+      "require": "./dist/processing-steps.cjs"
+    }
   },
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "registry:build": "npx shadcn@latest build",
+    "dev": "tsup --watch & npm run build:css --watch",
+    "build": "tsup && npm run build:css",
+    "build:css": "postcss src/styles.css -o dist/styles.css",
+    "lint": "eslint src/**/*.{ts,tsx}",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
   "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "next": "15.4.1",
+    "@llamaindex/cloud": "4.0.23",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-dropdown-menu": "^2.1.15",
@@ -30,26 +64,39 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.514.0",
-    "tailwind-merge": "^3.3.1",
+    "react-pdf": "^10.0.1",
     "sonner": "^2.0.5",
-    "react-pdf": "^10.0.1"
+    "tailwind-merge": "^3.3.1",
+    "zod": "^3.25.76"
+  },
+  "peerDependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "typescript": "^5",
-    "@types/node": "^20",
-    "@types/react": "^18.3.23",
-    "@types/react-dom": "^18.3.7",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
-    "eslint": "^9",
-    "eslint-config-next": "15.4.1",
-    "@eslint/eslintrc": "^3",
     "@chromatic-com/storybook": "^4.0.1",
+    "eslint-plugin-react": "^7",
+    "eslint-plugin-react-hooks": "^5",
+    "typescript-eslint": "^8",
     "@storybook/addon-a11y": "^9.0.13",
     "@storybook/addon-docs": "^9.0.13",
     "@storybook/react-vite": "^9.0.13",
-    "storybook": "^9.0.17",
+    "@storybook/test": "^8.6.14",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20.19.8",
+    "@types/react": "18.3.23",
+    "@types/react-dom": "18.3.7",
+    "eslint": "^9",
     "msw": "^2.10.2",
-    "msw-storybook-addon": "^2.0.5"
+    "msw-storybook-addon": "^2.0.5",
+    "postcss-cli": "^11.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "storybook": "^9.0.17",
+    "tailwind-classname-prefix-loader": "^1.0.6",
+    "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
+    "tsup": "^8.5.0",
+    "typescript": "^5"
   }
 }

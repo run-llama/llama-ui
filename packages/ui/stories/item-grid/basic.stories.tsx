@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { ItemGrid } from "@/registry/new-york/item-grid";
+import { ItemGrid } from "../../src/item-grid";
 
-import type { Column } from "@/registry/new-york/item-grid/types";
+import type { Column } from "../../src/item-grid/types";
 import type {
   AgentClient,
   ExtractedData,
