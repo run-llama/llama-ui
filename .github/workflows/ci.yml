@@ -46,3 +46,11 @@ jobs:
 
       - name: Build packages
         run: pnpm run build:all
+
+      - name: Check for changeset
+        if: github.event_name == 'pull_request'
+        run: |
+          if [[ $(pnpm changeset status --since=origin/${{ github.base_ref }}) == *"No changesets present"* ]]; then
+            echo "::error::No changeset found. Please run 'pnpm changeset' to add a changeset."
+            exit 1
+          fi

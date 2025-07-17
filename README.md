@@ -1,54 +1,105 @@
-# React + TypeScript + Vite
+# @llamaindex/ui
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React component library for LlamaIndex applications, built with TypeScript and Tailwind CSS.
 
-Currently, two official plugins are available:
+## Packages
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+This monorepo contains:
 
-## Expanding the ESLint configuration
+- `@llamaindex/ui` - Main UI component library (published to npm)
+- `@llamaindex/example-nextjs` - Next.js example application
+- `@llamaindex/example-vite` - Vite example application
+- `@llamaindex/testing` - Testing utilities and setup
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Development
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-});
+### Prerequisites
+
+- Node.js 22+
+- pnpm 10+
+
+### Setup
+
+```bash
+# Install dependencies
+pnpm install
+
+# Start UI development with Storybook
+pnpm storybook
+
+# Run examples
+pnpm dev:ui
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Scripts
 
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
+```bash
+# Development
+pnpm dev:ui          # Start UI package in development mode
+pnpm storybook       # Start Storybook for component development
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    "react-x": reactX,
-    "react-dom": reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs["recommended-typescript"].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-});
+# Building
+pnpm build:ui        # Build UI package
+pnpm build:all       # Build all packages
+
+# Testing & Linting
+pnpm test           # Run tests
+pnpm lint           # Run linting
 ```
+
+## Release Process
+
+This project uses [Changesets](https://github.com/changesets/changesets) for version management and publishing.
+
+### Creating a release
+
+1. **Make your changes** to the `@llamaindex/ui` package
+
+2. **Create a changeset** describing your changes:
+   ```bash
+   pnpm changeset
+   ```
+   - Select `@llamaindex/ui` when asked which packages changed
+   - Choose the appropriate semver bump (patch/minor/major)
+   - Write a clear description of the changes
+
+3. **Commit and push** your changes including the changeset file
+
+4. **Create a Pull Request** - CI will automatically check for changesets
+
+5. **Merge the PR** - A "Version Packages" PR will be automatically created
+
+6. **Merge the "Version Packages" PR** - The package will be automatically published to npm
+
+### Manual release (if needed)
+
+```bash
+# Update versions and generate changelogs
+pnpm version-packages
+
+# Build and publish
+pnpm release
+```
+
+## Package Structure
+
+The main UI package (`@llamaindex/ui`) exports components organized by functionality:
+
+- `file-uploader` - File upload components and utilities
+- `extracted-data` - Data display and editing components  
+- `file-preview` - PDF and image preview components
+- `item-grid` - Data grid and table components
+- `processing-steps` - Step-by-step process indicators
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Create a changeset with `pnpm changeset`
+6. Push your changes and create a Pull Request
+
+## License
+
+[License information to be added]
