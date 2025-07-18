@@ -1,5 +1,7 @@
 # @llamaindex/ui
 
+[![codecov](https://codecov.io/gh/run-llama/llama-ui/branch/main/graph/badge.svg)](https://codecov.io/gh/run-llama/llama-ui)
+
 A comprehensive UI component library built with React, TypeScript, and Tailwind CSS for LlamaIndex applications.
 
 ## 📊 Test Coverage
