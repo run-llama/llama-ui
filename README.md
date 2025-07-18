@@ -1,6 +1,6 @@
 # @llamaindex/ui
 
-[![codecov](https://codecov.io/gh/run-llama/llama-ui/branch/main/graph/badge.svg)](https://codecov.io/gh/run-llama/llama-ui)
+[![codecov](https://codecov.io/gh/run-llama/llama-ui/graph/badge.svg?token=HULSBAQBSB)](https://codecov.io/gh/run-llama/llama-ui)
 
 A React component library for LlamaIndex applications, built with TypeScript and Tailwind CSS.
 
