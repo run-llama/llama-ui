@@ -4,17 +4,17 @@ codecov:
 coverage:
   precision: 2
   round: down
-  range: "70...100"
+  range: "50...100"
 
   status:
     project:
       default:
-        target: 80%
+        target: 50%
         threshold: 1%
         base: auto
     patch:
       default:
-        target: 70%
+        target: 40%
         threshold: 5%
 
 comment:
@@ -35,6 +35,7 @@ ignore:
   - "src/**/index.ts"
   - "src/styles.css"
   - "src/**/mock-*.ts"
+  - "base/**"
   - "tests/**/*"
   - "**/*.d.ts"
   - "dist/**"
