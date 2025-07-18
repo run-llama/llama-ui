@@ -1,0 +1,42 @@
+codecov:
+  require_ci_to_pass: yes
+
+coverage:
+  precision: 2
+  round: down
+  range: "70...100"
+
+  status:
+    project:
+      default:
+        target: 80%
+        threshold: 1%
+        base: auto
+    patch:
+      default:
+        target: 70%
+        threshold: 5%
+
+comment:
+  layout: "header,diff,files,footer"
+  behavior: default
+  require_changes: false
+  require_base: no
+  require_head: yes
+
+github_checks:
+  annotations: true
+
+ignore:
+  - "src/**/*.stories.tsx"
+  - "src/**/*.test.tsx"
+  - "src/**/*.spec.tsx"
+  - "src/**/types.ts"
+  - "src/**/index.ts"
+  - "src/styles.css"
+  - "src/**/mock-*.ts"
+  - "tests/**/*"
+  - "**/*.d.ts"
+  - "dist/**"
+  - "coverage/**"
+  - "node_modules/**" 
