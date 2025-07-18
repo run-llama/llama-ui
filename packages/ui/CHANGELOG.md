@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 0.3.0
+
+### Minor Changes
+
+- 38c6198: add more business components and export default shadcn base components
+
 ## 0.2.1
 
 ### Patch Changes
