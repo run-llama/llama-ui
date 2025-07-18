@@ -41,8 +41,18 @@ jobs:
       - name: Run linting
         run: pnpm run lint
 
-      - name: Run tests
-        run: pnpm run test
+      - name: Run tests with coverage
+        run: pnpm run coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./packages/ui/coverage/lcov.info
+          flags: unittests
+          name: codecov-ui
+          fail_ci_if_error: true
+          verbose: true
 
       - name: Build packages
         run: pnpm run build:all

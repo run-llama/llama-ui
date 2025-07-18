@@ -1,18 +1,72 @@
 # @llamaindex/ui
 
-A comprehensive UI component library built with React, TypeScript, and Tailwind CSS.
+[![codecov](https://codecov.io/gh/run-llama/llama-ui/branch/main/graph/badge.svg)](https://codecov.io/gh/run-llama/llama-ui)
 
-## Features
+A comprehensive UI component library built with React, TypeScript, and Tailwind CSS for LlamaIndex applications.
 
-- 🎨 **Modern Design System** - Built with Tailwind CSS for consistent styling
-- 🧩 **Modular Components** - Tree-shakable exports for optimal bundle size
-- 📱 **Responsive Design** - Mobile-first responsive components
-- 🌙 **Dark Mode Support** - Built-in dark mode variants
-- 📊 **Rich Components** - File upload, data tables, PDF preview, and more
-- ⚡ **Performance Optimized** - Minimal bundle impact with external dependencies
-- 🔧 **TypeScript First** - Full TypeScript support with comprehensive types
+## 📊 Test Coverage
 
-## Installation
+![Coverage Lines](https://img.shields.io/badge/Coverage-Lines%3A%2070.04%25-brightgreen)
+![Coverage Functions](https://img.shields.io/badge/Coverage-Functions%3A%2072.67%25-brightgreen)
+![Coverage Branches](https://img.shields.io/badge/Coverage-Branches%3A%2084.7%25-brightgreen)
+
+| Component | Lines | Functions | Branches | Statements |
+|-----------|-------|-----------|----------|------------|
+| **Overall** | 70.04% | 72.67% | 84.7% | 70.04% |
+| lib | 50.35% | 55.55% | 57.14% | 50.35% |
+| extracted-data | 76.28% | 92.85% | 86.12% | 76.28% |
+| file-uploader | 77.65% | 62.79% | 84.24% | 77.65% |
+| item-grid | 78.01% | 77.77% | 78.43% | 78.01% |
+
+## 🧪 Testing
+
+### Running Tests
+
+```bash
+# Run all tests (unit + storybook)
+pnpm test
+
+# Run only unit tests
+pnpm test:unit
+
+# Run only storybook tests
+pnpm test:storybook
+
+# Run tests in watch mode
+pnpm test:watch
+
+# Generate coverage report
+pnpm test:coverage
+
+# Open coverage UI
+pnpm test:ui
+```
+
+### Test Structure
+
+```
+packages/ui/
+├── tests/                    # Test files
+│   ├── extracted-data/      # Data extraction component tests
+│   ├── file-uploader/       # File upload functionality tests
+│   └── lib/                 # Utility library tests
+└── coverage/                # Coverage reports
+    └── index.html           # Interactive coverage report
+```
+
+### Coverage Goals
+
+- **Functions**: >80% (currently 72.67%)
+- **Branches**: >85% (currently 84.7%)
+- **Statements/Lines**: >80% (currently 70.04%)
+
+### Test Statistics
+
+- **Unit Tests**: 231 test cases
+- **Storybook Tests**: 37 test cases
+- **Total Tests**: 268 test cases
+
+## 📦 Installation
 
 ```bash
 npm install @llamaindex/ui
@@ -21,6 +75,8 @@ yarn add @llamaindex/ui
 # or
 pnpm add @llamaindex/ui
 ```
+
+## 🚀 Quick Start
 
 ## Setup
 

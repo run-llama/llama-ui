@@ -1,6 +1,6 @@
 import { ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ColumnFilter } from "@/components/ui/column-filter";
+import { ColumnFilter } from "@/base/column-filter";
 import type { Column, SortState } from "../types";
 
 export function ColumnHeader<T = unknown>({

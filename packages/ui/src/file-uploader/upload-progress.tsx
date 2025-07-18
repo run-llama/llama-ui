@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { X, ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Button } from "@/base/button";
+import { Progress } from "@/base/progress";
 import { formatFileSize } from "./file-utils";
 import {
   calculateUploadStats,

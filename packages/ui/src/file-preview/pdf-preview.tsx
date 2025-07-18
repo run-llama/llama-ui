@@ -1,7 +1,23 @@
 "use client";
 
-// This wrapper is now a thin re-export so that other modules can continue to
-// import `./pdf-preview` without being concerned about the internal
-// implementation.  All SSR-safety is handled inside `PdfPreviewImpl`.
+import { Clock } from "lucide-react";
+import { lazy, memo, Suspense } from "react";
 
-export { PdfPreviewImpl as PdfPreview } from "./pdf-preview-impl";
+const PdfPreview = memo(({ url }: { url: string }) => {
+    if (typeof window === "undefined") {
+        return null;
+    }
+    const PdfPreviewLazy = lazy(() => import("./pdf-preview-impl").then(module => ({ default: module.PdfPreviewImpl })));
+    return (
+        <Suspense fallback={
+            <div className="flex items-center justify-center p-8">
+            <Clock className="h-6 w-6 animate-pulse text-gray-400" />
+            <span className="ml-2 text-gray-600">Loading PDF viewer...</span>
+            </div>
+        }>
+            <PdfPreviewLazy url={url} />
+        </Suspense>
+    );
+});
+
+export { PdfPreview };

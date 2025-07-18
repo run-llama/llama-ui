@@ -1,7 +1,7 @@
 
 import React, { useMemo } from "react";
 import { EditableField } from "../editable-field";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/base/button";
 import {
   Table,
   TableBody,
@@ -9,7 +9,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/base/table";
 import {
   type ColumnDef,
   flattenObject,

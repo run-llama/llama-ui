@@ -8,7 +8,6 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [
-    "@llamaindex/testing",
     "example-nextjs"
   ],
   "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {

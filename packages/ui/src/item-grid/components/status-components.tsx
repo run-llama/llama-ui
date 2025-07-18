@@ -1,5 +1,5 @@
 import { CheckIcon, XIcon } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/base/badge";
 import { useMemo } from "react";
 
 export function ReviewStatusBadge({ value }: { value: string }) {

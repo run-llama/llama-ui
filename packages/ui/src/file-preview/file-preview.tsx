@@ -1,10 +1,9 @@
-
-import { lazy, Suspense } from "react";
-import { Card } from "@/components/ui/card";
+import { Card } from "@/base/card";
 import type { BoundingBox } from "./types";
 import { ImagePreview } from "./image-preview";
 import { useFileData, type FileData } from "./use-file-data";
 import { Clock, XCircle } from "lucide-react";
+import { PdfPreview } from "./pdf-preview";
 
 function getFileType(fileType?: string): "image" | "pdf" | "unsupported" {
   if (!fileType) return "unsupported";
@@ -103,17 +102,7 @@ export function FilePreview({
 
   if (fileType === "pdf") {
     // Use dynamic import for PDF preview to avoid SSR issues
-    const PdfPreviewLazy = lazy(() => import("./pdf-preview").then(module => ({ default: module.PdfPreview })));
-    return (
-      <Suspense fallback={
-        <div className="flex items-center justify-center p-8">
-          <Clock className="h-6 w-6 animate-pulse text-gray-400" />
-          <span className="ml-2 text-gray-600">Loading PDF viewer...</span>
-        </div>
-      }>
-        <PdfPreviewLazy url={data?.url || ""} />
-      </Suspense>
-    );
+    return <PdfPreview url={data?.url || ""} />;
   }
 
   return null;

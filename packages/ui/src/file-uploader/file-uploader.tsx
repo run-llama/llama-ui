@@ -2,8 +2,8 @@ import * as React from "react";
 import { useState } from "react";
 import { Loader2, Upload, X } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/base/button";
+import { Input } from "@/base/input";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from "@/base/dialog";
 import { validateFile, FileType } from "./file-utils";
 import { useFileUpload, type FileUploadData } from "./use-file-upload";
 import { useUploadProgress } from "./use-upload-progress";

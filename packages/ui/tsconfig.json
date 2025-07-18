@@ -21,6 +21,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["src/**/*", "components/**/*", "lib/**/*", "lib", "stories/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.*", "**/*.spec.*"]
+  "include": ["src/**/*", "base/**/*", "lib/**/*", "lib", "stories/**/*", "tests/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
