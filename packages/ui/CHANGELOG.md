@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 0.3.1
+
+### Patch Changes
+
+- b6eee29: Make llama cloud a peer dependency to avoid duplicates
+
 ## 0.3.0
 
 ### Minor Changes
