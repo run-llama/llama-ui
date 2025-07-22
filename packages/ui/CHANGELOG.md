@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 0.3.2
+
+### Patch Changes
+
+- 30ce12c: Add support for dereferencing and re-organizing json schemas
+
 ## 0.3.1
 
 ### Patch Changes
