@@ -1,6 +1,11 @@
 import { z } from "zod/v4";
 import { describe, expect, it } from "vitest";
-import { zodToJsonSchema } from "@/lib/json-schema";
+import {
+  zodToJsonSchema,
+  modifyJsonSchema,
+  derefLocalRefs,
+} from "@/lib/json-schema";
+import { JSONSchema } from "zod/v4/core";
 
 describe("zodToJsonSchema", () => {
   // Test schema with multiple fields for ordering tests
@@ -259,6 +264,239 @@ describe("zodToJsonSchema", () => {
 
       expect(result.required).toContain("required");
       expect(result.required).not.toContain("optional");
+    });
+  });
+
+  describe("reference dereferencing", () => {
+    it("should dereference $ref schemas when dereference is true", () => {
+      // Create a schema with references
+      const schemaWithRefs = {
+        type: "object" as const,
+        properties: {
+          user: {
+            $ref: "#/definitions/User",
+          },
+          name: {
+            type: "string" as const,
+          },
+        },
+        definitions: {
+          User: {
+            type: "object" as const,
+            properties: {
+              firstName: { type: "string" as const },
+              age: { type: "number" as const },
+            },
+            required: ["firstName", "age"],
+          },
+        },
+      };
+
+      const result = modifyJsonSchema(schemaWithRefs, { dereference: true });
+
+      // Verify that the result doesn't contain $ref properties
+      expect(result.properties!.user).not.toHaveProperty("$ref");
+
+      // Verify that the referenced schema is properly inlined
+      expect(result.properties!.user).toEqual({
+        type: "object",
+        properties: {
+          firstName: { type: "string" },
+          age: { type: "number" },
+        },
+        required: ["firstName", "age"],
+      });
+
+      // Verify that non-ref properties are preserved
+      expect(result.properties!.name).toEqual({ type: "string" });
+    });
+
+    it("should preserve $ref schemas when dereference is false", () => {
+      const schemaWithRefs = {
+        type: "object" as const,
+        properties: {
+          user: {
+            $ref: "#/definitions/User",
+          },
+        },
+        definitions: {
+          User: {
+            type: "object" as const,
+            properties: {
+              name: { type: "string" as const },
+            },
+          },
+        },
+      };
+
+      const result = modifyJsonSchema(schemaWithRefs, { dereference: false });
+
+      // Verify that $ref is preserved when dereference is false
+      expect(result.properties!.user).toHaveProperty(
+        "$ref",
+        "#/definitions/User"
+      );
+    });
+  });
+});
+
+describe("derefLocalRefs()", () => {
+  it("inlines a simple local $ref", () => {
+    const schema: JSONSchema.ObjectSchema = {
+      $defs: {
+        Foo: { type: "string", minLength: 3 },
+      },
+      type: "object",
+      properties: {
+        name: { $ref: "#/$defs/Foo" },
+      },
+    };
+
+    const out = derefLocalRefs(schema) as any;
+
+    expect(out.properties!.name).toEqual({ type: "string", minLength: 3 });
+    // Ensure original still has $ref
+    expect(schema.properties!.name).toEqual({ $ref: "#/$defs/Foo" });
+  });
+
+  it("handles nested refs and arrays of refs", () => {
+    const schema: JSONSchema.ArraySchema = {
+      $defs: {
+        Bar: { type: "number", minimum: 0 },
+        Baz: {
+          type: "object",
+          properties: {
+            bar: { $ref: "#/$defs/Bar" },
+          },
+        },
+      },
+      type: "array",
+      items: { $ref: "#/$defs/Baz" },
+    };
+
+    const out = derefLocalRefs(schema) as any;
+    expect(out.items).toEqual({
+      type: "object",
+      properties: {
+        bar: { type: "number", minimum: 0 },
+      },
+    });
+    expect(out.items.properties.bar.minimum).toBe(0);
+  });
+
+  it("merges siblings next to $ref (ref + overrides)", () => {
+    const schema: JSONSchema.BaseSchema = {
+      $defs: {
+        Num: { type: "number", minimum: 0 },
+      },
+      properties: {
+        count: {
+          $ref: "#/$defs/Num",
+          description: "overridden description",
+          minimum: 10, // override
+        },
+      },
+    };
+
+    const out = derefLocalRefs(schema) as any;
+    expect(out.properties.count).toEqual({
+      type: "number",
+      minimum: 10,
+      description: "overridden description",
+    });
+  });
+
+  it("throws if a pointer is missing", () => {
+    const schema = {
+      properties: {
+        foo: { $ref: "#/missing/thing" },
+      },
+    };
+
+    expect(() => derefLocalRefs(schema)).toThrow(
+      /Pointer #\/missing\/thing not found/
+    );
+  });
+
+  it("resolves JSON Pointer escape sequences (~0 -> ~, ~1 -> /)", () => {
+    const schema = {
+      $defs: {
+        "tilde~key": { enum: ["~"] },
+        "slash/key": { enum: ["/"] },
+      },
+      props: {
+        tilde: { $ref: "#/$defs/tilde~0key" }, // ~0 -> ~
+        slash: { $ref: "#/$defs/slash~1key" }, // ~1 -> /
+      },
+    };
+
+    const out = derefLocalRefs(schema);
+    expect(out.props.tilde).toEqual({ enum: ["~"] });
+    expect(out.props.slash).toEqual({ enum: ["/"] });
+  });
+
+  it("deep clones targets so changes to output do not affect originals", () => {
+    const schema: JSONSchema.BaseSchema = {
+      $defs: {
+        Foo: { type: "number", minimum: 1 },
+      },
+      props: {
+        a: { $ref: "#/$defs/Foo" },
+        b: { $ref: "#/$defs/Foo" },
+      },
+    };
+
+    const out = derefLocalRefs(schema) as any;
+    out.props.a.minimum = 99;
+
+    // Original $defs untouched
+    expect((schema as any).$defs.Foo.minimum).toBe(1);
+    // Second usage not affected
+    expect(out.props.b.minimum).toBe(1);
+  });
+
+  it("handles object reuse without infinite recursion (simple self-cycle)", () => {
+    // Construct a self-referential schema:
+    const schema: any = {
+      $defs: {},
+      node: { type: "object", properties: { self: { $ref: "#/node" } } },
+    };
+
+    // NOTE: Our simple implementation may or may not handle this depending on cache logic.
+    // If it does, result will have an object graph that references itself; JSON.stringify will fail.
+    // We can still test that it doesn’t crash.
+    expect(() => derefLocalRefs(schema)).not.toThrow();
+  });
+
+  it("leaves non-ref fields alone", () => {
+    const schema: JSONSchema.ObjectSchema = {
+      type: "object",
+      properties: {
+        x: { type: "integer", maximum: 5 },
+      },
+    };
+
+    const out = derefLocalRefs(schema);
+    expect(out).toEqual(schema);
+    expect((out as any).properties.x.maximum).toBe(5);
+  });
+
+  it("handles multiple levels of nested objects and arrays", () => {
+    const schema: JSONSchema.BaseSchema = {
+      $defs: {
+        Stringy: { type: "string" },
+        ArrayOfStringy: { type: "array", items: { $ref: "#/$defs/Stringy" } },
+      },
+      type: "object",
+      properties: {
+        list: { $ref: "#/$defs/ArrayOfStringy" },
+      },
+    };
+
+    const out = derefLocalRefs(schema) as any;
+    expect(out.properties!.list).toEqual({
+      type: "array",
+      items: { type: "string" },
     });
   });
 });
