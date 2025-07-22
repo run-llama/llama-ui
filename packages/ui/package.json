@@ -278,7 +278,6 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
-    "@llamaindex/cloud": "4.0.23",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-avatar": "^1.1.10",
@@ -317,11 +316,13 @@
     "zod": "^3.25.76"
   },
   "peerDependencies": {
+    "@llamaindex/cloud": "^4.0.23",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^4.0.1",
+    "@llamaindex/cloud": "^4.0.23",
     "@storybook/addon-a11y": "^9.0.13",
     "@storybook/addon-docs": "^9.0.13",
     "@storybook/addon-vitest": "^9.0.13",
