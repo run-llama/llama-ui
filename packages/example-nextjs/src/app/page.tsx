@@ -6,8 +6,8 @@ import {
   ExtractedDataDisplay,
   FilePreview,
   ItemGrid,
-  ProcessingSteps,
-  type WorkflowEvent,
+  AgentStreamDisplay,
+      type AgentStreamEvent,
   type FileUploadData,
 } from "@llamaindex/ui";
 import { FileType } from "@llamaindex/ui";
@@ -34,24 +34,25 @@ export default function Home() {
     ],
   };
 
-  // Mock data for ProcessingSteps (correct format)
-  const mockWorkflowEvents: WorkflowEvent[] = [
+  // Mock data for AgentStreamDisplay
+  const mockAgentStreamEvents: AgentStreamEvent[] = [
     {
-      event_name: "FileReceived",
-      label: "File Received",
-      status: "completed",
-      timestamp: "2024-01-15T10:00:00Z",
+      type: "AgentStream",
+      data: {
+        message: "File received and validated",
+      },
     },
     {
-      event_name: "ProcessingDocument",
-      label: "Processing Document",
-      status: "current",
-      timestamp: "2024-01-15T10:05:00Z",
+      type: "AgentStream",
+      data: {
+        message: "Processing document with AI model...",
+      },
     },
     {
-      event_name: "ExtractingData",
-      label: "Extracting Data",
-      status: "pending",
+      type: "AgentStream",
+      data: {
+        message: "Extracting structured data from content",
+      },
     },
   ];
 
@@ -157,8 +158,8 @@ export default function Home() {
       {/* Processing Steps */}
       <section className="border rounded-lg p-6">
         <h2 className="text-xl font-semibold mb-4">Processing Steps</h2>
-        <ProcessingSteps
-          workflowEvents={mockWorkflowEvents}
+        <AgentStreamDisplay
+          events={mockAgentStreamEvents}
           title="Document Processing Workflow"
         />
       </section>

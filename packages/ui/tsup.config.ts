@@ -16,12 +16,19 @@ const businessComponents = glob.sync('src/*/index.ts').reduce((acc, file) => {
   return acc;
 }, {} as Record<string, string>);
 
+const hooks = glob.sync('src/hooks/**/index.ts').reduce((acc, file) => {
+  const dirname = path.dirname(file).replace('src/hooks/', '');
+  acc[`hooks/${dirname}`] = file;
+  return acc;
+}, {} as Record<string, string>);
+
 export default defineConfig({
   entry: {
     index: 'src/index.ts',
     lib: 'lib/index.ts',
     ...businessComponents,
     ...baseComponents,
+    ...hooks,
   },
   format: ['cjs', 'esm'],
   dts: true,

@@ -3,7 +3,7 @@ export * from './file-uploader';
 export * from './extracted-data';
 export * from './file-preview';
 export * from './item-grid';
-export * from './processing-steps';
+export * from './workflow-task';
 export * from './item-count';
 
 // shadcn/ui components
@@ -45,6 +45,8 @@ export * from '../base/tabs';
 export * from '../base/textarea';
 export * from '../base/toggle';
 export * from '../base/tooltip';
+
+// hooks - workflow hooks are now exported from ./workflow-task
 
 // Utility functions
 export * from '../lib/utils';
