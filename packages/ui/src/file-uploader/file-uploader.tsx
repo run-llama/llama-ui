@@ -210,14 +210,16 @@ export function FileUploader({
     setSelectedFiles((prev) => prev.filter((file) => file !== fileToRemove));
   };
 
-  const canSubmit =
-    selectedFiles.length > 0 &&
-    inputFields?.every(
+  const canSubmit = () => {
+    if (!inputFields) return true;
+    if (inputFields.length === 0) return true;
+    if (selectedFiles.length === 0) return false;
+    return inputFields.every(
       (field) =>
         !field.required ||
         (fieldValues[field.key] && fieldValues[field.key].trim()),
     );
-
+  };
   return (
     <>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>

@@ -4,7 +4,6 @@ import { resolve } from "path";
 const config: StorybookConfig = {
   stories: [
     "../stories/**/*.stories.@(js|jsx|mjs|ts|tsx)",
-    "!../stories/**/*.stories.mdx",
   ],
   addons: [
     "@chromatic-com/storybook",

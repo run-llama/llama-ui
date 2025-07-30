@@ -22,7 +22,11 @@ const preview: Preview = {
       test: "todo",
     },
     msw: {
-      handlers,
+      handlers: [
+        handlers.upload,
+        ...handlers.fileContent,
+        ...handlers.workflowTask,
+      ],
     },
   },
   loaders: [mswLoader],

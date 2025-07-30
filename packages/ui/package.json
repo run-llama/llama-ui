@@ -65,15 +65,15 @@
       "import": "./dist/item-grid.mjs",
       "require": "./dist/item-grid.cjs"
     },
-    "./processing-steps": {
-      "types": "./dist/processing-steps.d.ts",
-      "import": "./dist/processing-steps.mjs",
-      "require": "./dist/processing-steps.cjs"
-    },
     "./item-count": {
       "types": "./dist/item-count.d.ts",
       "import": "./dist/item-count.mjs",
       "require": "./dist/item-count.cjs"
+    },
+    "./workflow-task": {
+      "types": "./dist/workflow-task.d.ts",
+      "import": "./dist/workflow-task.mjs",
+      "require": "./dist/workflow-task.cjs"
     },
     "./accordion": {
       "types": "./dist/ui/accordion.d.ts",
@@ -313,10 +313,12 @@
     "sonner": "^2.0.5",
     "tailwind-merge": "^3.3.1",
     "vaul": "^1.1.2",
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "zustand": "^5.0.6"
   },
   "peerDependencies": {
     "@llamaindex/cloud": "^4.0.23",
+    "@llamaindex/llama-deploy": "0.0.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
