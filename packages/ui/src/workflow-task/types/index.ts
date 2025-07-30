@@ -52,14 +52,7 @@ export type WorkflowTask = TaskDefinition & {
 
 // Available events map to qualified name
 export enum WorkflowEventType {
-  StartEvent = 'llama_index.core.workflow.events.StartEvent',
-  StopEvent = 'llama_index.core.workflow.events.StopEvent',
-  AgentStream = 'llama_index.core.agent.workflow.workflow_events.AgentStream',
-  SourceNodesEvent = 'llama_index.core.chat_ui.events.SourceNodesEvent',
-  ArtifactEvent = 'llama_index.core.chat_ui.events.ArtifactEvent',
-  UIEvent = 'llama_index.core.chat_ui.events.UIEvent',
-  ToolCall = 'llama_index.core.agent.workflow.workflow_events.ToolCall',
-  ToolCallResult = 'llama_index.core.agent.workflow.workflow_events.ToolCallResult',
+  StopEvent = 'workflow.events.StopEvent',
 }
 
 export interface StreamingEventCallback<E extends WorkflowEvent = WorkflowEvent> {
