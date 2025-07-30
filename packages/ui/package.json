@@ -65,15 +65,15 @@
       "import": "./dist/item-grid.mjs",
       "require": "./dist/item-grid.cjs"
     },
-    "./processing-steps": {
-      "types": "./dist/processing-steps.d.ts",
-      "import": "./dist/processing-steps.mjs",
-      "require": "./dist/processing-steps.cjs"
-    },
     "./item-count": {
       "types": "./dist/item-count.d.ts",
       "import": "./dist/item-count.mjs",
       "require": "./dist/item-count.cjs"
+    },
+    "./workflow-task": {
+      "types": "./dist/workflow-task.d.ts",
+      "import": "./dist/workflow-task.mjs",
+      "require": "./dist/workflow-task.cjs"
     },
     "./accordion": {
       "types": "./dist/ui/accordion.d.ts",
@@ -264,11 +264,6 @@
       "types": "./dist/ui/sonner.d.ts",
       "import": "./dist/ui/sonner.mjs",
       "require": "./dist/ui/sonner.cjs"
-    },
-    "./use-workflow": {
-      "types": "./dist/hooks/use-workflow.d.ts",
-      "import": "./dist/hooks/use-workflow.mjs",
-      "require": "./dist/hooks/use-workflow.cjs"
     }
   },
   "scripts": {
