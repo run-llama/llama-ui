@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useMemo } from 'react';
-import { useTaskStore } from '../store/task-store';
+import { useTaskStore } from './use-task-store';
 import type { WorkflowTaskSummary } from '../types';
 
 interface UseWorkflowTaskListResult {

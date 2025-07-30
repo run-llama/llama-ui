@@ -15,9 +15,6 @@ export interface WorkflowTriggerProps extends Omit<FileUploaderProps, 'onSuccess
   deployment: string;
   workflow?: string;
   
-  // Pre-filled input data for programmatic task creation
-  initialInput?: string;
-  
   // Override onSuccess to provide workflow task result
   onSuccess?: (task: WorkflowTaskSummary) => void;
   onError?: (error: Error) => void;

@@ -5,6 +5,7 @@ export * from './file-preview';
 export * from './item-grid';
 export * from './workflow-task';
 export * from './item-count';
+export * from './lib';
 
 // shadcn/ui components
 export * from '../base/accordion';
@@ -45,8 +46,6 @@ export * from '../base/tabs';
 export * from '../base/textarea';
 export * from '../base/toggle';
 export * from '../base/tooltip';
-
-// hooks - workflow hooks are now exported from ./workflow-task
 
 // Utility functions
 export * from '../lib/utils';

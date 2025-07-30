@@ -1,14 +1,17 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { WorkflowTrigger } from '../src/workflow-task';
+import { ApiProvider, createMockClients } from '../src/lib';
 
 function WorkflowTriggerDemo() {
   return (
-    <div className="max-w-lg mx-auto p-6">
-      <WorkflowTrigger
-        deployment="demo-deployment"
-        onSuccess={(result) => console.log('Task created:', result)}
-      />
-    </div>
+    <ApiProvider clients={createMockClients()}>
+      <div className="max-w-lg mx-auto p-6">
+        <WorkflowTrigger
+          deployment="demo-deployment"
+          onSuccess={(result) => console.log('Task created:', result)}
+        />
+      </div>
+    </ApiProvider>
   );
 }
 

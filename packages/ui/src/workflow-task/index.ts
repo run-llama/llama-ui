@@ -11,8 +11,8 @@ export type {
   RunStatus 
 } from './types';
 
-// Store
-export { useTaskStore } from './store/task-store';
+// Store (deprecated - use hooks instead)
+export { createTaskStore } from './store/task-store';
 
 // Hooks
 export {
@@ -20,6 +20,7 @@ export {
   useWorkflowTaskList,
   useWorkflowTask,
   useWorkflowProgress,
+  useTaskStore,
 } from './hooks';
 
 // Components

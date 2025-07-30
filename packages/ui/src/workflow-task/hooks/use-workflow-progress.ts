@@ -4,7 +4,7 @@
  */
 
 import { useMemo } from 'react';
-import { useTaskStore } from '../store/task-store';
+import { useTaskStore } from './use-task-store';
 import type { WorkflowProgressState, RunStatus } from '../types';
 
 export function useWorkflowProgress(): WorkflowProgressState {

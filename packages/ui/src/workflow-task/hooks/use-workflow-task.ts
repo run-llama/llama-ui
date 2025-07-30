@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useMemo } from 'react';
-import { useTaskStore } from '../store/task-store';
+import { useTaskStore } from './use-task-store';
 import type { WorkflowTaskSummary, WorkflowEvent } from '../types';
 
 interface UseWorkflowTaskResult {
@@ -37,7 +37,7 @@ export function useWorkflowTask(taskId: string, autoStream: boolean = true): Use
         unsubscribe(taskId);
       }
     };
-  }, [taskId, task?.status, task?.deployment, autoStream, subscribe, unsubscribe]);
+  }, [taskId, task, autoStream, subscribe, unsubscribe]);
 
   const stopStreaming = useCallback(() => {
     unsubscribe(taskId);

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { WorkflowProgressBar } from '../src/workflow-task';
+import { ApiProvider, createMockClients } from '../src/lib';
 
 const meta: Meta<typeof WorkflowProgressBar> = {
   title: 'Components/WorkflowProgressBar',
@@ -10,9 +11,11 @@ const meta: Meta<typeof WorkflowProgressBar> = {
   },
   decorators: [
     (Story) => (
-      <div style={{ padding: '16px', width: '100%' }}>
-        <Story />
-      </div>
+      <ApiProvider clients={createMockClients()}>
+        <div style={{ padding: '16px', width: '100%' }}>
+          <Story />
+        </div>
+      </ApiProvider>
     ),
   ],
   tags: ['autodocs'],

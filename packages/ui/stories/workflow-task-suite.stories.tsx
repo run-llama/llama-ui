@@ -8,6 +8,7 @@ import {
   useTaskStore
 } from '../src/workflow-task';
 import { AgentStreamDisplay } from '../src/workflow-task/components/agent-stream-display';
+import { ApiProvider, createMockClients } from '../src/lib';
 
 // Task Trigger & Progress Component  
 function TaskTriggerSection({ onTaskClick, selectedTaskId }: { onTaskClick: (taskId: string) => void; selectedTaskId: string | null }) {
@@ -43,9 +44,8 @@ function TaskTriggerSection({ onTaskClick, selectedTaskId }: { onTaskClick: (tas
       });
       
       await Promise.all(promises);
-      console.log(`Successfully created ${batchSize} tasks`);
-    } catch (error) {
-      console.error('Failed to create batch tasks:', error);
+    } catch {
+      // Failed to create batch tasks
     } finally {
       setIsCreatingBatch(false);
     }
@@ -97,46 +97,49 @@ function TaskTriggerSection({ onTaskClick, selectedTaskId }: { onTaskClick: (tas
         <h3 className="text-lg font-medium mb-3">Or Create Single Task</h3>
         <WorkflowTrigger 
           deployment="process_file"
-          onSuccess={(result: unknown) => {
-            console.log('Suite: Single task completed:', result);
+          onSuccess={() => {
+            // Task completed successfully
           }}
         />
       </div>
 
-      {/* Progress Section - only show when there are tasks */}
+      {/* Progress Section with WorkflowProgressBar */}
       {tasks.length > 0 && (
         <div>
           <h3 className="text-lg font-medium mb-3">Overall Progress ({tasks.length} tasks)</h3>
           <WorkflowProgressBar />
           
-          {/* Task list summary */}
+          {/* Enhanced Task List */}
           <div className="mt-4 space-y-2">
             <div className="flex justify-between items-center">
-              <h4 className="text-sm font-medium text-gray-700">Task Status:</h4>
+              <h4 className="text-sm font-medium text-gray-700">Task List (click to view details):</h4>
               <div className="text-xs text-gray-500">
                 Running: {tasks.filter(t => t.status === 'running').length} | 
                 Complete: {tasks.filter(t => t.status === 'complete').length} | 
                 Error: {tasks.filter(t => t.status === 'error').length}
               </div>
             </div>
-            <div className="max-h-48 overflow-y-auto space-y-1">
+            <div className="max-h-48 overflow-y-auto space-y-1 border rounded-lg">
               {tasks.map((task, index) => {
                 const isSelected = selectedTaskId === task.task_id;
                 return (
                   <div 
                     key={task.task_id} 
-                    className={`flex justify-between items-center text-sm p-2 rounded cursor-pointer transition-colors ${
+                    className={`flex justify-between items-center text-sm p-3 cursor-pointer transition-colors border-b last:border-b-0 ${
                       isSelected 
-                        ? 'bg-blue-100 border border-blue-300 hover:bg-blue-200' 
-                        : 'bg-gray-50 hover:bg-gray-100'
+                        ? 'bg-blue-50 border-l-4 border-l-blue-500' 
+                        : 'hover:bg-gray-50'
                     }`}
                     onClick={() => onTaskClick(task.task_id)}
                   >
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-gray-500">#{index + 1}</span>
-                      <span className="font-mono text-xs truncate">{task.task_id}</span>
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <span className="text-xs text-gray-500 flex-shrink-0">#{index + 1}</span>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-xs font-medium text-gray-700">Task {index + 1}</div>
+                        <div className="font-mono text-xs text-gray-500 truncate">{task.task_id}</div>
+                      </div>
                     </div>
-                    <span className={`px-2 py-1 rounded text-xs ${
+                    <span className={`px-2 py-1 rounded text-xs font-medium flex-shrink-0 ${
                       task.status === 'complete' ? 'bg-green-100 text-green-800' :
                       task.status === 'error' ? 'bg-red-100 text-red-800' :
                       task.status === 'running' ? 'bg-blue-100 text-blue-800' :
@@ -168,14 +171,7 @@ function TaskDetailSection({ taskId }: { taskId: string | null }) {
     );
   }
 
-  // Debug logging
-  const debugInfo = {
-    taskId,
-    task: taskDetail.task,
-    eventsCount: taskDetail.events.length,
-    isStreaming: taskDetail.isStreaming
-  };
-  console.log('TaskDetailSection Debug:', debugInfo);
+  // Task detail information available in taskDetail object
 
   if (!taskDetail.task) {
     return (
@@ -280,9 +276,13 @@ function WorkflowTaskSuiteInternal() {
   );
 }
 
-// Main Suite Component (no provider needed anymore)
+// Main Suite Component with ApiProvider
 function WorkflowTaskSuite() {
-  return <WorkflowTaskSuiteInternal />;
+  return (
+    <ApiProvider clients={createMockClients()}>
+      <WorkflowTaskSuiteInternal />
+    </ApiProvider>
+  );
 }
 
 const meta: Meta<typeof WorkflowTaskSuite> = {
@@ -342,4 +342,6 @@ The suite uses MSW (Mock Service Worker) to simulate realistic API responses and
       },
     },
   },
-}; 
+};
+
+ 

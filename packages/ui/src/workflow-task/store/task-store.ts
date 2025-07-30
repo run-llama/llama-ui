@@ -6,12 +6,12 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { createClient, createConfig, Client } from '@llamaindex/llama-deploy';
+import { Client } from '@llamaindex/llama-deploy';
 import { workflowStreamingManager } from '../../lib/shared-streaming';
 import { createTask as createTaskAPI, fetchTaskEvents } from './helper';
 import type { WorkflowTaskSummary, WorkflowEvent, StreamingEventCallback } from '../types';
 
-interface TaskStoreState {
+export interface TaskStoreState {
   // State
   tasks: Record<string, WorkflowTaskSummary>;
   events: Record<string, WorkflowEvent[]>;
@@ -27,7 +27,7 @@ interface TaskStoreState {
   isSubscribed(taskId: string): boolean;
 }
 
-const createTaskStore = (client: Client) => create<TaskStoreState>()(
+export const createTaskStore = (client: Client) => create<TaskStoreState>()(
   persist(
     (set, get) => ({
       // Initial state
@@ -207,7 +207,3 @@ const createTaskStore = (client: Client) => create<TaskStoreState>()(
     }
   )
 );
-
-const client = createClient(createConfig({ baseUrl: process.env.LLAMA_DEPLOY_BASE_URL || 'http://localhost:8000' }));
-
-export const useTaskStore = createTaskStore(client);

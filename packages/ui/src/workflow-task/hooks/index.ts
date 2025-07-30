@@ -7,3 +7,4 @@ export { useWorkflowTaskCreate } from './use-workflow-task-create';
 export { useWorkflowTaskList } from './use-workflow-task-list';
 export { useWorkflowTask } from './use-workflow-task';
 export { useWorkflowProgress } from './use-workflow-progress';
+export { useTaskStore } from './use-task-store';

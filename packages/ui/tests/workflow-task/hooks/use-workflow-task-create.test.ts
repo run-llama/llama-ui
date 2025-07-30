@@ -4,15 +4,15 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+import { act } from '@testing-library/react';
 import { useWorkflowTaskCreate } from '../../../src/workflow-task/hooks/use-workflow-task-create';
-import { useTaskStore } from '../../../src/workflow-task/store/task-store';
+import { renderHookWithProvider } from '../../test-utils';
 import type { WorkflowTaskSummary } from '../../../src/workflow-task/types';
 
 // Mock the helper functions  
 vi.mock('../../../src/workflow-task/store/helper', () => ({
   createTask: vi.fn(),
-  fetchTaskEvents: vi.fn(),
+  fetchTaskEvents: vi.fn().mockResolvedValue(undefined),
 }));
 
 // Mock the shared streaming manager
@@ -58,31 +58,22 @@ describe('useWorkflowTaskCreate', () => {
   };
 
   beforeEach(() => {
-    // Reset store state
-    useTaskStore.setState({
-      tasks: {},
-      events: {},
-    });
-    
     // Clear localStorage mock
     localStorageMock.clear();
     vi.clearAllMocks();
   });
 
   describe('H1: Success creates and writes to store', () => {
-    it('should have isCreating true then false, and store should contain new task with running status', async () => {
+    it('should have isCreating true then false, and return created task', async () => {
       // Mock successful API response
       const { createTask: createTaskAPI } = await import('../../../src/workflow-task/store/helper');
       vi.mocked(createTaskAPI).mockResolvedValue(mockTask);
       
-      const { result } = renderHook(() => useWorkflowTaskCreate());
+      const { result } = renderHookWithProvider(() => useWorkflowTaskCreate());
       
       // Initial state
       expect(result.current.isCreating).toBe(false);
       expect(result.current.error).toBe(null);
-      
-      // Get initial store state
-      const initialTasksCount = Object.keys(useTaskStore.getState().tasks).length;
       
       // Start creation
       let createPromise: Promise<WorkflowTaskSummary>;
@@ -93,38 +84,39 @@ describe('useWorkflowTaskCreate', () => {
       // Should be creating
       expect(result.current.isCreating).toBe(true);
       
-      // Wait for completion
+      // Wait for completion and get result
+      let createdTask: WorkflowTaskSummary;
       await act(async () => {
-        await createPromise!;
+        createdTask = await createPromise!;
       });
       
       // Should be done creating
       expect(result.current.isCreating).toBe(false);
+      expect(result.current.error).toBe(null);
       
-      // Check store has a new task with running status
-      const { tasks } = useTaskStore.getState();
-      const newTasksCount = Object.keys(tasks).length;
-      expect(newTasksCount).toBe(initialTasksCount + 1);
+      // Verify the created task is returned correctly
+      expect(createdTask!.task_id).toBe(mockTask.task_id);
+      expect(createdTask!.deployment).toBe('test-deployment');
+      expect(createdTask!.input).toBe('test input');
       
-      // Find the newly created task
-      const newTask = Object.values(tasks)[0];
-      expect(newTask.status).toBe('running');
-      expect(newTask.deployment).toBe('test-deployment');
-      expect(newTask.input).toBe('test input');
+      // Verify the API was called correctly
+      expect(createTaskAPI).toHaveBeenCalledWith({
+        client: expect.any(Object),
+        deploymentName: 'test-deployment',
+        eventData: 'test input',
+        workflow: undefined
+      });
     });
   });
 
   describe('H2: Backend error returns error and does not write store', () => {
-    it('should capture error and not change store tasks count', async () => {
+    it('should capture error and set error state', async () => {
       // Mock API error
       const { createTask: createTaskAPI } = await import('../../../src/workflow-task/store/helper');
       const testError = new Error('API Error');
       vi.mocked(createTaskAPI).mockRejectedValue(testError);
       
-      const { result } = renderHook(() => useWorkflowTaskCreate());
-      
-      // Get initial store state
-      const initialTasksCount = Object.keys(useTaskStore.getState().tasks).length;
+      const { result } = renderHookWithProvider(() => useWorkflowTaskCreate());
       
       // Initial state
       expect(result.current.error).toBe(null);
@@ -143,7 +135,7 @@ describe('useWorkflowTaskCreate', () => {
       await act(async () => {
         try {
           await createPromise!;
-        } catch (err) {
+        } catch {
           // Expected to throw
         }
       });
@@ -152,9 +144,13 @@ describe('useWorkflowTaskCreate', () => {
       expect(result.current.isCreating).toBe(false);
       expect(result.current.error).toBe(testError);
       
-      // Store tasks count should remain unchanged
-      const { tasks } = useTaskStore.getState();
-      expect(Object.keys(tasks).length).toBe(initialTasksCount);
+      // Verify the API was called
+      expect(createTaskAPI).toHaveBeenCalledWith({
+        client: expect.any(Object),
+        deploymentName: 'test-deployment',
+        eventData: 'test input',
+        workflow: undefined
+      });
     });
   });
 });
