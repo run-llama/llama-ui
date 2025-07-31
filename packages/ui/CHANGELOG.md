@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 0.3.3
+
+### Patch Changes
+
+- 0533e5d: Add workflow trigger and workflow progress monitor
+
 ## 0.3.2
 
 ### Patch Changes
