@@ -4,16 +4,12 @@
  */
 
 import React, { createContext, useContext, useMemo, type ReactNode } from 'react';
-import { type Client, createClient, createConfig } from '@llamaindex/llama-deploy';
-import { client as cloudClient } from '@llamaindex/cloud/api';
-import { type AgentClient, createAgentDataClient } from '@llamaindex/cloud/beta/agent';
+import { CloudAgentClient, cloudApiClient, CloudApiClient, LlamaDeployClient, createLlamaDeployClient, createLlamaDeployConfig, createCloudAgentClient } from './clients';
 
-// ===== Types =====
-export type CloudApiClient = typeof cloudClient;
 export interface ApiClients {
-  llamaDeployClient?: Client;
+  llamaDeployClient?: LlamaDeployClient;
   cloudApiClient?: CloudApiClient;
-  agentDataClient?: AgentClient<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+  agentDataClient?: CloudAgentClient;
 }
 
 export interface ApiProviderProps {
@@ -47,9 +43,14 @@ export function ApiProvider({ children, clients }: ApiProviderProps) {
 
 export function createMockClients(): ApiClients {
   return {
-    llamaDeployClient: createClient(createConfig()),
-    cloudApiClient: cloudClient,
-    agentDataClient: createAgentDataClient(createConfig()),
+    llamaDeployClient: createLlamaDeployClient(createLlamaDeployConfig()),
+    cloudApiClient: cloudApiClient,
+    agentDataClient: createCloudAgentClient({
+      baseUrl: 'https://api.llamaindex.cloud',
+      apiKey: 'your-api-key',
+      agentUrlId: 'your-agent-url-id',
+      collection: 'your-collection',
+    }),
   };
 }
 
@@ -68,7 +69,7 @@ function useApiContext(): ApiContextValue {
   return context;
 }
 
-export function useLlamaDeployClient(): Client {
+export function useLlamaDeployClient(): LlamaDeployClient {
   const { clients } = useApiContext();
   
   if (!clients.llamaDeployClient) {
@@ -94,7 +95,7 @@ export function useCloudApiClient(): CloudApiClient {
   return clients.cloudApiClient;
 }
 
-export function useAgentDataClient(): AgentClient<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
+export function useAgentDataClient(): CloudAgentClient {
   const { clients } = useApiContext();
   
   if (!clients.agentDataClient) {
