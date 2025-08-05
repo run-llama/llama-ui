@@ -53,8 +53,6 @@ describe('useWorkflowTaskCreate', () => {
     input: 'test input',
     deployment: 'test-deployment',
     status: 'running',
-    createdAt: new Date('2023-01-01'),
-    updatedAt: new Date('2023-01-01'),
   };
 
   beforeEach(() => {

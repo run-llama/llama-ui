@@ -3,17 +3,36 @@
  * Based on workflow-task-suite.md specifications
  */
 
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useTaskStore } from './use-task-store';
+import { useDeployment } from '../../lib/api-provider';
 import type { WorkflowProgressState, RunStatus } from '../types';
 
 export function useWorkflowProgress(): WorkflowProgressState {
-  // Use a stable selector that only depends on tasks object reference
-  const tasks = useTaskStore(state => state.tasks);
+  // Get deployment from context and store methods
+  const deployment = useDeployment();
+  const store = useTaskStore();
+  const tasks = store.tasks;
+  const sync = store.sync;
+
+  // Sync with server on mount and when deployment changes
+  useEffect(() => {
+    async function syncWithServer() {
+      try {
+        await sync(deployment);
+      } catch (error) {
+        console.error('Failed to sync with server for progress:', error);
+      }
+    }
+    
+    syncWithServer();
+  }, [deployment, sync]);
   
   // Memoize the calculation based on tasks object
   return useMemo(() => {
-    const taskArray = Object.values(tasks);
+    const taskArray = Object.values(tasks).filter(task => 
+      task.deployment === deployment
+    );
     const total = taskArray.length;
     
     if (total === 0) {
@@ -53,5 +72,5 @@ export function useWorkflowProgress(): WorkflowProgressState {
       total,
       status,
     };
-  }, [tasks]); // Only recalculate when tasks object reference changes
+  }, [tasks, deployment]); // Only recalculate when tasks object reference or deployment changes
 }

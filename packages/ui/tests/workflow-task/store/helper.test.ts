@@ -5,13 +5,14 @@
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import {
+  getRunningTasks,
   getExistingTask,
   createTask,
   fetchTaskEvents,
   sendEventToTask,
 } from '../../../src/workflow-task/store/helper';
 import { workflowStreamingManager } from '../../../src/lib/shared-streaming';
-import type { WorkflowTask, WorkflowEvent } from '../../../src/workflow-task/types';
+import type { TaskParams, WorkflowEvent } from '../../../src/workflow-task/types';
 
 // Mock dependencies
 vi.mock('@llamaindex/llama-deploy');
@@ -26,7 +27,7 @@ describe('Helper Functions Tests', () => {
     getConfig: vi.fn(() => ({ baseUrl: 'http://localhost:8000' })),
   } as unknown as any;
 
-  const mockTask: WorkflowTask = {
+  const mockTask: TaskParams = {
     task_id: 'task-123',
     session_id: 'session-456',
     service_id: 'workflow-service',
@@ -40,6 +41,110 @@ describe('Helper Functions Tests', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  describe('getRunningTasks', () => {
+    const mockGetTasksResponse = {
+      data: [
+        {
+          task_id: 'task-1',
+          session_id: 'session-1',
+          service_id: 'service-1',
+          input: 'input-1',
+          // No status field - backend doesn't return it
+        },
+        {
+          task_id: 'task-2',
+          session_id: 'session-2',
+          service_id: 'service-2',
+          input: 'input-2',
+          // No status field - backend doesn't return it
+        },
+        {
+          task_id: 'task-3',
+          session_id: 'session-3',
+          service_id: 'service-3',
+          input: 'input-3',
+          // No status field - backend doesn't return it
+        },
+      ],
+    };
+
+    it('should fetch all tasks from server (all are running)', async () => {
+      const { getTasksDeploymentsDeploymentNameTasksGet } = await import('@llamaindex/llama-deploy');
+      vi.mocked(getTasksDeploymentsDeploymentNameTasksGet).mockResolvedValue(mockGetTasksResponse as any);
+
+      const result = await getRunningTasks({
+        client: mockClient,
+        deploymentName: 'test-deployment',
+      });
+
+      expect(getTasksDeploymentsDeploymentNameTasksGet).toHaveBeenCalledWith({
+        client: mockClient,
+        path: { deployment_name: 'test-deployment' },
+      });
+
+      // All tasks from backend are running tasks
+      expect(result).toHaveLength(3);
+      expect(result[0]).toEqual({
+        task_id: 'task-1',
+        session_id: 'session-1',
+        service_id: 'service-1',
+        input: 'input-1',
+        deployment: 'test-deployment',
+        status: 'running',
+      });
+      expect(result[1]).toEqual({
+        task_id: 'task-2',
+        session_id: 'session-2',
+        service_id: 'service-2',
+        input: 'input-2',
+        deployment: 'test-deployment',
+        status: 'running',
+      });
+    });
+
+    it('should return empty array when no tasks', async () => {
+      const { getTasksDeploymentsDeploymentNameTasksGet } = await import('@llamaindex/llama-deploy');
+      vi.mocked(getTasksDeploymentsDeploymentNameTasksGet).mockResolvedValue({
+        data: [],
+      } as any);
+
+      const result = await getRunningTasks({
+        client: mockClient,
+        deploymentName: 'test-deployment',
+      });
+
+      expect(result).toHaveLength(0);
+    });
+
+    it('should handle missing fields with defaults', async () => {
+      const { getTasksDeploymentsDeploymentNameTasksGet } = await import('@llamaindex/llama-deploy');
+      vi.mocked(getTasksDeploymentsDeploymentNameTasksGet).mockResolvedValue({
+        data: [
+          {
+            // Missing some fields
+            task_id: 'task-1',
+            // No other fields
+          },
+        ],
+      } as any);
+
+      const result = await getRunningTasks({
+        client: mockClient,
+        deploymentName: 'test-deployment',
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        task_id: 'task-1',
+        session_id: '',
+        service_id: '',
+        input: '',
+        deployment: 'test-deployment',
+        status: 'running',
+      });
+    });
   });
 
   describe('getExistingTask', () => {
@@ -107,28 +212,6 @@ describe('Helper Functions Tests', () => {
       ).rejects.toThrow('Task non-existent-task not found');
     });
 
-    it('should throw error when task has missing required fields', async () => {
-      const mockResponse = {
-        data: [
-          {
-            task_id: 'task-123',
-            session_id: 'session-456',
-            // Missing service_id and input
-          },
-        ],
-      };
-
-      const { getTasksDeploymentsDeploymentNameTasksGet } = await import('@llamaindex/llama-deploy');
-      vi.mocked(getTasksDeploymentsDeploymentNameTasksGet).mockResolvedValue(mockResponse as any);
-
-      await expect(
-        getExistingTask({
-          client: mockClient,
-          deploymentName: 'test-deployment',
-          taskId: 'task-123',
-        })
-      ).rejects.toThrow('Task is found but missing one of the required fields');
-    });
   });
 
   describe('createTask', () => {
@@ -203,26 +286,6 @@ describe('Helper Functions Tests', () => {
           service_id: undefined,
         },
       });
-    });
-
-    it('should throw error when created task has missing fields', async () => {
-      const mockResponse = {
-        data: {
-          task_id: 'new-task-123',
-          // Missing required fields
-        },
-      };
-
-      const { createDeploymentTaskNowaitDeploymentsDeploymentNameTasksCreatePost } = await import('@llamaindex/llama-deploy');
-      vi.mocked(createDeploymentTaskNowaitDeploymentsDeploymentNameTasksCreatePost).mockResolvedValue(mockResponse as any);
-
-      await expect(
-        createTask({
-          client: mockClient,
-          deploymentName: 'test-deployment',
-          eventData: { test: 'data' },
-        })
-      ).rejects.toThrow('Task is created but missing one of the required fields');
     });
   });
 

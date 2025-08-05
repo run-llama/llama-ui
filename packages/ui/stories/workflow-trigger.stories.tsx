@@ -4,7 +4,7 @@ import { ApiProvider, createMockClients } from '../src/lib';
 
 function WorkflowTriggerDemo() {
   return (
-    <ApiProvider clients={createMockClients()}>
+    <ApiProvider clients={createMockClients()} deployment="demo-deployment">
       <div className="max-w-lg mx-auto p-6">
         <WorkflowTrigger
           deployment="demo-deployment"

@@ -9,10 +9,16 @@ import { ApiProvider, createMockClients } from '../src/lib';
 // Create a wrapper function for renderHook that includes ApiProvider
 export function renderHookWithProvider<T>(
   hook: () => T,
-  options?: { apiClients?: Parameters<typeof ApiProvider>[0]['clients'] }
+  options?: { 
+    apiClients?: Parameters<typeof ApiProvider>[0]['clients'];
+    deployment?: string;
+  }
 ): ReturnType<typeof renderHook<T, any>> {
   const wrapper = ({ children }: { children: ReactNode }) => (
-    <ApiProvider clients={options?.apiClients || createMockClients()}>
+    <ApiProvider 
+      clients={options?.apiClients || createMockClients()}
+      deployment={options?.deployment || 'test-deployment'}
+    >
       {children}
     </ApiProvider>
   );

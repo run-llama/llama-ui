@@ -15,10 +15,12 @@ export interface ApiClients {
 export interface ApiProviderProps {
   children: ReactNode;
   clients: ApiClients;
+  deployment: string;
 }
 
 interface ApiContextValue {
   clients: ApiClients;
+  deployment: string;
 }
 
 // ===== Context =====
@@ -27,10 +29,11 @@ const ApiContext = createContext<ApiContextValue | null>(null);
 
 // ===== Provider =====
 
-export function ApiProvider({ children, clients }: ApiProviderProps) {
+export function ApiProvider({ children, clients, deployment }: ApiProviderProps) {
   const contextValue = useMemo(() => ({
     clients,
-  }), [clients]);
+    deployment,
+  }), [clients, deployment]);
 
   return (
     <ApiContext.Provider value={contextValue}>
@@ -111,4 +114,9 @@ export function useAgentDataClient(): CloudAgentClient {
 export function useApiClients(): ApiClients {
   const { clients } = useApiContext();
   return clients;
+}
+
+export function useDeployment(): string {
+  const { deployment } = useApiContext();
+  return deployment;
 } 

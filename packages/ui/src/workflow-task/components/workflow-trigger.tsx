@@ -4,19 +4,19 @@
  * A wrapper around FileUploader that creates workflow tasks after file upload
  */
 
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { FileUploader, type FileUploaderProps } from '../../file-uploader';
 import { useWorkflowTaskCreate } from '../hooks/use-workflow-task-create';
 import type { FileUploadData } from '../../file-uploader/use-file-upload';
-import { WorkflowTaskSummary } from '../types';
+import { JSONValue, WorkflowTaskSummary } from '../types';
 
 export interface WorkflowTriggerProps extends Omit<FileUploaderProps, 'onSuccess'> {
   deployment: string;
   workflow?: string;
 
   // support for custom workflow input
-  customWorkflowInput?: (data: FileUploadData[], fieldValues: Record<string, string>) => Record<string, unknown>;
+  customWorkflowInput?: (data: FileUploadData[], fieldValues: Record<string, string>) => JSONValue;
   
   // Override onSuccess to provide workflow task result
   onSuccess?: (task: WorkflowTaskSummary) => void;
@@ -35,6 +35,12 @@ export function WorkflowTrigger({
 }: WorkflowTriggerProps) {
   const { createTask, isCreating, error } = useWorkflowTaskCreate();
 
+  useEffect(() => {
+    if (error) {
+      toast.error(`Failed to create workflow task: ${error.message}`);
+    }
+  }, [error]);
+
   const handleFileUpload = useCallback(async (
     data: FileUploadData[],
     fieldValues: Record<string, string>
@@ -43,7 +49,7 @@ export function WorkflowTrigger({
       // If customWorkflowInput is provided, use it to create the workflow input
       if (customWorkflowInput) {
         const workflowInput = customWorkflowInput(data, fieldValues);
-        const task = await createTask(deployment, JSON.stringify(workflowInput), workflow);
+        const task = await createTask(deployment, workflowInput, workflow);
         toast.success("Workflow task created successfully!");
         onSuccess?.(task);
         return;
@@ -58,12 +64,12 @@ export function WorkflowTrigger({
           type: file.file.type
         })),
         ...fieldValues
-      };
+      } as JSONValue;
 
       // Create workflow task
       const task = await createTask(
         deployment, 
-        JSON.stringify(workflowInput), 
+        workflowInput, 
         workflow
       );
 
@@ -87,12 +93,6 @@ export function WorkflowTrigger({
         isProcessing={isCreating}
         {...fileUploaderProps}
       />
-      
-      {error && (
-        <div className="mt-4 p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded">
-          <strong>Error:</strong> {error.message}
-        </div>
-      )}
     </div>
   );
 }
