@@ -14,6 +14,9 @@ import { WorkflowTaskSummary } from '../types';
 export interface WorkflowTriggerProps extends Omit<FileUploaderProps, 'onSuccess'> {
   deployment: string;
   workflow?: string;
+
+  // support for custom workflow input
+  customWorkflowInput?: (data: FileUploadData[], fieldValues: Record<string, string>) => Record<string, unknown>;
   
   // Override onSuccess to provide workflow task result
   onSuccess?: (task: WorkflowTaskSummary) => void;
@@ -23,6 +26,7 @@ export interface WorkflowTriggerProps extends Omit<FileUploaderProps, 'onSuccess
 export function WorkflowTrigger({ 
   deployment, 
   workflow,
+  customWorkflowInput,
   onSuccess,
   onError,
   title = "Trigger Workflow",
@@ -36,6 +40,15 @@ export function WorkflowTrigger({
     fieldValues: Record<string, string>
   ) => {
     try {
+      // If customWorkflowInput is provided, use it to create the workflow input
+      if (customWorkflowInput) {
+        const workflowInput = customWorkflowInput(data, fieldValues);
+        const task = await createTask(deployment, JSON.stringify(workflowInput), workflow);
+        toast.success("Workflow task created successfully!");
+        onSuccess?.(task);
+        return;
+      }
+
       // Create workflow input from uploaded file and form fields
       const workflowInput = {
         files: data.map(file => ({
@@ -63,7 +76,7 @@ export function WorkflowTrigger({
       onError?.(error);
       throw error; // Re-throw to let FileUploader handle UI state
     }
-  }, [deployment, workflow, createTask, onSuccess, onError]);
+  }, [deployment, workflow, createTask, onSuccess, onError, customWorkflowInput]);
 
   return (
     <div>
