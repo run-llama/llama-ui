@@ -11,7 +11,7 @@ const meta: Meta<typeof WorkflowProgressBar> = {
   },
   decorators: [
     (Story) => (
-      <ApiProvider clients={createMockClients()}>
+      <ApiProvider clients={createMockClients()} deployment="mock-deployment">
         <div style={{ padding: '16px', width: '100%' }}>
           <Story />
         </div>

@@ -10,12 +10,38 @@ import { cn } from '../../../lib/utils';
 
 interface WorkflowProgressBarProps {
   className?: string;
+  /**
+   * Controls auto-show/hide behavior
+   * - 'auto': Show when there are tasks or status is not 'idle', hide when no tasks and status is 'idle'
+   * - 'always': Always show the component
+   */
+  mode?: 'auto' | 'always';
 }
 
-export function WorkflowProgressBar({ className }: WorkflowProgressBarProps) {
+export function WorkflowProgressBar({ 
+  className, 
+  mode = 'auto'
+}: WorkflowProgressBarProps) {
   const { current, total, status } = useWorkflowProgress();
 
   const percentage = total > 0 ? (current / total) * 100 : 0;
+
+  // Determine if component should be visible
+  const shouldShow = () => {
+    switch (mode) {
+      case 'always':
+        return true;
+      case 'auto':
+      default:
+        // Auto mode: show when there are tasks or status is not idle
+        return total > 0 || status !== 'idle';
+    }
+  };
+
+  // Don't render if not visible in auto mode
+  if (!shouldShow()) {
+    return null;
+  }
 
   // Determine status text
   const getStatusText = () => {

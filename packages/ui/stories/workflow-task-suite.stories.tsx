@@ -9,10 +9,12 @@ import {
 } from '../src/workflow-task';
 import { AgentStreamDisplay } from '../src/workflow-task/components/agent-stream-display';
 import { ApiProvider, createMockClients } from '../src/lib';
+import { useDeployment } from '@/src/lib/api-provider';
 
 // Task Trigger & Progress Component  
 function TaskTriggerSection({ onTaskClick, selectedTaskId }: { onTaskClick: (taskId: string) => void; selectedTaskId: string | null }) {
   const { tasks, clearCompleted } = useWorkflowTaskList();
+  const deployment = useDeployment();
   const { createTask } = useTaskStore();
   const [batchSize, setBatchSize] = useState(3);
   const [isCreatingBatch, setIsCreatingBatch] = useState(false);
@@ -32,15 +34,15 @@ function TaskTriggerSection({ onTaskClick, selectedTaskId }: { onTaskClick: (tas
       // Create multiple tasks simultaneously
       const promises = Array.from({ length: batchSize }, async (_, index) => {
         const config = taskConfigs[index % taskConfigs.length];
-        const input = JSON.stringify({
+        const input = {
           ...config.input,
           taskName: `${config.name} #${index + 1}`,
           batchId: Date.now(),
-        });
+        };
         
         // Stagger the creation slightly to see the effect
         await new Promise(resolve => setTimeout(resolve, index * 100));
-        return createTask('process_file', input);
+        return createTask(deployment, input);
       });
       
       await Promise.all(promises);
@@ -96,7 +98,7 @@ function TaskTriggerSection({ onTaskClick, selectedTaskId }: { onTaskClick: (tas
       <div>
         <h3 className="text-lg font-medium mb-3">Or Create Single Task</h3>
         <WorkflowTrigger 
-          deployment="process_file"
+          deployment={deployment}
           onSuccess={() => {
             // Task completed successfully
           }}
@@ -279,7 +281,7 @@ function WorkflowTaskSuiteInternal() {
 // Main Suite Component with ApiProvider
 function WorkflowTaskSuite() {
   return (
-    <ApiProvider clients={createMockClients()}>
+    <ApiProvider clients={createMockClients()} deployment="mock-deployment">
       <WorkflowTaskSuiteInternal />
     </ApiProvider>
   );

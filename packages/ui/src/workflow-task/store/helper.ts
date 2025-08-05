@@ -9,15 +9,39 @@ import {
   StreamingEventCallback,
   WorkflowEvent,
   WorkflowEventType,
-  WorkflowTask,
+  TaskDefinition,
+  TaskParams,
+  WorkflowTaskSummary,
 } from '../types'
 import { workflowStreamingManager, type StreamSubscriber } from '../../lib/shared-streaming'
+
+export async function getRunningTasks(params: {
+  client: Client
+  deploymentName: string
+}): Promise<WorkflowTaskSummary[]> {
+  const data = await getTasksDeploymentsDeploymentNameTasksGet({
+    client: params.client,
+    path: { deployment_name: params.deploymentName },
+  })
+  const allTasks = data.data ?? []
+  
+  // Now the API will only return running tasks because there is no persistent layer for tasks.
+  return allTasks
+    .map(task => ({
+      task_id: task.task_id ?? "",
+      session_id: task.session_id ?? "",
+      service_id: task.service_id ?? "",
+      input: task.input ?? "",
+      deployment: params.deploymentName,
+      status: 'running' as const,
+    }))
+}
 
 export async function getExistingTask(params: {
   client: Client
   deploymentName: string
   taskId: string
-}): Promise<WorkflowTask> {
+}): Promise<TaskDefinition> {
   const data = await getTasksDeploymentsDeploymentNameTasksGet({
     client: params.client,
     path: { deployment_name: params.deploymentName },
@@ -29,22 +53,15 @@ export async function getExistingTask(params: {
     throw new Error(`Task ${params.taskId} not found`)
   }
 
-  const { task_id, session_id, service_id, input } = task ?? {}
-  if (!task_id || !session_id || !service_id || !input) {
-    throw new Error(
-      `Task is found but missing one of the required fields: task_id, session_id, service_id, input`
-    )
-  }
-
-  return { task_id, session_id, service_id, input }
+  return task
 }
 
 export async function createTask<E extends WorkflowEvent>(params: {
   client: Client
   deploymentName: string
-  eventData: E['data']
+  eventData: E["data"]
   workflow?: string // create task in default service if not provided
-}): Promise<WorkflowTask> {
+}): Promise<TaskDefinition> {
   const data =
     await createDeploymentTaskNowaitDeploymentsDeploymentNameTasksCreatePost({
       client: params.client,
@@ -55,21 +72,18 @@ export async function createTask<E extends WorkflowEvent>(params: {
       },
     })
 
-  const { task_id, session_id, service_id, input } = data.data ?? {}
-  if (!task_id || !session_id || !service_id || !input) {
-    throw new Error(
-      `Task is created but missing one of the required fields: task_id, session_id, service_id, input`
-    )
+  if (!data.data) {
+    throw new Error('Task creation failed')
   }
 
-  return { task_id, session_id, service_id, input }
+  return data.data
 }
 
 export async function fetchTaskEvents<E extends WorkflowEvent>(
   params: {
     client: Client
     deploymentName: string
-    task: WorkflowTask
+    task: TaskParams
     signal?: AbortSignal
   },
   callback?: StreamingEventCallback<E>
@@ -175,7 +189,7 @@ export async function fetchTaskEvents<E extends WorkflowEvent>(
 export async function sendEventToTask<E extends WorkflowEvent>(params: {
   client: Client
   deploymentName: string
-  task: WorkflowTask
+  task: TaskParams
   event: E
 }) {
   const { task_id, session_id, service_id } = params.task

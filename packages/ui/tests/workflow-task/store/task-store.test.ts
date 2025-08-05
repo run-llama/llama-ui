@@ -5,9 +5,9 @@
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { createTaskStore } from '../../../src/workflow-task/store/task-store';
-import { createTask as createTaskAPI, fetchTaskEvents } from '../../../src/workflow-task/store/helper';
+import { createTask as createTaskAPI, fetchTaskEvents, getRunningTasks } from '../../../src/workflow-task/store/helper';
 import { workflowStreamingManager } from '../../../src/lib/shared-streaming';
-import type { WorkflowTaskSummary, WorkflowEvent, WorkflowTask } from '../../../src/workflow-task/types';
+import type { WorkflowTaskSummary, WorkflowEvent, TaskDefinition } from '../../../src/workflow-task/types';
 
 // Mock the helper functions
 vi.mock('../../../src/workflow-task/store/helper');
@@ -35,7 +35,7 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 describe('Complete Task Store Tests', () => {
-  const mockWorkflowTask: WorkflowTask = {
+  const mockWorkflowTask: TaskDefinition = {
     task_id: 'task-123',
     session_id: 'session-456',
     service_id: 'workflow-test',
@@ -49,8 +49,6 @@ describe('Complete Task Store Tests', () => {
     input: 'test input',
     deployment: 'test-deployment',
     status: 'running',
-    createdAt: new Date('2023-01-01'),
-    updatedAt: new Date('2023-01-01'),
   };
 
   const mockEvent: WorkflowEvent = {
@@ -78,6 +76,7 @@ describe('Complete Task Store Tests', () => {
     // Setup default mock implementations
     (createTaskAPI as any).mockResolvedValue(mockWorkflowTask);
     (fetchTaskEvents as any).mockResolvedValue([]);
+    (getRunningTasks as any).mockResolvedValue([]);
     (workflowStreamingManager.isStreamActive as any).mockReturnValue(false);
   });
 
@@ -206,6 +205,116 @@ describe('Complete Task Store Tests', () => {
       const result = testStore.getState().isSubscribed('nonexistent');
       
       expect(result).toBe(false);
+    });
+  });
+
+  describe('sync', () => {
+    const mockServerTasks: WorkflowTaskSummary[] = [
+      {
+        task_id: 'server-task-1',
+        session_id: 'session-1',
+        service_id: 'service-1',
+        input: 'server input 1',
+        deployment: 'test-deployment',
+        status: 'running',
+      },
+      {
+        task_id: 'server-task-2',
+        session_id: 'session-2',
+        service_id: 'service-2',
+        input: 'server input 2',
+        deployment: 'test-deployment',
+        status: 'running',
+      },
+    ];
+
+    it('should fetch and sync running tasks from server', async () => {
+      (getRunningTasks as any).mockResolvedValue(mockServerTasks);
+
+      await testStore.getState().sync('test-deployment');
+
+      expect(getRunningTasks).toHaveBeenCalledWith({
+        client: mockClient,
+        deploymentName: 'test-deployment',
+      });
+
+      // Check if tasks were added to store
+      const state = testStore.getState();
+      expect(state.tasks['server-task-1']).toEqual(mockServerTasks[0]);
+      expect(state.tasks['server-task-2']).toEqual(mockServerTasks[1]);
+    });
+
+    it('should auto-subscribe to synced running tasks', async () => {
+      (getRunningTasks as any).mockResolvedValue(mockServerTasks);
+      (workflowStreamingManager.isStreamActive as any).mockReturnValue(false);
+
+      await testStore.getState().sync('test-deployment');
+
+      // Should call fetchTaskEvents for each task
+      expect(fetchTaskEvents).toHaveBeenCalledTimes(2);
+      
+      // Check if subscription calls were made correctly
+      expect(fetchTaskEvents).toHaveBeenCalledWith(
+        expect.objectContaining({
+          client: mockClient,
+          deploymentName: 'test-deployment',
+          task: expect.objectContaining({
+            task_id: 'server-task-1',
+          }),
+        }),
+        expect.any(Object)
+      );
+    });
+
+    it('should not subscribe to already subscribed tasks', async () => {
+      (getRunningTasks as any).mockResolvedValue(mockServerTasks);
+      (workflowStreamingManager.isStreamActive as any).mockReturnValue(true);
+
+      await testStore.getState().sync('test-deployment');
+
+      // Should not call fetchTaskEvents since tasks are already subscribed
+      expect(fetchTaskEvents).not.toHaveBeenCalled();
+    });
+
+    it('should handle sync errors gracefully', async () => {
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      (getRunningTasks as any).mockRejectedValue(new Error('Server error'));
+
+      // Should not throw
+      await expect(testStore.getState().sync('test-deployment')).resolves.toBeUndefined();
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Failed to sync with server:',
+        expect.any(Error)
+      );
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('should replace existing tasks with server tasks', async () => {
+      // First add some local tasks
+      const localTask: WorkflowTaskSummary = {
+        ...mockTaskSummary,
+        task_id: 'local-task',
+        status: 'running',
+      };
+      
+      testStore.setState({
+        tasks: { 'local-task': localTask },
+        events: {},
+      });
+
+      // Mock server returning different tasks
+      (getRunningTasks as any).mockResolvedValue(mockServerTasks);
+
+      await testStore.getState().sync('test-deployment');
+
+      const state = testStore.getState();
+      
+      // Local task should be replaced by server tasks
+      expect(state.tasks['local-task']).toBeUndefined();
+      expect(state.tasks['server-task-1']).toBeDefined();
+      expect(state.tasks['server-task-2']).toBeDefined();
     });
   });
 }); 

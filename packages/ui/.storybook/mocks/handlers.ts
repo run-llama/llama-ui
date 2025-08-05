@@ -170,14 +170,13 @@ export const handlers = {
       const allTasks = [];
       
       // Add any tasks that were created through the create task endpoint
-      if (deploymentName?.toString().includes('demo-deployment')) {
-        allTasks.push({
-          task_id: 'task-1',
-          session_id: 'session-1',
-          service_id: 'service',
-          input: '{"demo": "data"}',
-        });
-      }
+      
+      allTasks.push({
+        task_id: 'task-1',
+        session_id: 'session-1',
+        service_id: 'service',
+        input: '{"demo": "data"}',
+      });
       
       console.log('MSW: Returning tasks list:', allTasks);
       return HttpResponse.json(allTasks);
