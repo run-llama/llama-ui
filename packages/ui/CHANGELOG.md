@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 0.3.4
+
+### Patch Changes
+
+- 3a406c9: export api client
+
 ## 0.3.3
 
 ### Patch Changes
