@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 0.3.5
+
+### Patch Changes
+
+- 75cc905: add custom workflow input
+
 ## 0.3.4
 
 ### Patch Changes
