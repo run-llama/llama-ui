@@ -2,8 +2,9 @@
 
 import { Clock } from "lucide-react";
 import { lazy, memo, Suspense } from "react";
+import { Highlight } from "./types";
 
-const PdfPreview = memo(({ url }: { url: string }) => {
+const PdfPreview = memo(({ url, highlight }: { url: string, highlight?: Highlight }) => {
     if (typeof window === "undefined") {
         return null;
     }
@@ -15,7 +16,7 @@ const PdfPreview = memo(({ url }: { url: string }) => {
             <span className="ml-2 text-gray-600">Loading PDF viewer...</span>
             </div>
         }>
-            <PdfPreviewLazy url={url} />
+            <PdfPreviewLazy url={url} highlight={highlight} />
         </Suspense>
     );
 });
