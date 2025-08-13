@@ -7,6 +7,39 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { act } from '@testing-library/react';
 import { useWorkflowTaskList } from '../../../src/workflow-task/hooks/use-workflow-task-list';
 import { renderHookWithProvider } from '../../test-utils';
+import { useTaskStore } from '../../../src/workflow-task/hooks/use-task-store';
+
+// Mock helper and streaming to control task creation and completion
+vi.mock('../../../src/workflow-task/store/helper', () => {
+  return {
+    createTask: vi.fn(async (_args: any) => {
+      return {
+        task_id: 'task-list-1',
+        session_id: 'session-1',
+        service_id: 'service-1',
+        input: 'input',
+      };
+    }),
+    fetchTaskEvents: vi.fn(async (_params: any, callback?: any) => {
+      // Let the hook see the task in running state first, then finish
+      setTimeout(() => {
+        callback?.onFinish?.([]);
+      }, 5);
+      return [];
+    }),
+  };
+});
+vi.mock('../../../src/lib/shared-streaming', () => {
+  const manager = {
+    subscribe: vi.fn(() => ({ promise: Promise.resolve([]), unsubscribe: vi.fn() })),
+    isStreamActive: vi.fn(() => false),
+    closeStream: vi.fn(),
+    closeAllStreams: vi.fn(),
+    getSubscriberCount: vi.fn(() => 0),
+    getStreamEvents: vi.fn(() => []),
+  };
+  return { workflowStreamingManager: manager };
+});
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -65,6 +98,34 @@ describe('useWorkflowTaskList', () => {
       
       // Should not throw error
       expect(result.current.tasks).toEqual([]);
+    });
+  });
+
+  describe('H6: onTaskResult is called when a running task completes', () => {
+    it('should invoke onTaskResult with the completed task', async () => {
+      const onTaskResult = vi.fn();
+      const { rerender } = renderHookWithProvider(() =>
+        useWorkflowTaskList({ onTaskResult })
+      );
+
+      const storeHook = renderHookWithProvider(() => useTaskStore());
+
+      // Create a task which starts in running state and will complete via mocked fetchTaskEvents
+      await act(async () => {
+        await storeHook.result.current.createTask('dep-1', 'input');
+      });
+
+      // Allow the finish callback to run and the hook effects to process
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 15));
+        rerender();
+      });
+
+      expect(onTaskResult).toHaveBeenCalledTimes(1);
+      expect(onTaskResult.mock.calls[0][0]).toMatchObject({
+        task_id: 'task-list-1',
+        status: 'complete',
+      });
     });
   });
 });
