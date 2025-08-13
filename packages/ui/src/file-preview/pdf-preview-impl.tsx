@@ -22,6 +22,7 @@ interface PdfPreviewImplProps {
   highlight?: Highlight;
 }
 
+// map of page number to page viewport dimensions
 type PageBaseDims = {
   [key: number]: { width: number; height: number };
 };
