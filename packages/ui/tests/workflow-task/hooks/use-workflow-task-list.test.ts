@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { act } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 import { useWorkflowTaskList } from '../../../src/workflow-task/hooks/use-workflow-task-list';
 import { renderHookWithProvider } from '../../test-utils';
 import { useTaskStore } from '../../../src/workflow-task/hooks/use-task-store';
@@ -19,6 +19,9 @@ vi.mock('../../../src/workflow-task/store/helper', () => {
         service_id: 'service-1',
         input: 'input',
       };
+    }),
+    getRunningTasks: vi.fn(async (_args: any) => {
+      return [];
     }),
     fetchTaskEvents: vi.fn(async (_params: any, callback?: any) => {
       // Let the hook see the task in running state first, then finish
@@ -116,13 +119,10 @@ describe('useWorkflowTaskList', () => {
         await storeHook.result.current.createTask('dep-1', 'input');
       });
 
-      // Allow the finish callback to run and the hook effects to process
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 0));
-        rerender();
+      // Wait for mocked fetchTaskEvents to complete and effect to detect removal
+      await waitFor(() => {
+        expect(onTaskResult).toHaveBeenCalledTimes(1);
       });
-
-      expect(onTaskResult).toHaveBeenCalledTimes(1);
       expect(onTaskResult.mock.calls[0][0]).toMatchObject({
         task_id: 'task-list-1',
         status: 'complete',

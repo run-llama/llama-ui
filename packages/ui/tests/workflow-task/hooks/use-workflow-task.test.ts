@@ -21,6 +21,10 @@ vi.mock("../../../src/workflow-task/store/helper", () => {
         input: "input",
       };
     }),
+    // sync helper used by store.sync
+    getRunningTasks: vi.fn(async (_args: any) => {
+      return [];
+    }),
     // fetchTaskEvents immediately invokes onFinish to mark task complete in store
     fetchTaskEvents: vi.fn(async (_params: any, callback?: any) => {
       // simulate async completion
@@ -204,7 +208,7 @@ describe("useWorkflowTask", () => {
       });
 
       expect(onTaskResult).toHaveBeenCalledTimes(1);
-      expect(onTaskResult.mock.calls[0][0]).toMatchObject({
+      expect(onTaskResult.mock.calls[0][0].task).toMatchObject({
         task_id: expectedTaskId,
         status: "complete",
       });

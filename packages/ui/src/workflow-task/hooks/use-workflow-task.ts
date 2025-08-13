@@ -13,7 +13,7 @@ interface UseWorkflowTaskResult {
 export interface UseWorkflowTaskOptions {
   taskId?: string;
   autoStream?: boolean;
-  onTaskResult?: (task: WorkflowTaskSummary) => void;
+  onTaskResult?: (task: UseWorkflowTaskResult) => void;
 }
 
 export function useWorkflowTask({
@@ -63,16 +63,23 @@ export function useWorkflowTask({
     }
   }, [taskId, clearEvents]);
 
+  const result = {
+    task,
+    events,
+    isStreaming: taskId ? isSubscribed(taskId) : false,
+    stopStreaming,
+    clearEvents: clearTaskEvents,
+  };
   const lastStatus = useRef(task?.status);
   useEffect(() => {
     if (
       task &&
       lastStatus.current !== task.status &&
-      task.status === "complete" &&
+      (task.status === "complete" || task.status === "error") &&
       onTaskResult
     ) {
       try {
-        onTaskResult(task);
+        onTaskResult(result);
       } catch (error) {
         console.error("Error calling onTaskResult", error);
       }
@@ -80,11 +87,5 @@ export function useWorkflowTask({
     lastStatus.current = task?.status;
   }, [task, onTaskResult, taskId]);
 
-  return {
-    task,
-    events,
-    isStreaming: taskId ? isSubscribed(taskId) : false,
-    stopStreaming,
-    clearEvents: clearTaskEvents,
-  };
+  return result;
 }
