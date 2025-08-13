@@ -46,7 +46,7 @@ export function AgentStreamDisplay({
   maxEvents = 20,
   className,
 }: AgentStreamDisplayProps) {
-  const { task, events } = useWorkflowTask(taskId, true);
+  const { task, events } = useWorkflowTask({ taskId, autoStream: true });
 
   // Filter and limit events to show only AgentStream events
   const agentEvents = useMemo(() => {
