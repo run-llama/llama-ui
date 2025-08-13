@@ -72,8 +72,9 @@ describe("useWorkflowTask", () => {
 
   describe("H6: Mount subscribes and accumulates events", () => {
     it("should work with task ID", () => {
-      const { result } = renderHookWithProvider(() =>
-        useWorkflowTask({ taskId: "task-123" })
+      const { result } = renderHookWithProvider(
+        () => useWorkflowTask({ taskId: "task-123" }),
+        { deployment: 'dep-1' }
       );
 
       // The hook should work without errors
@@ -85,8 +86,9 @@ describe("useWorkflowTask", () => {
 
   describe("H7: clearEvents empties events array", () => {
     it("should have clearEvents function", () => {
-      const { result } = renderHookWithProvider(() =>
-        useWorkflowTask({ taskId: "task-123" })
+      const { result } = renderHookWithProvider(
+        () => useWorkflowTask({ taskId: "task-123" }),
+        { deployment: 'dep-1' }
       );
 
       expect(typeof result.current.clearEvents).toBe("function");
@@ -135,8 +137,9 @@ describe("useWorkflowTask", () => {
         taskId: createdTaskId,
         autoStream: false,
       };
-      const { result, rerender } = renderHookWithProvider(() =>
-        useWorkflowTask(options)
+      const { result, rerender } = renderHookWithProvider(
+        () => useWorkflowTask(options),
+        { deployment: 'dep-1' }
       );
 
       expect(result.current.task?.task_id).toBe(createdTaskId);
@@ -169,8 +172,14 @@ describe("useWorkflowTask", () => {
       const onTaskResult = vi.fn();
       const expectedTaskId = "task-switch-1"; // from mocked createTask
 
-      const hook = renderHookWithProvider(() =>
-        useWorkflowTask({ taskId: expectedTaskId, onTaskResult, autoStream: true })
+      const hook = renderHookWithProvider(
+        () =>
+          useWorkflowTask({
+            taskId: expectedTaskId,
+            onTaskResult,
+            autoStream: true,
+          }),
+        { deployment: 'dep-2' }
       );
 
       // Override fetchTaskEvents for this flow to complete after mount

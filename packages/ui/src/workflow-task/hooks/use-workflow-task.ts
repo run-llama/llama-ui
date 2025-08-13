@@ -52,11 +52,15 @@ export function useWorkflowTask({
   }, [taskId, task, autoStream, subscribe, unsubscribe]);
 
   const stopStreaming = useCallback(() => {
-    taskId && unsubscribe(taskId);
+    if (taskId) {
+      unsubscribe(taskId);
+    }
   }, [taskId, unsubscribe]);
 
   const clearTaskEvents = useCallback(() => {
-    taskId && clearEvents(taskId);
+    if (taskId) {
+      clearEvents(taskId);
+    }
   }, [taskId, clearEvents]);
 
   const lastStatus = useRef(task?.status);

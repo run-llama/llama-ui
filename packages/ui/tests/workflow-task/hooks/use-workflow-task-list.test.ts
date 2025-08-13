@@ -104,8 +104,9 @@ describe('useWorkflowTaskList', () => {
   describe('H6: onTaskResult is called when a running task completes', () => {
     it('should invoke onTaskResult with the completed task', async () => {
       const onTaskResult = vi.fn();
-      const { rerender } = renderHookWithProvider(() =>
-        useWorkflowTaskList({ onTaskResult })
+      const { rerender } = renderHookWithProvider(
+        () => useWorkflowTaskList({ onTaskResult }),
+        { deployment: 'dep-1' }
       );
 
       const storeHook = renderHookWithProvider(() => useTaskStore());
@@ -117,7 +118,7 @@ describe('useWorkflowTaskList', () => {
 
       // Allow the finish callback to run and the hook effects to process
       await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 15));
+        await new Promise((resolve) => setTimeout(resolve, 0));
         rerender();
       });
 
