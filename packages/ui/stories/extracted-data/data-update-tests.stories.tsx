@@ -5,7 +5,7 @@ import { ExtractedDataDisplay } from "../../src/extracted-data";
 import type { JSONSchema } from "zod/v4/core";
 
 const meta: Meta<typeof ExtractedDataDisplay> = {
-  title: "Components/ExtractedDataDisplay",
+  title: "Components/ExtractedDataDisplay/DataUpdateTests",
   component: ExtractedDataDisplay,
   parameters: {
     layout: "padded",
@@ -14,379 +14,6 @@ const meta: Meta<typeof ExtractedDataDisplay> = {
 
 export default meta;
 type Story = StoryObj<typeof ExtractedDataDisplay>;
-
-// Data that demonstrates the problem - some nested required fields are missing
-const sampleData = {
-  receiptNumber: "uyte1213",
-  invoiceNumber: "8336",
-  merchant: {
-    name: "Wehner LLC", // This is required
-    // phone is missing (optional) - should show "(added)"
-    address: {
-      street: "Princess", // This is required
-      city: "Funkhaven", // This is required
-      state: "-", // This is optional
-      postalCode: "24843-7916", // This is optional
-      country: "-", // This is optional
-    },
-    tags: ["urgent", "paid", "processed"],
-  },
-  items: [
-    {
-      description: "Labour Charges", // This is required
-      period: {
-        start: "09/06/2025", // This is required
-        end: "10/06/2025", // This is required
-      },
-      items: ["a", "b", "c"],
-      // amount is missing (optional) - should show "(added)"
-    },
-    {
-      description: "Material", // This is required
-      period: {
-        start: "08/06/2025", // This is required
-        end: "09/06/2025", // This is required
-      },
-      items: ["x", "y", "z"],
-      // amount is missing (optional) - should show "(added)"
-    },
-  ],
-  tags: ["urgent", "paid", "processed"], // This is required
-  // email is missing (optional) - should show "(added)"
-  // totalAmount is missing (optional) - should show "(added)"
-};
-
-// Schema to demonstrate required/optional field display
-const sampleSchema = {
-  type: "object" as const,
-  properties: {
-    receiptNumber: {
-      type: "string" as const,
-      title: "Receipt Number",
-      description: "Unique receipt identifier",
-    },
-    invoiceNumber: {
-      type: "string" as const,
-      title: "Invoice Number",
-      description: "Invoice reference number",
-    },
-    email: {
-      type: "string" as const,
-      title: "Email Address",
-      description: "Contact email address",
-    },
-    totalAmount: {
-      type: "number" as const,
-      title: "Total Amount",
-      description: "Total invoice amount",
-    },
-    merchant: {
-      type: "object" as const,
-      title: "Merchant Information",
-      properties: {
-        name: {
-          type: "string" as const,
-          title: "Merchant Name",
-        },
-        phone: {
-          type: "string" as const,
-          title: "Phone Number",
-          description: "Contact phone number",
-        },
-        address: {
-          type: "object" as const,
-          title: "Address",
-          properties: {
-            street: { type: "string" as const, title: "Street" },
-            city: { type: "string" as const, title: "City" },
-            state: { type: "string" as const, title: "State" },
-            postalCode: { type: "string" as const, title: "Postal Code" },
-            country: { type: "string" as const, title: "Country" },
-          },
-          required: ["street", "city"],
-        },
-        tags: {
-          type: "array" as const,
-          title: "Tags",
-          items: { type: "string" as const },
-        },
-      },
-      required: ["name", "tags"], // phone is optional
-    },
-    items: {
-      type: "array" as const,
-      title: "Line Items",
-      items: {
-        type: "object" as const,
-        properties: {
-          description: { type: "string" as const, title: "Description" },
-          amount: {
-            type: "number" as const,
-            title: "Amount",
-            description: "Line item amount",
-          },
-          period: {
-            type: "object" as const,
-            title: "Period",
-            properties: {
-              start: { type: "string" as const, title: "Start Date" },
-              end: { type: "string" as const, title: "End Date" },
-            },
-            required: ["start", "end"], // Both dates are required
-          },
-          items: {
-            type: "array" as const,
-            title: "Items",
-            items: { type: "string" as const },
-          },
-        },
-        required: ["description"], // amount is optional
-      },
-    },
-    tags: {
-      type: "array" as const,
-      title: "Tags",
-      items: { type: "string" as const },
-    },
-  },
-  required: ["receiptNumber", "invoiceNumber", "tags"], // email and totalAmount are optional
-};
-
-// Create field_metadata for the sample data
-const sampleFieldMetadata = {
-  receiptNumber: {
-    confidence: 0.95,
-    reasoning: "Receipt number clearly identified",
-    citation: [{ page_number: 1, matching_text: "uyte1213" }],
-  },
-  invoiceNumber: {
-    confidence: 0.87,
-    reasoning: "Invoice number extracted from header",
-    citation: [{ page_number: 1, matching_text: "8336" }],
-  },
-  "merchant.name": {
-    confidence: 0.92,
-    reasoning: "Merchant name identified",
-    citation: [{ page_number: 1, matching_text: "Wehner LLC" }],
-  },
-  "merchant.address.street": {
-    confidence: 0.78,
-    reasoning: "Street address extracted",
-    citation: [{ page_number: 1, matching_text: "Princess" }],
-  },
-  "merchant.address.city": {
-    confidence: 0.89,
-    reasoning: "City name identified",
-    citation: [{ page_number: 1, matching_text: "Funkhaven" }],
-  },
-  "items.0.description": {
-    confidence: 0.94,
-    reasoning: "First item description extracted",
-    citation: [{ page_number: 1, matching_text: "Labour Charges" }],
-  },
-  "items.1.description": {
-    confidence: 0.88,
-    reasoning: "Second item description extracted",
-    citation: [{ page_number: 1, matching_text: "Material" }],
-  },
-  "tags.0": {
-    confidence: 0.96,
-    reasoning: "First tag identified",
-    citation: [{ page_number: 1, matching_text: "urgent" }],
-  },
-  "tags.1": {
-    confidence: 0.85,
-    reasoning: "Second tag identified",
-    citation: [{ page_number: 1, matching_text: "paid" }],
-  },
-};
-
-function BasicStoryComponent() {
-  const [data, setData] = useState(sampleData);
-
-  const handleChange = (updatedData: Record<string, unknown>) => {
-    setData(updatedData as typeof sampleData);
-  };
-
-  const extractedData = {
-    original_data: data,
-    data,
-    status: "completed" as const,
-    field_metadata: sampleFieldMetadata,
-  };
-
-  return (
-    <ExtractedDataDisplay
-      extractedData={extractedData}
-      editable={true}
-      onChange={handleChange}
-      jsonSchema={sampleSchema}
-    />
-  );
-}
-
-export const Basic: Story = {
-  render: () => <BasicStoryComponent />,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-
-    // Schema Reconciliation Tests - verify required vs optional field display
-    console.log("Testing schema reconciliation features...");
-
-    // Test: Top-level required fields should be bold (font-semibold)
-    const receiptNumberLabel = canvas.getByText(/Receipt Number/);
-    const receiptNumberElement = receiptNumberLabel.closest("div");
-    expect(receiptNumberElement).toHaveClass("font-semibold"); // Required field
-
-    const invoiceNumberLabel = canvas.getByText(/Invoice Number/);
-    const invoiceNumberElement = invoiceNumberLabel.closest("div");
-    expect(invoiceNumberElement).toHaveClass("font-semibold"); // Required field
-
-    // Test: Optional fields that were added should be present
-    const emailLabel = canvas.queryByText(/Email Address/);
-    expect(emailLabel).toBeInTheDocument(); // Email was missing, should be added
-
-    const totalAmountLabel = canvas.queryByText(/Total Amount/);
-    expect(totalAmountLabel).toBeInTheDocument(); // Total amount was missing, should be added
-
-    // Test: Nested object required fields should be bold
-    const merchantNameLabel = canvas.getByText(/Merchant Name/);
-    const merchantNameElement = merchantNameLabel.closest("div");
-    expect(merchantNameElement).toHaveClass("font-semibold"); // merchant.name is required
-
-    // Test: Nested object optional fields should be present if missing
-    const merchantPhoneLabel = canvas.queryByText(/Phone Number/);
-    expect(merchantPhoneLabel).toBeInTheDocument(); // merchant.phone was missing, should be added
-
-    // Test: Nested address required fields should be bold
-    const streetLabel = canvas.getByText(/Street/);
-    const streetElement = streetLabel.closest("div");
-    expect(streetElement).toHaveClass("font-semibold"); // address.street is required
-
-    const cityLabel = canvas.getByText(/City/);
-    const cityElement = cityLabel.closest("div");
-    expect(cityElement).toHaveClass("font-semibold"); // address.city is required
-
-    // Test: Table/array required fields should be bold
-    const descriptionLabels = canvas.getAllByText(/Description/);
-    for (const label of descriptionLabels) {
-      const element = label.closest("div");
-      expect(element).toHaveClass("font-semibold"); // description is required for each item
-    }
-
-    // Test: Table/array optional fields should be present if missing
-    const amountLabels = canvas.queryAllByText(/Amount/);
-    expect(amountLabels.length).toBeGreaterThan(0); // amount was missing from items, should be added
-
-    // Test: Nested period required fields should be bold
-    const startDateLabels = canvas.getAllByText(/Start Date/);
-    for (const label of startDateLabels) {
-      const element = label.closest("div");
-      expect(element).toHaveClass("font-semibold"); // period.start is required
-    }
-
-    const endDateLabels = canvas.getAllByText(/End Date/);
-    for (const label of endDateLabels) {
-      const element = label.closest("div");
-      expect(element).toHaveClass("font-semibold"); // period.end is required
-    }
-
-    console.log("Schema reconciliation tests completed");
-
-    // Test 1: Edit primitive field (receipt number)
-    const receiptSpan = canvas.getByText("uyte1213");
-    await userEvent.click(receiptSpan);
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    const receiptInput = screen.getByDisplayValue("uyte1213");
-    await userEvent.clear(receiptInput);
-    await userEvent.type(receiptInput, "NEW123");
-    await userEvent.keyboard("{Enter}");
-
-    // Wait for update and check green background
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    // Use a more flexible approach to find the updated text
-    const receiptFields = canvas.queryAllByText("NEW123");
-    if (receiptFields.length === 0) {
-      // If direct text search fails, try to find by partial text or wait longer
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      const receiptFieldsRetry = canvas.getAllByText("NEW123");
-      const changedReceiptField = receiptFieldsRetry[0].closest(
-        '[class*="bg-green-50"]'
-      );
-      expect(changedReceiptField).toBeInTheDocument();
-    } else {
-      const changedReceiptField = receiptFields[0].closest(
-        '[class*="bg-green-50"]'
-      );
-      expect(changedReceiptField).toBeInTheDocument();
-    }
-
-    // Test 2: Edit nested field (merchant name)
-    const merchantNameSpan = canvas.getByText("Wehner LLC");
-    await userEvent.click(merchantNameSpan);
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    const merchantNameInput = screen.getByDisplayValue("Wehner LLC");
-    await userEvent.clear(merchantNameInput);
-    await userEvent.type(merchantNameInput, "Updated Company LLC");
-    await userEvent.keyboard("{Enter}");
-
-    // Wait for update and check green background
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    const merchantFields = canvas.getAllByText(/Updated Company LLC/);
-    const changedMerchantField = merchantFields[0].closest(
-      '[class*="bg-green-50"]'
-    );
-    expect(changedMerchantField).toBeInTheDocument();
-
-    // Test 3: Edit array element (root level tags)
-    const allUrgentSpans = canvas.getAllByText("urgent");
-    // Use the last "urgent" which should be from root-level tags (after merchant section)
-    const rootTagsUrgent = allUrgentSpans[allUrgentSpans.length - 1];
-    await userEvent.click(rootTagsUrgent);
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    const urgentInput = screen.getByDisplayValue("urgent");
-    await userEvent.clear(urgentInput);
-    await userEvent.type(urgentInput, "high-priority");
-    await userEvent.keyboard("{Enter}");
-
-    // Wait for update and verify tag was updated
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    const highPriorityElements = canvas.getAllByText("high-priority");
-    expect(highPriorityElements.length).toBeGreaterThan(0);
-
-    // Verify the updated tag has green background
-    const tagGreenBg = highPriorityElements[0].closest(
-      '[class*="bg-green-50"]'
-    );
-    expect(tagGreenBg).toBeInTheDocument();
-
-    // Test 4: Edit table cell (first item description)
-    const labourChargesSpans = canvas.getAllByText("Labour Charges");
-    const firstLabourChargesSpan = labourChargesSpans[0];
-    await userEvent.click(firstLabourChargesSpan);
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    const labourChargesInput = screen.getByDisplayValue("Labour Charges");
-    await userEvent.clear(labourChargesInput);
-    await userEvent.type(labourChargesInput, "Updated Labour Charges");
-    await userEvent.keyboard("{Enter}");
-
-    // Wait for update and verify table cell was updated
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    const updatedLabourElements = canvas.getAllByText("Updated Labour Charges");
-    expect(updatedLabourElements.length).toBeGreaterThan(0);
-
-    // Verify the updated table cell has green background
-    const tableGreenBg = updatedLabourElements[0].closest(
-      '[class*="bg-green-50"]'
-    );
-    expect(tableGreenBg).toBeInTheDocument();
-  },
-};
 
 // Create a component for DataUpdateTests story to use hooks properly
 function DataUpdateTestsComponent() {
@@ -427,7 +54,7 @@ function DataUpdateTestsComponent() {
     ],
   };
 
-  // Create field_metadata for the data
+  // Create field_metadata for the data (tree structure)
   const fieldMetadata = {
     title: {
       confidence: 0.95,
@@ -439,71 +66,85 @@ function DataUpdateTestsComponent() {
       reasoning: "Amount extracted from financial section",
       citation: [{ page_number: 1, matching_text: "1000" }],
     },
-    "tags.0": {
-      confidence: 0.88,
-      reasoning: "First tag identified",
-      citation: [{ page_number: 1, matching_text: "tag1" }],
+    tags: [
+      {
+        confidence: 0.88,
+        reasoning: "First tag identified",
+        citation: [{ page_number: 1, matching_text: "tag1" }],
+      },
+      {
+        confidence: 0.87,
+        reasoning: "Second tag identified",
+        citation: [{ page_number: 1, matching_text: "tag2" }],
+      },
+    ],
+    scores: [
+      {
+        confidence: 0.91,
+        reasoning: "First score extracted",
+        citation: [{ page_number: 1, matching_text: "85" }],
+      },
+      {
+        confidence: 0.89,
+        reasoning: "Second score extracted",
+        citation: [{ page_number: 1, matching_text: "92" }],
+      },
+    ],
+    flags: [
+      {
+        confidence: 0.94,
+        reasoning: "First flag extracted",
+        citation: [{ page_number: 1, matching_text: "true" }],
+      },
+      {
+        confidence: 0.93,
+        reasoning: "Second flag extracted",
+        citation: [{ page_number: 1, matching_text: "false" }],
+      },
+    ],
+    metadata: {
+      version: {
+        confidence: 0.96,
+        reasoning: "Version number identified",
+        citation: [{ page_number: 1, matching_text: "1.2.3" }],
+      },
+      priority: {
+        confidence: 0.9,
+        reasoning: "Priority level extracted",
+        citation: [{ page_number: 1, matching_text: "5" }],
+      },
+      published: {
+        confidence: 0.85,
+        reasoning: "Published status identified",
+        citation: [{ page_number: 1, matching_text: "false" }],
+      },
     },
-    "tags.1": {
-      confidence: 0.87,
-      reasoning: "Second tag identified",
-      citation: [{ page_number: 1, matching_text: "tag2" }],
-    },
-    "scores.0": {
-      confidence: 0.91,
-      reasoning: "First score extracted",
-      citation: [{ page_number: 1, matching_text: "85" }],
-    },
-    "scores.1": {
-      confidence: 0.89,
-      reasoning: "Second score extracted",
-      citation: [{ page_number: 1, matching_text: "92" }],
-    },
-    "flags.0": {
-      confidence: 0.94,
-      reasoning: "First flag extracted",
-      citation: [{ page_number: 1, matching_text: "true" }],
-    },
-    "flags.1": {
-      confidence: 0.93,
-      reasoning: "Second flag extracted",
-      citation: [{ page_number: 1, matching_text: "false" }],
-    },
-    "metadata.version": {
-      confidence: 0.96,
-      reasoning: "Version number identified",
-      citation: [{ page_number: 1, matching_text: "1.2.3" }],
-    },
-    "metadata.priority": {
-      confidence: 0.9,
-      reasoning: "Priority level extracted",
-      citation: [{ page_number: 1, matching_text: "5" }],
-    },
-    "metadata.published": {
-      confidence: 0.85,
-      reasoning: "Published status identified",
-      citation: [{ page_number: 1, matching_text: "false" }],
-    },
-    "items.0.name": {
-      confidence: 0.92,
-      reasoning: "First item name extracted",
-      citation: [{ page_number: 1, matching_text: "Item 1" }],
-    },
-    "items.0.price": {
-      confidence: 0.89,
-      reasoning: "First item price extracted",
-      citation: [{ page_number: 1, matching_text: "100" }],
-    },
-    "items.1.name": {
-      confidence: 0.91,
-      reasoning: "Second item name extracted",
-      citation: [{ page_number: 1, matching_text: "Item 2" }],
-    },
-    "items.1.price": {
-      confidence: 0.88,
-      reasoning: "Second item price extracted",
-      citation: [{ page_number: 1, matching_text: "200" }],
-    },
+    items: [
+      {
+        name: {
+          confidence: 0.92,
+          reasoning: "First item name extracted",
+          citation: [{ page_number: 1, matching_text: "Item 1" }],
+        },
+        price: {
+          confidence: 0.89,
+          reasoning: "First item price extracted",
+          citation: [{ page_number: 1, matching_text: "100" }],
+        },
+      },
+      {
+        name: {
+          confidence: 0.91,
+          reasoning: "Second item name extracted",
+          citation: [{ page_number: 1, matching_text: "Item 2" }],
+        },
+        price: {
+          confidence: 0.88,
+          reasoning: "Second item price extracted",
+          citation: [{ page_number: 1, matching_text: "200" }],
+        },
+      },
+    ],
   };
 
   const schema: JSONSchema.ObjectSchema = {
@@ -568,7 +209,6 @@ function DataUpdateTestsComponent() {
   const [updateCount, setUpdateCount] = useState(0);
 
   const handleChange = (updatedData: Record<string, unknown>) => {
-    console.log("Data update received:", updatedData);
     setData(updatedData as typeof initialData);
     setUpdateCount((prev) => prev + 1);
   };
@@ -667,7 +307,7 @@ export const DataUpdateTests: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    console.log("Testing data updates through onChange...");
+    // Testing data updates through onChange
 
     // Helper to wait for updates
     const waitForUpdate = async (expectedCount: number) => {
@@ -678,7 +318,6 @@ export const DataUpdateTests: Story = {
     };
 
     // Test 1: Update primitive field
-    console.log("Test 1: Update title field");
     const titleField = canvas.getByText("Test Document");
     await userEvent.click(titleField);
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -692,7 +331,6 @@ export const DataUpdateTests: Story = {
     expect(canvas.getByText("Updated Title")).toBeInTheDocument();
 
     // Test 2: Update number field
-    console.log("Test 2: Update amount field");
     const amountField = canvas.getByText("1000");
     await userEvent.click(amountField);
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -706,7 +344,6 @@ export const DataUpdateTests: Story = {
     expect(canvas.getByText("2000")).toBeInTheDocument();
 
     // Test 3: Update array item
-    console.log("Test 3: Update tag item");
     const tag1Field = canvas.getByText("tag1");
     await userEvent.click(tag1Field);
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -720,7 +357,6 @@ export const DataUpdateTests: Story = {
     expect(canvas.getByText("updated-tag")).toBeInTheDocument();
 
     // Test 4: Update number array item
-    console.log("Test 4: Update number array item");
     const score85 = canvas.getByText("85");
     await userEvent.click(score85);
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -734,7 +370,6 @@ export const DataUpdateTests: Story = {
     expect(canvas.getByText("95")).toBeInTheDocument();
 
     // Test 5: Update boolean array item
-    console.log("Test 5: Update boolean array item");
     // Find the flags section specifically and click the first "true" value
     const flagsSection = canvas.getByText("Flags").closest("div");
     // Initial flags array is [true, false], so we'll change the true to false
@@ -758,7 +393,6 @@ export const DataUpdateTests: Story = {
     }
 
     // Test 6: Update nested object fields
-    console.log("Test 6: Update nested object fields");
 
     // Update metadata.version (string)
     const versionField = canvas.getByText("1.2.3");
@@ -787,7 +421,6 @@ export const DataUpdateTests: Story = {
     expect(canvas.getByText("10")).toBeInTheDocument();
 
     // Test 7: Add array item
-    console.log("Test 7: Add new tag");
     const addButtons = canvas
       .getAllByRole("button")
       .filter((btn) => btn.querySelector('svg[class*="lucide-plus"]'));
@@ -801,7 +434,6 @@ export const DataUpdateTests: Story = {
     // (The empty string will be in the JSON but won't have visible text)
 
     // Test 7: Update table cell
-    console.log("Test 7: Update table cell");
     const item1Field = canvas.getByText("Item 1");
     await userEvent.click(item1Field);
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -815,7 +447,6 @@ export const DataUpdateTests: Story = {
     expect(canvas.getByText("Updated Item 1")).toBeInTheDocument();
 
     // Test 8: Update nested table boolean field
-    console.log("Test 8: Update nested table boolean field");
     const activeTrue = canvas
       .getAllByText("true")
       .find((el) => el.closest("td") && el.textContent === "true");
@@ -837,7 +468,6 @@ export const DataUpdateTests: Story = {
     }
 
     // Test 9: Update deeply nested object field
-    console.log("Test 9: Update deeply nested object field");
     const supplierField = canvas.getByText("Supplier A");
     await userEvent.click(supplierField);
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -851,7 +481,6 @@ export const DataUpdateTests: Story = {
     expect(canvas.getByText("Updated Supplier A")).toBeInTheDocument();
 
     // Test 10: Add table row
-    console.log("Test 10: Add table row");
     // Find all tables and get the one that's not for the Tags section (Tags uses a simple list)
     const allTables = canvas.getAllByRole("table");
     // The second table should be the Items table (first is Tags, second is Items)
@@ -868,7 +497,6 @@ export const DataUpdateTests: Story = {
     expect(deleteRowButtons.length).toBe(3); // Original 2 + 1 new
 
     // Test 11: Edit new row properties
-    console.log("Test 11: Edit properties in new row");
 
     // Edit name in new row - find the clickable div inside the first cell
     const tableRows = canvas.getAllByRole("row");
@@ -879,7 +507,6 @@ export const DataUpdateTests: Story = {
       const editableDiv = tableCells[0].querySelector(
         'div[class*="cursor-pointer"]'
       ) as HTMLElement;
-      console.log("Found editable div:", !!editableDiv);
 
       if (editableDiv) {
         await userEvent.click(editableDiv);
@@ -888,7 +515,6 @@ export const DataUpdateTests: Story = {
         // Look for the input field that appears when editing
         try {
           const nameInput = screen.getByRole("textbox");
-          console.log("test item 3");
           await userEvent.type(nameInput, "New Item 3");
           await userEvent.keyboard("{Enter}");
 
@@ -919,7 +545,6 @@ export const DataUpdateTests: Story = {
     }
 
     // Test 12: Delete table row
-    console.log("Test 12: Delete table row");
     const currentDeleteButtons = canvas.getAllByTitle("Delete row");
     if (currentDeleteButtons.length > 0) {
       await userEvent.click(currentDeleteButtons[0]);
@@ -928,8 +553,6 @@ export const DataUpdateTests: Story = {
       const remainingDeleteButtons = canvas.getAllByTitle("Delete row");
       expect(remainingDeleteButtons.length).toBe(2);
     }
-
-    console.log("All data update tests completed!");
 
     expect(canvas.getByText("2000")).toBeInTheDocument();
     expect(canvas.getByText("updated-tag")).toBeInTheDocument();

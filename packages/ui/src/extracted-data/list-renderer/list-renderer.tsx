@@ -7,24 +7,31 @@ import {
 } from "./list-renderer-utils";
 import { Plus, Trash2 } from "lucide-react";
 import { PrimitiveType, toPrimitiveType } from "../primitive-validation";
-import type { FieldMetadata } from "../schema-reconciliation";
-import type { RendererMetadata } from "../types";
-import { findFieldMetadata } from "../metadata-path-utils";
+import type { FieldSchemaMetadata } from "../schema-reconciliation";
+import type { PrimitiveValue, RendererMetadata } from "../types";
+import type { ExtractedFieldMetadata } from "llama-cloud-services/beta/agent";
+import { findFieldSchemaMetadata } from "../metadata-path-utils";
 import { findExtractedFieldMetadata } from "../metadata-lookup";
 
-interface ListRendererProps {
-  data: unknown[];
-  onUpdate: (index: number, value: unknown) => void;
-  onAdd?: (value: unknown) => void;
+interface ListRendererProps<S extends PrimitiveValue> {
+  data: S[];
+  onUpdate: (index: number, value: S) => void;
+  onAdd?: (value: S) => void;
   onDelete?: (index: number) => void;
 
   changedPaths?: Set<string>;
   keyPath?: string[];
   // Unified metadata
   metadata?: RendererMetadata;
+  // Field click callback
+  onClickField?: (args: {
+    value: PrimitiveValue;
+    metadata?: ExtractedFieldMetadata;
+    path: string[];
+  }) => void;
 }
 
-export function ListRenderer({
+export function ListRenderer<S extends PrimitiveValue>({
   data,
   onUpdate,
   onAdd,
@@ -32,13 +39,15 @@ export function ListRenderer({
   changedPaths,
   keyPath = [],
   metadata,
-}: ListRendererProps) {
-  const effectiveSchema: Record<string, FieldMetadata> = metadata?.schema ?? {};
+  onClickField,
+}: ListRendererProps<S>) {
+  const effectiveSchema: Record<string, FieldSchemaMetadata> =
+    metadata?.schema ?? {};
   const effectiveExtracted = metadata?.extracted ?? {};
   const handleAdd = () => {
     // Get smart default value based on field metadata
     const defaultValue = getArrayItemDefaultValue(keyPath, effectiveSchema);
-    onAdd?.(defaultValue);
+    onAdd?.(defaultValue as S);
   };
 
   const handleDelete = (index: number) => {
@@ -52,7 +61,10 @@ export function ListRenderer({
   // Example: ["tags"] → ["tags", "*"] → "tags.*"
   const getExpectedType = (): PrimitiveType => {
     const itemFieldPath = [...keyPath, "*"];
-    const itemMetadata = findFieldMetadata(itemFieldPath, effectiveSchema);
+    const itemMetadata = findFieldSchemaMetadata(
+      itemFieldPath,
+      effectiveSchema
+    );
 
     if (itemMetadata?.schemaType) {
       return toPrimitiveType(itemMetadata.schemaType);
@@ -62,6 +74,18 @@ export function ListRenderer({
   };
 
   const expectedType = getExpectedType();
+
+  // Handle field click
+  const handleFieldClick = (
+    args: { value: PrimitiveValue; metadata?: ExtractedFieldMetadata },
+    index: number
+  ) => {
+    onClickField?.({
+      value: args.value,
+      metadata: args.metadata,
+      path: [...keyPath, String(index)],
+    });
+  };
 
   if (!data || data.length === 0) {
     return (
@@ -89,6 +113,14 @@ export function ListRenderer({
             // Check if this specific array item has been changed
             const isChanged = isArrayItemChanged(changedPaths, keyPath, index);
 
+            // Create field click handler for this specific index
+            const handleItemFieldClick = (args: {
+              value: PrimitiveValue;
+              metadata?: ExtractedFieldMetadata;
+            }) => {
+              handleFieldClick(args, index);
+            };
+
             return (
               <TableRow key={index} className="hover:bg-gray-50 border-0">
                 <TableCell className="p-0 border-r border-gray-100 w-12 align-middle h-full">
@@ -97,7 +129,7 @@ export function ListRenderer({
                   </div>
                 </TableCell>
                 <TableCell className="p-0 min-w-[120px] align-top h-full">
-                  <EditableField
+                  <EditableField<S>
                     value={item}
                     onSave={(newValue) => onUpdate(index, newValue)}
                     metadata={findExtractedFieldMetadata(
@@ -111,6 +143,7 @@ export function ListRenderer({
                       expectedType === PrimitiveType.NUMBER ||
                       expectedType === PrimitiveType.BOOLEAN
                     }
+                    onClick={handleItemFieldClick}
                   />
                 </TableCell>
                 {onDelete && (

@@ -14,10 +14,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/base/select";
+import { PrimitiveValue } from "../types";
 
-interface EditableFieldProps {
-  value: unknown;
-  onSave: (newValue: unknown) => void;
+interface EditableFieldProps<S extends PrimitiveValue> {
+  value: S;
+  onSave: (newValue: S) => void;
 
   // UI/state
   expectedType?: PrimitiveType;
@@ -28,13 +29,10 @@ interface EditableFieldProps {
 
   // metadata and click callback
   metadata?: ExtractedFieldMetadata;
-  onClick?: (args: {
-    value: unknown;
-    metadata?: ExtractedFieldMetadata;
-  }) => void;
+  onClick?: (args: { value: S; metadata?: ExtractedFieldMetadata }) => void;
 }
 
-export function EditableField({
+export function EditableField<S extends PrimitiveValue>({
   value,
   onSave,
   isChanged,
@@ -44,7 +42,7 @@ export function EditableField({
   className,
   metadata,
   onClick,
-}: EditableFieldProps) {
+}: EditableFieldProps<S>) {
   const [isOpen, setIsOpen] = useState(false);
   const [editValue, setEditValue] = useState(
     value === null || value === undefined ? "" : String(value)
@@ -52,6 +50,8 @@ export function EditableField({
   const [localConfidence, setLocalConfidence] = useState(
     metadata?.confidence ?? 1
   );
+
+  // Removed noisy debug log for low confidence fields to avoid confusing onClick payload structure
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -84,7 +84,7 @@ export function EditableField({
     );
 
     // Save the converted value
-    onSave(convertedValue);
+    onSave(convertedValue as S);
 
     // Update confidence to 100% after user confirms the edit
     setLocalConfidence(1.0);

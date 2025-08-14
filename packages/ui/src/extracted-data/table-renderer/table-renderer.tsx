@@ -17,26 +17,31 @@ import {
   isTableCellChanged,
   getTableRowDefaultValue,
 } from "./table-renderer-utils";
-import type { FieldMetadata, ValidationError } from "../schema-reconciliation";
+import type {
+  FieldSchemaMetadata,
+  ValidationError,
+} from "../schema-reconciliation";
 import type { RendererMetadata } from "../types";
+import type { ExtractedFieldMetadata } from "llama-cloud-services/beta/agent";
 import { getFieldDisplayInfo, getFieldLabelText } from "../field-display-utils";
 import {
   buildTableHeaderMetadataPath,
-  findFieldMetadata,
+  findFieldSchemaMetadata,
 } from "../metadata-path-utils";
 import { findExtractedFieldMetadata } from "../metadata-lookup";
 import { Plus, Trash2 } from "lucide-react";
 import { PrimitiveType, toPrimitiveType } from "../primitive-validation";
+import type { PrimitiveValue, JSONObject } from "../types";
 
-export interface TableRendererProps {
-  data: Record<string, unknown>[];
+export interface TableRendererProps<Row extends Record<string, JSONObject>> {
+  data: Row[];
   onUpdate: (
     index: number,
     key: string,
-    value: unknown,
+    value: JSONObject,
     affectedPaths?: string[]
   ) => void;
-  onAddRow?: (newRow: Record<string, unknown>) => void;
+  onAddRow?: (newRow: Row) => void;
   onDeleteRow?: (index: number) => void;
 
   changedPaths?: Set<string>;
@@ -44,9 +49,15 @@ export interface TableRendererProps {
   // Unified metadata
   metadata?: RendererMetadata;
   validationErrors?: ValidationError[];
+  // Field click callback
+  onClickField?: (args: {
+    value: PrimitiveValue;
+    metadata?: ExtractedFieldMetadata;
+    path: string[];
+  }) => void;
 }
 
-export function TableRenderer({
+export function TableRenderer<Row extends Record<string, JSONObject>>({
   data,
   onUpdate,
   onAddRow,
@@ -55,9 +66,10 @@ export function TableRenderer({
   keyPath = [],
   metadata,
   validationErrors = [],
-}: TableRendererProps) {
+  onClickField,
+}: TableRendererProps<Row>) {
   const effectiveMetadata: RendererMetadata = {
-    schema: metadata?.schema ?? ({} as Record<string, FieldMetadata>),
+    schema: metadata?.schema ?? ({} as Record<string, FieldSchemaMetadata>),
     extracted: metadata?.extracted ?? {},
   };
   // Get metadata from extracted field metadata
@@ -67,7 +79,6 @@ export function TableRenderer({
     }
     return undefined;
   };
-
   const handleAddRow = () => {
     // Try to get schema-based default values first
     const schemaBasedRow = getTableRowDefaultValue(
@@ -77,56 +88,61 @@ export function TableRenderer({
 
     // If we got schema-based defaults and they're not empty, use them
     if (Object.keys(schemaBasedRow).length > 0) {
-      onAddRow?.(schemaBasedRow);
+      onAddRow?.(schemaBasedRow as Row);
       return;
     }
 
     // Fallback to structure-based approach if no schema metadata available
-    const newRow: Record<string, unknown> = {};
+    const newRow: Row = {} as Row;
 
     if (data.length > 0) {
       // If we have existing data, use the structure of the first row
-      const firstRow = data[0];
+      const firstRow = data[0] as Record<string, JSONObject>;
       const fillEmptyValues = (
-        obj: Record<string, unknown>
-      ): Record<string, unknown> => {
-        const result: Record<string, unknown> = {};
+        obj: Record<string, JSONObject>
+      ): Record<string, JSONObject> => {
+        const result: Record<string, JSONObject> = {};
         Object.keys(obj).forEach((key) => {
+          const value = obj[key];
           if (
-            typeof obj[key] === "object" &&
-            obj[key] !== null &&
-            !Array.isArray(obj[key])
+            value !== null &&
+            typeof value === "object" &&
+            !Array.isArray(value)
           ) {
-            result[key] = fillEmptyValues(obj[key] as Record<string, unknown>);
+            result[key] = fillEmptyValues(value as Record<string, JSONObject>);
           } else {
             result[key] = "";
           }
         });
         return result;
       };
-      Object.assign(newRow, fillEmptyValues(firstRow));
+      Object.assign(newRow, fillEmptyValues(firstRow) as Row);
     } else {
       // If no existing data, create structure based on columns
       columns.forEach((column) => {
         const setNestedValue = (
-          obj: Record<string, unknown>,
+          obj: Record<string, JSONObject>,
           path: string[],
-          value: unknown
+          value: JSONObject
         ) => {
           if (path.length === 1) {
             obj[path[0]] = value;
           } else {
-            if (!obj[path[0]] || typeof obj[path[0]] !== "object") {
+            if (
+              !obj[path[0]] ||
+              typeof obj[path[0]] !== "object" ||
+              Array.isArray(obj[path[0]])
+            ) {
               obj[path[0]] = {};
             }
             setNestedValue(
-              obj[path[0]] as Record<string, unknown>,
+              obj[path[0]] as Record<string, JSONObject>,
               path.slice(1),
               value
             );
           }
         };
-        setNestedValue(newRow, column.path, "");
+        setNestedValue(newRow as Record<string, JSONObject>, column.path, "");
       });
     }
 
@@ -145,7 +161,7 @@ export function TableRenderer({
     if (data && data.length > 0) {
       // If we have data, use the data to generate columns
       data.forEach((item) => {
-        const itemColumns = flattenObject(item);
+        const itemColumns = flattenObject(item as Record<string, unknown>);
         itemColumns.forEach((col) => {
           if (!allColumns.has(col.key)) {
             allColumns.set(col.key, col);
@@ -333,7 +349,10 @@ export function TableRenderer({
           {data.map((item, rowIndex) => (
             <TableRow key={rowIndex} className="hover:bg-gray-50 border-0">
               {columns.map((column, colIndex) => {
-                const value = getValue(item, column);
+                const value = getValue(
+                  item as Record<string, unknown>,
+                  column
+                ) as PrimitiveValue;
                 const cellPath = [...keyPath, String(rowIndex), ...column.path];
                 const isChanged = isTableCellChanged(
                   changedPaths,
@@ -348,7 +367,7 @@ export function TableRenderer({
                 // This ensures consistent type detection regardless of row index.
                 // Example: ["users", "2", "name"] → ["users", "*", "name"] → "users.*.name"
                 const fieldKeyPath = [...keyPath, "*", ...column.path];
-                const fieldInfo = findFieldMetadata(
+                const fieldInfo = findFieldSchemaMetadata(
                   fieldKeyPath,
                   effectiveMetadata.schema
                 );
@@ -362,16 +381,30 @@ export function TableRenderer({
                     key={colIndex}
                     className="p-0 border-r border-gray-100 min-w-[80px] max-w-[200px]"
                   >
-                    <EditableField
+                    <EditableField<PrimitiveValue>
                       value={value}
                       onSave={(newValue) =>
-                        handleUpdate(rowIndex, column, newValue, data, onUpdate)
+                        handleUpdate(
+                          rowIndex,
+                          column,
+                          newValue,
+                          data as Array<Record<string, unknown>>,
+                          (idx, key, val, paths) =>
+                            onUpdate(idx, key, val as JSONObject, paths)
+                        )
                       }
                       metadata={getMetadata(cellPath)}
                       isChanged={isChanged}
                       showBorder={true}
                       expectedType={expectedType}
                       required={isRequired}
+                      onClick={(args) =>
+                        onClickField?.({
+                          value: args.value,
+                          metadata: args.metadata,
+                          path: cellPath,
+                        })
+                      }
                     />
                   </TableCell>
                 );

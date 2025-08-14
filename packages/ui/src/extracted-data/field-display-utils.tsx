@@ -1,5 +1,5 @@
-import type { FieldMetadata } from "./schema-reconciliation";
-import { findFieldMetadata } from "./metadata-path-utils";
+import { FieldSchemaMetadata } from "./schema-reconciliation";
+import { findFieldSchemaMetadata } from "./metadata-path-utils";
 
 /**
  * Convert snake_case or camelCase field names to Title Case
@@ -29,12 +29,12 @@ export interface FieldDisplayInfo {
  */
 export function getFieldDisplayInfo(
   key: string,
-  fieldMetadata: Record<string, FieldMetadata>,
+  fieldSchemaMetadata: Record<string, FieldSchemaMetadata>,
   validationErrors: Array<{ path: string[]; message: string }> = [],
   keyPath: string[] = [key]
 ): FieldDisplayInfo {
   const pathString = keyPath.join(".");
-  const metadata = findFieldMetadata(keyPath, fieldMetadata);
+  const metadata = findFieldSchemaMetadata(keyPath, fieldSchemaMetadata);
 
   // Use title from schema metadata, fallback to formatted field name
   const displayName = metadata?.title || formatFieldName(key);

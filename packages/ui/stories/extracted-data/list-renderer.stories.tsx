@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect } from "@storybook/test";
-import { within, userEvent, screen } from "@storybook/test";
+import { expect, userEvent, within, screen } from "@storybook/test";
 import { useState } from "react";
-import { ListRenderer } from "../../src/extracted-data/list-renderer";
+import { ListRenderer } from "../../src/extracted-data";
+import type { PrimitiveValue } from "../../src/extracted-data/types";
 
 const meta: Meta<typeof ListRenderer> = {
   title: "Components/ExtractedData/ListRenderer",
@@ -28,8 +28,8 @@ export const Basic: Story = {
       // noop for test
       // Update the data
       const newData = [...data];
-      newData[index] = value;
-      setData(newData);
+      newData[index] = value as PrimitiveValue;
+      setData(newData as PrimitiveValue[]);
 
       // Add the changed path to the set
       const path = `${args.keyPath?.join(".") || ""}.${index}`;
@@ -39,7 +39,7 @@ export const Basic: Story = {
     const handleAdd = (value: unknown) => {
       // noop for test
       const newData = [...data, value];
-      setData(newData);
+      setData(newData as PrimitiveValue[]);
 
       // Add the new item path to changed paths
       const path = `${args.keyPath?.join(".") || ""}.${data.length}`;
@@ -49,7 +49,7 @@ export const Basic: Story = {
     const handleDelete = (index: number) => {
       // noop for test
       const newData = data.filter((_, i) => i !== index);
-      setData(newData);
+      setData(newData as PrimitiveValue[]);
 
       // Mark the entire array as changed when deleting
       const arrayPath = args.keyPath?.join(".") || "";
@@ -137,8 +137,8 @@ export const EmptyArray: Story = {
     const handleUpdate = (index: number, value: unknown) => {
       // noop for test
       const newData = [...data];
-      newData[index] = value;
-      setData(newData);
+      newData[index] = value as PrimitiveValue;
+      setData(newData as PrimitiveValue[]);
 
       const path = `${args.keyPath?.join(".") || ""}.${index}`;
       setChangedPaths((prev) => new Set([...prev, path]));
@@ -147,7 +147,7 @@ export const EmptyArray: Story = {
     const handleAdd = (value: unknown) => {
       // noop for test
       const newData = [...data, value];
-      setData(newData);
+      setData(newData as PrimitiveValue[]);
 
       const path = `${args.keyPath?.join(".") || ""}.${data.length}`;
       setChangedPaths((prev) => new Set([...prev, path]));
@@ -156,7 +156,7 @@ export const EmptyArray: Story = {
     const handleDelete = (index: number) => {
       // noop for test
       const newData = data.filter((_, i) => i !== index);
-      setData(newData);
+      setData(newData as PrimitiveValue[]);
 
       const arrayPath = args.keyPath?.join(".") || "";
       setChangedPaths((prev) => new Set([...prev, arrayPath]));
@@ -223,8 +223,8 @@ export const ReadOnlyList: Story = {
     const handleUpdate = (index: number, value: unknown) => {
       // noop for test
       const newData = [...data];
-      newData[index] = value;
-      setData(newData);
+      newData[index] = value as PrimitiveValue;
+      setData(newData as PrimitiveValue[]);
     };
 
     return (
@@ -298,8 +298,8 @@ export const NumberArray: Story = {
     const handleUpdate = (index: number, value: unknown) => {
       // noop for test
       const newData = [...data];
-      newData[index] = value;
-      setData(newData);
+      newData[index] = value as PrimitiveValue;
+      setData(newData as PrimitiveValue[]);
 
       const path = `${args.keyPath?.join(".") || ""}.${index}`;
       setChangedPaths((prev) => new Set([...prev, path]));
@@ -308,7 +308,7 @@ export const NumberArray: Story = {
     const handleAdd = (value: unknown) => {
       // noop for test
       const newData = [...data, value];
-      setData(newData);
+      setData(newData as PrimitiveValue[]);
 
       const path = `${args.keyPath?.join(".") || ""}.${data.length}`;
       setChangedPaths((prev) => new Set([...prev, path]));
@@ -317,7 +317,7 @@ export const NumberArray: Story = {
     const handleDelete = (index: number) => {
       // noop for test
       const newData = data.filter((_, i) => i !== index);
-      setData(newData);
+      setData(newData as PrimitiveValue[]);
 
       const arrayPath = args.keyPath?.join(".") || "";
       setChangedPaths((prev) => new Set([...prev, arrayPath]));
@@ -424,8 +424,8 @@ export const BooleanArray: Story = {
     const handleUpdate = (index: number, value: unknown) => {
       // noop for test
       const newData = [...data];
-      newData[index] = value;
-      setData(newData);
+      newData[index] = value as PrimitiveValue;
+      setData(newData as PrimitiveValue[]);
 
       const path = `${args.keyPath?.join(".") || ""}.${index}`;
       setChangedPaths((prev) => new Set([...prev, path]));
@@ -434,7 +434,7 @@ export const BooleanArray: Story = {
     const handleAdd = (value: unknown) => {
       // noop for test
       const newData = [...data, value];
-      setData(newData);
+      setData(newData as PrimitiveValue[]);
 
       const path = `${args.keyPath?.join(".") || ""}.${data.length}`;
       setChangedPaths((prev) => new Set([...prev, path]));
@@ -443,7 +443,7 @@ export const BooleanArray: Story = {
     const handleDelete = (index: number) => {
       // noop for test
       const newData = data.filter((_, i) => i !== index);
-      setData(newData);
+      setData(newData as PrimitiveValue[]);
 
       const arrayPath = args.keyPath?.join(".") || "";
       setChangedPaths((prev) => new Set([...prev, arrayPath]));

@@ -1,5 +1,5 @@
-import type { FieldMetadata } from "../schema-reconciliation";
-import { getDefaultValueForType } from "../metadata-lookup-utils";
+import type { FieldSchemaMetadata } from "../schema-reconciliation";
+import { getDefaultValueForType } from "../schema-metadata-lookup";
 
 export interface ColumnDef {
   key: string;
@@ -138,7 +138,7 @@ export const handleUpdate = (
  */
 export function getTableRowDefaultValue(
   keyPath: string[],
-  fieldMetadata: Record<string, FieldMetadata>
+  fieldMetadata: Record<string, FieldSchemaMetadata>
 ): Record<string, unknown> {
   const newRow: Record<string, unknown> = {};
 
@@ -175,7 +175,7 @@ export function getTableRowDefaultValue(
 /**
  * Helper function to get default value for a field based on its metadata
  */
-function getFieldDefaultValue(metadata: FieldMetadata): unknown {
+function getFieldDefaultValue(metadata: FieldSchemaMetadata): unknown {
   if (!metadata || !metadata.schemaType) {
     return "";
   }

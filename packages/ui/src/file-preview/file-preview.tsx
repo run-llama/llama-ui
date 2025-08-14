@@ -1,5 +1,5 @@
 import { Card } from "@/base/card";
-import type { BoundingBox } from "./types";
+import type { BoundingBox, Highlight } from "./types";
 import { ImagePreview } from "./image-preview";
 import { useFileData, type FileData } from "./use-file-data";
 import { Clock, XCircle } from "lucide-react";
@@ -32,12 +32,14 @@ function getFileType(fileType?: string): "image" | "pdf" | "unsupported" {
 export interface FilePreviewProps {
   onBoundingBoxClick?: (box: BoundingBox, pageNumber?: number) => void;
   fileId: string;
+  highlight?: Highlight;
   mockData?: FileData; // For Storybook
 }
 
 // Main unified FilePreview component
 export function FilePreview({
   onBoundingBoxClick,
+  highlight,
   fileId,
   mockData,
 }: FilePreviewProps) {
@@ -102,7 +104,7 @@ export function FilePreview({
 
   if (fileType === "pdf") {
     // Use dynamic import for PDF preview to avoid SSR issues
-    return <PdfPreview url={data?.url || ""} />;
+    return <PdfPreview url={data?.url || ""} highlight={highlight} />;
   }
 
   return null;
