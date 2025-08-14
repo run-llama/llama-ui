@@ -282,7 +282,12 @@ export const handlers = {
         console.log("MSW: Intercepted agent data search request");
 
         const requestBody = (await request.json()) as any;
-        const { offset = 0, page_size: pageSize = 20, order_by: orderBy, filter } = requestBody;
+        const {
+          offset = 0,
+          page_size: pageSize = 20,
+          order_by: orderBy,
+          filter,
+        } = requestBody;
 
         await delay(500); // Simulate network delay
 

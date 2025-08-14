@@ -27,7 +27,9 @@ describe("useItemGridData", () => {
     expect(Array.isArray(result.current.data)).toBe(true);
     expect(typeof result.current.totalSize).toBe("number");
     // Error can be null or string depending on mock setup
-    expect(typeof result.current.error === "string" || result.current.error === null).toBe(true);
+    expect(
+      typeof result.current.error === "string" || result.current.error === null
+    ).toBe(true);
   });
 
   it("should provide fetchData function", async () => {
@@ -68,7 +70,9 @@ describe("useItemGridData", () => {
       const initialLength = result.current.data.length;
 
       await act(async () => {
-        const deleteResult = await result.current.deleteItem(String(firstItemId));
+        const deleteResult = await result.current.deleteItem(
+          String(firstItemId)
+        );
         expect(deleteResult.success).toBe(true);
       });
 
@@ -105,8 +109,8 @@ describe("useItemGridData", () => {
   it("should apply filtering correctly", async () => {
     const { result } = renderHookWithProvider(() =>
       useItemGridData(
-        { page: 0, size: 20 }, 
-        { status: { includes: ["approved"] } }, 
+        { page: 0, size: 20 },
+        { status: { includes: ["approved"] } },
         undefined
       )
     );

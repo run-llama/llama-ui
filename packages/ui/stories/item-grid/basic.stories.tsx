@@ -314,21 +314,25 @@ export const InteractiveTests: Story = {
     console.log("🧪 Starting ItemGrid interactive tests");
 
     // Test 1: Basic functionality - data loads and displays
-    await new Promise(resolve => setTimeout(resolve, 1500)); // Wait for MSW response
-    
+    await new Promise((resolve) => setTimeout(resolve, 1500)); // Wait for MSW response
+
     // Verify headers
     await expect(canvas.getByText("File Name")).toBeInTheDocument();
     await expect(canvas.getByText("Status")).toBeInTheDocument();
-    
+
     // Verify data rows
-    await expect(canvas.getAllByText(/document_\d+\.pdf/)[0]).toBeInTheDocument();
-    
+    await expect(
+      canvas.getAllByText(/document_\d+\.pdf/)[0]
+    ).toBeInTheDocument();
+
     // Test 2: Sorting functionality
     const fileNameHeader = canvas.getByText("File Name");
     await userEvent.click(fileNameHeader);
     await new Promise((resolve) => setTimeout(resolve, 800));
-    await expect(canvas.getAllByText(/document_\d+\.pdf/)[0]).toBeInTheDocument();
-    
+    await expect(
+      canvas.getAllByText(/document_\d+\.pdf/)[0]
+    ).toBeInTheDocument();
+
     // Test 3: Row click interaction
     const firstRow = canvas.getAllByText(/document_\d+\.pdf/)[0].closest("tr");
     if (firstRow) {
@@ -439,9 +443,11 @@ export const RefreshFunctionalityTest: Story = {
     console.log("🧪 Testing refresh functionality");
 
     // Wait for initial data load
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
     await expect(canvas.getByText("File Name")).toBeInTheDocument();
-    await expect(canvas.getAllByText(/document_\d+\.pdf/)[0]).toBeInTheDocument();
+    await expect(
+      canvas.getAllByText(/document_\d+\.pdf/)[0]
+    ).toBeInTheDocument();
 
     // Test refresh button
     const refreshButton = canvas.getByTestId("refresh-button");
@@ -454,7 +460,9 @@ export const RefreshFunctionalityTest: Story = {
 
     // Wait for new data and verify it's still working
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    await expect(canvas.getAllByText(/document_\d+\.pdf/)[0]).toBeInTheDocument();
+    await expect(
+      canvas.getAllByText(/document_\d+\.pdf/)[0]
+    ).toBeInTheDocument();
 
     console.log("✅ Refresh functionality works");
   },
