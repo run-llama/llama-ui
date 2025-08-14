@@ -57,7 +57,7 @@ export function useItemGridData<T = unknown>(
   const handleDeleteItem = useCallback(
     async (itemId: string) => {
       try {
-        await (client as any).deleteItem(itemId);
+        await client.deleteItem(itemId);
 
         // Remove item from local state immediately
         setData((prevData) =>
