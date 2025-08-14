@@ -1,6 +1,8 @@
 import React, { useState, useRef, useLayoutEffect } from "react";
-import { getConfidenceBackgroundClass } from "../confidence-utils";
-import { isLowConfidence } from "@/lib";
+import {
+  getConfidenceBackgroundClass,
+  getConfidenceBorderClass,
+} from "../confidence-utils";
 import { PrimitiveType, convertPrimitiveValue } from "../primitive-validation";
 import { Popover, PopoverContent, PopoverTrigger } from "@/base/popover";
 import { Button } from "@/base/button";
@@ -14,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/base/select";
+import { useDisplayControl } from "../extracted-data-display-control";
 
 interface EditableFieldProps {
   value: unknown;
@@ -45,6 +48,8 @@ export function EditableField({
   metadata,
   onClick,
 }: EditableFieldProps) {
+  const { confidenceThreshold } = useDisplayControl();
+
   const [isOpen, setIsOpen] = useState(false);
   const [editValue, setEditValue] = useState(
     value === null || value === undefined ? "" : String(value)
@@ -133,16 +138,14 @@ export function EditableField({
     value === null || value === undefined || value === "" ? "" : String(value);
   const backgroundClass = isChanged
     ? "bg-green-50"
-    : getConfidenceBackgroundClass(currentConfidence);
+    : getConfidenceBackgroundClass(confidenceThreshold, currentConfidence);
   const hoverClass = backgroundClass.includes("bg-orange-50")
     ? "hover:bg-orange-100"
     : backgroundClass.includes("bg-green-50")
       ? "hover:bg-green-100"
       : "hover:bg-gray-100";
   const defaultBorderClass = showBorder
-    ? isLowConfidence(currentConfidence)
-      ? "border-b-2 border-orange-300"
-      : "border-b border-gray-200"
+    ? getConfidenceBorderClass(confidenceThreshold, currentConfidence)
     : "";
   const paddingClass = "p-2";
 

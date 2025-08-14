@@ -3,6 +3,7 @@ import { expect, userEvent, within, screen } from "@storybook/test";
 import { useState } from "react";
 import { ExtractedDataDisplay } from "../../src/extracted-data";
 import type { JSONSchema } from "zod/v4/core";
+import { ExtractedDataDisplayControl } from "@/src/extracted-data/extracted-data-display-control";
 
 const meta: Meta<typeof ExtractedDataDisplay> = {
   title: "Components/ExtractedDataDisplay",
@@ -385,6 +386,64 @@ export const Basic: Story = {
       '[class*="bg-green-50"]'
     );
     expect(tableGreenBg).toBeInTheDocument();
+  },
+};
+
+export const WithControl: Story = {
+  render: () => (
+    <ExtractedDataDisplayControl>
+      <ExtractedDataDisplay
+        extractedData={{
+          original_data: sampleData,
+          data: sampleData,
+          status: "completed",
+          field_metadata: sampleFieldMetadata,
+        }}
+        jsonSchema={sampleSchema}
+        editable={false}
+      />
+    </ExtractedDataDisplayControl>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // Test: Verify initial confidence threshold is 90%
+    const thresholdLabel = canvas.getByText(/Confidence Threshold \(90%\)/);
+    expect(thresholdLabel).toBeInTheDocument();
+
+    // Test: Verify low confidence fields are highlighted (orange background)
+    // merchant.address.street has confidence 0.78 (78%) - should be highlighted at 90% threshold
+    const streetField = canvas.getByText("Princess");
+    const streetContainer = streetField.closest('[class*="bg-orange-"]');
+    expect(streetContainer).toBeInTheDocument();
+
+    // Test: Verify high confidence fields are not highlighted
+    // receiptNumber has confidence 0.95 (95%) - should not be highlighted at 90% threshold
+    const receiptField = canvas.getByText("uyte1213");
+    const receiptContainer = receiptField.closest('[class*="bg-orange-"]');
+    expect(receiptContainer).toBeNull();
+
+    // Test: Adjust confidence threshold using slider
+    const slider = canvas.getByRole("slider");
+    expect(slider).toBeInTheDocument();
+
+    // Lower the threshold to 75% (move slider down by 15 points)
+    await userEvent.click(slider);
+    await userEvent.keyboard("{ArrowLeft>15}"); // Move slider down by 15%
+
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    // Check if threshold label updated (should be around 75%)
+    const updatedLabel = canvas.getByText(/Confidence Threshold \(7[0-9]%\)/);
+    expect(updatedLabel).toBeInTheDocument();
+
+    // Test: Verify that previously highlighted field is no longer highlighted
+    // merchant.address.street (78%) should not be highlighted at 75% threshold
+    const streetFieldAfter = canvas.getByText("Princess");
+    const streetContainerAfter = streetFieldAfter.closest(
+      '[class*="bg-orange-"]'
+    );
+    expect(streetContainerAfter).toBeNull();
   },
 };
 

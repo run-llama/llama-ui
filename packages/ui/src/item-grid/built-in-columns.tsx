@@ -4,12 +4,13 @@ import {
   FormattedDate,
 } from "./components/status-components";
 import { ActionButton } from "./components/action-button";
-import { isLowConfidence } from "@/lib";
 import { toast } from "sonner";
 import type {
   ExtractedData,
   TypedAgentData,
 } from "llama-cloud-services/beta/agent";
+
+const DEFAULT_CONFIDENCE_THRESHOLD = 0.9;
 
 // Status enum values
 export const STATUS_OPTIONS = [
@@ -44,7 +45,7 @@ export function getItemsToReviewCount(item: ExtractedData): number {
     );
 
     if (typeof confidence === "number" && !hasNestedObjectChild) {
-      if (isLowConfidence(confidence)) lowConfidenceCount++;
+      if (confidence < DEFAULT_CONFIDENCE_THRESHOLD) lowConfidenceCount++;
       return; // do not traverse deeper
     }
 
