@@ -31,7 +31,11 @@ interface PropertyRendererProps<S extends JSONObject> {
   metadata?: RendererMetadata;
   validationErrors?: ValidationError[];
   // Field click callback
-  onClickField?: (args: { value: PrimitiveValue; metadata?: ExtractedFieldMetadata; path: string[] }) => void;
+  onClickField?: (args: {
+    value: PrimitiveValue;
+    metadata?: ExtractedFieldMetadata;
+    path: string[];
+  }) => void;
 }
 
 export function PropertyRenderer<S extends JSONObject>({
@@ -59,8 +63,15 @@ export function PropertyRenderer<S extends JSONObject>({
   };
 
   // Handle field click
-  const handleFieldClick = (args: { value: PrimitiveValue; metadata?: ExtractedFieldMetadata }) => {
-    onClickField?.({ value: args.value, metadata: args.metadata, path: keyPath });
+  const handleFieldClick = (args: {
+    value: PrimitiveValue;
+    metadata?: ExtractedFieldMetadata;
+  }) => {
+    onClickField?.({
+      value: args.value,
+      metadata: args.metadata,
+      path: keyPath,
+    });
   };
 
   // Helper function to render field labels with schema info

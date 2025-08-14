@@ -50,7 +50,11 @@ export interface TableRendererProps<Row extends Record<string, JSONObject>> {
   metadata?: RendererMetadata;
   validationErrors?: ValidationError[];
   // Field click callback
-  onClickField?: (args: { value: PrimitiveValue; metadata?: ExtractedFieldMetadata; path: string[] }) => void;
+  onClickField?: (args: {
+    value: PrimitiveValue;
+    metadata?: ExtractedFieldMetadata;
+    path: string[];
+  }) => void;
 }
 
 export function TableRenderer<Row extends Record<string, JSONObject>>({

@@ -24,7 +24,11 @@ interface ListRendererProps<S extends PrimitiveValue> {
   // Unified metadata
   metadata?: RendererMetadata;
   // Field click callback
-  onClickField?: (args: { value: PrimitiveValue; metadata?: ExtractedFieldMetadata; path: string[] }) => void;
+  onClickField?: (args: {
+    value: PrimitiveValue;
+    metadata?: ExtractedFieldMetadata;
+    path: string[];
+  }) => void;
 }
 
 export function ListRenderer<S extends PrimitiveValue>({
@@ -72,8 +76,15 @@ export function ListRenderer<S extends PrimitiveValue>({
   const expectedType = getExpectedType();
 
   // Handle field click
-  const handleFieldClick = (args: { value: PrimitiveValue; metadata?: ExtractedFieldMetadata }, index: number) => {
-    onClickField?.({ value: args.value, metadata: args.metadata, path: [...keyPath, String(index)] });
+  const handleFieldClick = (
+    args: { value: PrimitiveValue; metadata?: ExtractedFieldMetadata },
+    index: number
+  ) => {
+    onClickField?.({
+      value: args.value,
+      metadata: args.metadata,
+      path: [...keyPath, String(index)],
+    });
   };
 
   if (!data || data.length === 0) {
@@ -103,7 +114,10 @@ export function ListRenderer<S extends PrimitiveValue>({
             const isChanged = isArrayItemChanged(changedPaths, keyPath, index);
 
             // Create field click handler for this specific index
-            const handleItemFieldClick = (args: { value: PrimitiveValue; metadata?: ExtractedFieldMetadata }) => {
+            const handleItemFieldClick = (args: {
+              value: PrimitiveValue;
+              metadata?: ExtractedFieldMetadata;
+            }) => {
               handleFieldClick(args, index);
             };
 

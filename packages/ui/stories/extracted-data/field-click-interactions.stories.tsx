@@ -88,5 +88,3 @@ export const FieldClickInteractions: Story = {
     expect(payload.value).toBe("Labour Charges");
   },
 };
-
-

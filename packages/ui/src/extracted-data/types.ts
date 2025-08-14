@@ -15,7 +15,11 @@ export interface ExtractedDataDisplayProps<S extends JSONObject> {
   // Schema reconciliation - pass schema and let component handle reconciliation internally
   jsonSchema?: JSONSchema.ObjectSchema;
   // Field click callback
-  onClickField?: (args: { value: PrimitiveValue; metadata?: ExtractedFieldMetadata; path: string[] }) => void;
+  onClickField?: (args: {
+    value: PrimitiveValue;
+    metadata?: ExtractedFieldMetadata;
+    path: string[];
+  }) => void;
 }
 
 // Convenience type used by renderers to carry both schema metadata and extracted metadata
