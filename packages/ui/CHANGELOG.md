@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 0.5.0
+
+### Minor Changes
+
+- 1868f03: breaking changes for several elements, item grid, extracted-data-display, etc.
+
 ## 0.4.0
 
 ### Minor Changes
