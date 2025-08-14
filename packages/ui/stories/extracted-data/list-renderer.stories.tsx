@@ -18,11 +18,6 @@ type Story = StoryObj<typeof ListRenderer>;
 export const Basic: Story = {
   args: {
     data: ["urgent", "paid", "processed"],
-    confidence: {
-      "0": 0.96,
-      "1": 0.85,
-      "2": 0.92,
-    },
     keyPath: ["tags"],
   },
   render: function Render(args) {
@@ -30,7 +25,7 @@ export const Basic: Story = {
     const [changedPaths, setChangedPaths] = useState<Set<string>>(new Set());
 
     const handleUpdate = (index: number, value: unknown) => {
-      console.log(`Updated item ${index}:`, value);
+      // noop for test
       // Update the data
       const newData = [...data];
       newData[index] = value;
@@ -42,7 +37,7 @@ export const Basic: Story = {
     };
 
     const handleAdd = (value: unknown) => {
-      console.log(`Added item:`, value);
+      // noop for test
       const newData = [...data, value];
       setData(newData);
 
@@ -52,7 +47,7 @@ export const Basic: Story = {
     };
 
     const handleDelete = (index: number) => {
-      console.log(`Deleted item at index ${index}`);
+      // noop for test
       const newData = data.filter((_, i) => i !== index);
       setData(newData);
 
@@ -63,12 +58,13 @@ export const Basic: Story = {
 
     return (
       <ListRenderer
-        {...args}
+        keyPath={args.keyPath}
         data={data}
         onUpdate={handleUpdate}
         onAdd={handleAdd}
         onDelete={handleDelete}
         changedPaths={changedPaths}
+        metadata={{ schema: {}, extracted: {} }}
       />
     );
   },
@@ -132,7 +128,6 @@ export const Basic: Story = {
 export const EmptyArray: Story = {
   args: {
     data: [],
-    confidence: {},
     keyPath: ["emptyTags"],
   },
   render: function Render(args) {
@@ -140,7 +135,7 @@ export const EmptyArray: Story = {
     const [changedPaths, setChangedPaths] = useState<Set<string>>(new Set());
 
     const handleUpdate = (index: number, value: unknown) => {
-      console.log(`Updated item ${index}:`, value);
+      // noop for test
       const newData = [...data];
       newData[index] = value;
       setData(newData);
@@ -150,7 +145,7 @@ export const EmptyArray: Story = {
     };
 
     const handleAdd = (value: unknown) => {
-      console.log(`Added item:`, value);
+      // noop for test
       const newData = [...data, value];
       setData(newData);
 
@@ -159,7 +154,7 @@ export const EmptyArray: Story = {
     };
 
     const handleDelete = (index: number) => {
-      console.log(`Deleted item at index ${index}`);
+      // noop for test
       const newData = data.filter((_, i) => i !== index);
       setData(newData);
 
@@ -169,12 +164,13 @@ export const EmptyArray: Story = {
 
     return (
       <ListRenderer
-        {...args}
+        keyPath={args.keyPath}
         data={data}
         onUpdate={handleUpdate}
         onAdd={handleAdd}
         onDelete={handleDelete}
         changedPaths={changedPaths}
+        metadata={args.metadata ?? { schema: {}, extracted: {} }}
       />
     );
   },
@@ -219,18 +215,13 @@ export const EmptyArray: Story = {
 export const ReadOnlyList: Story = {
   args: {
     data: ["item1", "item2", "item3"],
-    confidence: {
-      "0": 0.9,
-      "1": 0.8,
-      "2": 0.7,
-    },
     keyPath: ["readOnlyTags"],
   },
   render: function Render(args) {
     const [data, setData] = useState(args.data);
 
     const handleUpdate = (index: number, value: unknown) => {
-      console.log(`Updated item ${index}:`, value);
+      // noop for test
       const newData = [...data];
       newData[index] = value;
       setData(newData);
@@ -238,7 +229,7 @@ export const ReadOnlyList: Story = {
 
     return (
       <ListRenderer
-        {...args}
+        keyPath={args.keyPath}
         data={data}
         onUpdate={handleUpdate}
         // No onAdd or onDelete props - should be read-only
@@ -279,27 +270,24 @@ export const ReadOnlyList: Story = {
 export const NumberArray: Story = {
   args: {
     data: [85, 92, 78, 95],
-    confidence: {
-      "0": 0.99,
-      "1": 0.96,
-      "2": 0.93,
-      "3": 0.98,
-    },
     keyPath: ["scores"],
-    fieldMetadata: {
-      scores: {
-        isRequired: false,
-        isOptional: true,
-        schemaType: "array",
-        title: "Scores",
-        wasMissing: false,
-      },
-      "scores.*": {
-        isRequired: false,
-        isOptional: true,
-        schemaType: "number",
-        title: "Score",
-        wasMissing: false,
+    metadata: {
+      extracted: {},
+      schema: {
+        scores: {
+          isRequired: false,
+          isOptional: true,
+          schemaType: "array",
+          title: "Scores",
+          wasMissing: false,
+        },
+        "scores.*": {
+          isRequired: false,
+          isOptional: true,
+          schemaType: "number",
+          title: "Score",
+          wasMissing: false,
+        },
       },
     },
   },
@@ -308,7 +296,7 @@ export const NumberArray: Story = {
     const [changedPaths, setChangedPaths] = useState<Set<string>>(new Set());
 
     const handleUpdate = (index: number, value: unknown) => {
-      console.log(`Updated item ${index}:`, value);
+      // noop for test
       const newData = [...data];
       newData[index] = value;
       setData(newData);
@@ -318,7 +306,7 @@ export const NumberArray: Story = {
     };
 
     const handleAdd = (value: unknown) => {
-      console.log(`Added item:`, value);
+      // noop for test
       const newData = [...data, value];
       setData(newData);
 
@@ -327,7 +315,7 @@ export const NumberArray: Story = {
     };
 
     const handleDelete = (index: number) => {
-      console.log(`Deleted item at index ${index}`);
+      // noop for test
       const newData = data.filter((_, i) => i !== index);
       setData(newData);
 
@@ -337,12 +325,13 @@ export const NumberArray: Story = {
 
     return (
       <ListRenderer
-        {...args}
+        keyPath={args.keyPath}
         data={data}
         onUpdate={handleUpdate}
         onAdd={handleAdd}
         onDelete={handleDelete}
         changedPaths={changedPaths}
+        metadata={args.metadata ?? { schema: {}, extracted: {} }}
       />
     );
   },
@@ -407,27 +396,24 @@ export const NumberArray: Story = {
 export const BooleanArray: Story = {
   args: {
     data: [true, false, true, false],
-    confidence: {
-      "0": 0.95,
-      "1": 0.88,
-      "2": 0.92,
-      "3": 0.97,
-    },
     keyPath: ["flags"],
-    fieldMetadata: {
-      flags: {
-        isRequired: false,
-        isOptional: true,
-        schemaType: "array",
-        title: "Flags",
-        wasMissing: false,
-      },
-      "flags.*": {
-        isRequired: false,
-        isOptional: true,
-        schemaType: "boolean",
-        title: "Flag",
-        wasMissing: false,
+    metadata: {
+      extracted: {},
+      schema: {
+        flags: {
+          isRequired: false,
+          isOptional: true,
+          schemaType: "array",
+          title: "Flags",
+          wasMissing: false,
+        },
+        "flags.*": {
+          isRequired: false,
+          isOptional: true,
+          schemaType: "boolean",
+          title: "Flag",
+          wasMissing: false,
+        },
       },
     },
   },
@@ -436,7 +422,7 @@ export const BooleanArray: Story = {
     const [changedPaths, setChangedPaths] = useState<Set<string>>(new Set());
 
     const handleUpdate = (index: number, value: unknown) => {
-      console.log(`Updated item ${index}:`, value);
+      // noop for test
       const newData = [...data];
       newData[index] = value;
       setData(newData);
@@ -446,7 +432,7 @@ export const BooleanArray: Story = {
     };
 
     const handleAdd = (value: unknown) => {
-      console.log(`Added item:`, value);
+      // noop for test
       const newData = [...data, value];
       setData(newData);
 
@@ -455,7 +441,7 @@ export const BooleanArray: Story = {
     };
 
     const handleDelete = (index: number) => {
-      console.log(`Deleted item at index ${index}`);
+      // noop for test
       const newData = data.filter((_, i) => i !== index);
       setData(newData);
 
@@ -465,12 +451,13 @@ export const BooleanArray: Story = {
 
     return (
       <ListRenderer
-        {...args}
+        keyPath={args.keyPath}
         data={data}
         onUpdate={handleUpdate}
         onAdd={handleAdd}
         onDelete={handleDelete}
         changedPaths={changedPaths}
+        metadata={args.metadata ?? { schema: {}, extracted: {} }}
       />
     );
   },

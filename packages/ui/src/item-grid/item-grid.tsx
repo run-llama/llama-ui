@@ -24,7 +24,7 @@ import type {
   ExtractedData,
   FilterOperation,
   TypedAgentData,
-} from "@llamaindex/cloud/beta/agent";
+} from "llama-cloud-services/beta/agent";
 import { createBuiltInColumn, BUILT_IN_COLUMNS } from "./built-in-columns";
 
 // Hooks

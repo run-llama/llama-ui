@@ -3,6 +3,7 @@ import { PropertyRenderer } from "../../src/extracted-data";
 import { userEvent, within, expect, screen } from "@storybook/test";
 import { useState } from "react";
 import type { FieldMetadata } from "../../src/extracted-data/schema-reconciliation";
+import type { ExtractedFieldMetadataDict } from "llama-cloud-services/beta/agent";
 
 const meta: Meta<typeof PropertyRenderer> = {
   title: "Components/ExtractedData/PropertyRenderer",
@@ -303,14 +304,14 @@ const comprehensiveFieldMetadata: Record<string, FieldMetadata> = {
 // Interactive wrapper component for testing
 function InteractivePropertyRenderer({
   initialData,
-  confidence,
+  extractedFieldMetadata,
   changedPaths: initialChangedPaths,
-  fieldMetadata,
+  schemaFieldMetadata,
 }: {
   initialData: unknown;
-  confidence?: Record<string, number>;
+  extractedFieldMetadata?: ExtractedFieldMetadataDict;
   changedPaths?: Set<string>;
-  fieldMetadata?: Record<string, FieldMetadata>;
+  schemaFieldMetadata?: Record<string, FieldMetadata>;
 }) {
   const [data, setData] = useState(initialData);
   const [changedPaths, setChangedPaths] = useState(
@@ -350,31 +351,69 @@ function InteractivePropertyRenderer({
         keyPath={[]}
         value={data}
         onUpdate={handleUpdate}
-        confidence={confidence}
         changedPaths={changedPaths}
-        fieldMetadata={fieldMetadata}
+        metadata={{ schema: schemaFieldMetadata ?? {}, extracted: extractedFieldMetadata ?? {} }}
       />
     </div>
   );
 }
+
+// Create extracted field metadata for PropertyRenderer
+const extractedFieldMetadata: ExtractedFieldMetadataDict = {
+  title: {
+    confidence: 0.98,
+    reasoning: "Title extracted from document header",
+    citation: [{ page_number: 1, matching_text: "Sample Document" }]
+  },
+  amount: {
+    confidence: 0.92,
+    reasoning: "Amount extracted from financial section",
+    citation: [{ page_number: 1, matching_text: "1250.75" }]
+  },
+  isActive: {
+    confidence: 0.95,
+    reasoning: "Status extracted from metadata",
+    citation: [{ page_number: 1, matching_text: "true" }]
+  },
+  "author.name": {
+    confidence: 0.97,
+    reasoning: "Author name identified",
+    citation: [{ page_number: 1, matching_text: "Jane Smith" }]
+  },
+  "author.profile.verified": {
+    confidence: 0.85,
+    reasoning: "Verification status extracted",
+    citation: [{ page_number: 1, matching_text: "false" }]
+  },
+  "tags.0": {
+    confidence: 0.93,
+    reasoning: "First tag identified",
+    citation: [{ page_number: 1, matching_text: "urgent" }]
+  },
+  "scores.0": {
+    confidence: 0.88,
+    reasoning: "First score extracted",
+    citation: [{ page_number: 1, matching_text: "88" }]
+  },
+  "flags.0": {
+    confidence: 0.91,
+    reasoning: "First flag extracted",
+    citation: [{ page_number: 1, matching_text: "true" }]
+  },
+  "items.0.taxable": {
+    confidence: 0.82,
+    reasoning: "Tax status extracted",
+    citation: [{ page_number: 1, matching_text: "true" }]
+  }
+};
 
 // Interactive Editing - focuses on key editing scenarios
 export const InteractiveEditing: Story = {
   render: () => (
     <InteractivePropertyRenderer
       initialData={comprehensiveData}
-      confidence={{
-        title: 0.98,
-        amount: 0.92,
-        isActive: 0.95,
-        "author.name": 0.97,
-        "author.profile.verified": 0.85,
-        "tags.0": 0.93,
-        "scores.0": 0.88,
-        "flags.0": 0.91,
-        "items.0.taxable": 0.82,
-      }}
-      fieldMetadata={comprehensiveFieldMetadata}
+      extractedFieldMetadata={extractedFieldMetadata}
+      schemaFieldMetadata={comprehensiveFieldMetadata}
     />
   ),
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {

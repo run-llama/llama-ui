@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import {
   readFileContentApiV1FilesIdContentGet,
   getFileApiV1FilesIdGet,
-} from "@llamaindex/cloud/api";
+} from "llama-cloud-services/api";
 
 export interface FileData {
   url?: string;

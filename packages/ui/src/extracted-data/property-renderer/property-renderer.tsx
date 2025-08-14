@@ -4,11 +4,12 @@ import { TableRenderer } from "../table-renderer";
 import { ListRenderer } from "../list-renderer";
 import {
   isPropertyChanged,
-  filterConfidenceForArray,
+  filterMetadataForArray,
   isArrayOfObjects,
   shouldShowKeyOnSeparateLine,
 } from "./property-renderer-utils";
 import type { FieldMetadata, ValidationError } from "../schema-reconciliation";
+import type { RendererMetadata } from "../types";
 import {
   getFieldDisplayInfo,
   getFieldLabelClasses,
@@ -16,6 +17,7 @@ import {
 } from "../field-display-utils";
 import { PrimitiveType, toPrimitiveType } from "../primitive-validation";
 import { findFieldMetadata } from "../metadata-path-utils";
+import { findExtractedFieldMetadata } from "../metadata-lookup";
 
 interface PropertyRendererProps {
   keyPath: string[];
@@ -25,10 +27,10 @@ interface PropertyRendererProps {
     newValue: unknown,
     additionalPaths?: string[][],
   ) => void;
-  confidence?: Record<string, number>;
+
   changedPaths?: Set<string>;
-  // Schema reconciliation results from parent
-  fieldMetadata?: Record<string, FieldMetadata>;
+  // Unified metadata
+  metadata?: RendererMetadata;
   validationErrors?: ValidationError[];
 }
 
@@ -36,13 +38,24 @@ export function PropertyRenderer({
   keyPath,
   value,
   onUpdate,
-  confidence,
   changedPaths,
-  fieldMetadata = {},
+  metadata,
   validationErrors = [],
 }: PropertyRendererProps) {
   const pathString = keyPath.join(".");
   const isChanged = isPropertyChanged(changedPaths, keyPath);
+  const effectiveMetadata: RendererMetadata = {
+    schema: metadata?.schema ?? ({} as Record<string, FieldMetadata>),
+    extracted: metadata?.extracted ?? {},
+  };
+  
+  // Get metadata for path
+  const getMetadata = (path: string | string[]) => {
+    if (effectiveMetadata.extracted) {
+      return findExtractedFieldMetadata(path, effectiveMetadata.extracted);
+    }
+    return undefined;
+  };
 
   // Helper function to render field labels with schema info
   const renderFieldLabel = (
@@ -52,7 +65,7 @@ export function PropertyRenderer({
   ) => {
     const fieldInfo = getFieldDisplayInfo(
       key,
-      fieldMetadata,
+      effectiveMetadata.schema,
       validationErrors,
       currentKeyPath,
     );
@@ -65,22 +78,22 @@ export function PropertyRenderer({
   };
 
   if (value === null || value === undefined) {
-    const fieldInfo = findFieldMetadata(keyPath, fieldMetadata);
+    const fieldInfo = findFieldMetadata(keyPath, effectiveMetadata.schema);
     const expectedType = fieldInfo?.schemaType
       ? toPrimitiveType(fieldInfo.schemaType)
       : PrimitiveType.STRING;
     const isRequired = fieldInfo?.isRequired || false;
 
-    return (
-      <EditableField
-        value="N/A"
-        onSave={(newValue) => onUpdate(keyPath, newValue)}
-        confidence={confidence?.[pathString]}
-        isChanged={isChanged}
-        expectedType={expectedType}
-        required={isRequired}
-      />
-    );
+      return (
+        <EditableField
+          value="N/A"
+          onSave={(newValue) => onUpdate(keyPath, newValue)}
+          metadata={getMetadata(pathString)}
+          isChanged={isChanged}
+          expectedType={expectedType}
+          required={isRequired}
+        />
+      );
   }
 
   if (Array.isArray(value)) {
@@ -97,15 +110,14 @@ export function PropertyRenderer({
             const newItemPath = [...keyPath, "0"];
             onUpdate(keyPath, newArray, [newItemPath]);
           }}
-          confidence={{}}
           changedPaths={changedPaths}
           keyPath={keyPath}
-          fieldMetadata={fieldMetadata}
+          metadata={{ schema: effectiveMetadata.schema, extracted: {} }}
         />
       );
     }
 
-    const arrayConfidence = filterConfidenceForArray(confidence, keyPath);
+    const arrayMetadata = filterMetadataForArray(effectiveMetadata.extracted, keyPath);
 
     // Check if it's an array of objects
     if (isArrayOfObjects(value)) {
@@ -148,10 +160,9 @@ export function PropertyRenderer({
             // Track the array change - when deleting, we track the entire array as changed
             onUpdate(keyPath, newArray, [keyPath]);
           }}
-          confidence={arrayConfidence}
           changedPaths={changedPaths}
           keyPath={keyPath}
-          fieldMetadata={fieldMetadata}
+          metadata={{ schema: effectiveMetadata.schema, extracted: arrayMetadata }}
           validationErrors={validationErrors}
         />
       );
@@ -181,10 +192,9 @@ export function PropertyRenderer({
             // Track the array change - when deleting, we track the entire array as changed
             onUpdate(keyPath, newArray, [keyPath]);
           }}
-          confidence={arrayConfidence}
           changedPaths={changedPaths}
           keyPath={keyPath}
-          fieldMetadata={fieldMetadata}
+          metadata={{ schema: effectiveMetadata.schema, extracted: arrayMetadata }}
         />
       );
     }
@@ -205,9 +215,8 @@ export function PropertyRenderer({
                       keyPath={[...keyPath, key]}
                       value={val}
                       onUpdate={onUpdate}
-                      confidence={confidence}
                       changedPaths={changedPaths}
-                      fieldMetadata={fieldMetadata}
+                      metadata={effectiveMetadata}
                       validationErrors={validationErrors}
                     />
                   </div>
@@ -228,9 +237,8 @@ export function PropertyRenderer({
                         keyPath={[...keyPath, key]}
                         value={val}
                         onUpdate={onUpdate}
-                        confidence={confidence}
                         changedPaths={changedPaths}
-                        fieldMetadata={fieldMetadata}
+                        metadata={effectiveMetadata}
                         validationErrors={validationErrors}
                       />
                     </div>
@@ -245,7 +253,7 @@ export function PropertyRenderer({
   }
 
   // Primitive value
-  const fieldInfo = findFieldMetadata(keyPath, fieldMetadata);
+  const fieldInfo = findFieldMetadata(keyPath, effectiveMetadata.schema);
   const expectedType = fieldInfo?.schemaType
     ? toPrimitiveType(fieldInfo.schemaType)
     : PrimitiveType.STRING;
@@ -255,7 +263,7 @@ export function PropertyRenderer({
     <EditableField
       value={value}
       onSave={(newValue) => onUpdate(keyPath, newValue)}
-      confidence={confidence?.[pathString]}
+      metadata={getMetadata(pathString)}
       isChanged={isChanged}
       expectedType={expectedType}
       required={isRequired}

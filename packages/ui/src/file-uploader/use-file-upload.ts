@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   uploadFileApiV1FilesPost,
   readFileContentApiV1FilesIdContentGet,
-} from "@llamaindex/cloud/api";
+} from "llama-cloud-services/api";
 
 export interface FileUploadData {
   file: File;

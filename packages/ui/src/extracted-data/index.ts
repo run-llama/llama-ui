@@ -1,8 +1,5 @@
 export { ExtractedDataDisplay } from "./extracted-data-display";
-export {
-  getConfidenceBackgroundClass,
-  flattenConfidence,
-} from "./confidence-utils";
+export { getConfidenceBackgroundClass } from "./confidence-utils";
 export { EditableField } from "./editable-field";
 export { TableRenderer } from "./table-renderer";
 export { ListRenderer } from "./list-renderer";
