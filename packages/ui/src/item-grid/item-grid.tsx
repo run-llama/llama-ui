@@ -18,7 +18,6 @@ import type {
   BuiltInColumnConfig,
 } from "./types";
 import type {
-  AgentClient,
   ExtractedData,
   FilterOperation,
   TypedAgentData,
@@ -40,9 +39,7 @@ export interface ItemGridProp<T = unknown> {
   // Row click event
   onRowClick?: (item: TypedAgentData<ExtractedData<T>>) => void;
   // Other configurations
-  useMockData?: boolean;
   defaultPageSize?: number;
-  client: AgentClient<ExtractedData<T>>;
 }
 
 // Main Business Component
@@ -50,9 +47,7 @@ export function ItemGrid<T = unknown>({
   customColumns = [],
   builtInColumns = {},
   onRowClick,
-  useMockData = false,
   defaultPageSize = 20,
-  client,
 }: ItemGridProp<T>) {
   const [paginationState, setPaginationState] = useState<PaginationState>({
     page: 0,
@@ -114,20 +109,16 @@ export function ItemGrid<T = unknown>({
     return result;
   }, [sortState]);
 
-  const { data, loading, error, totalSize, deleteItem } = useItemGridData<T>(
-    paginationState,
-    useMockData,
-    apiFilters,
-    apiSort,
-    client
-  );
+  const { data, loading, error, totalSize, deleteItem, fetchData } =
+    useItemGridData<T>(paginationState, apiFilters, apiSort);
 
   // Create hooks object for passing to renderCell
   const hooks = useMemo(
     () => ({
       deleteItem,
+      fetchData,
     }),
-    [deleteItem]
+    [deleteItem, fetchData]
   );
 
   // Handle sorting

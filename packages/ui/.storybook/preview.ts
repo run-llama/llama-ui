@@ -26,6 +26,7 @@ const preview: Preview = {
         handlers.upload,
         ...handlers.fileContent,
         ...handlers.workflowTask,
+        ...handlers.agentData,
       ],
     },
   },

@@ -3,11 +3,9 @@ import type { PaginationState } from "../types";
 import type {
   FilterOperation,
   TypedAgentData,
-  AgentClient,
   ExtractedData,
-  TypedAgentDataItems,
 } from "llama-cloud-services/beta/agent";
-import { mockResponse } from "./mock-response";
+import { useAgentDataClient } from "../../lib/api-provider";
 
 type UseItemGridHandler<T = unknown> = {
   data: TypedAgentData<ExtractedData<T>>[];
@@ -15,15 +13,15 @@ type UseItemGridHandler<T = unknown> = {
   error: string | null;
   totalSize: number;
   deleteItem: (itemId: string) => Promise<{ success: boolean; error?: string }>;
+  fetchData: () => Promise<void>;
 };
 // Custom hook for data fetching
 export function useItemGridData<T = unknown>(
   paginationState: PaginationState,
-  isMock: boolean,
   filterFields: Record<string, FilterOperation> = {},
-  sortSpec: string | undefined = undefined,
-  client: AgentClient<ExtractedData<T>>
+  sortSpec: string | undefined = undefined
 ): UseItemGridHandler<T> {
+  const client = useAgentDataClient();
   const [data, setData] = useState<TypedAgentData<ExtractedData<T>>[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,18 +31,13 @@ export function useItemGridData<T = unknown>(
     setLoading(true);
     setError(null);
     try {
-      let response: Awaited<ReturnType<typeof client.search>>;
-      if (isMock) {
-        response = mockResponse as TypedAgentDataItems<ExtractedData<T>>;
-      } else {
-        response = await client.search({
-          filter: filterFields,
-          orderBy: sortSpec,
-          offset: paginationState.page * paginationState.size,
-          pageSize: paginationState.size,
-          includeTotal: true,
-        });
-      }
+      const response = await (client as any).search({
+        filter: filterFields,
+        orderBy: sortSpec,
+        offset: paginationState.page * paginationState.size,
+        pageSize: paginationState.size,
+        includeTotal: true,
+      });
 
       setData(response.items || []);
       setTotalSize(response.totalSize || 0);
@@ -56,7 +49,6 @@ export function useItemGridData<T = unknown>(
   }, [
     paginationState.page,
     paginationState.size,
-    isMock,
     JSON.stringify(filterFields),
     sortSpec,
     client,
@@ -64,17 +56,8 @@ export function useItemGridData<T = unknown>(
 
   const handleDeleteItem = useCallback(
     async (itemId: string) => {
-      if (isMock) {
-        // For mock mode, just remove from local state
-        setData((prevData) =>
-          prevData.filter((item) => String(item.id) !== String(itemId))
-        );
-        setTotalSize((prevTotal) => prevTotal - 1);
-        return { success: true };
-      }
-
       try {
-        await client.deleteItem(itemId);
+        await (client as any).deleteItem(itemId);
 
         // Remove item from local state immediately
         setData((prevData) =>
@@ -91,7 +74,7 @@ export function useItemGridData<T = unknown>(
         };
       }
     },
-    [isMock, client]
+    [client]
   );
 
   useEffect(() => {
@@ -104,5 +87,6 @@ export function useItemGridData<T = unknown>(
     error,
     totalSize,
     deleteItem: handleDeleteItem,
+    fetchData,
   };
 }
