@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { FieldMetadata } from "@/src/extracted-data/schema-reconciliation";
+import type { FieldSchemaMetadata } from "@/src/extracted-data/schema-reconciliation";
 import {
   buildArrayItemPath,
   isArrayItemChanged,
@@ -171,7 +171,7 @@ describe("ListRenderer Utilities", () => {
           title: "Data Item",
           wasMissing: false,
         },
-      } as unknown as Record<string, FieldMetadata>; // Type assertion to test malformed data case
+      } as unknown as Record<string, FieldSchemaMetadata>; // Type assertion to test malformed data case
 
       const result = getArrayItemDefaultValue(["data"], fieldMetadata);
       expect(result).toBe("");

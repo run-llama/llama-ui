@@ -6,7 +6,7 @@ import {
   wasFieldMissingAtPath,
   getFieldMetadataAtPath,
   getValidationErrorsAtPath,
-  type FieldMetadata,
+  type FieldSchemaMetadata,
 } from "@/src/extracted-data/schema-reconciliation";
 
 describe("JSON Schema-based Schema Reconciliation", () => {
@@ -169,7 +169,7 @@ describe("JSON Schema-based Schema Reconciliation", () => {
       const result = reconcileDataWithJsonSchema(originalData, jsonSchema);
 
       // Check field metadata
-      expect(result.metadata.name).toEqual({
+      expect(result.schemaMetadata.name).toEqual({
         isRequired: true,
         isOptional: false,
         schemaType: "string",
@@ -178,7 +178,7 @@ describe("JSON Schema-based Schema Reconciliation", () => {
         wasMissing: false,
       });
 
-      expect(result.metadata.age).toEqual({
+      expect(result.schemaMetadata.age).toEqual({
         isRequired: true,
         isOptional: false,
         schemaType: "number",
@@ -187,7 +187,7 @@ describe("JSON Schema-based Schema Reconciliation", () => {
         wasMissing: false, // Age is present in original data
       });
 
-      expect(result.metadata.email).toEqual({
+      expect(result.schemaMetadata.email).toEqual({
         isRequired: false,
         isOptional: true,
         schemaType: "string",
@@ -254,7 +254,7 @@ describe("JSON Schema-based Schema Reconciliation", () => {
   });
 
   describe("Helper functions", () => {
-    const mockMetadata: Record<string, FieldMetadata> = {
+    const mockMetadata: Record<string, FieldSchemaMetadata> = {
       name: {
         isRequired: true,
         isOptional: false,

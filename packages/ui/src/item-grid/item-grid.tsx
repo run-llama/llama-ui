@@ -15,13 +15,11 @@ import type {
   SortDirection,
   PaginationState,
   Column,
-  BuiltInColumnConfig,
 } from "./types";
 import type {
   FilterOperation,
   TypedAgentData,
 } from "llama-cloud-services/beta/agent";
-import { createBuiltInColumn, BUILT_IN_COLUMNS } from "./built-in-columns";
 
 // Hooks
 import { useItemGridData } from "./hooks/use-item-grid-data";
@@ -33,8 +31,6 @@ import { PaginationControls } from "./components/pagination-controls";
 export interface ItemGridProp<T = unknown> {
   // Custom columns (displayed first)
   customColumns?: Column<T>[];
-  // Built-in columns configuration
-  builtInColumns?: BuiltInColumnConfig<T>;
   // Row click event
   onRowClick?: (item: TypedAgentData<T>) => void;
   // Other configurations
@@ -44,7 +40,6 @@ export interface ItemGridProp<T = unknown> {
 // Main Business Component
 export function ItemGrid<T = unknown>({
   customColumns = [],
-  builtInColumns = {},
   onRowClick,
   defaultPageSize = 20,
 }: ItemGridProp<T>) {
@@ -68,21 +63,8 @@ export function ItemGrid<T = unknown>({
     // Add custom columns first
     finalColumns.push(...customColumns);
 
-    // Add built-in columns in defined order
-    BUILT_IN_COLUMNS.forEach(({ name }) => {
-      const config = builtInColumns[name as keyof typeof builtInColumns];
-      if (config !== false && config !== undefined) {
-        try {
-          const builtInColumn = createBuiltInColumn<T>(name, config);
-          finalColumns.push(builtInColumn);
-        } catch {
-          // Skip disabled columns
-        }
-      }
-    });
-
     return finalColumns;
-  }, [customColumns, builtInColumns]);
+  }, [customColumns]);
 
   // Convert frontend filter state to API format
   const apiFilters = useMemo(() => {

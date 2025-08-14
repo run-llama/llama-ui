@@ -1,3 +1,5 @@
+import { PrimitiveValue } from "./types";
+
 /**
  * Primitive field types for validation and UI rendering
  */
@@ -29,7 +31,7 @@ export function convertPrimitiveValue(
   inputValue: string,
   expectedType: PrimitiveType,
   required = false
-): unknown {
+): PrimitiveValue {
   switch (expectedType) {
     case PrimitiveType.STRING:
       // Empty string is valid for strings

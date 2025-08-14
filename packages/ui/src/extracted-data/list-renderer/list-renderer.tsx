@@ -7,15 +7,15 @@ import {
 } from "./list-renderer-utils";
 import { Plus, Trash2 } from "lucide-react";
 import { PrimitiveType, toPrimitiveType } from "../primitive-validation";
-import type { FieldMetadata } from "../schema-reconciliation";
-import type { RendererMetadata } from "../types";
-import { findFieldMetadata } from "../metadata-path-utils";
+import type { FieldSchemaMetadata } from "../schema-reconciliation";
+import type { PrimitiveValue, RendererMetadata } from "../types";
+import { findFieldSchemaMetadata } from "../metadata-path-utils";
 import { findExtractedFieldMetadata } from "../metadata-lookup";
 
-interface ListRendererProps {
-  data: unknown[];
-  onUpdate: (index: number, value: unknown) => void;
-  onAdd?: (value: unknown) => void;
+interface ListRendererProps<S extends PrimitiveValue> {
+  data: S[];
+  onUpdate: (index: number, value: S) => void;
+  onAdd?: (value: S) => void;
   onDelete?: (index: number) => void;
 
   changedPaths?: Set<string>;
@@ -24,7 +24,7 @@ interface ListRendererProps {
   metadata?: RendererMetadata;
 }
 
-export function ListRenderer({
+export function ListRenderer<S extends PrimitiveValue>({
   data,
   onUpdate,
   onAdd,
@@ -32,13 +32,14 @@ export function ListRenderer({
   changedPaths,
   keyPath = [],
   metadata,
-}: ListRendererProps) {
-  const effectiveSchema: Record<string, FieldMetadata> = metadata?.schema ?? {};
+}: ListRendererProps<S>) {
+  const effectiveSchema: Record<string, FieldSchemaMetadata> =
+    metadata?.schema ?? {};
   const effectiveExtracted = metadata?.extracted ?? {};
   const handleAdd = () => {
     // Get smart default value based on field metadata
     const defaultValue = getArrayItemDefaultValue(keyPath, effectiveSchema);
-    onAdd?.(defaultValue);
+    onAdd?.(defaultValue as S);
   };
 
   const handleDelete = (index: number) => {
@@ -52,7 +53,10 @@ export function ListRenderer({
   // Example: ["tags"] → ["tags", "*"] → "tags.*"
   const getExpectedType = (): PrimitiveType => {
     const itemFieldPath = [...keyPath, "*"];
-    const itemMetadata = findFieldMetadata(itemFieldPath, effectiveSchema);
+    const itemMetadata = findFieldSchemaMetadata(
+      itemFieldPath,
+      effectiveSchema
+    );
 
     if (itemMetadata?.schemaType) {
       return toPrimitiveType(itemMetadata.schemaType);
@@ -97,7 +101,7 @@ export function ListRenderer({
                   </div>
                 </TableCell>
                 <TableCell className="p-0 min-w-[120px] align-top h-full">
-                  <EditableField
+                  <EditableField<S>
                     value={item}
                     onSave={(newValue) => onUpdate(index, newValue)}
                     metadata={findExtractedFieldMetadata(

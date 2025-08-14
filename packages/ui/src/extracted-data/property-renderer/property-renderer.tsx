@@ -3,29 +3,27 @@ import { TableRenderer } from "../table-renderer";
 import { ListRenderer } from "../list-renderer";
 import {
   isPropertyChanged,
-  filterMetadataForArray,
   isArrayOfObjects,
   shouldShowKeyOnSeparateLine,
 } from "./property-renderer-utils";
-import type { FieldMetadata, ValidationError } from "../schema-reconciliation";
-import type { RendererMetadata } from "../types";
+import type {
+  FieldSchemaMetadata,
+  ValidationError,
+} from "../schema-reconciliation";
+import type { JSONObject, RendererMetadata } from "../types";
 import {
   getFieldDisplayInfo,
   getFieldLabelClasses,
   getFieldLabelText,
 } from "../field-display-utils";
 import { PrimitiveType, toPrimitiveType } from "../primitive-validation";
-import { findFieldMetadata } from "../metadata-path-utils";
+import { findFieldSchemaMetadata } from "../metadata-path-utils";
 import { findExtractedFieldMetadata } from "../metadata-lookup";
 
-interface PropertyRendererProps {
+interface PropertyRendererProps<S extends JSONObject> {
   keyPath: string[];
-  value: unknown;
-  onUpdate: (
-    path: string[],
-    newValue: unknown,
-    additionalPaths?: string[][]
-  ) => void;
+  value: S;
+  onUpdate: (path: string[], newValue: S, additionalPaths?: string[][]) => void;
 
   changedPaths?: Set<string>;
   // Unified metadata
@@ -33,18 +31,18 @@ interface PropertyRendererProps {
   validationErrors?: ValidationError[];
 }
 
-export function PropertyRenderer({
+export function PropertyRenderer<S extends JSONObject>({
   keyPath,
   value,
   onUpdate,
   changedPaths,
   metadata,
   validationErrors = [],
-}: PropertyRendererProps) {
+}: PropertyRendererProps<S>) {
   const pathString = keyPath.join(".");
   const isChanged = isPropertyChanged(changedPaths, keyPath);
   const effectiveMetadata: RendererMetadata = {
-    schema: metadata?.schema ?? ({} as Record<string, FieldMetadata>),
+    schema: metadata?.schema ?? ({} as Record<string, FieldSchemaMetadata>),
     extracted: metadata?.extracted ?? {},
   };
 
@@ -77,7 +75,10 @@ export function PropertyRenderer({
   };
 
   if (value === null || value === undefined) {
-    const fieldInfo = findFieldMetadata(keyPath, effectiveMetadata.schema);
+    const fieldInfo = findFieldSchemaMetadata(
+      keyPath,
+      effectiveMetadata.schema
+    );
     const expectedType = fieldInfo?.schemaType
       ? toPrimitiveType(fieldInfo.schemaType)
       : PrimitiveType.STRING;
@@ -86,7 +87,7 @@ export function PropertyRenderer({
     return (
       <EditableField
         value="N/A"
-        onSave={(newValue) => onUpdate(keyPath, newValue)}
+        onSave={(newValue) => onUpdate(keyPath, newValue as S)}
         metadata={getMetadata(pathString)}
         isChanged={isChanged}
         expectedType={expectedType}
@@ -107,7 +108,7 @@ export function PropertyRenderer({
 
             // Track the array change and the new item
             const newItemPath = [...keyPath, "0"];
-            onUpdate(keyPath, newArray, [newItemPath]);
+            onUpdate(keyPath, newArray as S, [newItemPath]);
           }}
           changedPaths={changedPaths}
           keyPath={keyPath}
@@ -116,20 +117,15 @@ export function PropertyRenderer({
       );
     }
 
-    const arrayMetadata = filterMetadataForArray(
-      effectiveMetadata.extracted,
-      keyPath
-    );
-
     // Check if it's an array of objects
     if (isArrayOfObjects(value)) {
       // For arrays of objects, we want to show the table below the key
       // This will be handled by the parent component
       return (
-        <TableRenderer
-          data={value as Record<string, unknown>[]}
+        <TableRenderer<Record<string, JSONObject>>
+          data={value as Array<Record<string, JSONObject>>}
           onUpdate={(index, key, newValue, affectedPaths) => {
-            const newArray = [...value];
+            const newArray = [...(value as Array<Record<string, JSONObject>>)];
             newArray[index] = { ...newArray[index], [key]: newValue };
 
             // Use the affectedPaths provided by TableRenderer for accurate path tracking
@@ -140,33 +136,36 @@ export function PropertyRenderer({
                 const pathParts = path.split(".");
                 return [...keyPath, ...pathParts];
               });
-              onUpdate(keyPath, newArray, absolutePaths);
+              onUpdate(keyPath, newArray as S, absolutePaths);
             } else {
               // Fallback for backward compatibility
               const cellPath = [...keyPath, String(index), key];
-              onUpdate(keyPath, newArray, [cellPath]);
+              onUpdate(keyPath, newArray as S, [cellPath]);
             }
           }}
           onAddRow={(newRow) => {
-            const newArray = [...value, newRow];
+            const newArray = [
+              ...(value as Array<Record<string, JSONObject>>),
+              newRow,
+            ];
 
             // Track the array change and the new row
             const newRowPath = [...keyPath, String(value.length)];
-            onUpdate(keyPath, newArray, [newRowPath]);
+            onUpdate(keyPath, newArray as S, [newRowPath]);
           }}
           onDeleteRow={(index) => {
-            const newArray = (value as Record<string, unknown>[]).filter(
-              (_, i) => i !== index
-            );
+            const newArray = (
+              value as Array<Record<string, JSONObject>>
+            ).filter((_, i) => i !== index);
 
             // Track the array change - when deleting, we track the entire array as changed
-            onUpdate(keyPath, newArray, [keyPath]);
+            onUpdate(keyPath, newArray as S, [keyPath]);
           }}
           changedPaths={changedPaths}
           keyPath={keyPath}
           metadata={{
             schema: effectiveMetadata.schema,
-            extracted: arrayMetadata,
+            extracted: effectiveMetadata.extracted,
           }}
           validationErrors={validationErrors}
         />
@@ -182,26 +181,26 @@ export function PropertyRenderer({
 
             // Track both the array change and the specific item change
             const itemPath = [...keyPath, String(index)];
-            onUpdate(keyPath, newArray, [itemPath]);
+            onUpdate(keyPath, newArray as S, [itemPath]);
           }}
           onAdd={(newValue) => {
             const newArray = [...value, newValue];
 
             // Track the array change and the new item
             const newItemPath = [...keyPath, String(value.length)];
-            onUpdate(keyPath, newArray, [newItemPath]);
+            onUpdate(keyPath, newArray as S, [newItemPath]);
           }}
           onDelete={(index) => {
             const newArray = value.filter((_, i) => i !== index);
 
             // Track the array change - when deleting, we track the entire array as changed
-            onUpdate(keyPath, newArray, [keyPath]);
+            onUpdate(keyPath, newArray as S, [keyPath]);
           }}
           changedPaths={changedPaths}
           keyPath={keyPath}
           metadata={{
             schema: effectiveMetadata.schema,
-            extracted: arrayMetadata,
+            extracted: effectiveMetadata.extracted,
           }}
         />
       );
@@ -219,9 +218,9 @@ export function PropertyRenderer({
                 <div key={key}>
                   {renderFieldLabel(key, [...keyPath, key])}
                   <div className="mt-2">
-                    <PropertyRenderer
+                    <PropertyRenderer<S>
                       keyPath={[...keyPath, key]}
-                      value={val}
+                      value={val as S}
                       onUpdate={onUpdate}
                       changedPaths={changedPaths}
                       metadata={effectiveMetadata}
@@ -241,9 +240,9 @@ export function PropertyRenderer({
                       "min-w-0 flex-shrink-0"
                     )}
                     <div className="flex-1 min-w-0">
-                      <PropertyRenderer
+                      <PropertyRenderer<S>
                         keyPath={[...keyPath, key]}
-                        value={val}
+                        value={val as S}
                         onUpdate={onUpdate}
                         changedPaths={changedPaths}
                         metadata={effectiveMetadata}
@@ -261,7 +260,7 @@ export function PropertyRenderer({
   }
 
   // Primitive value
-  const fieldInfo = findFieldMetadata(keyPath, effectiveMetadata.schema);
+  const fieldInfo = findFieldSchemaMetadata(keyPath, effectiveMetadata.schema);
   const expectedType = fieldInfo?.schemaType
     ? toPrimitiveType(fieldInfo.schemaType)
     : PrimitiveType.STRING;
@@ -270,7 +269,7 @@ export function PropertyRenderer({
   return (
     <EditableField
       value={value}
-      onSave={(newValue) => onUpdate(keyPath, newValue)}
+      onSave={(newValue) => onUpdate(keyPath, newValue as S)}
       metadata={getMetadata(pathString)}
       isChanged={isChanged}
       expectedType={expectedType}

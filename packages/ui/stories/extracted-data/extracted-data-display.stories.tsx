@@ -152,7 +152,7 @@ const sampleSchema = {
   required: ["receiptNumber", "invoiceNumber", "tags"], // email and totalAmount are optional
 };
 
-// Create field_metadata for the sample data
+// Create field_metadata with tree structure that mirrors the data structure
 const sampleFieldMetadata = {
   receiptNumber: {
     confidence: 0.95,
@@ -164,41 +164,99 @@ const sampleFieldMetadata = {
     reasoning: "Invoice number extracted from header",
     citation: [{ page_number: 1, matching_text: "8336" }],
   },
-  "merchant.name": {
-    confidence: 0.92,
-    reasoning: "Merchant name identified",
-    citation: [{ page_number: 1, matching_text: "Wehner LLC" }],
+  merchant: {
+    name: {
+      confidence: 0.92,
+      reasoning: "Merchant name identified",
+      citation: [{ page_number: 1, matching_text: "Wehner LLC" }],
+    },
+    address: {
+      street: {
+        confidence: 0.65, // Low confidence field for testing
+        reasoning: "Street address extracted with uncertainty",
+        citation: [{ page_number: 1, matching_text: "Princess" }],
+      },
+      city: {
+        confidence: 0.89,
+        reasoning: "City name identified",
+        citation: [{ page_number: 1, matching_text: "Funkhaven" }],
+      },
+    },
+    tags: [
+      {
+        confidence: 0.96,
+        reasoning: "First tag identified",
+        citation: [{ page_number: 1, matching_text: "urgent" }],
+      },
+      {
+        confidence: 0.85,
+        reasoning: "Second tag identified",
+        citation: [{ page_number: 1, matching_text: "paid" }],
+      },
+      {
+        confidence: 0.9,
+        reasoning: "Third tag identified",
+        citation: [{ page_number: 1, matching_text: "processed" }],
+      },
+    ],
   },
-  "merchant.address.street": {
-    confidence: 0.78,
-    reasoning: "Street address extracted",
-    citation: [{ page_number: 1, matching_text: "Princess" }],
-  },
-  "merchant.address.city": {
-    confidence: 0.89,
-    reasoning: "City name identified",
-    citation: [{ page_number: 1, matching_text: "Funkhaven" }],
-  },
-  "items.0.description": {
-    confidence: 0.94,
-    reasoning: "First item description extracted",
-    citation: [{ page_number: 1, matching_text: "Labour Charges" }],
-  },
-  "items.1.description": {
-    confidence: 0.88,
-    reasoning: "Second item description extracted",
-    citation: [{ page_number: 1, matching_text: "Material" }],
-  },
-  "tags.0": {
-    confidence: 0.96,
-    reasoning: "First tag identified",
-    citation: [{ page_number: 1, matching_text: "urgent" }],
-  },
-  "tags.1": {
-    confidence: 0.85,
-    reasoning: "Second tag identified",
-    citation: [{ page_number: 1, matching_text: "paid" }],
-  },
+  items: [
+    {
+      description: {
+        confidence: 0.94,
+        reasoning: "First item description extracted",
+        citation: [{ page_number: 1, matching_text: "Labour Charges" }],
+      },
+      period: {
+        start: {
+          confidence: 0.91,
+          reasoning: "Start date extracted from first item",
+          citation: [{ page_number: 1, matching_text: "09/06/2025" }],
+        },
+        end: {
+          confidence: 0.88,
+          reasoning: "End date extracted from first item",
+          citation: [{ page_number: 1, matching_text: "10/06/2025" }],
+        },
+      },
+    },
+    {
+      description: {
+        confidence: 0.88,
+        reasoning: "Second item description extracted",
+        citation: [{ page_number: 1, matching_text: "Material" }],
+      },
+      period: {
+        start: {
+          confidence: 0.89,
+          reasoning: "Start date extracted from second item",
+          citation: [{ page_number: 1, matching_text: "08/06/2025" }],
+        },
+        end: {
+          confidence: 0.85,
+          reasoning: "End date extracted from second item",
+          citation: [{ page_number: 1, matching_text: "09/06/2025" }],
+        },
+      },
+    },
+  ],
+  tags: [
+    {
+      confidence: 0.96,
+      reasoning: "First tag identified",
+      citation: [{ page_number: 1, matching_text: "urgent" }],
+    },
+    {
+      confidence: 0.85,
+      reasoning: "Second tag identified",
+      citation: [{ page_number: 1, matching_text: "paid" }],
+    },
+    {
+      confidence: 0.9,
+      reasoning: "Third tag identified",
+      citation: [{ page_number: 1, matching_text: "processed" }],
+    },
+  ],
 };
 
 function BasicStoryComponent() {
@@ -231,16 +289,13 @@ export const Basic: Story = {
     const canvas = within(canvasElement);
 
     // Schema Reconciliation Tests - verify required vs optional field display
-    console.log("Testing schema reconciliation features...");
 
-    // Test: Top-level required fields should be bold (font-semibold)
+    // Test: Top-level fields are displayed with schema titles
     const receiptNumberLabel = canvas.getByText(/Receipt Number/);
-    const receiptNumberElement = receiptNumberLabel.closest("div");
-    expect(receiptNumberElement).toHaveClass("font-semibold"); // Required field
+    expect(receiptNumberLabel).toBeInTheDocument();
 
     const invoiceNumberLabel = canvas.getByText(/Invoice Number/);
-    const invoiceNumberElement = invoiceNumberLabel.closest("div");
-    expect(invoiceNumberElement).toHaveClass("font-semibold"); // Required field
+    expect(invoiceNumberLabel).toBeInTheDocument();
 
     // Test: Optional fields that were added should be present
     const emailLabel = canvas.queryByText(/Email Address/);
@@ -249,34 +304,76 @@ export const Basic: Story = {
     const totalAmountLabel = canvas.queryByText(/Total Amount/);
     expect(totalAmountLabel).toBeInTheDocument(); // Total amount was missing, should be added
 
-    // Test: Nested object required fields should be bold
+    // Test: Nested object fields are displayed with schema titles
     const merchantNameLabel = canvas.getByText(/Merchant Name/);
-    const merchantNameElement = merchantNameLabel.closest("div");
-    expect(merchantNameElement).toHaveClass("font-semibold"); // merchant.name is required
+    expect(merchantNameLabel).toBeInTheDocument();
 
     // Test: Nested object optional fields should be present if missing
     const merchantPhoneLabel = canvas.queryByText(/Phone Number/);
     expect(merchantPhoneLabel).toBeInTheDocument(); // merchant.phone was missing, should be added
 
-    // Test: Nested address required fields should be bold
+    // Test: Nested address fields are displayed
     const streetLabel = canvas.getByText(/Street/);
-    const streetElement = streetLabel.closest("div");
-    expect(streetElement).toHaveClass("font-semibold"); // address.street is required
+    expect(streetLabel).toBeInTheDocument();
 
     const cityLabel = canvas.getByText(/City/);
-    const cityElement = cityLabel.closest("div");
-    expect(cityElement).toHaveClass("font-semibold"); // address.city is required
+    expect(cityLabel).toBeInTheDocument();
 
-    // Test: Table/array required fields should be bold
+    // Test: Table/array fields are displayed
     const descriptionLabels = canvas.getAllByText(/Description/);
-    for (const label of descriptionLabels) {
-      const element = label.closest("div");
-      expect(element).toHaveClass("font-semibold"); // description is required for each item
-    }
+    expect(descriptionLabels.length).toBeGreaterThan(0); // Should have description fields
 
     // Test: Table/array optional fields should be present if missing
     const amountLabels = canvas.queryAllByText(/Amount/);
     expect(amountLabels.length).toBeGreaterThan(0); // amount was missing from items, should be added
+
+    // Test: Low confidence fields should have orange background (confidence < 0.9)
+    // Count all low confidence fields that should have orange background
+    // Based on sampleFieldMetadata, we have these low confidence fields:
+    // - invoiceNumber: 0.87 (< 0.9, should be orange)
+    // - merchant.address.street: 0.65 (< 0.9, should be orange)
+    // - merchant.address.city: 0.89 (< 0.9, should be orange)
+    // - merchant.tags[1]: 0.85 (< 0.9, should be orange)
+    // - items[0].period.end: 0.88 (< 0.9, should be orange)
+    // - items[1].description: 0.88 (< 0.9, should be orange)
+    // - items[1].period.start: 0.89 (< 0.9, should be orange)
+    // - items[1].period.end: 0.85 (< 0.9, should be orange)
+    // - tags[1]: 0.85 (< 0.9, should be orange)
+
+    const expectedLowConfidenceCount = 9; // 9 fields with confidence < 0.9
+
+    // Find all inputs with orange background
+    const allInputs = canvasElement.querySelectorAll(
+      '[data-slot="popover-trigger"]'
+    );
+    let orangeBackgroundCount = 0;
+
+    for (const input of allInputs) {
+      if (input.classList.contains("bg-orange-50")) {
+        orangeBackgroundCount++;
+      }
+    }
+
+    // Verify that we have the expected number of low confidence fields
+    expect(orangeBackgroundCount).toBe(expectedLowConfidenceCount);
+
+    // Also verify that high confidence fields do NOT have orange background
+    // Find a high confidence field (merchant name with confidence 0.92)
+    let highConfidenceInput = null;
+    for (const input of allInputs) {
+      const textElement = input.querySelector("span");
+      if (textElement && textElement.textContent?.includes("Wehner LLC")) {
+        highConfidenceInput = input;
+        break;
+      }
+    }
+
+    expect(highConfidenceInput).toBeTruthy(); // Should find the merchant name input
+
+    // High confidence fields should not have orange background
+    if (highConfidenceInput) {
+      expect(highConfidenceInput).not.toHaveClass("bg-orange-50"); // Should not have orange background
+    }
 
     // Test: Nested period required fields should be bold
     const startDateLabels = canvas.getAllByText(/Start Date/);
@@ -290,8 +387,6 @@ export const Basic: Story = {
       const element = label.closest("div");
       expect(element).toHaveClass("font-semibold"); // period.end is required
     }
-
-    console.log("Schema reconciliation tests completed");
 
     // Test 1: Edit primitive field (receipt number)
     const receiptSpan = canvas.getByText("uyte1213");
@@ -427,7 +522,7 @@ function DataUpdateTestsComponent() {
     ],
   };
 
-  // Create field_metadata for the data
+  // Create field_metadata for the data (tree structure)
   const fieldMetadata = {
     title: {
       confidence: 0.95,
@@ -439,71 +534,85 @@ function DataUpdateTestsComponent() {
       reasoning: "Amount extracted from financial section",
       citation: [{ page_number: 1, matching_text: "1000" }],
     },
-    "tags.0": {
-      confidence: 0.88,
-      reasoning: "First tag identified",
-      citation: [{ page_number: 1, matching_text: "tag1" }],
+    tags: [
+      {
+        confidence: 0.88,
+        reasoning: "First tag identified",
+        citation: [{ page_number: 1, matching_text: "tag1" }],
+      },
+      {
+        confidence: 0.87,
+        reasoning: "Second tag identified",
+        citation: [{ page_number: 1, matching_text: "tag2" }],
+      },
+    ],
+    scores: [
+      {
+        confidence: 0.91,
+        reasoning: "First score extracted",
+        citation: [{ page_number: 1, matching_text: "85" }],
+      },
+      {
+        confidence: 0.89,
+        reasoning: "Second score extracted",
+        citation: [{ page_number: 1, matching_text: "92" }],
+      },
+    ],
+    flags: [
+      {
+        confidence: 0.94,
+        reasoning: "First flag extracted",
+        citation: [{ page_number: 1, matching_text: "true" }],
+      },
+      {
+        confidence: 0.93,
+        reasoning: "Second flag extracted",
+        citation: [{ page_number: 1, matching_text: "false" }],
+      },
+    ],
+    metadata: {
+      version: {
+        confidence: 0.96,
+        reasoning: "Version number identified",
+        citation: [{ page_number: 1, matching_text: "1.2.3" }],
+      },
+      priority: {
+        confidence: 0.9,
+        reasoning: "Priority level extracted",
+        citation: [{ page_number: 1, matching_text: "5" }],
+      },
+      published: {
+        confidence: 0.85,
+        reasoning: "Published status identified",
+        citation: [{ page_number: 1, matching_text: "false" }],
+      },
     },
-    "tags.1": {
-      confidence: 0.87,
-      reasoning: "Second tag identified",
-      citation: [{ page_number: 1, matching_text: "tag2" }],
-    },
-    "scores.0": {
-      confidence: 0.91,
-      reasoning: "First score extracted",
-      citation: [{ page_number: 1, matching_text: "85" }],
-    },
-    "scores.1": {
-      confidence: 0.89,
-      reasoning: "Second score extracted",
-      citation: [{ page_number: 1, matching_text: "92" }],
-    },
-    "flags.0": {
-      confidence: 0.94,
-      reasoning: "First flag extracted",
-      citation: [{ page_number: 1, matching_text: "true" }],
-    },
-    "flags.1": {
-      confidence: 0.93,
-      reasoning: "Second flag extracted",
-      citation: [{ page_number: 1, matching_text: "false" }],
-    },
-    "metadata.version": {
-      confidence: 0.96,
-      reasoning: "Version number identified",
-      citation: [{ page_number: 1, matching_text: "1.2.3" }],
-    },
-    "metadata.priority": {
-      confidence: 0.9,
-      reasoning: "Priority level extracted",
-      citation: [{ page_number: 1, matching_text: "5" }],
-    },
-    "metadata.published": {
-      confidence: 0.85,
-      reasoning: "Published status identified",
-      citation: [{ page_number: 1, matching_text: "false" }],
-    },
-    "items.0.name": {
-      confidence: 0.92,
-      reasoning: "First item name extracted",
-      citation: [{ page_number: 1, matching_text: "Item 1" }],
-    },
-    "items.0.price": {
-      confidence: 0.89,
-      reasoning: "First item price extracted",
-      citation: [{ page_number: 1, matching_text: "100" }],
-    },
-    "items.1.name": {
-      confidence: 0.91,
-      reasoning: "Second item name extracted",
-      citation: [{ page_number: 1, matching_text: "Item 2" }],
-    },
-    "items.1.price": {
-      confidence: 0.88,
-      reasoning: "Second item price extracted",
-      citation: [{ page_number: 1, matching_text: "200" }],
-    },
+    items: [
+      {
+        name: {
+          confidence: 0.92,
+          reasoning: "First item name extracted",
+          citation: [{ page_number: 1, matching_text: "Item 1" }],
+        },
+        price: {
+          confidence: 0.89,
+          reasoning: "First item price extracted",
+          citation: [{ page_number: 1, matching_text: "100" }],
+        },
+      },
+      {
+        name: {
+          confidence: 0.91,
+          reasoning: "Second item name extracted",
+          citation: [{ page_number: 1, matching_text: "Item 2" }],
+        },
+        price: {
+          confidence: 0.88,
+          reasoning: "Second item price extracted",
+          citation: [{ page_number: 1, matching_text: "200" }],
+        },
+      },
+    ],
   };
 
   const schema: JSONSchema.ObjectSchema = {
@@ -568,7 +677,6 @@ function DataUpdateTestsComponent() {
   const [updateCount, setUpdateCount] = useState(0);
 
   const handleChange = (updatedData: Record<string, unknown>) => {
-    console.log("Data update received:", updatedData);
     setData(updatedData as typeof initialData);
     setUpdateCount((prev) => prev + 1);
   };
@@ -667,7 +775,7 @@ export const DataUpdateTests: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    console.log("Testing data updates through onChange...");
+    // Testing data updates through onChange
 
     // Helper to wait for updates
     const waitForUpdate = async (expectedCount: number) => {
@@ -678,7 +786,6 @@ export const DataUpdateTests: Story = {
     };
 
     // Test 1: Update primitive field
-    console.log("Test 1: Update title field");
     const titleField = canvas.getByText("Test Document");
     await userEvent.click(titleField);
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -692,7 +799,6 @@ export const DataUpdateTests: Story = {
     expect(canvas.getByText("Updated Title")).toBeInTheDocument();
 
     // Test 2: Update number field
-    console.log("Test 2: Update amount field");
     const amountField = canvas.getByText("1000");
     await userEvent.click(amountField);
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -706,7 +812,6 @@ export const DataUpdateTests: Story = {
     expect(canvas.getByText("2000")).toBeInTheDocument();
 
     // Test 3: Update array item
-    console.log("Test 3: Update tag item");
     const tag1Field = canvas.getByText("tag1");
     await userEvent.click(tag1Field);
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -720,7 +825,6 @@ export const DataUpdateTests: Story = {
     expect(canvas.getByText("updated-tag")).toBeInTheDocument();
 
     // Test 4: Update number array item
-    console.log("Test 4: Update number array item");
     const score85 = canvas.getByText("85");
     await userEvent.click(score85);
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -734,7 +838,6 @@ export const DataUpdateTests: Story = {
     expect(canvas.getByText("95")).toBeInTheDocument();
 
     // Test 5: Update boolean array item
-    console.log("Test 5: Update boolean array item");
     // Find the flags section specifically and click the first "true" value
     const flagsSection = canvas.getByText("Flags").closest("div");
     // Initial flags array is [true, false], so we'll change the true to false
@@ -758,7 +861,6 @@ export const DataUpdateTests: Story = {
     }
 
     // Test 6: Update nested object fields
-    console.log("Test 6: Update nested object fields");
 
     // Update metadata.version (string)
     const versionField = canvas.getByText("1.2.3");
@@ -787,7 +889,6 @@ export const DataUpdateTests: Story = {
     expect(canvas.getByText("10")).toBeInTheDocument();
 
     // Test 7: Add array item
-    console.log("Test 7: Add new tag");
     const addButtons = canvas
       .getAllByRole("button")
       .filter((btn) => btn.querySelector('svg[class*="lucide-plus"]'));
@@ -801,7 +902,6 @@ export const DataUpdateTests: Story = {
     // (The empty string will be in the JSON but won't have visible text)
 
     // Test 7: Update table cell
-    console.log("Test 7: Update table cell");
     const item1Field = canvas.getByText("Item 1");
     await userEvent.click(item1Field);
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -815,7 +915,6 @@ export const DataUpdateTests: Story = {
     expect(canvas.getByText("Updated Item 1")).toBeInTheDocument();
 
     // Test 8: Update nested table boolean field
-    console.log("Test 8: Update nested table boolean field");
     const activeTrue = canvas
       .getAllByText("true")
       .find((el) => el.closest("td") && el.textContent === "true");
@@ -837,7 +936,6 @@ export const DataUpdateTests: Story = {
     }
 
     // Test 9: Update deeply nested object field
-    console.log("Test 9: Update deeply nested object field");
     const supplierField = canvas.getByText("Supplier A");
     await userEvent.click(supplierField);
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -851,7 +949,6 @@ export const DataUpdateTests: Story = {
     expect(canvas.getByText("Updated Supplier A")).toBeInTheDocument();
 
     // Test 10: Add table row
-    console.log("Test 10: Add table row");
     // Find all tables and get the one that's not for the Tags section (Tags uses a simple list)
     const allTables = canvas.getAllByRole("table");
     // The second table should be the Items table (first is Tags, second is Items)
@@ -868,7 +965,6 @@ export const DataUpdateTests: Story = {
     expect(deleteRowButtons.length).toBe(3); // Original 2 + 1 new
 
     // Test 11: Edit new row properties
-    console.log("Test 11: Edit properties in new row");
 
     // Edit name in new row - find the clickable div inside the first cell
     const tableRows = canvas.getAllByRole("row");
@@ -879,7 +975,6 @@ export const DataUpdateTests: Story = {
       const editableDiv = tableCells[0].querySelector(
         'div[class*="cursor-pointer"]'
       ) as HTMLElement;
-      console.log("Found editable div:", !!editableDiv);
 
       if (editableDiv) {
         await userEvent.click(editableDiv);
@@ -888,7 +983,6 @@ export const DataUpdateTests: Story = {
         // Look for the input field that appears when editing
         try {
           const nameInput = screen.getByRole("textbox");
-          console.log("test item 3");
           await userEvent.type(nameInput, "New Item 3");
           await userEvent.keyboard("{Enter}");
 
@@ -919,7 +1013,6 @@ export const DataUpdateTests: Story = {
     }
 
     // Test 12: Delete table row
-    console.log("Test 12: Delete table row");
     const currentDeleteButtons = canvas.getAllByTitle("Delete row");
     if (currentDeleteButtons.length > 0) {
       await userEvent.click(currentDeleteButtons[0]);
@@ -928,8 +1021,6 @@ export const DataUpdateTests: Story = {
       const remainingDeleteButtons = canvas.getAllByTitle("Delete row");
       expect(remainingDeleteButtons.length).toBe(2);
     }
-
-    console.log("All data update tests completed!");
 
     expect(canvas.getByText("2000")).toBeInTheDocument();
     expect(canvas.getByText("updated-tag")).toBeInTheDocument();

@@ -1,5 +1,6 @@
-// Main component
+// Main components
 export { ItemGrid } from "./item-grid";
+export { ExtractedDataItemGrid } from "./extracted-data-item-grid";
 
 // Types
 export type {
@@ -11,8 +12,15 @@ export type {
   BusinessConfig,
 } from "./types";
 
-// Built-in columns
-export { BUILT_IN_COLUMNS, createBuiltInColumn } from "./built-in-columns";
+// Built-in columns (general utilities)
+export { STATUS_OPTIONS } from "./built-in-columns";
+
+// Extracted data columns
+export {
+  EXTRACTED_DATA_COLUMN_NAMES,
+  createExtractedDataColumn,
+  getExtractedDataItemsToReviewCount as getItemsToReviewCount,
+} from "./extracted-data-columns";
 
 // Individual components (in case needed for customization)
 export {

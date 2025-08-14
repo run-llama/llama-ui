@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { PropertyRenderer } from "../../src/extracted-data";
 import { userEvent, within, expect, screen } from "@storybook/test";
 import { useState } from "react";
-import type { FieldMetadata } from "../../src/extracted-data/schema-reconciliation";
+import type { FieldSchemaMetadata } from "../../src/extracted-data/schema-reconciliation";
 import type { ExtractedFieldMetadataDict } from "llama-cloud-services/beta/agent";
 
 const meta: Meta<typeof PropertyRenderer> = {
@@ -86,7 +86,7 @@ const comprehensiveData = {
 };
 
 // UNIFIED FIELD METADATA using "*" wildcard schema
-const comprehensiveFieldMetadata: Record<string, FieldMetadata> = {
+const comprehensiveFieldMetadata: Record<string, FieldSchemaMetadata> = {
   // Primitive fields
   title: {
     isRequired: true,
@@ -311,7 +311,7 @@ function InteractivePropertyRenderer({
   initialData: unknown;
   extractedFieldMetadata?: ExtractedFieldMetadataDict;
   changedPaths?: Set<string>;
-  schemaFieldMetadata?: Record<string, FieldMetadata>;
+  schemaFieldMetadata?: Record<string, FieldSchemaMetadata>;
 }) {
   const [data, setData] = useState(initialData);
   const [changedPaths, setChangedPaths] = useState(

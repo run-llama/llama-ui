@@ -1,8 +1,9 @@
 import { Button } from "@/base/button";
 import { toast } from "sonner";
 import { type ItemHookData } from "./use-item-data";
+import { JSONObject } from "./types";
 
-export function AcceptReject<T extends Record<string, unknown>>({
+export function AcceptReject<T extends JSONObject>({
   itemData,
   onComplete,
 }: {

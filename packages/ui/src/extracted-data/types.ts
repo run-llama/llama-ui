@@ -3,13 +3,13 @@ import type {
   ExtractedData,
   ExtractedFieldMetadataDict,
 } from "llama-cloud-services/beta/agent";
-import type { FieldMetadata } from "./schema-reconciliation";
+import type { FieldSchemaMetadata } from "./schema-reconciliation";
 
-export interface ExtractedDataDisplayProps {
-  extractedData: ExtractedData;
+export interface ExtractedDataDisplayProps<S extends JSONObject> {
+  extractedData: ExtractedData<S>;
   title?: string;
   emptyMessage?: string;
-  onChange?: (updatedData: Record<string, unknown>) => void;
+  onChange?: (updatedData: S) => void;
   editable?: boolean;
   // Schema reconciliation - pass schema and let component handle reconciliation internally
   jsonSchema?: JSONSchema.ObjectSchema;
@@ -17,6 +17,12 @@ export interface ExtractedDataDisplayProps {
 
 // Convenience type used by renderers to carry both schema metadata and extracted metadata
 export interface RendererMetadata {
-  schema: Record<string, FieldMetadata>;
+  schema: Record<string, FieldSchemaMetadata>;
   extracted?: ExtractedFieldMetadataDict;
 }
+
+export type PrimitiveValue = string | number | boolean | null | undefined;
+export type JSONObject =
+  | PrimitiveValue
+  | JSONObject[]
+  | { [key: string]: JSONObject };

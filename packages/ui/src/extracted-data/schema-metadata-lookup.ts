@@ -1,4 +1,4 @@
-import type { FieldMetadata } from "./schema-reconciliation";
+import type { FieldSchemaMetadata } from "./schema-reconciliation";
 
 /**
  * CORE METADATA LOOKUP UTILITIES
@@ -22,21 +22,21 @@ export function normalizeMetadataPath(pathString: string): string {
  * Core metadata lookup with normalization fallback
  * This is the unified algorithm used by all renderers
  */
-export function lookupFieldMetadata(
+export function lookupFieldSchemaMetadata(
   keyPath: string[],
-  fieldMetadata: Record<string, FieldMetadata>
-): FieldMetadata | undefined {
+  fieldSchemaMetadata: Record<string, FieldSchemaMetadata>
+): FieldSchemaMetadata | undefined {
   const pathString = keyPath.join(".");
 
   // Step 1: Try exact path match first
-  let metadata = fieldMetadata[pathString];
+  let metadata = fieldSchemaMetadata[pathString];
   if (metadata) {
     return metadata;
   }
 
   // Step 2: Try normalized path with "*" wildcards
   const normalizedPath = normalizeMetadataPath(pathString);
-  metadata = fieldMetadata[normalizedPath];
+  metadata = fieldSchemaMetadata[normalizedPath];
   if (metadata) {
     return metadata;
   }
@@ -53,7 +53,7 @@ export function lookupFieldMetadata(
           "*",
           ...segments.slice(i),
         ].join(".");
-        metadata = fieldMetadata[wildcardPath];
+        metadata = fieldSchemaMetadata[wildcardPath];
         if (metadata) {
           return metadata;
         }
