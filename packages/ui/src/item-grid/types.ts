@@ -2,7 +2,7 @@ import type {
   ExtractedData,
   FilterOperation,
   TypedAgentData,
-} from "@llamaindex/cloud/beta/agent";
+} from "llama-cloud-services/beta/agent";
 import type { ReactNode } from "react";
 
 // Types

@@ -5,7 +5,7 @@ import { JSONSchema } from "zod/v4/core";
 import {
   type ExtractedData,
   type TypedAgentData,
-} from "@llamaindex/cloud/beta/agent";
+} from "llama-cloud-services/beta/agent";
 
 // Mock the mock-item-response module
 vi.mock("@/src/extracted-data/mock-item-response", () => ({

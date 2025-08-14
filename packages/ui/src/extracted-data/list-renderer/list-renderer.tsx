@@ -9,17 +9,20 @@ import {
 import { Plus, Trash2 } from "lucide-react";
 import { PrimitiveType, toPrimitiveType } from "../primitive-validation";
 import type { FieldMetadata } from "../schema-reconciliation";
+import type { RendererMetadata } from "../types";
 import { findFieldMetadata } from "../metadata-path-utils";
+import { findExtractedFieldMetadata } from "../metadata-lookup";
 
 interface ListRendererProps {
   data: unknown[];
   onUpdate: (index: number, value: unknown) => void;
   onAdd?: (value: unknown) => void;
   onDelete?: (index: number) => void;
-  confidence?: Record<string, number>;
+
   changedPaths?: Set<string>;
   keyPath?: string[];
-  fieldMetadata?: Record<string, FieldMetadata>;
+  // Unified metadata
+  metadata?: RendererMetadata;
 }
 
 export function ListRenderer({
@@ -27,14 +30,15 @@ export function ListRenderer({
   onUpdate,
   onAdd,
   onDelete,
-  confidence,
   changedPaths,
   keyPath = [],
-  fieldMetadata = {},
+  metadata,
 }: ListRendererProps) {
+  const effectiveSchema: Record<string, FieldMetadata> = metadata?.schema ?? {};
+  const effectiveExtracted = metadata?.extracted ?? {};
   const handleAdd = () => {
     // Get smart default value based on field metadata
-    const defaultValue = getArrayItemDefaultValue(keyPath, fieldMetadata);
+    const defaultValue = getArrayItemDefaultValue(keyPath, effectiveSchema);
     onAdd?.(defaultValue);
   };
 
@@ -49,7 +53,7 @@ export function ListRenderer({
   // Example: ["tags"] → ["tags", "*"] → "tags.*"
   const getExpectedType = (): PrimitiveType => {
     const itemFieldPath = [...keyPath, "*"];
-    const itemMetadata = findFieldMetadata(itemFieldPath, fieldMetadata);
+    const itemMetadata = findFieldMetadata(itemFieldPath, effectiveSchema);
 
     if (itemMetadata?.schemaType) {
       return toPrimitiveType(itemMetadata.schemaType);
@@ -97,7 +101,10 @@ export function ListRenderer({
                   <EditableField
                     value={item}
                     onSave={(newValue) => onUpdate(index, newValue)}
-                    confidence={confidence?.[String(index)]}
+                    metadata={findExtractedFieldMetadata(
+                      [...keyPath, String(index)],
+                      effectiveExtracted,
+                    )}
                     isChanged={isChanged}
                     showBorder={true}
                     expectedType={expectedType}

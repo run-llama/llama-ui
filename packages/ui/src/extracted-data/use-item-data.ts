@@ -4,7 +4,7 @@ import {
   type ExtractedData,
   type TypedAgentData,
   type AgentClient,
-} from "@llamaindex/cloud/beta/agent";
+} from "llama-cloud-services/beta/agent";
 import { getMockItemResponse } from "./mock-item-response";
 import { JSONSchema } from "zod/v4/core";
 // Remove reconciliation imports since ExtractedDataDisplay handles it internally

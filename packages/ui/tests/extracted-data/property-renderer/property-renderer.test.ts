@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   formatFieldName,
   isPropertyChanged,
-  filterConfidenceForArray,
+  filterMetadataForArray,
   isArrayOfObjects,
   shouldShowKeyOnSeparateLine,
 } from "@/src/extracted-data/property-renderer/property-renderer-utils";
@@ -65,57 +65,74 @@ describe("PropertyRenderer Utilities", () => {
     });
   });
 
-  describe("filterConfidenceForArray", () => {
-    it("should return empty object when confidence is undefined", () => {
-      const result = filterConfidenceForArray(undefined, ["items"]);
+
+
+  describe("filterMetadataForArray", () => {
+    it("should return empty object for undefined metadata", () => {
+      const result = filterMetadataForArray(undefined, ["items"]);
       expect(result).toEqual({});
     });
 
-    it("should return empty object when no matching paths", () => {
-      const confidence = { "user.name": 0.9, "user.age": 0.8 };
-      const result = filterConfidenceForArray(confidence, ["items"]);
+    it("should return empty object for non-object metadata", () => {
+      const result = filterMetadataForArray("not an object" as any, ["items"]);
       expect(result).toEqual({});
     });
 
-    it("should filter and convert paths for object arrays", () => {
-      const confidence = {
-        "items.0.name": 0.9,
-        "items.0.price": 0.8,
-        "items.1.name": 0.7,
-        "user.name": 0.95,
+    it("should filter metadata for array items", () => {
+      const metadata = {
+        "items.0.name": { confidence: 0.9, citation: [] },
+        "items.0.price": { confidence: 0.8, citation: [] },
+        "items.1.name": { confidence: 0.95, citation: [] },
+        "other.field": { confidence: 0.7, citation: [] },
       };
-      const result = filterConfidenceForArray(confidence, ["items"]);
+      const result = filterMetadataForArray(metadata, ["items"]);
       expect(result).toEqual({
-        "0.name": 0.9,
-        "0.price": 0.8,
-        "1.name": 0.7,
+        "0.name": { confidence: 0.9, citation: [] },
+        "0.price": { confidence: 0.8, citation: [] },
+        "1.name": { confidence: 0.95, citation: [] },
       });
     });
 
-    it("should filter and convert paths for primitive arrays", () => {
-      const confidence = {
-        "tags.0": 0.9,
-        "tags.1": 0.8,
-        "tags.2": 0.7,
-        "user.name": 0.95,
+    it("should handle single level array paths", () => {
+      const metadata = {
+        "tags.0": { confidence: 0.9, citation: [] },
+        "tags.1": { confidence: 0.8, citation: [] },
+        "other": { confidence: 0.7, citation: [] },
       };
-      const result = filterConfidenceForArray(confidence, ["tags"]);
+      const result = filterMetadataForArray(metadata, ["tags"]);
       expect(result).toEqual({
-        "0": 0.9,
-        "1": 0.8,
-        "2": 0.7,
+        "0": { confidence: 0.9, citation: [] },
+        "1": { confidence: 0.8, citation: [] },
       });
     });
 
     it("should handle deeply nested paths", () => {
-      const confidence = {
-        "user.items.0.details.name": 0.9,
-        "user.items.1.details.price": 0.8,
+      const metadata = {
+        "user.items.0.details.name": { confidence: 0.9, citation: [] },
+        "user.items.1.details.price": { confidence: 0.8, citation: [] },
+        "user.other": { confidence: 0.7, citation: [] },
       };
-      const result = filterConfidenceForArray(confidence, ["user", "items"]);
+      const result = filterMetadataForArray(metadata, ["user", "items"]);
       expect(result).toEqual({
-        "0.details.name": 0.9,
-        "1.details.price": 0.8,
+        "0.details.name": { confidence: 0.9, citation: [] },
+        "1.details.price": { confidence: 0.8, citation: [] },
+      });
+    });
+
+    it("should handle empty metadata", () => {
+      const result = filterMetadataForArray({}, ["items"]);
+      expect(result).toEqual({});
+    });
+
+    it("should handle empty keyPath", () => {
+      const metadata = {
+        "0.name": { confidence: 0.9, citation: [] },
+        "1.name": { confidence: 0.8, citation: [] },
+      };
+      const result = filterMetadataForArray(metadata, []);
+      expect(result).toEqual({
+        "0.name": { confidence: 0.9, citation: [] },
+        "1.name": { confidence: 0.8, citation: [] },
       });
     });
   });

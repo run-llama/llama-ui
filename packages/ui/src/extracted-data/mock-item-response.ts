@@ -1,14 +1,11 @@
 import type {
   ExtractedData,
   TypedAgentData,
-} from "@llamaindex/cloud/beta/agent";
+  StatusType,
+} from "llama-cloud-services/beta/agent";
 
-export type ProcessingStatus =
-  | "pending"
-  | "pending_review"
-  | "approved"
-  | "rejected"
-  | "completed";
+// Use the StatusType from llama-cloud-services instead
+export type ProcessingStatus = StatusType | "pending" | "approved" | "completed";
 
 export type InvoiceData = {
   invoice_number: string;
@@ -56,11 +53,11 @@ const mockItemData: Record<
       file_hash: "hash_invoice_001_1736789234567",
       file_id: "invoice-001",
       status: "pending_review",
+      overall_confidence: 0.89,
       metadata: {
         document_type: "invoice",
         source_system: "email",
         vendor_category: "professional_services",
-        overall_confidence: 0.89,
       },
       data: {
         invoice_number: "INV-2024-001",
@@ -82,14 +79,75 @@ const mockItemData: Record<
         payment_terms: "Original Net 30",
         line_items: [],
       },
-      confidence: {
-        invoice_number: 0.98,
-        total_amount: 0.95,
-        vendor_name: 0.92,
-        invoice_date: 0.89,
-        due_date: 0.87,
-        payment_terms: 0.93,
-        line_items: 0.85,
+      field_metadata: {
+        invoice_number: {
+          confidence: 0.98,
+          reasoning: "Clear invoice number found in header section",
+          citation: [{
+            page_number: 1,
+            matching_text: "INV-2024-001"
+          }]
+        },
+        total_amount: {
+          confidence: 0.95,
+          reasoning: "Total amount clearly identified in summary table",
+          citation: [{
+            page_number: 1,
+            matching_text: "$1,250.50"
+          }, {
+            page_number: 1,
+            matching_text: "Total: $1,250.50"
+          }, {
+            page_number: 1,
+            matching_text: "Amount Due: $1,250.50"
+          }]
+        },
+        vendor_name: {
+          confidence: 0.92,
+          reasoning: "Company name found in header and billing address",
+          citation: [{
+            page_number: 1,
+            matching_text: "Acme Corp"
+          }, {
+            page_number: 1,
+            matching_text: "Acme Corporation"
+          }, {
+            page_number: 2,
+            matching_text: "Bill to: Acme Corp"
+          }]
+        },
+        invoice_date: {
+          confidence: 0.89,
+          reasoning: "Date format matches standard invoice date pattern",
+          citation: [{
+            page_number: 1,
+            matching_text: "January 15, 2024"
+          }]
+        },
+        due_date: {
+          confidence: 0.87,
+          reasoning: "Due date calculated from invoice date and payment terms",
+          citation: [{
+            page_number: 1,
+            matching_text: "February 15, 2024"
+          }]
+        },
+        payment_terms: {
+          confidence: 0.93,
+          reasoning: "Standard payment terms clearly stated",
+          citation: [{
+            page_number: 1,
+            matching_text: "Net 30 days"
+          }]
+        },
+        line_items: [{
+          confidence: 0.85,
+          reasoning: "Line items extracted from itemized table section",
+          citation: [{
+            page_number: 1,
+            matching_text: "Professional Services - Qty: 10, Rate: $125.05"
+          }]
+        }]
       },
     },
     createdAt: new Date("2024-01-15T10:30:00Z"),
@@ -103,12 +161,12 @@ const mockItemData: Record<
       file_name: "tech-solutions-contract-2024.pdf",
       file_hash: "hash_contract_002_1736789234568",
       file_id: "contract-002",
-      status: "approved",
+      status: "accepted",
+      overall_confidence: 0.94,
       metadata: {
         document_type: "contract",
         source_system: "docusign",
         contract_type: "service_agreement",
-        overall_confidence: 0.94,
       },
       data: {
         contract_number: "CNT-2024-TECH-001",
@@ -130,15 +188,71 @@ const mockItemData: Record<
         signatory_company: "Original Tech Solutions Inc",
         signatory_individual: "Original Jane Smith, CEO",
       },
-      confidence: {
-        contract_number: 0.96,
-        contract_value: 0.94,
-        start_date: 0.98,
-        end_date: 0.97,
-        renewal_terms: 0.89,
-        governing_law: 0.92,
-        signatory_company: 0.95,
-        signatory_individual: 0.88,
+      field_metadata: {
+        contract_number: {
+          confidence: 0.96,
+          reasoning: "Contract number clearly identified in document header",
+          citation: [{
+            page_number: 1,
+            matching_text: "CNT-2024-TECH-001"
+          }]
+        },
+        contract_value: {
+          confidence: 0.94,
+          reasoning: "Total contract value found in financial terms section",
+          citation: [{
+            page_number: 2,
+            matching_text: "$50,000.00"
+          }]
+        },
+        start_date: {
+          confidence: 0.98,
+          reasoning: "Contract commencement date clearly stated",
+          citation: [{
+            page_number: 1,
+            matching_text: "March 1, 2024"
+          }]
+        },
+        end_date: {
+          confidence: 0.97,
+          reasoning: "Contract expiration date specified in term section",
+          citation: [{
+            page_number: 1,
+            matching_text: "February 28, 2025"
+          }]
+        },
+        renewal_terms: {
+          confidence: 0.89,
+          reasoning: "Renewal clause found in contract terms section",
+          citation: [{
+            page_number: 3,
+            matching_text: "This agreement shall auto-renew unless terminated with 30 days written notice"
+          }]
+        },
+        governing_law: {
+          confidence: 0.92,
+          reasoning: "Governing law clause clearly specified",
+          citation: [{
+            page_number: 4,
+            matching_text: "This agreement shall be governed by the laws of the State of California"
+          }]
+        },
+        signatory_company: {
+          confidence: 0.95,
+          reasoning: "Company name found in signature block",
+          citation: [{
+            page_number: 4,
+            matching_text: "Tech Solutions Inc"
+          }]
+        },
+        signatory_individual: {
+          confidence: 0.88,
+          reasoning: "Signatory name and title identified in signature section",
+          citation: [{
+            page_number: 4,
+            matching_text: "Jane Smith, Chief Executive Officer"
+          }]
+        }
       },
     },
     createdAt: new Date("2024-02-28T09:15:00Z"),
@@ -157,7 +271,8 @@ const defaultMockItem = (
     file_name: `document-${itemId}.pdf`,
     file_hash: `hash_${itemId}_${Date.now()}`,
     file_id: itemId,
-    status: "pending",
+    status: "pending_review",
+    overall_confidence: 0.78,
     metadata: {
       document_type: "unknown",
       source_system: "upload",
@@ -170,9 +285,23 @@ const defaultMockItem = (
       document_title: `Original Sample Document ${itemId}`,
       processed_date: "1900-01-01",
     },
-    confidence: {
-      document_title: 0.82,
-      processed_date: 0.95,
+    field_metadata: {
+      document_title: {
+        confidence: 0.82,
+        reasoning: "Document title extracted from header or filename",
+        citation: [{
+          page_number: 1,
+          matching_text: `Sample Document ${itemId}`
+        }]
+      },
+      processed_date: {
+        confidence: 0.95,
+        reasoning: "Processing date automatically generated",
+        citation: [{
+          page_number: 1,
+          matching_text: new Date().toISOString().split("T")[0]
+        }]
+      }
     },
   },
   createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),

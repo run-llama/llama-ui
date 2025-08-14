@@ -38,67 +38,63 @@ const sampleObjectArray = [
   },
 ];
 
-const sampleConfidence = {
-  "0.description": 0.95,
-  "0.amount": 0.87,
-  "1.description": 0.92,
-  "1.amount": 0.78,
-};
 
 export const BasicTable: Story = {
   args: {
     data: sampleObjectArray,
-    confidence: sampleConfidence,
     keyPath: ["expenses"],
-    fieldMetadata: {
-      expenses: {
-        isRequired: false,
-        isOptional: true,
-        schemaType: "array",
-        title: "Expenses",
-        wasMissing: false,
-      },
-      "expenses.*.description": {
-        isRequired: true,
-        isOptional: false,
-        schemaType: "string",
-        title: "Description",
-        wasMissing: false,
-      },
-      "expenses.*.amount": {
-        isRequired: true,
-        isOptional: false,
-        schemaType: "number",
-        title: "Amount",
-        wasMissing: false,
-      },
-      "expenses.*.period.start": {
-        isRequired: true,
-        isOptional: false,
-        schemaType: "string",
-        title: "Start",
-        wasMissing: false,
-      },
-      "expenses.*.period.end": {
-        isRequired: true,
-        isOptional: false,
-        schemaType: "string",
-        title: "End",
-        wasMissing: false,
-      },
-      "expenses.*.category": {
-        isRequired: false,
-        isOptional: true,
-        schemaType: "string",
-        title: "Category",
-        wasMissing: false,
-      },
-      "expenses.*.completed": {
-        isRequired: false,
-        isOptional: true,
-        schemaType: "boolean",
-        title: "Completed",
-        wasMissing: false,
+    metadata: {
+      extracted: {},
+      schema: {
+        expenses: {
+          isRequired: false,
+          isOptional: true,
+          schemaType: "array",
+          title: "Expenses",
+          wasMissing: false,
+        },
+        "expenses.*.description": {
+          isRequired: true,
+          isOptional: false,
+          schemaType: "string",
+          title: "Description",
+          wasMissing: false,
+        },
+        "expenses.*.amount": {
+          isRequired: true,
+          isOptional: false,
+          schemaType: "number",
+          title: "Amount",
+          wasMissing: false,
+        },
+        "expenses.*.period.start": {
+          isRequired: true,
+          isOptional: false,
+          schemaType: "string",
+          title: "Start",
+          wasMissing: false,
+        },
+        "expenses.*.period.end": {
+          isRequired: true,
+          isOptional: false,
+          schemaType: "string",
+          title: "End",
+          wasMissing: false,
+        },
+        "expenses.*.category": {
+          isRequired: false,
+          isOptional: true,
+          schemaType: "string",
+          title: "Category",
+          wasMissing: false,
+        },
+        "expenses.*.completed": {
+          isRequired: false,
+          isOptional: true,
+          schemaType: "boolean",
+          title: "Completed",
+          wasMissing: false,
+        },
       },
     },
   },
@@ -112,7 +108,7 @@ export const BasicTable: Story = {
       value: unknown,
       affectedPaths?: string[],
     ) => {
-      console.log(`Updated row ${index}, field ${key}:`, value);
+      // noop for test
       const newData = [...data];
       newData[index] = { ...newData[index], [key]: value };
       setData(newData);
@@ -128,7 +124,7 @@ export const BasicTable: Story = {
     };
 
     const handleAddRow = (newRow: Record<string, unknown>) => {
-      console.log(`Added row:`, newRow);
+      // noop for test
       const newData = [...data, newRow];
       setData(newData);
 
@@ -138,7 +134,7 @@ export const BasicTable: Story = {
     };
 
     const handleDeleteRow = (index: number) => {
-      console.log(`Deleted row at index ${index}`);
+      // noop for test
       const newData = data.filter((_, i) => i !== index);
       setData(newData);
 
@@ -153,9 +149,8 @@ export const BasicTable: Story = {
         onAddRow={handleAddRow}
         onDeleteRow={handleDeleteRow}
         changedPaths={changedPaths}
-        confidence={args.confidence}
         keyPath={args.keyPath}
-        fieldMetadata={args.fieldMetadata}
+        metadata={args.metadata ?? { schema: {}, extracted: {} }}
       />
     );
   },
@@ -251,20 +246,20 @@ export const InconsistentKeys: Story = {
       affectedPaths?: string[],
     ) => {
       void affectedPaths; // Not used in this story
-      console.log(`Updated row ${index}, field ${key}:`, value);
+      // noop for test
       const newData = [...data];
       newData[index] = { ...newData[index], [key]: value };
       setData(newData);
     };
 
     const handleAddRow = (newRow: Record<string, unknown>) => {
-      console.log(`Added row:`, newRow);
+      // noop for test
       const newData = [...data, newRow];
       setData(newData);
     };
 
     const handleDeleteRow = (index: number) => {
-      console.log(`Deleted row at index ${index}`);
+      // noop for test
       const newData = data.filter((_, i) => i !== index);
       setData(newData);
     };
@@ -275,7 +270,6 @@ export const InconsistentKeys: Story = {
         onUpdate={handleUpdate}
         onAddRow={handleAddRow}
         onDeleteRow={handleDeleteRow}
-        confidence={args.confidence}
       />
     );
   },
@@ -327,7 +321,9 @@ export const DeepNestedTable: Story = {
       },
     ],
     keyPath: ["invoices"],
-    fieldMetadata: {
+    metadata: {
+      extracted: {},
+      schema: {
       invoices: {
         isRequired: false,
         isOptional: true,
@@ -399,6 +395,7 @@ export const DeepNestedTable: Story = {
         wasMissing: false,
       },
     },
+    },
   },
   render: function Render(args) {
     const [data, setData] = useState(args.data);
@@ -410,7 +407,7 @@ export const DeepNestedTable: Story = {
       value: unknown,
       affectedPaths?: string[],
     ) => {
-      console.log(`Updated row ${index}, field ${key}:`, value);
+      // noop for test
       const newData = [...data];
       if (typeof value === "object" && value !== null) {
         newData[index] = { ...newData[index], [key]: value };
@@ -430,7 +427,7 @@ export const DeepNestedTable: Story = {
     };
 
     const handleAddRow = (newRow: Record<string, unknown>) => {
-      console.log(`Added row:`, newRow);
+      // noop for test
       const newData = [...data, newRow];
       setData(newData);
 
@@ -439,7 +436,7 @@ export const DeepNestedTable: Story = {
     };
 
     const handleDeleteRow = (index: number) => {
-      console.log(`Deleted row at index ${index}`);
+      // noop for test
       const newData = data.filter((_, i) => i !== index);
       setData(newData);
 
@@ -453,9 +450,8 @@ export const DeepNestedTable: Story = {
         onAddRow={handleAddRow}
         onDeleteRow={handleDeleteRow}
         changedPaths={changedPaths}
-        confidence={args.confidence}
         keyPath={args.keyPath}
-        fieldMetadata={args.fieldMetadata}
+        metadata={args.metadata ?? { schema: {}, extracted: {} }}
       />
     );
   },
@@ -515,9 +511,10 @@ export const DeepNestedTable: Story = {
 export const EmptyTable: Story = {
   args: {
     data: [],
-    confidence: {},
     keyPath: ["items"],
-    fieldMetadata: {
+    metadata: {
+      extracted: {},
+      schema: {
       items: {
         isRequired: false,
         isOptional: true,
@@ -547,25 +544,26 @@ export const EmptyTable: Story = {
         wasMissing: false,
       },
     },
+    },
   },
   render: function Render(args) {
     const [data, setData] = useState(args.data);
 
     const handleUpdate = (index: number, key: string, value: unknown) => {
-      console.log(`Updated row ${index}, field ${key}:`, value);
+      // noop for test
       const newData = [...data];
       newData[index] = { ...newData[index], [key]: value };
       setData(newData);
     };
 
     const handleAddRow = (newRow: Record<string, unknown>) => {
-      console.log(`Added row:`, newRow);
+      // noop for test
       const newData = [...data, newRow];
       setData(newData);
     };
 
     const handleDeleteRow = (index: number) => {
-      console.log(`Deleted row at index ${index}`);
+      // noop for test
       const newData = data.filter((_, i) => i !== index);
       setData(newData);
     };
@@ -576,9 +574,8 @@ export const EmptyTable: Story = {
         onUpdate={handleUpdate}
         onAddRow={handleAddRow}
         onDeleteRow={handleDeleteRow}
-        confidence={args.confidence}
         keyPath={args.keyPath}
-        fieldMetadata={args.fieldMetadata}
+        metadata={args.metadata ?? { schema: {}, extracted: {} }}
       />
     );
   },
@@ -626,18 +623,12 @@ export const ReadOnlyTable: Story = {
       { name: "Item 1", price: 100, category: "A" },
       { name: "Item 2", price: 200, category: "B" },
     ],
-    confidence: {
-      "0.name": 0.9,
-      "0.price": 0.8,
-      "1.name": 0.85,
-      "1.price": 0.95,
-    },
   },
   render: function Render(args) {
     const [data, setData] = useState(args.data);
 
     const handleUpdate = (index: number, key: string, value: unknown) => {
-      console.log(`Updated row ${index}, field ${key}:`, value);
+      // noop for test
       const newData = [...data];
       newData[index] = { ...newData[index], [key]: value };
       setData(newData);
@@ -648,7 +639,6 @@ export const ReadOnlyTable: Story = {
         data={data}
         onUpdate={handleUpdate}
         // No onAddRow or onDeleteRow props - should be read-only
-        confidence={args.confidence}
       />
     );
   },

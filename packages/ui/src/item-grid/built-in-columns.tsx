@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import type {
   ExtractedData,
   TypedAgentData,
-} from "@llamaindex/cloud/beta/agent";
+} from "llama-cloud-services/beta/agent";
 
 // Status enum values
 export const STATUS_OPTIONS = [
@@ -20,26 +20,39 @@ export const STATUS_OPTIONS = [
 
 export type StatusValue = (typeof STATUS_OPTIONS)[number]["value"];
 
-// Helper function to calculate count of low confidence items to review
-// TODO: revisit this function after entity level confidence is implemented
-function getItemsToReviewCount(item: ExtractedData): number {
-  if (!item.confidence) return 0;
+// Helper: count low-confidence leaf metadata from extracted field metadata
+// Leaf definition: an object that contains numeric `confidence` and has no nested object properties
+export function getItemsToReviewCount(item: ExtractedData): number {
+  const metadata = (item as { field_metadata?: unknown }).field_metadata;
+  if (!metadata || typeof metadata !== "object") return 0;
 
   let lowConfidenceCount = 0;
 
-  // Recursively check confidence scores in all fields
-  function checkConfidence(obj: object): void {
-    for (const value of Object.values(obj)) {
-      if (value === null || value === undefined) continue;
-      if (typeof value === "number" && isLowConfidence(value)) {
-        lowConfidenceCount++;
-      } else if (typeof value === "object") {
-        checkConfidence(value);
-      }
+  const visit = (node: unknown): void => {
+    if (!node || typeof node !== "object") return;
+    if (Array.isArray(node)) {
+      node.forEach(visit);
+      return;
     }
-  }
 
-  checkConfidence(item.confidence);
+    const obj = node as Record<string, unknown>;
+
+    // Check leaf metadata: has confidence number and no nested object children
+    const confidence = obj.confidence;
+    const hasNestedObjectChild = Object.values(obj).some(
+      (v) => v && typeof v === "object" && !Array.isArray(v),
+    );
+
+    if (typeof confidence === "number" && !hasNestedObjectChild) {
+      if (isLowConfidence(confidence)) lowConfidenceCount++;
+      return; // do not traverse deeper
+    }
+
+    // Otherwise traverse children
+    Object.values(obj).forEach(visit);
+  };
+
+  visit(metadata);
   return lowConfidenceCount;
 }
 

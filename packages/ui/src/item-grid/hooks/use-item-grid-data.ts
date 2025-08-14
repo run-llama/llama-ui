@@ -6,7 +6,7 @@ import type {
   AgentClient,
   ExtractedData,
   TypedAgentDataItems,
-} from "@llamaindex/cloud/beta/agent";
+} from "llama-cloud-services/beta/agent";
 import { mockResponse } from "./mock-response";
 
 type UseItemGridHandler<T = unknown> = {
