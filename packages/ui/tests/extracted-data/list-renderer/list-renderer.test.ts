@@ -57,7 +57,7 @@ describe("ListRenderer Utilities", () => {
       const result = isArrayItemChanged(
         changedPaths,
         ["user", "preferences", "tags"],
-        1,
+        1
       );
       expect(result).toBe(true);
     });
@@ -157,7 +157,7 @@ describe("ListRenderer Utilities", () => {
 
       const result = getArrayItemDefaultValue(
         ["user", "preferences", "tags"],
-        fieldMetadata,
+        fieldMetadata
       );
       expect(result).toBe("");
     });

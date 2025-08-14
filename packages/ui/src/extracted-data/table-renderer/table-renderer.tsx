@@ -1,4 +1,3 @@
-
 import React, { useMemo } from "react";
 import { EditableField } from "../editable-field";
 import { Button } from "@/base/button";
@@ -19,11 +18,13 @@ import {
   getTableRowDefaultValue,
 } from "./table-renderer-utils";
 import type { FieldMetadata, ValidationError } from "../schema-reconciliation";
+import type { RendererMetadata } from "../types";
 import { getFieldDisplayInfo, getFieldLabelText } from "../field-display-utils";
 import {
   buildTableHeaderMetadataPath,
   findFieldMetadata,
 } from "../metadata-path-utils";
+import { findExtractedFieldMetadata } from "../metadata-lookup";
 import { Plus, Trash2 } from "lucide-react";
 import { PrimitiveType, toPrimitiveType } from "../primitive-validation";
 
@@ -33,15 +34,15 @@ export interface TableRendererProps {
     index: number,
     key: string,
     value: unknown,
-    affectedPaths?: string[],
+    affectedPaths?: string[]
   ) => void;
   onAddRow?: (newRow: Record<string, unknown>) => void;
   onDeleteRow?: (index: number) => void;
-  confidence?: Record<string, number>;
+
   changedPaths?: Set<string>;
   keyPath?: string[];
-  // Schema reconciliation results from parent
-  fieldMetadata?: Record<string, FieldMetadata>;
+  // Unified metadata
+  metadata?: RendererMetadata;
   validationErrors?: ValidationError[];
 }
 
@@ -50,15 +51,29 @@ export function TableRenderer({
   onUpdate,
   onAddRow,
   onDeleteRow,
-  confidence,
   changedPaths,
   keyPath = [],
-  fieldMetadata = {},
+  metadata,
   validationErrors = [],
 }: TableRendererProps) {
+  const effectiveMetadata: RendererMetadata = {
+    schema: metadata?.schema ?? ({} as Record<string, FieldMetadata>),
+    extracted: metadata?.extracted ?? {},
+  };
+  // Get metadata from extracted field metadata
+  const getMetadata = (path: string | string[]) => {
+    if (effectiveMetadata.extracted) {
+      return findExtractedFieldMetadata(path, effectiveMetadata.extracted);
+    }
+    return undefined;
+  };
+
   const handleAddRow = () => {
     // Try to get schema-based default values first
-    const schemaBasedRow = getTableRowDefaultValue(keyPath, fieldMetadata);
+    const schemaBasedRow = getTableRowDefaultValue(
+      keyPath,
+      effectiveMetadata.schema
+    );
 
     // If we got schema-based defaults and they're not empty, use them
     if (Object.keys(schemaBasedRow).length > 0) {
@@ -73,7 +88,7 @@ export function TableRenderer({
       // If we have existing data, use the structure of the first row
       const firstRow = data[0];
       const fillEmptyValues = (
-        obj: Record<string, unknown>,
+        obj: Record<string, unknown>
       ): Record<string, unknown> => {
         const result: Record<string, unknown> = {};
         Object.keys(obj).forEach((key) => {
@@ -96,7 +111,7 @@ export function TableRenderer({
         const setNestedValue = (
           obj: Record<string, unknown>,
           path: string[],
-          value: unknown,
+          value: unknown
         ) => {
           if (path.length === 1) {
             obj[path[0]] = value;
@@ -107,7 +122,7 @@ export function TableRenderer({
             setNestedValue(
               obj[path[0]] as Record<string, unknown>,
               path.slice(1),
-              value,
+              value
             );
           }
         };
@@ -138,9 +153,12 @@ export function TableRenderer({
           }
         });
       });
-    } else if (fieldMetadata && Object.keys(fieldMetadata).length > 0) {
-      // If no data but we have field metadata, generate columns from schema
-      Object.entries(fieldMetadata).forEach(([path]) => {
+    } else if (
+      effectiveMetadata.schema &&
+      Object.keys(effectiveMetadata.schema).length > 0
+    ) {
+      // If no data but we have schema metadata, generate columns from schema
+      Object.keys(effectiveMetadata.schema).forEach((path) => {
         // Only include paths that are for the current level (array items)
         // For array items, paths should start with keyPath followed by array index
         const pathParts = path.split(".");
@@ -175,7 +193,7 @@ export function TableRenderer({
     const maxDepth = Math.max(...columns.map((col) => col.path.length));
 
     return { columns, maxDepth };
-  }, [data, fieldMetadata, keyPath]);
+  }, [data, effectiveMetadata.schema, keyPath]);
 
   // Generate header rows for each depth level
   const generateHeaderRows = (): React.ReactNode[] => {
@@ -211,13 +229,13 @@ export function TableRenderer({
           const fieldKeyPath = buildTableHeaderMetadataPath(
             keyPath,
             column.path,
-            depth,
+            depth
           );
           const fieldInfo = getFieldDisplayInfo(
             fieldKey,
-            fieldMetadata,
+            effectiveMetadata.schema,
             validationErrors,
-            fieldKeyPath,
+            fieldKeyPath
           );
           const headerText = getFieldLabelText(fieldInfo);
           const isLeaf = depth === column.path.length - 1;
@@ -273,7 +291,7 @@ export function TableRenderer({
               <div className="break-words text-zinc-900 font-semibold">
                 {headerText}
               </div>
-            </TableHead>,
+            </TableHead>
           );
 
           colIndex = nextColIndex;
@@ -316,12 +334,12 @@ export function TableRenderer({
             <TableRow key={rowIndex} className="hover:bg-gray-50 border-0">
               {columns.map((column, colIndex) => {
                 const value = getValue(item, column);
-                const confidenceKey = `${rowIndex}.${column.key}`;
+                const cellPath = [...keyPath, String(rowIndex), ...column.path];
                 const isChanged = isTableCellChanged(
                   changedPaths,
                   keyPath,
                   rowIndex,
-                  column.key,
+                  column.key
                 );
 
                 // UNIFIED TABLE RENDERER FIELD TYPE LOOKUP
@@ -332,7 +350,7 @@ export function TableRenderer({
                 const fieldKeyPath = [...keyPath, "*", ...column.path];
                 const fieldInfo = findFieldMetadata(
                   fieldKeyPath,
-                  fieldMetadata,
+                  effectiveMetadata.schema
                 );
                 const expectedType = fieldInfo?.schemaType
                   ? toPrimitiveType(fieldInfo.schemaType)
@@ -349,7 +367,7 @@ export function TableRenderer({
                       onSave={(newValue) =>
                         handleUpdate(rowIndex, column, newValue, data, onUpdate)
                       }
-                      confidence={confidence?.[confidenceKey]}
+                      metadata={getMetadata(cellPath)}
                       isChanged={isChanged}
                       showBorder={true}
                       expectedType={expectedType}

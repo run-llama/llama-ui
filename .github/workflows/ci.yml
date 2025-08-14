@@ -41,6 +41,9 @@ jobs:
       - name: Run linting
         run: pnpm run lint
 
+      - name: Check code formatting
+        run: pnpm run format-check
+
       - name: Run tests with coverage
         run: pnpm run coverage
 

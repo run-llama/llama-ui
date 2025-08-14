@@ -23,7 +23,7 @@ export function isTableCellChanged(
   changedPaths: Set<string> | undefined,
   keyPath: string[],
   rowIndex: number,
-  columnKey: string,
+  columnKey: string
 ): boolean {
   if (!changedPaths) return false;
 
@@ -39,7 +39,7 @@ export function isTableCellChanged(
 // Recursively flatten nested objects to get all leaf paths
 export function flattenObject(
   obj: Record<string, unknown>,
-  prefix: string[] = [],
+  prefix: string[] = []
 ): ColumnDef[] {
   const columns: ColumnDef[] = [];
 
@@ -56,7 +56,7 @@ export function flattenObject(
       // Recursively process nested object
       const nestedColumns = flattenObject(
         value as Record<string, unknown>,
-        currentPath,
+        currentPath
       );
       columns.push(...nestedColumns);
     } else if (value !== null && value !== undefined && !Array.isArray(value)) {
@@ -76,7 +76,7 @@ export function flattenObject(
 
 export const getValue = (
   item: Record<string, unknown>,
-  column: ColumnDef,
+  column: ColumnDef
 ): unknown => {
   let current: unknown = item;
   for (const key of column.path) {
@@ -98,8 +98,8 @@ export const handleUpdate = (
     index: number,
     key: string,
     value: unknown,
-    affectedPaths?: string[],
-  ) => void,
+    affectedPaths?: string[]
+  ) => void
 ) => {
   if (column.path.length === 1) {
     // Simple field - return the specific path that was changed
@@ -138,7 +138,7 @@ export const handleUpdate = (
  */
 export function getTableRowDefaultValue(
   keyPath: string[],
-  fieldMetadata: Record<string, FieldMetadata>,
+  fieldMetadata: Record<string, FieldMetadata>
 ): Record<string, unknown> {
   const newRow: Record<string, unknown> = {};
 
@@ -198,7 +198,7 @@ function getFieldDefaultValue(metadata: FieldMetadata): unknown {
 function setNestedValue(
   obj: Record<string, unknown>,
   path: string[],
-  value: unknown,
+  value: unknown
 ): void {
   if (path.length === 1) {
     obj[path[0]] = value;
@@ -209,7 +209,7 @@ function setNestedValue(
     setNestedValue(
       obj[path[0]] as Record<string, unknown>,
       path.slice(1),
-      value,
+      value
     );
   }
 }

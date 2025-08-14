@@ -1,18 +1,24 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import React, { useState } from 'react';
-import { 
+import type { Meta, StoryObj } from "@storybook/react";
+import React, { useState } from "react";
+import {
   useWorkflowTaskList,
   useWorkflowTask,
   WorkflowTrigger,
   WorkflowProgressBar,
-  useTaskStore
-} from '../src/workflow-task';
-import { AgentStreamDisplay } from '../src/workflow-task/components/agent-stream-display';
-import { ApiProvider, createMockClients } from '../src/lib';
-import { useDeployment } from '@/src/lib/api-provider';
+  useTaskStore,
+} from "../src/workflow-task";
+import { AgentStreamDisplay } from "../src/workflow-task/components/agent-stream-display";
+import { ApiProvider, createMockClients } from "../src/lib";
+import { useDeployment } from "@/src/lib/api-provider";
 
-// Task Trigger & Progress Component  
-function TaskTriggerSection({ onTaskClick, selectedTaskId }: { onTaskClick: (taskId: string) => void; selectedTaskId: string | null }) {
+// Task Trigger & Progress Component
+function TaskTriggerSection({
+  onTaskClick,
+  selectedTaskId,
+}: {
+  onTaskClick: (taskId: string) => void;
+  selectedTaskId: string | null;
+}) {
   const { tasks, clearCompleted } = useWorkflowTaskList();
   const deployment = useDeployment();
   const { createTask } = useTaskStore();
@@ -21,11 +27,26 @@ function TaskTriggerSection({ onTaskClick, selectedTaskId }: { onTaskClick: (tas
 
   // Sample task configurations for batch creation
   const taskConfigs = [
-    { name: 'Document Analysis', input: { file: 'document1.pdf', type: 'analysis' } },
-    { name: 'Data Processing', input: { file: 'data.csv', type: 'processing' } },
-    { name: 'Image Recognition', input: { file: 'image.jpg', type: 'recognition' } },
-    { name: 'Text Extraction', input: { file: 'text.docx', type: 'extraction' } },
-    { name: 'Report Generation', input: { file: 'report.xlsx', type: 'generation' } },
+    {
+      name: "Document Analysis",
+      input: { file: "document1.pdf", type: "analysis" },
+    },
+    {
+      name: "Data Processing",
+      input: { file: "data.csv", type: "processing" },
+    },
+    {
+      name: "Image Recognition",
+      input: { file: "image.jpg", type: "recognition" },
+    },
+    {
+      name: "Text Extraction",
+      input: { file: "text.docx", type: "extraction" },
+    },
+    {
+      name: "Report Generation",
+      input: { file: "report.xlsx", type: "generation" },
+    },
   ];
 
   const createBatchTasks = async () => {
@@ -39,12 +60,12 @@ function TaskTriggerSection({ onTaskClick, selectedTaskId }: { onTaskClick: (tas
           taskName: `${config.name} #${index + 1}`,
           batchId: Date.now(),
         };
-        
+
         // Stagger the creation slightly to see the effect
-        await new Promise(resolve => setTimeout(resolve, index * 100));
+        await new Promise((resolve) => setTimeout(resolve, index * 100));
         return createTask(deployment, input);
       });
-      
+
       await Promise.all(promises);
     } catch {
       // Failed to create batch tasks
@@ -61,26 +82,28 @@ function TaskTriggerSection({ onTaskClick, selectedTaskId }: { onTaskClick: (tas
         <div className="space-y-4">
           <div className="flex items-center gap-4">
             <label className="text-sm font-medium">Batch Size:</label>
-            <select 
-              value={batchSize} 
+            <select
+              value={batchSize}
               onChange={(e) => setBatchSize(Number(e.target.value))}
               className="px-3 py-1 border border-gray-300 rounded text-sm"
               disabled={isCreatingBatch}
             >
-              {[1, 2, 3, 4, 5].map(n => (
-                <option key={n} value={n}>{n} tasks</option>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <option key={n} value={n}>
+                  {n} tasks
+                </option>
               ))}
             </select>
             <button
               onClick={createBatchTasks}
               disabled={isCreatingBatch}
               className={`px-4 py-2 text-sm font-medium rounded ${
-                isCreatingBatch 
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
+                isCreatingBatch
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
               }`}
             >
-              {isCreatingBatch ? 'Creating...' : `Create ${batchSize} Tasks`}
+              {isCreatingBatch ? "Creating..." : `Create ${batchSize} Tasks`}
             </button>
             {tasks.length > 0 && (
               <button
@@ -97,7 +120,7 @@ function TaskTriggerSection({ onTaskClick, selectedTaskId }: { onTaskClick: (tas
       {/* Single Task Creation */}
       <div>
         <h3 className="text-lg font-medium mb-3">Or Create Single Task</h3>
-        <WorkflowTrigger 
+        <WorkflowTrigger
           deployment={deployment}
           onSuccess={() => {
             // Task completed successfully
@@ -108,45 +131,60 @@ function TaskTriggerSection({ onTaskClick, selectedTaskId }: { onTaskClick: (tas
       {/* Progress Section with WorkflowProgressBar */}
       {tasks.length > 0 && (
         <div>
-          <h3 className="text-lg font-medium mb-3">Overall Progress ({tasks.length} tasks)</h3>
+          <h3 className="text-lg font-medium mb-3">
+            Overall Progress ({tasks.length} tasks)
+          </h3>
           <WorkflowProgressBar />
-          
+
           {/* Enhanced Task List */}
           <div className="mt-4 space-y-2">
             <div className="flex justify-between items-center">
-              <h4 className="text-sm font-medium text-gray-700">Task List (click to view details):</h4>
+              <h4 className="text-sm font-medium text-gray-700">
+                Task List (click to view details):
+              </h4>
               <div className="text-xs text-gray-500">
-                Running: {tasks.filter(t => t.status === 'running').length} | 
-                Complete: {tasks.filter(t => t.status === 'complete').length} | 
-                Error: {tasks.filter(t => t.status === 'error').length}
+                Running: {tasks.filter((t) => t.status === "running").length} |
+                Complete: {tasks.filter((t) => t.status === "complete").length}{" "}
+                | Error: {tasks.filter((t) => t.status === "error").length}
               </div>
             </div>
             <div className="max-h-48 overflow-y-auto space-y-1 border rounded-lg">
               {tasks.map((task, index) => {
                 const isSelected = selectedTaskId === task.task_id;
                 return (
-                  <div 
-                    key={task.task_id} 
+                  <div
+                    key={task.task_id}
                     className={`flex justify-between items-center text-sm p-3 cursor-pointer transition-colors border-b last:border-b-0 ${
-                      isSelected 
-                        ? 'bg-blue-50 border-l-4 border-l-blue-500' 
-                        : 'hover:bg-gray-50'
+                      isSelected
+                        ? "bg-blue-50 border-l-4 border-l-blue-500"
+                        : "hover:bg-gray-50"
                     }`}
                     onClick={() => onTaskClick(task.task_id)}
                   >
                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <span className="text-xs text-gray-500 flex-shrink-0">#{index + 1}</span>
+                      <span className="text-xs text-gray-500 flex-shrink-0">
+                        #{index + 1}
+                      </span>
                       <div className="min-w-0 flex-1">
-                        <div className="text-xs font-medium text-gray-700">Task {index + 1}</div>
-                        <div className="font-mono text-xs text-gray-500 truncate">{task.task_id}</div>
+                        <div className="text-xs font-medium text-gray-700">
+                          Task {index + 1}
+                        </div>
+                        <div className="font-mono text-xs text-gray-500 truncate">
+                          {task.task_id}
+                        </div>
                       </div>
                     </div>
-                    <span className={`px-2 py-1 rounded text-xs font-medium flex-shrink-0 ${
-                      task.status === 'complete' ? 'bg-green-100 text-green-800' :
-                      task.status === 'error' ? 'bg-red-100 text-red-800' :
-                      task.status === 'running' ? 'bg-blue-100 text-blue-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
+                    <span
+                      className={`px-2 py-1 rounded text-xs font-medium flex-shrink-0 ${
+                        task.status === "complete"
+                          ? "bg-green-100 text-green-800"
+                          : task.status === "error"
+                            ? "bg-red-100 text-red-800"
+                            : task.status === "running"
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
                       {task.status}
                     </span>
                   </div>
@@ -164,11 +202,11 @@ function TaskTriggerSection({ onTaskClick, selectedTaskId }: { onTaskClick: (tas
 function TaskDetailSection({ taskId }: { taskId: string | null }) {
   // Always call hooks at the top level
   const taskDetail = useWorkflowTask(taskId || "");
-  
+
   if (!taskId) {
     return (
       <div className="p-6 w-1/2 flex items-center justify-center text-gray-500">
-        Create a task to view processing details        
+        Create a task to view processing details
       </div>
     );
   }
@@ -203,35 +241,46 @@ function TaskDetailSection({ taskId }: { taskId: string | null }) {
             </button>
           </div>
         </div>
-        
+
         <div className="bg-gray-50 rounded-lg p-4 space-y-3">
           <div>
-            <span className="font-medium">Task ID:</span> {taskDetail.task.task_id}
+            <span className="font-medium">Task ID:</span>{" "}
+            {taskDetail.task.task_id}
           </div>
           <div>
-            <span className="font-medium">Deployment:</span> {taskDetail.task.deployment}
+            <span className="font-medium">Deployment:</span>{" "}
+            {taskDetail.task.deployment}
           </div>
           <div>
-            <span className="font-medium">Status:</span> 
-            <span className={`ml-2 px-2 py-1 rounded text-sm ${
-              taskDetail.task.status === 'complete' ? 'bg-green-100 text-green-800' :
-              taskDetail.task.status === 'error' ? 'bg-red-100 text-red-800' :
-              taskDetail.task.status === 'running' ? 'bg-blue-100 text-blue-800' :
-              'bg-gray-100 text-gray-800'
-            }`}>
+            <span className="font-medium">Status:</span>
+            <span
+              className={`ml-2 px-2 py-1 rounded text-sm ${
+                taskDetail.task.status === "complete"
+                  ? "bg-green-100 text-green-800"
+                  : taskDetail.task.status === "error"
+                    ? "bg-red-100 text-red-800"
+                    : taskDetail.task.status === "running"
+                      ? "bg-blue-100 text-blue-800"
+                      : "bg-gray-100 text-gray-800"
+              }`}
+            >
               {taskDetail.task.status}
             </span>
           </div>
           <div>
-            <span className="font-medium">Streaming:</span> 
-            <span className={`ml-2 px-2 py-1 rounded text-sm ${
-              taskDetail.isStreaming ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-            }`}>
-              {taskDetail.isStreaming ? 'Active' : 'Inactive'}
+            <span className="font-medium">Streaming:</span>
+            <span
+              className={`ml-2 px-2 py-1 rounded text-sm ${
+                taskDetail.isStreaming
+                  ? "bg-blue-100 text-blue-800"
+                  : "bg-gray-100 text-gray-800"
+              }`}
+            >
+              {taskDetail.isStreaming ? "Active" : "Inactive"}
             </span>
           </div>
           <div>
-            <span className="font-medium">Events:</span> 
+            <span className="font-medium">Events:</span>
             <span className="ml-2 text-sm text-gray-600">
               {taskDetail.events.length} events received
             </span>
@@ -240,7 +289,7 @@ function TaskDetailSection({ taskId }: { taskId: string | null }) {
       </div>
 
       {/* Agent Stream - use taskId instead of events */}
-      <AgentStreamDisplay 
+      <AgentStreamDisplay
         taskId={taskDetail.task.task_id}
         title="Processing Steps"
         className="mb-4"
@@ -253,26 +302,32 @@ function TaskDetailSection({ taskId }: { taskId: string | null }) {
 function WorkflowTaskSuiteInternal() {
   const { tasks } = useWorkflowTaskList();
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-  
+
   // Get the selected task or the most recent task for details
-  const selectedTask = selectedTaskId 
-    ? tasks.find(t => t.task_id === selectedTaskId) 
-    : tasks.length > 0 ? tasks[tasks.length - 1] : null;
+  const selectedTask = selectedTaskId
+    ? tasks.find((t) => t.task_id === selectedTaskId)
+    : tasks.length > 0
+      ? tasks[tasks.length - 1]
+      : null;
 
   return (
     <div className="space-y-4">
       {/* Header */}
       <div className="text-center p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg">
         <h1 className="text-2xl font-bold mb-2">Workflow Task Suite</h1>
-        <p className="text-gray-600">Complete workflow management with trigger, progress tracking, and processing details</p>
+        <p className="text-gray-600">
+          Complete workflow management with trigger, progress tracking, and
+          processing details
+        </p>
       </div>
 
       {/* Main Content */}
       <div className="flex h-[800px] border rounded-lg">
-        <TaskTriggerSection onTaskClick={setSelectedTaskId} selectedTaskId={selectedTaskId} />
-        <TaskDetailSection 
-          taskId={selectedTask?.task_id || null}
+        <TaskTriggerSection
+          onTaskClick={setSelectedTaskId}
+          selectedTaskId={selectedTaskId}
         />
+        <TaskDetailSection taskId={selectedTask?.task_id || null} />
       </div>
     </div>
   );
@@ -288,13 +343,14 @@ function WorkflowTaskSuite() {
 }
 
 const meta: Meta<typeof WorkflowTaskSuite> = {
-  title: 'Components/Workflow Task Suite',
+  title: "Components/Workflow Task Suite",
   component: WorkflowTaskSuite,
   parameters: {
-    layout: 'padded',
+    layout: "padded",
     docs: {
       description: {
-        component: 'A complete workflow task management suite including task creation, progress tracking, and processing detail viewing.',
+        component:
+          "A complete workflow task management suite including task creation, progress tracking, and processing detail viewing.",
       },
     },
   },
@@ -304,7 +360,7 @@ export default meta;
 type Story = StoryObj<typeof WorkflowTaskSuite>;
 
 export const Default: Story = {
-  name: 'Complete Workflow Suite',
+  name: "Complete Workflow Suite",
   parameters: {
     docs: {
       description: {
@@ -345,5 +401,3 @@ The suite uses MSW (Mock Service Worker) to simulate realistic API responses and
     },
   },
 };
-
- 

@@ -1,10 +1,9 @@
-
 import { useEffect, useState, useCallback } from "react";
 import {
   type ExtractedData,
   type TypedAgentData,
   type AgentClient,
-} from "@llamaindex/cloud/beta/agent";
+} from "llama-cloud-services/beta/agent";
 import { getMockItemResponse } from "./mock-item-response";
 import { JSONSchema } from "zod/v4/core";
 // Remove reconciliation imports since ExtractedDataDisplay handles it internally
@@ -42,43 +41,48 @@ export function useItemData<T extends Record<string, unknown>>({
   client,
 }: UseItemDataOptions<T>): ItemHookData<T> {
   // Single source of truth - contains both original predictions and user corrections
-  const [item, setItem] = useState<TypedAgentData<ExtractedData<T>> | null>(null);
+  const [item, setItem] = useState<TypedAgentData<ExtractedData<T>> | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   /** Updates user-corrected data within the item */
   const updateData = useCallback((newData: T) => {
-    setItem(currentItem => {
+    setItem((currentItem) => {
       if (!currentItem) return null;
-      
+
       return {
         ...currentItem,
         data: {
           ...currentItem.data,
           data: newData, // Update user-corrected data
           // Keep original_data unchanged
-        }
+        },
       };
     });
   }, []);
 
   /** Resets the state after loading from API */
-  const resetState = useCallback((newItem: TypedAgentData<ExtractedData<T>>) => {
-    try {
-      // Validate that we have the expected data structure
-      if (!newItem.data.data) {
-        throw new Error("Invalid item structure: missing data field");
-      }
+  const resetState = useCallback(
+    (newItem: TypedAgentData<ExtractedData<T>>) => {
+      try {
+        // Validate that we have the expected data structure
+        if (!newItem.data.data) {
+          throw new Error("Invalid item structure: missing data field");
+        }
 
-      setItem(newItem);
-      setError(null);
-      setLoading(false);
-    } catch (err) {
-      setError(`Failed to parse item data: ${err}`);
-      setLoading(false);
-      setItem(null);
-    }
-  }, []);
+        setItem(newItem);
+        setError(null);
+        setLoading(false);
+      } catch (err) {
+        setError(`Failed to parse item data: ${err}`);
+        setLoading(false);
+        setItem(null);
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     const fetchItemData = async () => {
@@ -98,7 +102,7 @@ export function useItemData<T extends Record<string, unknown>>({
           }
 
           const mockData = getMockItemResponse(
-            itemId,
+            itemId
           ) as unknown as TypedAgentData<ExtractedData<T>>;
           resetState(mockData);
         } else {
@@ -113,7 +117,7 @@ export function useItemData<T extends Record<string, unknown>>({
         // eslint-disable-next-line no-console
         console.error("Error fetching item data:", err);
         setError(
-          err instanceof Error ? err.message : "Failed to load item data",
+          err instanceof Error ? err.message : "Failed to load item data"
         );
         setLoading(false);
       }
@@ -141,7 +145,7 @@ export function useItemData<T extends Record<string, unknown>>({
       });
       resetState(response);
     },
-    [item, itemId, resetState, client],
+    [item, itemId, resetState, client]
   );
 
   return {

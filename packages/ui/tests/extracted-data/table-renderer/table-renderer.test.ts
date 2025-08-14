@@ -68,13 +68,13 @@ describe("TableRenderer Utilities", () => {
       const changedPaths = new Set(["items.0.description", "items.1.amount"]);
 
       expect(
-        isTableCellChanged(changedPaths, ["items"], 0, "description"),
+        isTableCellChanged(changedPaths, ["items"], 0, "description")
       ).toBe(true);
       expect(isTableCellChanged(changedPaths, ["items"], 1, "amount")).toBe(
-        true,
+        true
       );
       expect(isTableCellChanged(changedPaths, ["items"], 0, "amount")).toBe(
-        false,
+        false
       );
     });
   });
@@ -145,7 +145,7 @@ describe("TableRenderer Utilities", () => {
 
       expect(result).toHaveLength(2);
       expect(
-        result.find((col) => col.key === "user.profile.personal.name"),
+        result.find((col) => col.key === "user.profile.personal.name")
       ).toEqual({
         key: "user.profile.personal.name",
         header: "Name",
@@ -291,7 +291,7 @@ describe("TableRenderer Utilities", () => {
           street: "456 Oak Ave",
           city: "New York",
         },
-        ["0.address.street"],
+        ["0.address.street"]
       );
     });
 
@@ -329,7 +329,7 @@ describe("TableRenderer Utilities", () => {
             },
           },
         },
-        ["0.user.profile.personal.name"],
+        ["0.user.profile.personal.name"]
       );
     });
 
@@ -351,7 +351,7 @@ describe("TableRenderer Utilities", () => {
         {
           street: "123 Main St",
         },
-        ["0.address.street"],
+        ["0.address.street"]
       );
     });
   });
@@ -465,7 +465,7 @@ describe("TableRenderer Utilities", () => {
 
       const result = getTableRowDefaultValue(
         ["user", "preferences", "items"],
-        fieldMetadata,
+        fieldMetadata
       );
       expect(result).toEqual({
         name: "",

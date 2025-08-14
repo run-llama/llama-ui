@@ -1,4 +1,3 @@
-
 // Main component
 export { ItemGrid } from "./item-grid";
 

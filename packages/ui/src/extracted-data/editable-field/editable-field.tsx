@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useLayoutEffect } from "react";
 import { getConfidenceBackgroundClass } from "../confidence-utils";
 import { isLowConfidence } from "@/lib";
@@ -7,6 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/base/popover";
 import { Button } from "@/base/button";
 import { Input } from "@/base/input";
 import { Textarea } from "@/base/textarea";
+import type { ExtractedFieldMetadata } from "llama-cloud-services/beta/agent";
 import {
   Select,
   SelectContent,
@@ -18,33 +18,40 @@ import {
 interface EditableFieldProps {
   value: unknown;
   onSave: (newValue: unknown) => void;
-  confidence?: number;
+
+  // UI/state
+  expectedType?: PrimitiveType;
+  required?: boolean;
   isChanged?: boolean;
   showBorder?: boolean;
-  onConfidenceUpdate?: (newConfidence: number) => void;
-  /** Expected primitive type for validation */
-  expectedType?: PrimitiveType;
-  /** Whether the field is required (prevents empty values for numbers) */
-  required?: boolean;
   className?: string;
+
+  // metadata and click callback
+  metadata?: ExtractedFieldMetadata;
+  onClick?: (args: {
+    value: unknown;
+    metadata?: ExtractedFieldMetadata;
+  }) => void;
 }
 
 export function EditableField({
   value,
   onSave,
-  confidence,
   isChanged,
   showBorder = true,
-  onConfidenceUpdate,
   expectedType = PrimitiveType.STRING,
   required = false,
   className,
+  metadata,
+  onClick,
 }: EditableFieldProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [editValue, setEditValue] = useState(
-    value === null || value === undefined ? "" : String(value),
+    value === null || value === undefined ? "" : String(value)
   );
-  const [localConfidence, setLocalConfidence] = useState(confidence ?? 1);
+  const [localConfidence, setLocalConfidence] = useState(
+    metadata?.confidence ?? 1
+  );
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -73,7 +80,7 @@ export function EditableField({
     const convertedValue = convertPrimitiveValue(
       editValue,
       expectedType,
-      required,
+      required
     );
 
     // Save the converted value
@@ -81,7 +88,6 @@ export function EditableField({
 
     // Update confidence to 100% after user confirms the edit
     setLocalConfidence(1.0);
-    onConfidenceUpdate?.(1.0);
     setIsOpen(false);
   };
 
@@ -121,8 +127,8 @@ export function EditableField({
     setEditValue(value);
   };
 
-  // Use local confidence if available, otherwise use prop confidence
-  const currentConfidence = localConfidence ?? confidence;
+  // Use local confidence if available, otherwise use metadata confidence
+  const currentConfidence = localConfidence ?? metadata?.confidence;
   const displayValue =
     value === null || value === undefined || value === "" ? "" : String(value);
   const backgroundClass = isChanged
@@ -198,6 +204,7 @@ export function EditableField({
       <PopoverTrigger asChild>
         <div
           ref={containerRef}
+          onClick={() => onClick?.({ value, metadata })}
           className={`cursor-pointer ${showBorder ? "min-h-8" : "w-full"} flex items-center ${defaultBorderClass} ${paddingClass} ${backgroundClass} ${hoverClass} ${className}`}
         >
           <span className="text-sm accent-foreground truncate leading-tight block w-full">

@@ -4,218 +4,253 @@
  * Uses Zustand best practices with constructor pattern for client injection
  */
 
-import { create } from 'zustand';
-import { Client } from '@llamaindex/llama-deploy';
-import { workflowStreamingManager } from '../../lib/shared-streaming';
-import { createTask as createTaskAPI, fetchTaskEvents, getRunningTasks } from './helper';
-import type { WorkflowTaskSummary, WorkflowEvent, StreamingEventCallback, JSONValue } from '../types';
+import { create } from "zustand";
+import { Client } from "@llamaindex/llama-deploy";
+import { workflowStreamingManager } from "../../lib/shared-streaming";
+import {
+  createTask as createTaskAPI,
+  fetchTaskEvents,
+  getRunningTasks,
+} from "./helper";
+import type {
+  WorkflowTaskSummary,
+  WorkflowEvent,
+  StreamingEventCallback,
+  JSONValue,
+} from "../types";
 
 export interface TaskStoreState {
   // State
   tasks: Record<string, WorkflowTaskSummary>;
   events: Record<string, WorkflowEvent[]>;
-  
+
   // Basic operations
   clearCompleted(): void;
-  createTask(deployment: string, input: JSONValue, workflow?: string): Promise<WorkflowTaskSummary>;
+  createTask(
+    deployment: string,
+    input: JSONValue,
+    workflow?: string
+  ): Promise<WorkflowTaskSummary>;
   clearEvents(taskId: string): void;
-  
+
   // Server synchronization
   sync(deployment: string): Promise<void>;
-  
+
   // Stream subscription management
   subscribe(taskId: string, deployment: string): void;
   unsubscribe(taskId: string): void;
   isSubscribed(taskId: string): boolean;
 }
 
-export const createTaskStore = (client: Client) => create<TaskStoreState>()((set, get) => ({
-  // Initial state
-  tasks: {},
-  events: {},
+export const createTaskStore = (client: Client) =>
+  create<TaskStoreState>()((set, get) => ({
+    // Initial state
+    tasks: {},
+    events: {},
 
-  // Basic operations
-  clearCompleted: () =>
-    set({
-      tasks: Object.fromEntries(
-        Object.entries(get().tasks).filter(
-          ([, t]) => t.status !== 'complete' && t.status !== 'error'
-        )
-      ),
-    }),
+    // Basic operations
+    clearCompleted: () =>
+      set({
+        tasks: Object.fromEntries(
+          Object.entries(get().tasks).filter(
+            ([, t]) => t.status !== "complete" && t.status !== "error"
+          )
+        ),
+      }),
 
-  createTask: async (deployment: string, input: JSONValue, workflow?: string) => {
-    try {
-      // Call API to create task
-      const workflowTask = await createTaskAPI({
-        client,
-        deploymentName: deployment,
-        eventData: input,
-        workflow
-      });
-
-    
-      // Convert to WorkflowTaskSummary and store
-      const task: WorkflowTaskSummary = {
-        task_id: workflowTask.task_id ?? "",
-        session_id: workflowTask.session_id ?? "",
-        service_id: workflowTask.service_id ?? "",
-        input: workflowTask.input,
-        deployment,
-        status: 'running',
-      };
-      
-      // Internal method to set task
-      set(state => ({
-        tasks: { ...state.tasks, [task.task_id]: task },
-        events: { ...state.events, [task.task_id]: [] }
-      }));
-
-      // Automatically subscribe to task events after creation
+    createTask: async (
+      deployment: string,
+      input: JSONValue,
+      workflow?: string
+    ) => {
       try {
-        get().subscribe(task.task_id, deployment);
+        // Call API to create task
+        const workflowTask = await createTaskAPI({
+          client,
+          deploymentName: deployment,
+          eventData: input,
+          workflow,
+        });
+
+        // Convert to WorkflowTaskSummary and store
+        const task: WorkflowTaskSummary = {
+          task_id: workflowTask.task_id ?? "",
+          session_id: workflowTask.session_id ?? "",
+          service_id: workflowTask.service_id ?? "",
+          input: workflowTask.input,
+          deployment,
+          status: "running",
+        };
+
+        // Internal method to set task
+        set((state) => ({
+          tasks: { ...state.tasks, [task.task_id]: task },
+          events: { ...state.events, [task.task_id]: [] },
+        }));
+
+        // Automatically subscribe to task events after creation
+        try {
+          get().subscribe(task.task_id, deployment);
+        } catch (error) {
+          console.error(
+            `Failed to auto-subscribe to task ${task.task_id}:`,
+            error
+          );
+          // Continue execution, subscription can be retried later
+        }
+
+        return task;
       } catch (error) {
-        console.error(`Failed to auto-subscribe to task ${task.task_id}:`, error);
-        // Continue execution, subscription can be retried later
+        console.error("Failed to create task:", error);
+        throw error;
       }
-      
-      return task;
-    } catch (error) {
-      console.error('Failed to create task:', error);
-      throw error;
-    }
-  },
+    },
 
-  clearEvents: (taskId: string) =>
-  set(state => ({ 
-    events: { ...state.events, [taskId]: [] } 
-  })),
+    clearEvents: (taskId: string) =>
+      set((state) => ({
+        events: { ...state.events, [taskId]: [] },
+      })),
 
-  // Server synchronization
-  sync: async (deployment: string) => {
-    try {
-      // 1. Get running tasks from server
-      const serverTasks = await getRunningTasks({ client, deploymentName: deployment });
-      
-      // 2. Update store with server tasks
-      const newTasksRecord = Object.fromEntries(
-        serverTasks.map(task => [task.task_id, task])
-      );
-      set({ tasks: newTasksRecord });
-      
-      // 3. Auto-subscribe to running tasks
-      serverTasks.forEach(task => {
-        if (!get().isSubscribed(task.task_id)) {
-          get().subscribe(task.task_id, task.deployment);
-        }
-      });
-    } catch (error) {
-      console.error('Failed to sync with server:', error);
-    }
-  },
+    // Server synchronization
+    sync: async (deployment: string) => {
+      try {
+        // 1. Get running tasks from server
+        const serverTasks = await getRunningTasks({
+          client,
+          deploymentName: deployment,
+        });
 
-  // Stream subscription management
-  subscribe: (taskId: string, deployment: string) => {
-    const task = get().tasks[taskId];
-    if (!task) {
-      console.warn(`Task ${taskId} not found for subscription`);
-      return;
-    }
+        // 2. Update store with server tasks
+        const newTasksRecord = Object.fromEntries(
+          serverTasks.map((task) => [task.task_id, task])
+        );
+        set({ tasks: newTasksRecord });
 
-    // Check if already subscribed to prevent duplicate subscriptions
-    if (get().isSubscribed(taskId)) {
-      return;
-    }
-
-    // Create streaming callback
-    const callback: StreamingEventCallback = {
-      onData: (event: WorkflowEvent) => {
-        // Internal method to append event
-        set(state => ({
-          events: {
-            ...state.events,
-            [taskId]: [...(state.events[taskId] || []), event]
+        // 3. Auto-subscribe to running tasks
+        serverTasks.forEach((task) => {
+          if (!get().isSubscribed(task.task_id)) {
+            get().subscribe(task.task_id, task.deployment);
           }
-        }));
-      },
-      onFinish: () => {
-        // Update task status to complete
-        set(state => ({
-          tasks: {
-            ...state.tasks,
-            [taskId]: { 
-              ...state.tasks[taskId], 
-              status: 'complete', 
-              updatedAt: new Date() 
-            }
-          }
-        }));
-      },
-      onError: (error: Error) => {
-        // Ignore network errors caused by page refresh/unload
-        if (error.name === 'AbortError' || 
-            (error.name === 'TypeError' && error.message.includes('network error'))) {
-          return;
-        }
-        console.error(`Streaming error for task ${taskId}:`, error);
-        // Update task status to error
-        set(state => ({
-          tasks: {
-            ...state.tasks,
-            [taskId]: { 
-              ...state.tasks[taskId], 
-              status: 'error', 
-              updatedAt: new Date() 
-            }
-          }
-        }));
+        });
+      } catch (error) {
+        console.error("Failed to sync with server:", error);
       }
-    };
+    },
 
-    // Use fetchTaskEvents directly - it already handles SharedStreamingManager internally
-    fetchTaskEvents({
-      client,
-      deploymentName: deployment,
-      task: {
-        task_id: task.task_id,
-        session_id: task.session_id,
-        service_id: task.service_id,
-        input: task.input
-      }
-    }, callback).catch(error => {
-      // Ignore network errors caused by page refresh/unload
-      if (error.name === 'AbortError' || 
-          (error.name === 'TypeError' && error.message.includes('network error'))) {
+    // Stream subscription management
+    subscribe: (taskId: string, deployment: string) => {
+      const task = get().tasks[taskId];
+      if (!task) {
+        console.warn(`Task ${taskId} not found for subscription`);
         return;
       }
-      console.error(`Failed to start task events streaming for ${taskId}:`, error);
-      // Update task status to error
-      set(state => ({
-        tasks: {
-          ...state.tasks,
-          [taskId]: { 
-            ...state.tasks[taskId], 
-            status: 'error', 
-            updatedAt: new Date() 
+
+      // Check if already subscribed to prevent duplicate subscriptions
+      if (get().isSubscribed(taskId)) {
+        return;
+      }
+
+      // Create streaming callback
+      const callback: StreamingEventCallback = {
+        onData: (event: WorkflowEvent) => {
+          // Internal method to append event
+          set((state) => ({
+            events: {
+              ...state.events,
+              [taskId]: [...(state.events[taskId] || []), event],
+            },
+          }));
+        },
+        onFinish: () => {
+          // Update task status to complete
+          set((state) => ({
+            tasks: {
+              ...state.tasks,
+              [taskId]: {
+                ...state.tasks[taskId],
+                status: "complete",
+                updatedAt: new Date(),
+              },
+            },
+          }));
+        },
+        onError: (error: Error) => {
+          // Ignore network errors caused by page refresh/unload
+          if (
+            error.name === "AbortError" ||
+            (error.name === "TypeError" &&
+              error.message.includes("network error"))
+          ) {
+            return;
           }
+          console.error(`Streaming error for task ${taskId}:`, error);
+          // Update task status to error
+          set((state) => ({
+            tasks: {
+              ...state.tasks,
+              [taskId]: {
+                ...state.tasks[taskId],
+                status: "error",
+                updatedAt: new Date(),
+              },
+            },
+          }));
+        },
+      };
+
+      // Use fetchTaskEvents directly - it already handles SharedStreamingManager internally
+      fetchTaskEvents(
+        {
+          client,
+          deploymentName: deployment,
+          task: {
+            task_id: task.task_id,
+            session_id: task.session_id,
+            service_id: task.service_id,
+            input: task.input,
+          },
+        },
+        callback
+      ).catch((error) => {
+        // Ignore network errors caused by page refresh/unload
+        if (
+          error.name === "AbortError" ||
+          (error.name === "TypeError" &&
+            error.message.includes("network error"))
+        ) {
+          return;
         }
-      }));
-    });
-  },
+        console.error(
+          `Failed to start task events streaming for ${taskId}:`,
+          error
+        );
+        // Update task status to error
+        set((state) => ({
+          tasks: {
+            ...state.tasks,
+            [taskId]: {
+              ...state.tasks[taskId],
+              status: "error",
+              updatedAt: new Date(),
+            },
+          },
+        }));
+      });
+    },
 
-  unsubscribe: (taskId: string) => {
-    const task = get().tasks[taskId];
-    if (!task) return;
+    unsubscribe: (taskId: string) => {
+      const task = get().tasks[taskId];
+      if (!task) return;
 
-    const streamKey = `task:${taskId}:${task.deployment}`;
-    workflowStreamingManager.closeStream(streamKey);
-  },
+      const streamKey = `task:${taskId}:${task.deployment}`;
+      workflowStreamingManager.closeStream(streamKey);
+    },
 
-  isSubscribed: (taskId: string): boolean => {
-    const task = get().tasks[taskId];
-    if (!task) return false;
+    isSubscribed: (taskId: string): boolean => {
+      const task = get().tasks[taskId];
+      if (!task) return false;
 
-    const streamKey = `task:${taskId}:${task.deployment}`;
-    return workflowStreamingManager.isStreamActive(streamKey);
-  },
-}));
+      const streamKey = `task:${taskId}:${task.deployment}`;
+      return workflowStreamingManager.isStreamActive(streamKey);
+    },
+  }));

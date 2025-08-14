@@ -2,7 +2,7 @@ import type {
   ExtractedData,
   TypedAgentData,
   TypedAgentDataItems,
-} from "@llamaindex/cloud/beta/agent";
+} from "llama-cloud-services/beta/agent";
 import type {
   InvoiceData,
   ContractData,

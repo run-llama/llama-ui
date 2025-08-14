@@ -271,6 +271,8 @@
     "build": "tsup && npm run build:css",
     "build:css": "postcss src/styles.css -o dist/styles.css",
     "lint": "eslint src/**/*.{ts,tsx}",
+    "format": "prettier --write .",
+    "format-check": "prettier --check .",
     "test": "vitest",
     "coverage": "vitest run --coverage",
     "storybook": "storybook dev -p 6006",
@@ -317,14 +319,13 @@
     "zustand": "^5.0.6"
   },
   "peerDependencies": {
-    "@llamaindex/cloud": "^4.0.23",
     "@llamaindex/llama-deploy": "0.0.2",
+    "llama-cloud-services": "^0.3.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^4.0.1",
-    "@llamaindex/cloud": "^4.0.23",
     "@storybook/addon-a11y": "^9.0.13",
     "@storybook/addon-docs": "^9.0.13",
     "@storybook/addon-vitest": "^9.0.13",
@@ -346,9 +347,11 @@
     "eslint-plugin-react-hooks": "^5",
     "glob": "^11.0.3",
     "jsdom": "^26.1.0",
+    "llama-cloud-services": "^0.3.3",
     "msw": "^2.10.2",
     "msw-storybook-addon": "^2.0.5",
     "postcss-cli": "^11.0.0",
+    "prettier": "^3.6.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "storybook": "^9.0.17",

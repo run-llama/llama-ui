@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from "react";
 import type { ExtractedDataDisplayProps } from "./types";
 import { PropertyRenderer } from "./property-renderer";
@@ -8,11 +7,9 @@ import {
   getFieldLabelText,
 } from "./field-display-utils";
 import { reconcileDataWithJsonSchema } from "./schema-reconciliation";
-import { flattenConfidence } from "./confidence-utils";
 
 export function ExtractedDataDisplay({
-  data,
-  confidence = {},
+  extractedData,
   emptyMessage = "No extracted data available",
   onChange,
   editable = true,
@@ -20,17 +17,18 @@ export function ExtractedDataDisplay({
 }: ExtractedDataDisplayProps) {
   const [changedPaths, setChangedPaths] = useState<Set<string>>(new Set());
 
-  // Flatten confidence object to keypath: value format
-  const flattenedConfidence = useMemo(() => {
-    return flattenConfidence(confidence);
-  }, [confidence]);
+  // Extract data from extractedData
+  const { data } = extractedData;
 
   // Perform schema reconciliation if schema is provided
   const reconciliationResult = useMemo(() => {
     if (!jsonSchema) {
       return null;
     }
-    return reconcileDataWithJsonSchema(data, jsonSchema);
+    return reconcileDataWithJsonSchema(
+      data as Record<string, unknown>,
+      jsonSchema
+    );
   }, [data, jsonSchema]);
 
   // Use reconciled data if available, otherwise use original data
@@ -43,7 +41,7 @@ export function ExtractedDataDisplay({
       key,
       fieldMetadata,
       validationErrors,
-      [key],
+      [key]
     );
     const baseClasses = getFieldLabelClasses(fieldInfo);
     const finalClasses = additionalClasses
@@ -64,11 +62,11 @@ export function ExtractedDataDisplay({
   const handleUpdate = (
     path: string[],
     newValue: unknown,
-    additionalPaths?: string[][],
+    additionalPaths?: string[][]
   ) => {
     if (!editable || !onChange) return;
 
-    const newData = { ...data };
+    const newData = { ...(data as Record<string, unknown>) };
     let current: Record<string, unknown> = newData;
 
     // Navigate to the parent of the target property
@@ -96,7 +94,7 @@ export function ExtractedDataDisplay({
   return (
     <div>
       {Object.keys(jsonSchema?.properties || {}).map((key) => {
-        const value = displayData[key];
+        const value = (displayData as Record<string, unknown>)[key];
         // If the value is an array of objects, show key on separate line with table below
         if (
           Array.isArray(value) &&
@@ -112,9 +110,11 @@ export function ExtractedDataDisplay({
                   keyPath={[key]}
                   value={value}
                   onUpdate={handleUpdate}
-                  confidence={flattenedConfidence}
                   changedPaths={changedPaths}
-                  fieldMetadata={fieldMetadata}
+                  metadata={{
+                    schema: fieldMetadata,
+                    extracted: extractedData.field_metadata,
+                  }}
                   validationErrors={validationErrors}
                 />
               </div>
@@ -130,9 +130,11 @@ export function ExtractedDataDisplay({
                 keyPath={[key]}
                 value={value}
                 onUpdate={handleUpdate}
-                confidence={flattenedConfidence}
                 changedPaths={changedPaths}
-                fieldMetadata={fieldMetadata}
+                metadata={{
+                  schema: fieldMetadata,
+                  extracted: extractedData.field_metadata,
+                }}
                 validationErrors={validationErrors}
               />
             </div>
@@ -148,9 +150,11 @@ export function ExtractedDataDisplay({
                     keyPath={[key]}
                     value={value}
                     onUpdate={handleUpdate}
-                    confidence={flattenedConfidence}
                     changedPaths={changedPaths}
-                    fieldMetadata={fieldMetadata}
+                    metadata={{
+                      schema: fieldMetadata,
+                      extracted: extractedData.field_metadata,
+                    }}
                     validationErrors={validationErrors}
                   />
                 </div>

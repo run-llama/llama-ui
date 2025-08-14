@@ -4,6 +4,7 @@ import { within, userEvent, screen } from "@storybook/test";
 import { useState } from "react";
 import { EditableField } from "../../src/extracted-data/editable-field";
 import { PrimitiveType } from "../../src/extracted-data/primitive-validation";
+import type { ExtractedFieldMetadata } from "llama-cloud-services/beta/agent";
 
 const meta: Meta<typeof EditableField> = {
   title: "Components/ExtractedData/EditableField",
@@ -19,31 +20,16 @@ type Story = StoryObj<typeof EditableField>;
 export const Basic: Story = {
   args: {
     value: "Sample text",
-    confidence: 0.95,
   },
   render: function Render(args) {
     const [value, setValue] = useState(args.value);
-    const [confidence, setConfidence] = useState(args.confidence);
 
     const handleSave = (newValue: unknown) => {
       console.log("Saved:", newValue);
       setValue(newValue);
     };
 
-    const handleConfidenceUpdate = (newConfidence: number) => {
-      console.log("Confidence updated:", newConfidence);
-      setConfidence(newConfidence);
-    };
-
-    return (
-      <EditableField
-        {...args}
-        value={value}
-        onSave={handleSave}
-        confidence={confidence}
-        onConfidenceUpdate={handleConfidenceUpdate}
-      />
-    );
+    return <EditableField {...args} value={value} onSave={handleSave} />;
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -62,7 +48,7 @@ export const Basic: Story = {
     const editValueText = await screen.findByText(
       "Edit Value",
       {},
-      { timeout: 1000 },
+      { timeout: 1000 }
     );
     expect(editValueText).toBeInTheDocument();
 
@@ -87,7 +73,7 @@ export const Basic: Story = {
 export const LowConfidence: Story = {
   args: {
     value: "Low confidence value",
-    confidence: 0.65,
+    metadata: { confidence: 0.65, citation: [] },
   },
   render: function Render(args) {
     const [value, setValue] = useState(args.value);
@@ -111,7 +97,6 @@ export const LowConfidence: Story = {
 export const ChangedState: Story = {
   args: {
     value: "Changed value",
-    confidence: 0.92,
     isChanged: true,
   },
   render: function Render(args) {
@@ -132,7 +117,6 @@ export const ChangedState: Story = {
 export const NoBorder: Story = {
   args: {
     value: "No border field",
-    confidence: 0.88,
     showBorder: false,
   },
   render: function Render(args) {
@@ -162,7 +146,6 @@ export const NoBorder: Story = {
 export const EscapeToCancel: Story = {
   args: {
     value: "Original value",
-    confidence: 0.75,
   },
   render: function Render(args) {
     const [value, setValue] = useState(args.value);
@@ -197,7 +180,6 @@ export const EscapeToCancel: Story = {
 export const NumberType: Story = {
   args: {
     value: 42,
-    confidence: 0.92,
     expectedType: PrimitiveType.NUMBER,
   },
   render: function Render(args) {
@@ -241,7 +223,6 @@ export const NumberType: Story = {
 export const NumberClearValue: Story = {
   args: {
     value: 100,
-    confidence: 0.85,
     expectedType: PrimitiveType.NUMBER,
   },
   render: function Render(args) {
@@ -270,7 +251,7 @@ export const NumberClearValue: Story = {
     // Test that empty number becomes null, displayed as blank
     await new Promise((resolve) => setTimeout(resolve, 100));
     const fieldElement = canvasElement.querySelector(
-      'div[class*="cursor-pointer"] span',
+      'div[class*="cursor-pointer"] span'
     );
     expect(fieldElement?.textContent).toBe("");
   },
@@ -279,7 +260,6 @@ export const NumberClearValue: Story = {
 export const RequiredNumber: Story = {
   args: {
     value: 50,
-    confidence: 0.9,
     expectedType: PrimitiveType.NUMBER,
     required: true,
   },
@@ -328,7 +308,6 @@ export const RequiredNumber: Story = {
 export const BooleanType: Story = {
   args: {
     value: true,
-    confidence: 0.88,
     expectedType: PrimitiveType.BOOLEAN,
   },
   render: function Render(args) {
@@ -375,7 +354,6 @@ export const BooleanType: Story = {
 export const BooleanToggle: Story = {
   args: {
     value: false,
-    confidence: 0.72,
     expectedType: PrimitiveType.BOOLEAN,
   },
   render: function Render(args) {
@@ -415,7 +393,6 @@ export const BooleanToggle: Story = {
 export const StringEdit: Story = {
   args: {
     value: "Hello World",
-    confidence: 0.95,
     expectedType: PrimitiveType.STRING,
   },
   render: function Render(args) {
@@ -435,7 +412,7 @@ export const StringEdit: Story = {
 
     // Test input appears (textarea for string types)
     const input = screen.getByDisplayValue(
-      "Hello World",
+      "Hello World"
     ) as HTMLTextAreaElement;
     expect(input).toBeInTheDocument();
     expect(input.tagName.toLowerCase()).toBe("textarea");
@@ -457,7 +434,6 @@ export const StringEdit: Story = {
 export const CancelWithButton: Story = {
   args: {
     value: "Cancel test",
-    confidence: 0.8,
     expectedType: PrimitiveType.STRING,
   },
   render: function Render(args) {
@@ -488,5 +464,51 @@ export const CancelWithButton: Story = {
     await new Promise((resolve) => setTimeout(resolve, 100));
     expect(canvas.getByText("Cancel test")).toBeInTheDocument();
     expect(canvas.queryByText("Edit Value")).not.toBeInTheDocument();
+  },
+};
+
+export const OnClickMetadata: Story = {
+  args: {
+    value: "Clickable value",
+    metadata: {
+      confidence: 0.42,
+      citation: [{ page: 2, matching_text: "Invoice #8336" }],
+    },
+  },
+  render: function Render(args) {
+    const [value, setValue] = useState(args.value);
+    const [payload, setPayload] = useState<{
+      value: unknown;
+      metadata?: ExtractedFieldMetadata;
+    } | null>(null);
+
+    return (
+      <div>
+        <EditableField
+          {...args}
+          value={value}
+          onSave={setValue}
+          onClick={(p) => setPayload(p)}
+        />
+        <pre data-testid="click-payload">
+          {payload ? JSON.stringify(payload) : ""}
+        </pre>
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // Click field to trigger onClick
+    const field = canvas.getByText("Clickable value");
+    await userEvent.click(field);
+
+    // Wait for payload to be rendered
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    const payloadEl = canvas.getByTestId("click-payload");
+    expect(payloadEl.textContent || "").toContain("Clickable value");
+    expect(payloadEl.textContent || "").toContain("0.42");
+    expect(payloadEl.textContent || "").toContain("Invoice #8336");
   },
 };

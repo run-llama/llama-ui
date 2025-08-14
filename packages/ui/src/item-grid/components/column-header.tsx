@@ -27,7 +27,7 @@ export function ColumnHeader<T = unknown>({
       <div
         className={cn(
           "flex items-center justify-center space-x-1",
-          column.sortable && "cursor-pointer hover:text-primary",
+          column.sortable && "cursor-pointer hover:text-primary"
         )}
         onClick={() => column.sortable && onSort?.(sortKey)}
       >

@@ -11,6 +11,8 @@
     "storybook": "pnpm --filter @llamaindex/ui storybook",
     "build:all": "pnpm --filter @llamaindex/ui build",
     "lint": "pnpm --filter @llamaindex/ui lint",
+    "format": "pnpm --filter @llamaindex/ui format",
+    "format-check": "pnpm --filter @llamaindex/ui format-check",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "changeset publish"

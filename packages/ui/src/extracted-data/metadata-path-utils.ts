@@ -13,7 +13,7 @@ import { lookupFieldMetadata } from "./metadata-lookup-utils";
 export function buildTableHeaderMetadataPath(
   parentKeyPath: string[],
   columnPath: string[],
-  depth: number,
+  depth: number
 ): string[] {
   // For table headers, use index 0 as reference for metadata lookup
   // This converts paths like ["items"] + ["period", "start"] at depth 1
@@ -36,7 +36,7 @@ export function buildTableHeaderMetadataPath(
  */
 export function findFieldMetadata(
   keyPath: string[],
-  fieldMetadata: Record<string, FieldMetadata>,
+  fieldMetadata: Record<string, FieldMetadata>
 ): FieldMetadata | undefined {
   return lookupFieldMetadata(keyPath, fieldMetadata);
 }

@@ -2,7 +2,7 @@ import type {
   ExtractedData,
   FilterOperation,
   TypedAgentData,
-} from "@llamaindex/cloud/beta/agent";
+} from "llama-cloud-services/beta/agent";
 import type { ReactNode } from "react";
 
 // Types
@@ -20,7 +20,7 @@ export interface PaginationState {
 
 export interface ItemGridHooks {
   deleteItem?: (
-    itemId: string,
+    itemId: string
   ) => Promise<{ success: boolean; error?: string }>;
 }
 

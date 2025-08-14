@@ -34,7 +34,7 @@ export interface FileUploaderProps {
   multiple?: boolean;
   onSuccess: (
     data: FileUploadData[],
-    fieldValues: Record<string, string>,
+    fieldValues: Record<string, string>
   ) => Promise<void>;
   trigger?: React.ReactNode;
   /** Set to true while processing the file after a callback, in order to show a spinner */
@@ -122,7 +122,7 @@ export function FileUploader({
       const validationError = validateFile(
         file,
         allowedFileTypes,
-        maxFileSizeBytes,
+        maxFileSizeBytes
       );
       if (!validationError) {
         validFiles.push(file);
@@ -217,7 +217,7 @@ export function FileUploader({
     return inputFields.every(
       (field) =>
         !field.required ||
-        (fieldValues[field.key] && fieldValues[field.key].trim()),
+        (fieldValues[field.key] && fieldValues[field.key].trim())
     );
   };
   return (

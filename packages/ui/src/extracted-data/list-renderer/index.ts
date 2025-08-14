@@ -1,2 +1,6 @@
 export { ListRenderer } from "./list-renderer";
-export { buildArrayItemPath, isArrayItemChanged, getArrayItemDefaultValue } from "./list-renderer-utils";
+export {
+  buildArrayItemPath,
+  isArrayItemChanged,
+  getArrayItemDefaultValue,
+} from "./list-renderer-utils";

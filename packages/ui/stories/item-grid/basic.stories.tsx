@@ -6,7 +6,7 @@ import type {
   AgentClient,
   ExtractedData,
   TypedAgentData,
-} from "@llamaindex/cloud/beta/agent";
+} from "llama-cloud-services/beta/agent";
 
 // Meta configuration for the ItemGrid component
 const meta = {

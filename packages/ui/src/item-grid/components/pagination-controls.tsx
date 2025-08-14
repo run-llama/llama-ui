@@ -59,7 +59,7 @@ export function PaginationControls({
                   onClick={() => onPaginationChange({ page: 0, size: option })}
                   className={cn(
                     "cursor-pointer px-2 py-1 text-sm",
-                    size === option && "bg-accent font-bold text-primary",
+                    size === option && "bg-accent font-bold text-primary"
                   )}
                 >
                   {option}
@@ -79,7 +79,7 @@ export function PaginationControls({
               className={cn(
                 page === 0 && "pointer-events-none opacity-50",
                 "text-base-foreground",
-                "cursor-pointer",
+                "cursor-pointer"
               )}
             />
           </PaginationItem>
@@ -98,13 +98,13 @@ export function PaginationControls({
                   className={cn(
                     "text-base-foreground",
                     "size-7",
-                    "cursor-pointer",
+                    "cursor-pointer"
                   )}
                 >
                   {num + 1}
                 </PaginationLink>
               </PaginationItem>
-            ),
+            )
           )}
           <PaginationItem>
             <PaginationNext
@@ -115,7 +115,7 @@ export function PaginationControls({
               className={cn(
                 page >= totalPages - 1 && "pointer-events-none opacity-50",
                 "text-base-foreground",
-                "cursor-pointer",
+                "cursor-pointer"
               )}
             />
           </PaginationItem>

@@ -49,7 +49,7 @@ describe("field-display-utils path construction", () => {
       "receiptNumber",
       mockFieldMetadata,
       [],
-      ["receiptNumber"],
+      ["receiptNumber"]
     );
     expect(result.name).toBe("Receipt Number");
     expect(result.isRequired).toBe(true);
@@ -60,7 +60,7 @@ describe("field-display-utils path construction", () => {
       "name",
       mockFieldMetadata,
       [],
-      ["merchant", "name"],
+      ["merchant", "name"]
     );
     expect(result.name).toBe("Merchant Name");
     expect(result.isRequired).toBe(true);
@@ -72,7 +72,7 @@ describe("field-display-utils path construction", () => {
       "description",
       mockFieldMetadata,
       [],
-      ["items", "0", "description"],
+      ["items", "0", "description"]
     );
     expect(descResult.name).toBe("Description");
     expect(descResult.isRequired).toBe(true);
@@ -82,7 +82,7 @@ describe("field-display-utils path construction", () => {
       "start",
       mockFieldMetadata,
       [],
-      ["items", "0", "period", "start"],
+      ["items", "0", "period", "start"]
     );
     expect(startResult.name).toBe("Start Date");
     expect(startResult.isRequired).toBe(true);
@@ -92,7 +92,7 @@ describe("field-display-utils path construction", () => {
       "end",
       mockFieldMetadata,
       [],
-      ["items", "0", "period", "end"],
+      ["items", "0", "period", "end"]
     );
     expect(endResult.name).toBe("End Date");
     expect(endResult.isRequired).toBe(true);
@@ -103,7 +103,7 @@ describe("field-display-utils path construction", () => {
       "unknownField",
       mockFieldMetadata,
       [],
-      ["unknownField"],
+      ["unknownField"]
     );
     expect(result.name).toBe("UnknownField"); // formatFieldName result for camelCase
     expect(result.isRequired).toBe(false);
@@ -131,7 +131,7 @@ describe("field-display-utils path construction", () => {
         lastKey,
         mockFieldMetadata,
         [],
-        keyPath,
+        keyPath
       );
 
       // If the path construction is correct, we should find the metadata

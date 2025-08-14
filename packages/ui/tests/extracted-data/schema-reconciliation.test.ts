@@ -283,10 +283,10 @@ describe("JSON Schema-based Schema Reconciliation", () => {
         expect(isFieldRequiredAtPath(["name"], mockMetadata)).toBe(true);
         expect(isFieldRequiredAtPath(["email"], mockMetadata)).toBe(false);
         expect(isFieldRequiredAtPath(["address", "street"], mockMetadata)).toBe(
-          true,
+          true
         );
         expect(isFieldRequiredAtPath(["nonexistent"], mockMetadata)).toBe(
-          false,
+          false
         );
       });
     });
@@ -296,10 +296,10 @@ describe("JSON Schema-based Schema Reconciliation", () => {
         expect(wasFieldMissingAtPath(["name"], mockMetadata)).toBe(false);
         expect(wasFieldMissingAtPath(["email"], mockMetadata)).toBe(true);
         expect(wasFieldMissingAtPath(["address", "street"], mockMetadata)).toBe(
-          false,
+          false
         );
         expect(wasFieldMissingAtPath(["nonexistent"], mockMetadata)).toBe(
-          false,
+          false
         );
       });
     });
@@ -307,13 +307,13 @@ describe("JSON Schema-based Schema Reconciliation", () => {
     describe("getFieldMetadataAtPath", () => {
       it("should return correct metadata", () => {
         expect(getFieldMetadataAtPath(["name"], mockMetadata)).toEqual(
-          mockMetadata.name,
+          mockMetadata.name
         );
         expect(getFieldMetadataAtPath(["email"], mockMetadata)).toEqual(
-          mockMetadata.email,
+          mockMetadata.email
         );
         expect(getFieldMetadataAtPath(["nonexistent"], mockMetadata)).toBe(
-          null,
+          null
         );
       });
     });
@@ -337,10 +337,10 @@ describe("JSON Schema-based Schema Reconciliation", () => {
           mockErrors[1],
         ]);
         expect(
-          getValidationErrorsAtPath(["address", "street"], mockErrors),
+          getValidationErrorsAtPath(["address", "street"], mockErrors)
         ).toEqual([mockErrors[2]]);
         expect(getValidationErrorsAtPath(["nonexistent"], mockErrors)).toEqual(
-          [],
+          []
         );
       });
     });

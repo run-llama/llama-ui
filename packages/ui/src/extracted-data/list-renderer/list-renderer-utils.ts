@@ -13,7 +13,7 @@ export function buildArrayItemPath(keyPath: string[], index: number): string {
 export function isArrayItemChanged(
   changedPaths: Set<string> | undefined,
   keyPath: string[],
-  index: number,
+  index: number
 ): boolean {
   if (!changedPaths) return false;
   const fullPath = buildArrayItemPath(keyPath, index);
@@ -34,7 +34,7 @@ export function isArrayItemChanged(
  */
 export function getArrayItemDefaultValue(
   keyPath: string[],
-  fieldMetadata: Record<string, FieldMetadata>,
+  fieldMetadata: Record<string, FieldMetadata>
 ): string | number | boolean {
   // Use shared metadata lookup utility - no code duplication!
   const itemFieldPath = [...keyPath, "*"];

@@ -152,38 +152,81 @@ const sampleSchema = {
   required: ["receiptNumber", "invoiceNumber", "tags"], // email and totalAmount are optional
 };
 
-const sampleConfidence = {
-  receiptNumber: 0.95,
-  invoiceNumber: 0.87,
-  merchant: {
-    name: 0.92,
-    address: {
-      street: 0.78,
-      city: 0.89,
-    },
+// Create field_metadata for the sample data
+const sampleFieldMetadata = {
+  receiptNumber: {
+    confidence: 0.95,
+    reasoning: "Receipt number clearly identified",
+    citation: [{ page_number: 1, matching_text: "uyte1213" }],
   },
-  items: [{ description: 0.94 }, { description: 0.88 }],
-  tags: [0.96, 0.85],
+  invoiceNumber: {
+    confidence: 0.87,
+    reasoning: "Invoice number extracted from header",
+    citation: [{ page_number: 1, matching_text: "8336" }],
+  },
+  "merchant.name": {
+    confidence: 0.92,
+    reasoning: "Merchant name identified",
+    citation: [{ page_number: 1, matching_text: "Wehner LLC" }],
+  },
+  "merchant.address.street": {
+    confidence: 0.78,
+    reasoning: "Street address extracted",
+    citation: [{ page_number: 1, matching_text: "Princess" }],
+  },
+  "merchant.address.city": {
+    confidence: 0.89,
+    reasoning: "City name identified",
+    citation: [{ page_number: 1, matching_text: "Funkhaven" }],
+  },
+  "items.0.description": {
+    confidence: 0.94,
+    reasoning: "First item description extracted",
+    citation: [{ page_number: 1, matching_text: "Labour Charges" }],
+  },
+  "items.1.description": {
+    confidence: 0.88,
+    reasoning: "Second item description extracted",
+    citation: [{ page_number: 1, matching_text: "Material" }],
+  },
+  "tags.0": {
+    confidence: 0.96,
+    reasoning: "First tag identified",
+    citation: [{ page_number: 1, matching_text: "urgent" }],
+  },
+  "tags.1": {
+    confidence: 0.85,
+    reasoning: "Second tag identified",
+    citation: [{ page_number: 1, matching_text: "paid" }],
+  },
 };
 
+function BasicStoryComponent() {
+  const [data, setData] = useState(sampleData);
+
+  const handleChange = (updatedData: Record<string, unknown>) => {
+    setData(updatedData as typeof sampleData);
+  };
+
+  const extractedData = {
+    original_data: data,
+    data,
+    status: "completed" as const,
+    field_metadata: sampleFieldMetadata,
+  };
+
+  return (
+    <ExtractedDataDisplay
+      extractedData={extractedData}
+      editable={true}
+      onChange={handleChange}
+      jsonSchema={sampleSchema}
+    />
+  );
+}
+
 export const Basic: Story = {
-  render: () => {
-    const [data, setData] = useState(sampleData);
-
-    const handleChange = (updatedData: Record<string, unknown>) => {
-      setData(updatedData as typeof sampleData);
-    };
-
-    return (
-      <ExtractedDataDisplay
-        data={data}
-        confidence={sampleConfidence}
-        editable={true}
-        onChange={handleChange}
-        jsonSchema={sampleSchema}
-      />
-    );
-  },
+  render: () => <BasicStoryComponent />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
@@ -270,12 +313,12 @@ export const Basic: Story = {
       await new Promise((resolve) => setTimeout(resolve, 500));
       const receiptFieldsRetry = canvas.getAllByText("NEW123");
       const changedReceiptField = receiptFieldsRetry[0].closest(
-        '[class*="bg-green-50"]',
+        '[class*="bg-green-50"]'
       );
       expect(changedReceiptField).toBeInTheDocument();
     } else {
       const changedReceiptField = receiptFields[0].closest(
-        '[class*="bg-green-50"]',
+        '[class*="bg-green-50"]'
       );
       expect(changedReceiptField).toBeInTheDocument();
     }
@@ -294,7 +337,7 @@ export const Basic: Story = {
     await new Promise((resolve) => setTimeout(resolve, 300));
     const merchantFields = canvas.getAllByText(/Updated Company LLC/);
     const changedMerchantField = merchantFields[0].closest(
-      '[class*="bg-green-50"]',
+      '[class*="bg-green-50"]'
     );
     expect(changedMerchantField).toBeInTheDocument();
 
@@ -317,7 +360,7 @@ export const Basic: Story = {
 
     // Verify the updated tag has green background
     const tagGreenBg = highPriorityElements[0].closest(
-      '[class*="bg-green-50"]',
+      '[class*="bg-green-50"]'
     );
     expect(tagGreenBg).toBeInTheDocument();
 
@@ -339,199 +382,288 @@ export const Basic: Story = {
 
     // Verify the updated table cell has green background
     const tableGreenBg = updatedLabourElements[0].closest(
-      '[class*="bg-green-50"]',
+      '[class*="bg-green-50"]'
     );
     expect(tableGreenBg).toBeInTheDocument();
   },
 };
 
-export const DataUpdateTests: Story = {
-  render: () => {
-    const initialData = {
-      title: "Test Document",
-      amount: 1000,
-      tags: ["tag1", "tag2"],
-      scores: [85, 92],
-      flags: [true, false],
+// Create a component for DataUpdateTests story to use hooks properly
+function DataUpdateTestsComponent() {
+  const initialData = {
+    title: "Test Document",
+    amount: 1000,
+    tags: ["tag1", "tag2"],
+    scores: [85, 92],
+    flags: [true, false],
+    metadata: {
+      version: "1.2.3",
+      priority: 5,
+      published: false,
+    },
+    items: [
+      {
+        name: "Item 1",
+        price: 100,
+        category: "service",
+        active: true,
+        details: {
+          supplier: "Supplier A",
+          location: "Warehouse 1",
+          verified: false,
+        },
+      },
+      {
+        name: "Item 2",
+        price: 200,
+        category: "material",
+        active: false,
+        details: {
+          supplier: "Supplier B",
+          location: "Warehouse 2",
+          verified: true,
+        },
+      },
+    ],
+  };
+
+  // Create field_metadata for the data
+  const fieldMetadata = {
+    title: {
+      confidence: 0.95,
+      reasoning: "Document title extracted from header",
+      citation: [{ page_number: 1, matching_text: "Test Document" }],
+    },
+    amount: {
+      confidence: 0.92,
+      reasoning: "Amount extracted from financial section",
+      citation: [{ page_number: 1, matching_text: "1000" }],
+    },
+    "tags.0": {
+      confidence: 0.88,
+      reasoning: "First tag identified",
+      citation: [{ page_number: 1, matching_text: "tag1" }],
+    },
+    "tags.1": {
+      confidence: 0.87,
+      reasoning: "Second tag identified",
+      citation: [{ page_number: 1, matching_text: "tag2" }],
+    },
+    "scores.0": {
+      confidence: 0.91,
+      reasoning: "First score extracted",
+      citation: [{ page_number: 1, matching_text: "85" }],
+    },
+    "scores.1": {
+      confidence: 0.89,
+      reasoning: "Second score extracted",
+      citation: [{ page_number: 1, matching_text: "92" }],
+    },
+    "flags.0": {
+      confidence: 0.94,
+      reasoning: "First flag extracted",
+      citation: [{ page_number: 1, matching_text: "true" }],
+    },
+    "flags.1": {
+      confidence: 0.93,
+      reasoning: "Second flag extracted",
+      citation: [{ page_number: 1, matching_text: "false" }],
+    },
+    "metadata.version": {
+      confidence: 0.96,
+      reasoning: "Version number identified",
+      citation: [{ page_number: 1, matching_text: "1.2.3" }],
+    },
+    "metadata.priority": {
+      confidence: 0.9,
+      reasoning: "Priority level extracted",
+      citation: [{ page_number: 1, matching_text: "5" }],
+    },
+    "metadata.published": {
+      confidence: 0.85,
+      reasoning: "Published status identified",
+      citation: [{ page_number: 1, matching_text: "false" }],
+    },
+    "items.0.name": {
+      confidence: 0.92,
+      reasoning: "First item name extracted",
+      citation: [{ page_number: 1, matching_text: "Item 1" }],
+    },
+    "items.0.price": {
+      confidence: 0.89,
+      reasoning: "First item price extracted",
+      citation: [{ page_number: 1, matching_text: "100" }],
+    },
+    "items.1.name": {
+      confidence: 0.91,
+      reasoning: "Second item name extracted",
+      citation: [{ page_number: 1, matching_text: "Item 2" }],
+    },
+    "items.1.price": {
+      confidence: 0.88,
+      reasoning: "Second item price extracted",
+      citation: [{ page_number: 1, matching_text: "200" }],
+    },
+  };
+
+  const schema: JSONSchema.ObjectSchema = {
+    type: "object",
+    properties: {
+      title: { type: "string", title: "Title" },
+      amount: { type: "number", title: "Amount" },
+      tags: {
+        type: "array",
+        title: "Tags",
+        items: { type: "string" },
+      },
+      scores: {
+        type: "array",
+        title: "Scores",
+        items: { type: "number" },
+      },
+      flags: {
+        type: "array",
+        title: "Flags",
+        items: { type: "boolean" },
+      },
       metadata: {
-        version: "1.2.3",
-        priority: 5,
-        published: false,
+        type: "object",
+        title: "Metadata",
+        properties: {
+          version: { type: "string", title: "Version" },
+          priority: { type: "number", title: "Priority" },
+          published: { type: "boolean", title: "Published" },
+        },
+        required: ["version", "priority"],
       },
-      items: [
-        {
-          name: "Item 1",
-          price: 100,
-          category: "service",
-          active: true,
-          details: {
-            supplier: "Supplier A",
-            location: "Warehouse 1",
-            verified: false,
-          },
-        },
-        {
-          name: "Item 2",
-          price: 200,
-          category: "material",
-          active: false,
-          details: {
-            supplier: "Supplier B",
-            location: "Warehouse 2",
-            verified: true,
-          },
-        },
-      ],
-    };
-
-    const schema: JSONSchema.ObjectSchema = {
-      type: "object",
-      properties: {
-        title: { type: "string", title: "Title" },
-        amount: { type: "number", title: "Amount" },
-        tags: {
-          type: "array",
-          title: "Tags",
-          items: { type: "string" },
-        },
-        scores: {
-          type: "array",
-          title: "Scores",
-          items: { type: "number" },
-        },
-        flags: {
-          type: "array",
-          title: "Flags",
-          items: { type: "boolean" },
-        },
-        metadata: {
-          type: "object",
-          title: "Metadata",
-          properties: {
-            version: { type: "string", title: "Version" },
-            priority: { type: "number", title: "Priority" },
-            published: { type: "boolean", title: "Published" },
-          },
-          required: ["version", "priority"],
-        },
+      items: {
+        type: "array",
+        title: "Items",
         items: {
-          type: "array",
-          title: "Items",
-          items: {
-            type: "object",
-            properties: {
-              name: { type: "string", title: "Name" },
-              price: { type: "number", title: "Price" },
-              category: { type: "string", title: "Category" },
-              active: { type: "boolean", title: "Active" },
-              details: {
-                type: "object",
-                title: "Details",
-                properties: {
-                  supplier: { type: "string", title: "Supplier" },
-                  location: { type: "string", title: "Location" },
-                  verified: { type: "boolean", title: "Verified" },
-                },
-                required: ["supplier", "location"],
+          type: "object",
+          properties: {
+            name: { type: "string", title: "Name" },
+            price: { type: "number", title: "Price" },
+            category: { type: "string", title: "Category" },
+            active: { type: "boolean", title: "Active" },
+            details: {
+              type: "object",
+              title: "Details",
+              properties: {
+                supplier: { type: "string", title: "Supplier" },
+                location: { type: "string", title: "Location" },
+                verified: { type: "boolean", title: "Verified" },
               },
+              required: ["supplier", "location"],
             },
-            required: ["name", "price"],
           },
+          required: ["name", "price"],
         },
       },
-      required: ["title", "amount"],
-    };
+    },
+    required: ["title", "amount"],
+  };
 
-    const [data, setData] = useState(initialData);
-    const [updateCount, setUpdateCount] = useState(0);
+  const [data, setData] = useState(initialData);
+  const [updateCount, setUpdateCount] = useState(0);
 
-    const handleChange = (updatedData: Record<string, unknown>) => {
-      console.log("Data update received:", updatedData);
-      setData(updatedData as typeof initialData);
-      setUpdateCount((prev) => prev + 1);
-    };
+  const handleChange = (updatedData: Record<string, unknown>) => {
+    console.log("Data update received:", updatedData);
+    setData(updatedData as typeof initialData);
+    setUpdateCount((prev) => prev + 1);
+  };
 
-    return (
-      <div style={{ display: "flex", gap: "20px" }}>
-        {/* Left panel: ExtractedDataDisplay */}
-        <div style={{ flex: 1 }}>
-          <ExtractedDataDisplay
-            data={data}
-            editable={true}
-            onChange={handleChange}
-            jsonSchema={schema}
-          />
+  // Create extractedData structure
+  const extractedData = {
+    original_data: initialData,
+    data,
+    status: "completed" as const,
+    field_metadata: fieldMetadata,
+  };
 
-          <div
-            data-testid="update-counter"
-            style={{ marginTop: "10px", fontSize: "12px", fontWeight: "bold" }}
-          >
-            Updates: {updateCount}
-          </div>
-        </div>
+  return (
+    <div style={{ display: "flex", gap: "20px" }}>
+      {/* Left panel: ExtractedDataDisplay */}
+      <div style={{ flex: 1 }}>
+        <ExtractedDataDisplay
+          extractedData={extractedData}
+          editable={true}
+          onChange={handleChange}
+          jsonSchema={schema}
+        />
 
-        {/* Right panel: JSON comparison */}
-        <div style={{ flex: 1, maxWidth: "500px" }}>
-          <div style={{ marginBottom: "15px" }}>
-            <h4 style={{ fontSize: "14px", margin: "5px 0", color: "#666" }}>
-              Original Data:
-            </h4>
-            <pre
-              style={{
-                fontSize: "11px",
-                background: "#f5f5f5",
-                padding: "8px",
-                borderRadius: "4px",
-                maxHeight: "150px",
-                overflow: "auto",
-              }}
-            >
-              {JSON.stringify(initialData, null, 2)}
-            </pre>
-          </div>
-
-          <div style={{ marginBottom: "15px" }}>
-            <h4 style={{ fontSize: "14px", margin: "5px 0", color: "#666" }}>
-              Schema:
-            </h4>
-            <pre
-              style={{
-                fontSize: "11px",
-                background: "#e8f4fd",
-                padding: "8px",
-                borderRadius: "4px",
-                maxHeight: "150px",
-                overflow: "auto",
-              }}
-            >
-              {JSON.stringify(schema, null, 2)}
-            </pre>
-          </div>
-
-          <div>
-            <h4 style={{ fontSize: "14px", margin: "5px 0", color: "#666" }}>
-              Current Data:
-            </h4>
-            <pre
-              data-testid="current-data"
-              style={{
-                fontSize: "11px",
-                background: updateCount > 0 ? "#f0f9f0" : "#f5f5f5",
-                padding: "8px",
-                borderRadius: "4px",
-                maxHeight: "200px",
-                overflow: "auto",
-                border:
-                  updateCount > 0 ? "2px solid #4caf50" : "1px solid #ddd",
-              }}
-            >
-              {JSON.stringify(data, null, 2)}
-            </pre>
-          </div>
+        <div
+          data-testid="update-counter"
+          style={{ marginTop: "10px", fontSize: "12px", fontWeight: "bold" }}
+        >
+          Updates: {updateCount}
         </div>
       </div>
-    );
-  },
+
+      {/* Right panel: JSON comparison */}
+      <div style={{ flex: 1, maxWidth: "500px" }}>
+        <div style={{ marginBottom: "15px" }}>
+          <h4 style={{ fontSize: "14px", margin: "5px 0", color: "#666" }}>
+            Original Data:
+          </h4>
+          <pre
+            style={{
+              fontSize: "11px",
+              background: "#f5f5f5",
+              padding: "8px",
+              borderRadius: "4px",
+              maxHeight: "150px",
+              overflow: "auto",
+            }}
+          >
+            {JSON.stringify(initialData, null, 2)}
+          </pre>
+        </div>
+
+        <div style={{ marginBottom: "15px" }}>
+          <h4 style={{ fontSize: "14px", margin: "5px 0", color: "#666" }}>
+            Schema:
+          </h4>
+          <pre
+            style={{
+              fontSize: "11px",
+              background: "#e8f4fd",
+              padding: "8px",
+              borderRadius: "4px",
+              maxHeight: "150px",
+              overflow: "auto",
+            }}
+          >
+            {JSON.stringify(schema, null, 2)}
+          </pre>
+        </div>
+
+        <div>
+          <h4 style={{ fontSize: "14px", margin: "5px 0", color: "#666" }}>
+            Current Data:
+          </h4>
+          <pre
+            data-testid="current-data"
+            style={{
+              fontSize: "11px",
+              background: updateCount > 0 ? "#f0f9f0" : "#f5f5f5",
+              padding: "8px",
+              borderRadius: "4px",
+              maxHeight: "200px",
+              overflow: "auto",
+              border: updateCount > 0 ? "2px solid #4caf50" : "1px solid #ddd",
+            }}
+          >
+            {JSON.stringify(data, null, 2)}
+          </pre>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export const DataUpdateTests: Story = {
+  render: () => <DataUpdateTestsComponent />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
@@ -541,7 +673,7 @@ export const DataUpdateTests: Story = {
     const waitForUpdate = async (expectedCount: number) => {
       await new Promise((resolve) => setTimeout(resolve, 300));
       expect(canvas.getByTestId("update-counter")).toHaveTextContent(
-        `Updates: ${expectedCount}`,
+        `Updates: ${expectedCount}`
       );
     };
 
@@ -745,7 +877,7 @@ export const DataUpdateTests: Story = {
     if (tableCells.length > 0) {
       // Find the clickable div with cursor-pointer class (EditableField wrapper)
       const editableDiv = tableCells[0].querySelector(
-        'div[class*="cursor-pointer"]',
+        'div[class*="cursor-pointer"]'
       ) as HTMLElement;
       console.log("Found editable div:", !!editableDiv);
 
@@ -819,7 +951,7 @@ export const DataUpdateTests: Story = {
     expect(currentDataText).toContain("300");
 
     expect(canvas.getByTestId("update-counter")).toHaveTextContent(
-      "Updates: 14",
+      "Updates: 14"
     );
   },
 };

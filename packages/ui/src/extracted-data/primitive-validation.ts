@@ -28,7 +28,7 @@ export function toPrimitiveType(schemaType: string): PrimitiveType {
 export function convertPrimitiveValue(
   inputValue: string,
   expectedType: PrimitiveType,
-  required = false,
+  required = false
 ): unknown {
   switch (expectedType) {
     case PrimitiveType.STRING:
@@ -59,7 +59,7 @@ export function convertPrimitiveValue(
  */
 export function getDefaultPrimitiveValue(
   primitiveType: PrimitiveType,
-  isRequired: boolean,
+  isRequired: boolean
 ): unknown {
   if (!isRequired) {
     // For optional fields, return empty string (will be shown as blank)

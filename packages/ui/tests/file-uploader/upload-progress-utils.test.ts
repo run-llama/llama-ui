@@ -21,7 +21,7 @@ const createMockUpload = (
   name: string,
   progress: number = 0,
   status: FileUploadProgress["status"] = "uploading",
-  error?: string,
+  error?: string
 ): FileUploadProgress => ({
   file: createMockFile(name),
   progress,
@@ -204,7 +204,7 @@ describe("Upload Progress Utils", () => {
 
   describe("getVisibleFiles", () => {
     const uploads = Array.from({ length: 8 }, (_, i) =>
-      createMockUpload(`file${i}.pdf`),
+      createMockUpload(`file${i}.pdf`)
     );
 
     it("should limit files when showAll is false", () => {
@@ -260,7 +260,7 @@ describe("Upload Progress Utils", () => {
 
     it("should handle bulk operation scenario", () => {
       const files = Array.from({ length: 5 }, (_, i) =>
-        createMockFile(`file${i}.pdf`),
+        createMockFile(`file${i}.pdf`)
       );
 
       // Add all files
