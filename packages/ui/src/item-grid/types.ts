@@ -1,5 +1,4 @@
 import type {
-  ExtractedData,
   FilterOperation,
   TypedAgentData,
 } from "llama-cloud-services/beta/agent";
@@ -27,7 +26,7 @@ export interface ItemGridHooks {
 export interface Column<T = unknown> {
   key: string;
   header: string;
-  getValue: (item: TypedAgentData<ExtractedData<T>>) => unknown;
+  getValue: (item: TypedAgentData<T>) => unknown;
   renderCell?: (value: unknown, hooks?: ItemGridHooks) => ReactNode;
   sortable?: boolean;
   sortKey?: string;

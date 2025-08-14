@@ -3,12 +3,12 @@ import type { PaginationState } from "../types";
 import type {
   FilterOperation,
   TypedAgentData,
-  ExtractedData,
+  AgentClient,
 } from "llama-cloud-services/beta/agent";
 import { useAgentDataClient } from "../../lib/api-provider";
 
 type UseItemGridHandler<T = unknown> = {
-  data: TypedAgentData<ExtractedData<T>>[];
+  data: TypedAgentData<T>[];
   loading: boolean;
   error: string | null;
   totalSize: number;
@@ -21,8 +21,8 @@ export function useItemGridData<T = unknown>(
   filterFields: Record<string, FilterOperation> = {},
   sortSpec: string | undefined = undefined
 ): UseItemGridHandler<T> {
-  const client = useAgentDataClient();
-  const [data, setData] = useState<TypedAgentData<ExtractedData<T>>[]>([]);
+  const client = useAgentDataClient() as AgentClient<T>;
+  const [data, setData] = useState<TypedAgentData<T>[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [totalSize, setTotalSize] = useState<number>(0);
@@ -31,7 +31,7 @@ export function useItemGridData<T = unknown>(
     setLoading(true);
     setError(null);
     try {
-      const response = await (client as any).search({
+      const response = await client.search({
         filter: filterFields,
         orderBy: sortSpec,
         offset: paginationState.page * paginationState.size,

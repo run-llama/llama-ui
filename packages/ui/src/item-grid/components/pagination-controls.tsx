@@ -31,7 +31,6 @@ export function PaginationControls({
   const { page, size } = paginationState;
   const totalPages = Math.max(1, Math.ceil(totalSize / size));
 
-  // 页码渲染逻辑（最多显示5个页码，超出用...省略）
   function getPageNumbers() {
     if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i);
     if (page <= 2) return [0, 1, 2, -1, totalPages - 1];

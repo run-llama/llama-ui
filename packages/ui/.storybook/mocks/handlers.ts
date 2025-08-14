@@ -330,12 +330,12 @@ export const handlers = {
 
         const response = {
           items,
-          totalSize,
+          total_size: totalSize,
         };
 
         console.log("MSW: Returning agent data search response:", {
-          totalSize,
-          itemsCount: items.length,
+          total_size: totalSize,
+          items_count: items.length,
           requestBody,
           response,
         });

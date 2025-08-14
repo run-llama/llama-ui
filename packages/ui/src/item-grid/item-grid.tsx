@@ -18,7 +18,6 @@ import type {
   BuiltInColumnConfig,
 } from "./types";
 import type {
-  ExtractedData,
   FilterOperation,
   TypedAgentData,
 } from "llama-cloud-services/beta/agent";
@@ -37,7 +36,7 @@ export interface ItemGridProp<T = unknown> {
   // Built-in columns configuration
   builtInColumns?: BuiltInColumnConfig<T>;
   // Row click event
-  onRowClick?: (item: TypedAgentData<ExtractedData<T>>) => void;
+  onRowClick?: (item: TypedAgentData<T>) => void;
   // Other configurations
   defaultPageSize?: number;
 }
