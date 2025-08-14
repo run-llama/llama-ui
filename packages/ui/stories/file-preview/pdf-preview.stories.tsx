@@ -1,4 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { useState } from "react";
+import { expect, within, userEvent } from "@storybook/test";
 import { PdfPreview } from "../../src/file-preview/pdf-preview";
 
 const meta: Meta<typeof PdfPreview> = {
@@ -11,6 +13,11 @@ const meta: Meta<typeof PdfPreview> = {
     url: {
       control: "text",
       description: "URL of the PDF file to preview",
+    },
+    highlight: {
+      control: "object",
+      description:
+        "Optional highlight: { page, x, y, width, height } in PDF page coordinates",
     },
   },
 };
@@ -27,4 +34,437 @@ export const Default: Story = {
       <PdfPreview {...args} />
     </div>
   ),
+};
+
+export const InteractiveHighlight: Story = {
+  args: {
+    url: "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf",
+  },
+  render: (args) => <InteractiveHighlightExample url={args.url} />,
+};
+
+function InteractiveHighlightExample({ url }: { url: string }) {
+  const [highlight, setHighlight] = useState({
+    page: 1,
+    x: 50,
+    y: 350,
+    width: 250,
+    height: 140,
+  });
+
+  const goToFirstPage = () => {
+    setHighlight({ page: 1, x: 200, y: 205, width: 200, height: 80 });
+  };
+
+  const randomizeArea = () =>
+    setHighlight((prev) => ({
+      ...prev,
+      page: Math.floor(Math.random() * 5) + 1,
+      x: 50,
+      y: Math.max(10, Math.floor(Math.random() * 500)),
+      width: 250,
+      height: 250,
+    }));
+
+  return (
+    <div className="h-screen flex">
+      <div className="w-64 p-4 border-r space-y-2">
+        <div className="font-medium mb-2">Controls</div>
+        <button
+          className="px-2 py-1 border rounded w-full"
+          onClick={goToFirstPage}
+        >
+          Scroll to page 1 with highlight
+        </button>
+        <button
+          className="px-2 py-1 border rounded w-full"
+          onClick={randomizeArea}
+        >
+          Randomize Area
+        </button>
+      </div>
+      <div className="flex-1">
+        <PdfPreview url={url} highlight={highlight} />
+      </div>
+    </div>
+  );
+}
+
+// Interactive Test Component similar to DataUpdateTestsComponent
+function PdfHighlightTestsComponent() {
+  const url =
+    "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf";
+
+  const [highlight, setHighlight] = useState({
+    page: 1,
+    x: 100,
+    y: 200,
+    width: 300,
+    height: 100,
+  });
+
+  const [testLog, setTestLog] = useState<string[]>([]);
+  const [updateCount, setUpdateCount] = useState(0);
+
+  const addLog = (message: string) => {
+    setTestLog((prev) => [
+      ...prev,
+      `${new Date().toLocaleTimeString()}: ${message}`,
+    ]);
+  };
+
+  const updateHighlight = (newHighlight: typeof highlight) => {
+    setHighlight(newHighlight);
+    setUpdateCount((prev) => prev + 1);
+    addLog(
+      `Highlight updated: Page ${newHighlight.page}, Position (${newHighlight.x}, ${newHighlight.y}), Size ${newHighlight.width}x${newHighlight.height}`
+    );
+  };
+
+  // Test actions
+  const goToPage2 = () => {
+    updateHighlight({ page: 2, x: 150, y: 300, width: 200, height: 80 });
+  };
+
+  const goToPage3 = () => {
+    updateHighlight({ page: 3, x: 80, y: 150, width: 350, height: 120 });
+  };
+
+  const createSmallHighlight = () => {
+    updateHighlight({ page: 1, x: 200, y: 100, width: 100, height: 50 });
+  };
+
+  const createLargeHighlight = () => {
+    updateHighlight({ page: 1, x: 50, y: 250, width: 400, height: 200 });
+  };
+
+  const clearHighlight = () => {
+    setHighlight({ page: 1, x: 0, y: 0, width: 0, height: 0 });
+    setUpdateCount((prev) => prev + 1);
+    addLog("Highlight cleared");
+  };
+
+  const resetHighlight = () => {
+    updateHighlight({ page: 1, x: 100, y: 200, width: 300, height: 100 });
+  };
+
+  return (
+    <div style={{ display: "flex", height: "100vh" }}>
+      {/* Left panel: Controls and test info */}
+      <div
+        style={{
+          width: "320px",
+          padding: "16px",
+          borderRight: "1px solid #ddd",
+          overflowY: "auto",
+        }}
+      >
+        <div style={{ marginBottom: "16px" }}>
+          <h3
+            style={{
+              fontSize: "16px",
+              fontWeight: "bold",
+              margin: "0 0 8px 0",
+            }}
+          >
+            PDF Highlight Interactive Tests
+          </h3>
+          <div
+            data-testid="update-counter"
+            style={{ fontSize: "12px", color: "#666" }}
+          >
+            Updates: {updateCount}
+          </div>
+        </div>
+
+        {/* Current highlight info */}
+        <div
+          style={{
+            marginBottom: "16px",
+            padding: "8px",
+            background: "#f5f5f5",
+            borderRadius: "4px",
+          }}
+        >
+          <div
+            style={{
+              fontSize: "12px",
+              fontWeight: "bold",
+              marginBottom: "4px",
+            }}
+          >
+            Current Highlight:
+          </div>
+          <div
+            data-testid="current-highlight"
+            style={{ fontSize: "11px", fontFamily: "monospace" }}
+          >
+            Page: {highlight.page}
+            <br />
+            Position: ({highlight.x}, {highlight.y})<br />
+            Size: {highlight.width} × {highlight.height}
+          </div>
+        </div>
+
+        {/* Test controls */}
+        <div style={{ marginBottom: "16px" }}>
+          <div
+            style={{
+              fontSize: "14px",
+              fontWeight: "bold",
+              marginBottom: "8px",
+            }}
+          >
+            Navigation Tests:
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <button
+              data-testid="go-to-page-2"
+              onClick={goToPage2}
+              style={{
+                padding: "6px 8px",
+                fontSize: "12px",
+                border: "1px solid #ddd",
+                borderRadius: "4px",
+                background: "white",
+                cursor: "pointer",
+              }}
+            >
+              Go to Page 2
+            </button>
+            <button
+              data-testid="go-to-page-3"
+              onClick={goToPage3}
+              style={{
+                padding: "6px 8px",
+                fontSize: "12px",
+                border: "1px solid #ddd",
+                borderRadius: "4px",
+                background: "white",
+                cursor: "pointer",
+              }}
+            >
+              Go to Page 3
+            </button>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: "16px" }}>
+          <div
+            style={{
+              fontSize: "14px",
+              fontWeight: "bold",
+              marginBottom: "8px",
+            }}
+          >
+            Size Tests:
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <button
+              data-testid="small-highlight"
+              onClick={createSmallHighlight}
+              style={{
+                padding: "6px 8px",
+                fontSize: "12px",
+                border: "1px solid #ddd",
+                borderRadius: "4px",
+                background: "white",
+                cursor: "pointer",
+              }}
+            >
+              Small Highlight
+            </button>
+            <button
+              data-testid="large-highlight"
+              onClick={createLargeHighlight}
+              style={{
+                padding: "6px 8px",
+                fontSize: "12px",
+                border: "1px solid #ddd",
+                borderRadius: "4px",
+                background: "white",
+                cursor: "pointer",
+              }}
+            >
+              Large Highlight
+            </button>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: "16px" }}>
+          <div
+            style={{
+              fontSize: "14px",
+              fontWeight: "bold",
+              marginBottom: "8px",
+            }}
+          >
+            State Tests:
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <button
+              data-testid="clear-highlight"
+              onClick={clearHighlight}
+              style={{
+                padding: "6px 8px",
+                fontSize: "12px",
+                border: "1px solid #ddd",
+                borderRadius: "4px",
+                background: "white",
+                cursor: "pointer",
+              }}
+            >
+              Clear Highlight
+            </button>
+            <button
+              data-testid="reset-highlight"
+              onClick={resetHighlight}
+              style={{
+                padding: "6px 8px",
+                fontSize: "12px",
+                border: "1px solid #ddd",
+                borderRadius: "4px",
+                background: "white",
+                cursor: "pointer",
+              }}
+            >
+              Reset to Default
+            </button>
+          </div>
+        </div>
+
+        {/* Test log */}
+        <div>
+          <div
+            style={{
+              fontSize: "14px",
+              fontWeight: "bold",
+              marginBottom: "8px",
+            }}
+          >
+            Test Log:
+          </div>
+          <div
+            data-testid="test-log"
+            style={{
+              maxHeight: "200px",
+              overflowY: "auto",
+              padding: "8px",
+              background: "#f9f9f9",
+              borderRadius: "4px",
+              fontSize: "10px",
+              fontFamily: "monospace",
+            }}
+          >
+            {testLog.map((log, index) => (
+              <div key={index}>{log}</div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Right panel: PDF Preview */}
+      <div style={{ flex: 1 }}>
+        <PdfPreview
+          url={url}
+          highlight={highlight.width > 0 ? highlight : undefined}
+        />
+      </div>
+    </div>
+  );
+}
+
+export const HighlightInteractiveTests: Story = {
+  render: () => <PdfHighlightTestsComponent />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // Helper to wait for updates
+    const waitForUpdate = async (expectedCount: number, timeout = 2000) => {
+      const startTime = Date.now();
+      while (Date.now() - startTime < timeout) {
+        try {
+          const counter = canvas.getByTestId("update-counter");
+          if (counter.textContent?.includes(`Updates: ${expectedCount}`)) {
+            return;
+          }
+        } catch {
+          // Element not found yet, continue waiting
+        }
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      // Final check with expect for proper error reporting
+      expect(canvas.getByTestId("update-counter")).toHaveTextContent(
+        `Updates: ${expectedCount}`
+      );
+    };
+
+    // Wait for PDF to load
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    // Test 1: Navigate to page 2
+    const goToPage2Button = canvas.getByTestId("go-to-page-2");
+    await userEvent.click(goToPage2Button);
+
+    await waitForUpdate(1);
+    const highlightInfo = canvas.getByTestId("current-highlight");
+    expect(highlightInfo).toHaveTextContent("Page: 2");
+
+    // Test 2: Navigate to page 3
+    const goToPage3Button = canvas.getByTestId("go-to-page-3");
+    await userEvent.click(goToPage3Button);
+
+    await waitForUpdate(2);
+    expect(canvas.getByTestId("current-highlight")).toHaveTextContent(
+      "Page: 3"
+    );
+
+    // Test 3: Create small highlight
+    const smallHighlightButton = canvas.getByTestId("small-highlight");
+    await userEvent.click(smallHighlightButton);
+
+    await waitForUpdate(3);
+    expect(canvas.getByTestId("current-highlight")).toHaveTextContent(
+      "Size: 100 × 50"
+    );
+
+    // Test 4: Create large highlight
+    const largeHighlightButton = canvas.getByTestId("large-highlight");
+    await userEvent.click(largeHighlightButton);
+
+    await waitForUpdate(4);
+    expect(canvas.getByTestId("current-highlight")).toHaveTextContent(
+      "Size: 400 × 200"
+    );
+
+    // Test 5: Clear highlight
+    const clearButton = canvas.getByTestId("clear-highlight");
+    await userEvent.click(clearButton);
+
+    await waitForUpdate(5);
+    expect(canvas.getByTestId("current-highlight")).toHaveTextContent(
+      "Size: 0 × 0"
+    );
+
+    // Test 6: Reset highlight to default
+    const resetButton = canvas.getByTestId("reset-highlight");
+    await userEvent.click(resetButton);
+
+    await waitForUpdate(6);
+    expect(canvas.getByTestId("current-highlight")).toHaveTextContent(
+      "Page: 1"
+    );
+    expect(canvas.getByTestId("current-highlight")).toHaveTextContent(
+      "Size: 300 × 100"
+    );
+
+    // Verify test log has entries
+    const testLog = canvas.getByTestId("test-log");
+    expect(testLog.textContent).toContain("Highlight updated");
+
+    // Final verification
+    expect(canvas.getByTestId("update-counter")).toHaveTextContent(
+      "Updates: 6"
+    );
+  },
 };

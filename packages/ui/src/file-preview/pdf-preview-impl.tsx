@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { PdfNavigator } from "./pdf-navigator";
+import { BoundingBoxOverlay } from "./bounding-box-overlay";
+import { BoundingBox, Highlight } from "./types";
+import { PageCallback } from "react-pdf/dist/shared/types";
 
 // Configure worker path for PDF.js
 if (typeof window !== "undefined") {
@@ -16,13 +19,23 @@ import("react-pdf/dist/Page/TextLayer.css");
 interface PdfPreviewImplProps {
   url: string;
   onDownload?: () => void;
+  highlight?: Highlight;
 }
+
+// map of page number to page viewport dimensions
+type PageBaseDims = {
+  [key: number]: { width: number; height: number };
+};
 
 const pdfOptions = {
   cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
 };
 
-export const PdfPreviewImpl = ({ url, onDownload }: PdfPreviewImplProps) => {
+export const PdfPreviewImpl = ({
+  url,
+  onDownload,
+  highlight,
+}: PdfPreviewImplProps) => {
   const [numPages, setNumPages] = useState<number>();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [scale, setScale] = useState<number>(1.0);
@@ -31,9 +44,54 @@ export const PdfPreviewImpl = ({ url, onDownload }: PdfPreviewImplProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const pageRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
+  const [pageBaseDims, setPageBaseDims] = useState<PageBaseDims>({}); // store page viewport to use for bounding box overlay
+  const [showHighlight, setShowHighlight] = useState<boolean>(false); // whether to show the highlight
+
+  // bounding box from highlight (only 1 highlight at a time for now)
+  const boundingBoxes: BoundingBox[] = [
+    {
+      id: "highlight",
+      x: highlight?.x || 0,
+      y: highlight?.y || 0,
+      width: highlight?.width || 0,
+      height: highlight?.height || 0,
+      color: "rgba(255, 215, 0, 0.25)",
+    },
+  ];
+
   function onDocumentLoadSuccess({ numPages }: { numPages: number }): void {
     setNumPages(numPages);
   }
+
+  // when highlight is set, go to the page and show the highlight
+  useEffect(() => {
+    if (!highlight) return;
+    if (!numPages) return;
+    const pageEl = pageRefs.current[highlight.page];
+    if (pageEl) {
+      goToPage(highlight.page);
+      setShowHighlight(true);
+    }
+  }, [highlight, numPages]);
+
+  // store page viewport to use for bounding box overlay
+  const handleLoadPage = (page: PageCallback) => {
+    const viewport = page.getViewport({ scale: 1 });
+    setPageBaseDims((prev) => ({
+      ...prev,
+      [page.pageNumber]: {
+        width: viewport.width,
+        height: viewport.height,
+      },
+    }));
+  };
+
+  // click anywhere on the page to hide the highlight
+  const handleClickOnPage = () => {
+    if (showHighlight) {
+      setShowHighlight(false);
+    }
+  };
 
   // Detect current visible page on scroll
   useEffect(() => {
@@ -187,12 +245,27 @@ export const PdfPreviewImpl = ({ url, onDownload }: PdfPreviewImplProps) => {
               }}
               className="mb-4 flex justify-center"
             >
-              <Page
-                pageNumber={index + 1}
-                scale={scale}
-                renderTextLayer={true}
-                renderAnnotationLayer={true}
-              />
+              <div className="relative inline-block">
+                <Page
+                  pageNumber={index + 1}
+                  scale={scale}
+                  renderTextLayer={true}
+                  renderAnnotationLayer={true}
+                  onLoadSuccess={handleLoadPage}
+                  onClick={handleClickOnPage}
+                />
+                {highlight &&
+                  showHighlight &&
+                  highlight.page === index + 1 &&
+                  pageBaseDims[index + 1] && (
+                    <BoundingBoxOverlay
+                      boundingBoxes={boundingBoxes}
+                      zoom={scale}
+                      containerWidth={pageBaseDims[index + 1].width}
+                      containerHeight={pageBaseDims[index + 1].height}
+                    />
+                  )}
+              </div>
             </div>
           ))}
         </Document>
