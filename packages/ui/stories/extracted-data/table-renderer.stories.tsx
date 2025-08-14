@@ -38,7 +38,6 @@ const sampleObjectArray = [
   },
 ];
 
-
 export const BasicTable: Story = {
   args: {
     data: sampleObjectArray,
@@ -106,7 +105,7 @@ export const BasicTable: Story = {
       index: number,
       key: string,
       value: unknown,
-      affectedPaths?: string[],
+      affectedPaths?: string[]
     ) => {
       // noop for test
       const newData = [...data];
@@ -243,7 +242,7 @@ export const InconsistentKeys: Story = {
       index: number,
       key: string,
       value: unknown,
-      affectedPaths?: string[],
+      affectedPaths?: string[]
     ) => {
       void affectedPaths; // Not used in this story
       // noop for test
@@ -324,77 +323,77 @@ export const DeepNestedTable: Story = {
     metadata: {
       extracted: {},
       schema: {
-      invoices: {
-        isRequired: false,
-        isOptional: true,
-        schemaType: "array",
-        title: "Invoices",
-        wasMissing: false,
+        invoices: {
+          isRequired: false,
+          isOptional: true,
+          schemaType: "array",
+          title: "Invoices",
+          wasMissing: false,
+        },
+        "invoices.*.id": {
+          isRequired: true,
+          isOptional: false,
+          schemaType: "string",
+          title: "ID",
+          wasMissing: false,
+        },
+        "invoices.*.customer.name": {
+          isRequired: true,
+          isOptional: false,
+          schemaType: "string",
+          title: "Name",
+          wasMissing: false,
+        },
+        "invoices.*.customer.contact.email": {
+          isRequired: true,
+          isOptional: false,
+          schemaType: "string",
+          title: "Email",
+          wasMissing: false,
+        },
+        "invoices.*.customer.contact.phone": {
+          isRequired: false,
+          isOptional: true,
+          schemaType: "string",
+          title: "Phone",
+          wasMissing: false,
+        },
+        "invoices.*.customer.contact.address.street": {
+          isRequired: true,
+          isOptional: false,
+          schemaType: "string",
+          title: "Street",
+          wasMissing: false,
+        },
+        "invoices.*.customer.contact.address.city": {
+          isRequired: true,
+          isOptional: false,
+          schemaType: "string",
+          title: "City",
+          wasMissing: false,
+        },
+        "invoices.*.customer.contact.address.country": {
+          isRequired: true,
+          isOptional: false,
+          schemaType: "string",
+          title: "Country",
+          wasMissing: false,
+        },
+        "invoices.*.order.date": {
+          isRequired: true,
+          isOptional: false,
+          schemaType: "string",
+          title: "Date",
+          wasMissing: false,
+        },
+        "invoices.*.order.total": {
+          isRequired: true,
+          isOptional: false,
+          schemaType: "number",
+          title: "Total",
+          wasMissing: false,
+        },
       },
-      "invoices.*.id": {
-        isRequired: true,
-        isOptional: false,
-        schemaType: "string",
-        title: "ID",
-        wasMissing: false,
-      },
-      "invoices.*.customer.name": {
-        isRequired: true,
-        isOptional: false,
-        schemaType: "string",
-        title: "Name",
-        wasMissing: false,
-      },
-      "invoices.*.customer.contact.email": {
-        isRequired: true,
-        isOptional: false,
-        schemaType: "string",
-        title: "Email",
-        wasMissing: false,
-      },
-      "invoices.*.customer.contact.phone": {
-        isRequired: false,
-        isOptional: true,
-        schemaType: "string",
-        title: "Phone",
-        wasMissing: false,
-      },
-      "invoices.*.customer.contact.address.street": {
-        isRequired: true,
-        isOptional: false,
-        schemaType: "string",
-        title: "Street",
-        wasMissing: false,
-      },
-      "invoices.*.customer.contact.address.city": {
-        isRequired: true,
-        isOptional: false,
-        schemaType: "string",
-        title: "City",
-        wasMissing: false,
-      },
-      "invoices.*.customer.contact.address.country": {
-        isRequired: true,
-        isOptional: false,
-        schemaType: "string",
-        title: "Country",
-        wasMissing: false,
-      },
-      "invoices.*.order.date": {
-        isRequired: true,
-        isOptional: false,
-        schemaType: "string",
-        title: "Date",
-        wasMissing: false,
-      },
-      "invoices.*.order.total": {
-        isRequired: true,
-        isOptional: false,
-        schemaType: "number",
-        title: "Total",
-        wasMissing: false,
-      },
-    },
     },
   },
   render: function Render(args) {
@@ -405,7 +404,7 @@ export const DeepNestedTable: Story = {
       index: number,
       key: string,
       value: unknown,
-      affectedPaths?: string[],
+      affectedPaths?: string[]
     ) => {
       // noop for test
       const newData = [...data];
@@ -515,35 +514,35 @@ export const EmptyTable: Story = {
     metadata: {
       extracted: {},
       schema: {
-      items: {
-        isRequired: false,
-        isOptional: true,
-        schemaType: "array",
-        title: "Items",
-        wasMissing: false,
+        items: {
+          isRequired: false,
+          isOptional: true,
+          schemaType: "array",
+          title: "Items",
+          wasMissing: false,
+        },
+        "items.*.name": {
+          isRequired: true,
+          isOptional: false,
+          schemaType: "string",
+          title: "Name",
+          wasMissing: false,
+        },
+        "items.*.price": {
+          isRequired: false,
+          isOptional: true,
+          schemaType: "number",
+          title: "Price",
+          wasMissing: false,
+        },
+        "items.*.category": {
+          isRequired: false,
+          isOptional: true,
+          schemaType: "string",
+          title: "Category",
+          wasMissing: false,
+        },
       },
-      "items.*.name": {
-        isRequired: true,
-        isOptional: false,
-        schemaType: "string",
-        title: "Name",
-        wasMissing: false,
-      },
-      "items.*.price": {
-        isRequired: false,
-        isOptional: true,
-        schemaType: "number",
-        title: "Price",
-        wasMissing: false,
-      },
-      "items.*.category": {
-        isRequired: false,
-        isOptional: true,
-        schemaType: "string",
-        title: "Category",
-        wasMissing: false,
-      },
-    },
     },
   },
   render: function Render(args) {

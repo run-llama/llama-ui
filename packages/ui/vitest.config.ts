@@ -9,26 +9,23 @@ export default defineConfig({
   test: {
     // Coverage configuration
     coverage: {
-      provider: 'v8',
-      reporter: ['text', 'lcov', 'html', 'json'],
-      reportsDirectory: './coverage',
-      include: [
-        'src/**/*.{ts,tsx}',
-        'lib/**/*.{ts,tsx}'
-      ],
+      provider: "v8",
+      reporter: ["text", "lcov", "html", "json"],
+      reportsDirectory: "./coverage",
+      include: ["src/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}"],
       exclude: [
-        'src/**/*.stories.{ts,tsx}',
-        'src/**/*.test.{ts,tsx}',
-        'src/**/*.spec.{ts,tsx}',
-        'src/**/types.ts',
-        'src/**/index.ts',
-        'src/styles.css',
-        'src/**/mock-*.ts',
-        'tests/**/*',
-        'node_modules/**',
-        'dist/**',
-        'coverage/**',
-        '**/*.d.ts'
+        "src/**/*.stories.{ts,tsx}",
+        "src/**/*.test.{ts,tsx}",
+        "src/**/*.spec.{ts,tsx}",
+        "src/**/types.ts",
+        "src/**/index.ts",
+        "src/styles.css",
+        "src/**/mock-*.ts",
+        "tests/**/*",
+        "node_modules/**",
+        "dist/**",
+        "coverage/**",
+        "**/*.d.ts",
       ],
       all: true,
       thresholds: {
@@ -36,9 +33,9 @@ export default defineConfig({
           branches: 70,
           functions: 80,
           lines: 80,
-          statements: 80
-        }
-      }
+          statements: 80,
+        },
+      },
     },
     projects: [
       // Unit tests
@@ -90,4 +87,4 @@ export default defineConfig({
   define: {
     "process.env": process.env,
   },
-}); 
+});

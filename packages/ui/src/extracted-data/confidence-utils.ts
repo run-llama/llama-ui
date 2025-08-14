@@ -7,5 +7,3 @@ export function getConfidenceBackgroundClass(confidence?: number): string {
   // High confidence (>=90%) gets normal background
   return isLowConfidence(confidence) ? "bg-orange-50" : "";
 }
-
-

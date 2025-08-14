@@ -1,5 +1,8 @@
 import type { JSONSchema } from "zod/v4/core";
-import type { ExtractedData, ExtractedFieldMetadataDict } from "llama-cloud-services/beta/agent";
+import type {
+  ExtractedData,
+  ExtractedFieldMetadataDict,
+} from "llama-cloud-services/beta/agent";
 import type { FieldMetadata } from "./schema-reconciliation";
 
 export interface ExtractedDataDisplayProps {

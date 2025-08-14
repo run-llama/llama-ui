@@ -20,7 +20,7 @@ export interface PaginationState {
 
 export interface ItemGridHooks {
   deleteItem?: (
-    itemId: string,
+    itemId: string
   ) => Promise<{ success: boolean; error?: string }>;
 }
 

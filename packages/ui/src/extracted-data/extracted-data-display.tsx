@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from "react";
 import type { ExtractedDataDisplayProps } from "./types";
 import { PropertyRenderer } from "./property-renderer";
@@ -26,7 +25,10 @@ export function ExtractedDataDisplay({
     if (!jsonSchema) {
       return null;
     }
-    return reconcileDataWithJsonSchema(data as Record<string, unknown>, jsonSchema);
+    return reconcileDataWithJsonSchema(
+      data as Record<string, unknown>,
+      jsonSchema
+    );
   }, [data, jsonSchema]);
 
   // Use reconciled data if available, otherwise use original data
@@ -39,7 +41,7 @@ export function ExtractedDataDisplay({
       key,
       fieldMetadata,
       validationErrors,
-      [key],
+      [key]
     );
     const baseClasses = getFieldLabelClasses(fieldInfo);
     const finalClasses = additionalClasses
@@ -60,7 +62,7 @@ export function ExtractedDataDisplay({
   const handleUpdate = (
     path: string[],
     newValue: unknown,
-    additionalPaths?: string[][],
+    additionalPaths?: string[][]
   ) => {
     if (!editable || !onChange) return;
 
@@ -109,7 +111,10 @@ export function ExtractedDataDisplay({
                   value={value}
                   onUpdate={handleUpdate}
                   changedPaths={changedPaths}
-                  metadata={{ schema: fieldMetadata, extracted: extractedData.field_metadata }}
+                  metadata={{
+                    schema: fieldMetadata,
+                    extracted: extractedData.field_metadata,
+                  }}
                   validationErrors={validationErrors}
                 />
               </div>
@@ -126,7 +131,10 @@ export function ExtractedDataDisplay({
                 value={value}
                 onUpdate={handleUpdate}
                 changedPaths={changedPaths}
-                metadata={{ schema: fieldMetadata, extracted: extractedData.field_metadata }}
+                metadata={{
+                  schema: fieldMetadata,
+                  extracted: extractedData.field_metadata,
+                }}
                 validationErrors={validationErrors}
               />
             </div>
@@ -143,7 +151,10 @@ export function ExtractedDataDisplay({
                     value={value}
                     onUpdate={handleUpdate}
                     changedPaths={changedPaths}
-                    metadata={{ schema: fieldMetadata, extracted: extractedData.field_metadata }}
+                    metadata={{
+                      schema: fieldMetadata,
+                      extracted: extractedData.field_metadata,
+                    }}
                     validationErrors={validationErrors}
                   />
                 </div>

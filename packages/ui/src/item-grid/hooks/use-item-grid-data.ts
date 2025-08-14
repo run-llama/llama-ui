@@ -22,7 +22,7 @@ export function useItemGridData<T = unknown>(
   isMock: boolean,
   filterFields: Record<string, FilterOperation> = {},
   sortSpec: string | undefined = undefined,
-  client: AgentClient<ExtractedData<T>>,
+  client: AgentClient<ExtractedData<T>>
 ): UseItemGridHandler<T> {
   const [data, setData] = useState<TypedAgentData<ExtractedData<T>>[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,7 +67,7 @@ export function useItemGridData<T = unknown>(
       if (isMock) {
         // For mock mode, just remove from local state
         setData((prevData) =>
-          prevData.filter((item) => String(item.id) !== String(itemId)),
+          prevData.filter((item) => String(item.id) !== String(itemId))
         );
         setTotalSize((prevTotal) => prevTotal - 1);
         return { success: true };
@@ -78,7 +78,7 @@ export function useItemGridData<T = unknown>(
 
         // Remove item from local state immediately
         setData((prevData) =>
-          prevData.filter((item) => String(item.id) !== String(itemId)),
+          prevData.filter((item) => String(item.id) !== String(itemId))
         );
         setTotalSize((prevTotal) => prevTotal - 1);
         console.log("Item deleted successfully:", itemId);
@@ -91,7 +91,7 @@ export function useItemGridData<T = unknown>(
         };
       }
     },
-    [isMock, client],
+    [isMock, client]
   );
 
   useEffect(() => {

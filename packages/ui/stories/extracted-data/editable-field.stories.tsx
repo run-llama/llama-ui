@@ -29,13 +29,7 @@ export const Basic: Story = {
       setValue(newValue);
     };
 
-    return (
-      <EditableField
-        {...args}
-        value={value}
-        onSave={handleSave}
-      />
-    );
+    return <EditableField {...args} value={value} onSave={handleSave} />;
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -54,7 +48,7 @@ export const Basic: Story = {
     const editValueText = await screen.findByText(
       "Edit Value",
       {},
-      { timeout: 1000 },
+      { timeout: 1000 }
     );
     expect(editValueText).toBeInTheDocument();
 
@@ -257,7 +251,7 @@ export const NumberClearValue: Story = {
     // Test that empty number becomes null, displayed as blank
     await new Promise((resolve) => setTimeout(resolve, 100));
     const fieldElement = canvasElement.querySelector(
-      'div[class*="cursor-pointer"] span',
+      'div[class*="cursor-pointer"] span'
     );
     expect(fieldElement?.textContent).toBe("");
   },
@@ -418,7 +412,7 @@ export const StringEdit: Story = {
 
     // Test input appears (textarea for string types)
     const input = screen.getByDisplayValue(
-      "Hello World",
+      "Hello World"
     ) as HTMLTextAreaElement;
     expect(input).toBeInTheDocument();
     expect(input.tagName.toLowerCase()).toBe("textarea");
@@ -483,9 +477,10 @@ export const OnClickMetadata: Story = {
   },
   render: function Render(args) {
     const [value, setValue] = useState(args.value);
-    const [payload, setPayload] = useState<
-      { value: unknown; metadata?: ExtractedFieldMetadata } | null
-    >(null);
+    const [payload, setPayload] = useState<{
+      value: unknown;
+      metadata?: ExtractedFieldMetadata;
+    } | null>(null);
 
     return (
       <div>

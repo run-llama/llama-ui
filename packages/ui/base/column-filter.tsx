@@ -48,9 +48,7 @@ export const ColumnFilter: React.FC<ColumnFilterProps> = ({
           size="icon"
           className={cn(
             "h-6 w-6 p-0",
-            selectedValues.length > 0
-              ? "text-primary"
-              : "text-muted-foreground",
+            selectedValues.length > 0 ? "text-primary" : "text-muted-foreground"
           )}
         >
           <Filter className="h-3 w-3" />

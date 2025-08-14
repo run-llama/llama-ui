@@ -5,7 +5,11 @@ import type {
 } from "llama-cloud-services/beta/agent";
 
 // Use the StatusType from llama-cloud-services instead
-export type ProcessingStatus = StatusType | "pending" | "approved" | "completed";
+export type ProcessingStatus =
+  | StatusType
+  | "pending"
+  | "approved"
+  | "completed";
 
 export type InvoiceData = {
   invoice_number: string;
@@ -83,71 +87,91 @@ const mockItemData: Record<
         invoice_number: {
           confidence: 0.98,
           reasoning: "Clear invoice number found in header section",
-          citation: [{
-            page_number: 1,
-            matching_text: "INV-2024-001"
-          }]
+          citation: [
+            {
+              page_number: 1,
+              matching_text: "INV-2024-001",
+            },
+          ],
         },
         total_amount: {
           confidence: 0.95,
           reasoning: "Total amount clearly identified in summary table",
-          citation: [{
-            page_number: 1,
-            matching_text: "$1,250.50"
-          }, {
-            page_number: 1,
-            matching_text: "Total: $1,250.50"
-          }, {
-            page_number: 1,
-            matching_text: "Amount Due: $1,250.50"
-          }]
+          citation: [
+            {
+              page_number: 1,
+              matching_text: "$1,250.50",
+            },
+            {
+              page_number: 1,
+              matching_text: "Total: $1,250.50",
+            },
+            {
+              page_number: 1,
+              matching_text: "Amount Due: $1,250.50",
+            },
+          ],
         },
         vendor_name: {
           confidence: 0.92,
           reasoning: "Company name found in header and billing address",
-          citation: [{
-            page_number: 1,
-            matching_text: "Acme Corp"
-          }, {
-            page_number: 1,
-            matching_text: "Acme Corporation"
-          }, {
-            page_number: 2,
-            matching_text: "Bill to: Acme Corp"
-          }]
+          citation: [
+            {
+              page_number: 1,
+              matching_text: "Acme Corp",
+            },
+            {
+              page_number: 1,
+              matching_text: "Acme Corporation",
+            },
+            {
+              page_number: 2,
+              matching_text: "Bill to: Acme Corp",
+            },
+          ],
         },
         invoice_date: {
           confidence: 0.89,
           reasoning: "Date format matches standard invoice date pattern",
-          citation: [{
-            page_number: 1,
-            matching_text: "January 15, 2024"
-          }]
+          citation: [
+            {
+              page_number: 1,
+              matching_text: "January 15, 2024",
+            },
+          ],
         },
         due_date: {
           confidence: 0.87,
           reasoning: "Due date calculated from invoice date and payment terms",
-          citation: [{
-            page_number: 1,
-            matching_text: "February 15, 2024"
-          }]
+          citation: [
+            {
+              page_number: 1,
+              matching_text: "February 15, 2024",
+            },
+          ],
         },
         payment_terms: {
           confidence: 0.93,
           reasoning: "Standard payment terms clearly stated",
-          citation: [{
-            page_number: 1,
-            matching_text: "Net 30 days"
-          }]
+          citation: [
+            {
+              page_number: 1,
+              matching_text: "Net 30 days",
+            },
+          ],
         },
-        line_items: [{
-          confidence: 0.85,
-          reasoning: "Line items extracted from itemized table section",
-          citation: [{
-            page_number: 1,
-            matching_text: "Professional Services - Qty: 10, Rate: $125.05"
-          }]
-        }]
+        line_items: [
+          {
+            confidence: 0.85,
+            reasoning: "Line items extracted from itemized table section",
+            citation: [
+              {
+                page_number: 1,
+                matching_text: "Professional Services - Qty: 10, Rate: $125.05",
+              },
+            ],
+          },
+        ],
       },
     },
     createdAt: new Date("2024-01-15T10:30:00Z"),
@@ -192,67 +216,85 @@ const mockItemData: Record<
         contract_number: {
           confidence: 0.96,
           reasoning: "Contract number clearly identified in document header",
-          citation: [{
-            page_number: 1,
-            matching_text: "CNT-2024-TECH-001"
-          }]
+          citation: [
+            {
+              page_number: 1,
+              matching_text: "CNT-2024-TECH-001",
+            },
+          ],
         },
         contract_value: {
           confidence: 0.94,
           reasoning: "Total contract value found in financial terms section",
-          citation: [{
-            page_number: 2,
-            matching_text: "$50,000.00"
-          }]
+          citation: [
+            {
+              page_number: 2,
+              matching_text: "$50,000.00",
+            },
+          ],
         },
         start_date: {
           confidence: 0.98,
           reasoning: "Contract commencement date clearly stated",
-          citation: [{
-            page_number: 1,
-            matching_text: "March 1, 2024"
-          }]
+          citation: [
+            {
+              page_number: 1,
+              matching_text: "March 1, 2024",
+            },
+          ],
         },
         end_date: {
           confidence: 0.97,
           reasoning: "Contract expiration date specified in term section",
-          citation: [{
-            page_number: 1,
-            matching_text: "February 28, 2025"
-          }]
+          citation: [
+            {
+              page_number: 1,
+              matching_text: "February 28, 2025",
+            },
+          ],
         },
         renewal_terms: {
           confidence: 0.89,
           reasoning: "Renewal clause found in contract terms section",
-          citation: [{
-            page_number: 3,
-            matching_text: "This agreement shall auto-renew unless terminated with 30 days written notice"
-          }]
+          citation: [
+            {
+              page_number: 3,
+              matching_text:
+                "This agreement shall auto-renew unless terminated with 30 days written notice",
+            },
+          ],
         },
         governing_law: {
           confidence: 0.92,
           reasoning: "Governing law clause clearly specified",
-          citation: [{
-            page_number: 4,
-            matching_text: "This agreement shall be governed by the laws of the State of California"
-          }]
+          citation: [
+            {
+              page_number: 4,
+              matching_text:
+                "This agreement shall be governed by the laws of the State of California",
+            },
+          ],
         },
         signatory_company: {
           confidence: 0.95,
           reasoning: "Company name found in signature block",
-          citation: [{
-            page_number: 4,
-            matching_text: "Tech Solutions Inc"
-          }]
+          citation: [
+            {
+              page_number: 4,
+              matching_text: "Tech Solutions Inc",
+            },
+          ],
         },
         signatory_individual: {
           confidence: 0.88,
           reasoning: "Signatory name and title identified in signature section",
-          citation: [{
-            page_number: 4,
-            matching_text: "Jane Smith, Chief Executive Officer"
-          }]
-        }
+          citation: [
+            {
+              page_number: 4,
+              matching_text: "Jane Smith, Chief Executive Officer",
+            },
+          ],
+        },
       },
     },
     createdAt: new Date("2024-02-28T09:15:00Z"),
@@ -262,7 +304,7 @@ const mockItemData: Record<
 
 // Default fallback item
 const defaultMockItem = (
-  itemId: string,
+  itemId: string
 ): TypedAgentData<ExtractedData<GenericDocumentData>> => ({
   id: itemId,
   agentUrlId: "extraction-agent",
@@ -289,19 +331,23 @@ const defaultMockItem = (
       document_title: {
         confidence: 0.82,
         reasoning: "Document title extracted from header or filename",
-        citation: [{
-          page_number: 1,
-          matching_text: `Sample Document ${itemId}`
-        }]
+        citation: [
+          {
+            page_number: 1,
+            matching_text: `Sample Document ${itemId}`,
+          },
+        ],
       },
       processed_date: {
         confidence: 0.95,
         reasoning: "Processing date automatically generated",
-        citation: [{
-          page_number: 1,
-          matching_text: new Date().toISOString().split("T")[0]
-        }]
-      }
+        citation: [
+          {
+            page_number: 1,
+            matching_text: new Date().toISOString().split("T")[0],
+          },
+        ],
+      },
     },
   },
   createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
@@ -309,7 +355,7 @@ const defaultMockItem = (
 });
 
 export const getMockItemResponse = (
-  itemId: string,
+  itemId: string
 ): TypedAgentData<ExtractedData<DocumentData>> => {
   // First try to find by string key (for backward compatibility)
   if (mockItemData[itemId]) {
@@ -320,7 +366,7 @@ export const getMockItemResponse = (
   const numericId = parseInt(itemId);
   if (!isNaN(numericId)) {
     const itemByNumericId = Object.values(mockItemData).find(
-      (item) => item.id === itemId,
+      (item) => item.id === itemId
     );
     if (itemByNumericId) {
       return itemByNumericId;

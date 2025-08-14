@@ -31,5 +31,3 @@ describe("getItemsToReviewCount", () => {
     expect(getItemsToReviewCount(item)).toBe(3);
   });
 });
-
-

@@ -6,7 +6,7 @@ export const formatFieldName = (key: string): string => {
 
 export const isPropertyChanged = (
   changedPaths: Set<string> | undefined,
-  keyPath: string[],
+  keyPath: string[]
 ): boolean => {
   if (!changedPaths) return false;
   const pathString = keyPath.join(".");
@@ -16,11 +16,11 @@ export const isPropertyChanged = (
 // New function to filter metadata for arrays
 export const filterMetadataForArray = (
   metadata: ExtractedFieldMetadataDict | undefined,
-  keyPath: string[],
+  keyPath: string[]
 ): ExtractedFieldMetadataDict => {
   const arrayMetadata: ExtractedFieldMetadataDict = {};
 
-  if (!metadata || typeof metadata !== 'object') {
+  if (!metadata || typeof metadata !== "object") {
     return arrayMetadata;
   }
 

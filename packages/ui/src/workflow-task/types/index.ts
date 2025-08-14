@@ -3,7 +3,7 @@
  * Based on workflow-task-suite.md specifications
  */
 
-import type { TaskDefinition } from '@llamaindex/llama-deploy';
+import type { TaskDefinition } from "@llamaindex/llama-deploy";
 
 // ===== Core Types =====
 
@@ -15,20 +15,20 @@ export type JSONValue =
   | { [key: string]: JSONValue }
   | Array<JSONValue>;
 
-export type RunStatus = 'idle' | 'running' | 'complete' | 'error';
+export type RunStatus = "idle" | "running" | "complete" | "error";
 
 export type TaskParams = TaskDefinition & {
   task_id: string;
   session_id: string;
   service_id: string;
-}
+};
 
 export interface WorkflowTaskSummary {
   task_id: string;
   session_id: string;
-  service_id: string;   // workflow name
-  input: string;        // task input
-  deployment: string;   // deployment name
+  service_id: string; // workflow name
+  input: string; // task input
+  deployment: string; // deployment name
   status: RunStatus;
 }
 
@@ -45,10 +45,12 @@ export interface WorkflowProgressState {
 
 // Available events map to qualified name
 export enum WorkflowEventType {
-  StopEvent = 'workflow.events.StopEvent',
+  StopEvent = "workflow.events.StopEvent",
 }
 
-export interface StreamingEventCallback<E extends WorkflowEvent = WorkflowEvent> {
+export interface StreamingEventCallback<
+  E extends WorkflowEvent = WorkflowEvent,
+> {
   onStart?: () => void;
   onData?: (event: E) => void;
   onError?: (error: Error) => void;

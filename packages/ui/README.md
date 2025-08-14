@@ -10,13 +10,13 @@ A comprehensive UI component library built with React, TypeScript, and Tailwind 
 ![Coverage Functions](https://img.shields.io/badge/Coverage-Functions%3A%2072.67%25-brightgreen)
 ![Coverage Branches](https://img.shields.io/badge/Coverage-Branches%3A%2084.7%25-brightgreen)
 
-| Component | Lines | Functions | Branches | Statements |
-|-----------|-------|-----------|----------|------------|
-| **Overall** | 70.04% | 72.67% | 84.7% | 70.04% |
-| lib | 50.35% | 55.55% | 57.14% | 50.35% |
-| extracted-data | 76.28% | 92.85% | 86.12% | 76.28% |
-| file-uploader | 77.65% | 62.79% | 84.24% | 77.65% |
-| item-grid | 78.01% | 77.77% | 78.43% | 78.01% |
+| Component      | Lines  | Functions | Branches | Statements |
+| -------------- | ------ | --------- | -------- | ---------- |
+| **Overall**    | 70.04% | 72.67%    | 84.7%    | 70.04%     |
+| lib            | 50.35% | 55.55%    | 57.14%   | 50.35%     |
+| extracted-data | 76.28% | 92.85%    | 86.12%   | 76.28%     |
+| file-uploader  | 77.65% | 62.79%    | 84.24%   | 77.65%     |
+| item-grid      | 78.01% | 77.77%    | 78.43%   | 78.01%     |
 
 ## 🧪 Testing
 
@@ -100,7 +100,7 @@ For **PostCSS** setup:
 // postcss.config.mjs
 export default {
   plugins: {
-    '@tailwindcss/postcss': {},
+    "@tailwindcss/postcss": {},
   },
 };
 ```
@@ -109,13 +109,11 @@ For **Vite** setup:
 
 ```js
 // vite.config.ts
-import { defineConfig } from 'vite';
-import tailwindcss from '@tailwindcss/vite';
+import { defineConfig } from "vite";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  plugins: [
-    tailwindcss()
-  ],
+  plugins: [tailwindcss()],
 });
 ```
 
@@ -147,19 +145,17 @@ Tailwind v4 automatically detects source files, but you can add explicit sources
 ### 5. Usage
 
 ```tsx
-import { Button, Card, FileUploader } from '@llamaindex/ui';
+import { Button, Card, FileUploader } from "@llamaindex/ui";
 
 function App() {
   return (
     <div className="p-8">
       <Card>
         <h1 className="text-2xl font-bold mb-4">Welcome</h1>
-        <Button variant="primary">
-          Get Started
-        </Button>
-        
+        <Button variant="primary">Get Started</Button>
+
         <FileUploader
-          onUpload={(files) => console.log('Files uploaded:', files)}
+          onUpload={(files) => console.log("Files uploaded:", files)}
           accept=".pdf,.doc,.docx"
           maxFiles={5}
         />
@@ -177,17 +173,17 @@ function App() {
 // next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@llamaindex/ui'],
-}
+  transpilePackages: ["@llamaindex/ui"],
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
 ```
 
 ```js
 // postcss.config.mjs
 export default {
   plugins: {
-    '@tailwindcss/postcss': {},
+    "@tailwindcss/postcss": {},
   },
 };
 ```
@@ -202,19 +198,16 @@ export default {
 
 ```js
 // vite.config.ts
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  plugins: [
-    react(),
-    tailwindcss()
-  ],
+  plugins: [react(), tailwindcss()],
   optimizeDeps: {
-    include: ['@llamaindex/ui']
-  }
-})
+    include: ["@llamaindex/ui"],
+  },
+});
 ```
 
 ```css
@@ -231,7 +224,7 @@ For frameworks using PostCSS:
 // postcss.config.mjs
 export default {
   plugins: {
-    '@tailwindcss/postcss': {},
+    "@tailwindcss/postcss": {},
   },
 };
 ```
@@ -245,22 +238,26 @@ export default {
 ## Available Components
 
 ### Core Components
+
 - `Button` - Versatile button component with multiple variants
 - `Card` - Container component with built-in styling
 - `Badge` - Status and category indicators
 - `Dialog` - Modal dialogs and overlays
 
 ### Data Components
+
 - `Table` - Data table with sorting and filtering
 - `ItemGrid` - Grid layout for data items
 - `Pagination` - Page navigation controls
 
 ### File Components
+
 - `FileUploader` - Drag-and-drop file upload
 - `FilePreview` - PDF and image preview
 - `UploadProgress` - Upload progress indicators
 
 ### Form Components
+
 - `Input` - Text input with validation
 - `Textarea` - Multi-line text input
 - `Select` - Dropdown selection
@@ -272,11 +269,11 @@ For better tree-shaking, you can import components from their specific modules:
 
 ```tsx
 // Individual imports for optimal bundle size
-import { FileUploader } from '@llamaindex/ui/file-uploader';
-import { ExtractedDataDisplay } from '@llamaindex/ui/extracted-data';
-import { PDFPreview } from '@llamaindex/ui/file-preview';
-import { ItemGrid } from '@llamaindex/ui/item-grid';
-import { ProcessingSteps } from '@llamaindex/ui/processing-steps';
+import { FileUploader } from "@llamaindex/ui/file-uploader";
+import { ExtractedDataDisplay } from "@llamaindex/ui/extracted-data";
+import { PDFPreview } from "@llamaindex/ui/file-preview";
+import { ItemGrid } from "@llamaindex/ui/item-grid";
+import { ProcessingSteps } from "@llamaindex/ui/processing-steps";
 ```
 
 ## Styling and Customization
@@ -302,9 +299,7 @@ The library includes built-in dark mode support. Apply the `dark` class to your 
 
 ```tsx
 <html className="dark">
-  <body>
-    {/* Your app */}
-  </body>
+  <body>{/* Your app */}</body>
 </html>
 ```
 

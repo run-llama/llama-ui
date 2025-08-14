@@ -38,7 +38,7 @@ export function UploadProgress({ files, onClose }: UploadProgressProps) {
   const { filesToShow, shouldShowViewMore } = getVisibleFiles(
     files,
     showAll,
-    maxVisible,
+    maxVisible
   );
 
   return (

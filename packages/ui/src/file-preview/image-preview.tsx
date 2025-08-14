@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import type { BoundingBox } from "./types";
 import { BoundingBoxOverlay } from "./bounding-box-overlay";

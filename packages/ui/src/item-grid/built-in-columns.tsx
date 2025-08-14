@@ -40,7 +40,7 @@ export function getItemsToReviewCount(item: ExtractedData): number {
     // Check leaf metadata: has confidence number and no nested object children
     const confidence = obj.confidence;
     const hasNestedObjectChild = Object.values(obj).some(
-      (v) => v && typeof v === "object" && !Array.isArray(v),
+      (v) => v && typeof v === "object" && !Array.isArray(v)
     );
 
     if (typeof confidence === "number" && !hasNestedObjectChild) {
@@ -150,13 +150,13 @@ export const BUILT_IN_COLUMNS_MAP = BUILT_IN_COLUMNS.reduce(
     acc[def.name] = def.column;
     return acc;
   },
-  {} as Record<string, Column<unknown>>,
+  {} as Record<string, Column<unknown>>
 );
 
 // Factory function to create built-in columns
 export function createBuiltInColumn<T = unknown>(
   columnName: string,
-  config: boolean | Partial<Column<T>>,
+  config: boolean | Partial<Column<T>>
 ): Column<T> {
   const baseColumn = BUILT_IN_COLUMNS_MAP[columnName];
 

@@ -3,7 +3,7 @@
  * Displays real-time agent processing events from workflow tasks
  */
 
-import { useMemo } from 'react';
+import { useMemo } from "react";
 import {
   FileText,
   Clock,
@@ -15,8 +15,8 @@ import {
   Download,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../base/card";
-import { useWorkflowTask } from '../hooks/use-workflow-task';
-import type { WorkflowEvent } from '../types';
+import { useWorkflowTask } from "../hooks/use-workflow-task";
+import type { WorkflowEvent } from "../types";
 
 const iconPool = [
   FileText,
@@ -52,10 +52,12 @@ export function AgentStreamDisplay({
   const agentEvents = useMemo(() => {
     return events
       .filter((event: WorkflowEvent) => {
-        return event.type === 'AgentStream' && 
-               typeof event.data === 'object' && 
-               event.data !== null && 
-               'message' in event.data;
+        return (
+          event.type === "AgentStream" &&
+          typeof event.data === "object" &&
+          event.data !== null &&
+          "message" in event.data
+        );
       })
       .slice(-maxEvents); // Show only the latest events
   }, [events, maxEvents]);
@@ -69,11 +71,17 @@ export function AgentStreamDisplay({
     <Card className={className}>
       <CardHeader className="pb-3">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
-          <div className={`h-2 w-2 rounded-full ${
-            task.status === 'running' ? 'bg-blue-500 animate-pulse' : 
-            task.status === 'complete' ? 'bg-green-500' : 
-            task.status === 'error' ? 'bg-red-500' : 'bg-gray-400'
-          }`} />
+          <div
+            className={`h-2 w-2 rounded-full ${
+              task.status === "running"
+                ? "bg-blue-500 animate-pulse"
+                : task.status === "complete"
+                  ? "bg-green-500"
+                  : task.status === "error"
+                    ? "bg-red-500"
+                    : "bg-gray-400"
+            }`}
+          />
           {title}
         </CardTitle>
       </CardHeader>
@@ -81,7 +89,7 @@ export function AgentStreamDisplay({
         <div className="space-y-3 max-h-64 overflow-y-auto">
           {agentEvents.map((event, index) => {
             const Icon = getRandomIcon(index);
-            
+
             return (
               <div
                 key={`agent-stream-${taskId}-${index}`}
@@ -90,11 +98,11 @@ export function AgentStreamDisplay({
                 <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-blue-600 flex-shrink-0">
                   <Icon className="h-3 w-3" />
                 </div>
-                                 <div className="flex-1 min-w-0">
-                   <div className="text-sm font-medium text-blue-900 break-words">
-                     {(event.data as { message: string }).message}
-                   </div>
-                 </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-blue-900 break-words">
+                    {(event.data as { message: string }).message}
+                  </div>
+                </div>
               </div>
             );
           })}
@@ -102,4 +110,4 @@ export function AgentStreamDisplay({
       </CardContent>
     </Card>
   );
-} 
+}

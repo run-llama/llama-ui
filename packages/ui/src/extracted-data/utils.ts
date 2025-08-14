@@ -33,7 +33,7 @@ export function getSchemaType(schema: JSONSchema.BaseSchema): string {
     const unionSchema = schema as any; // eslint-disable-line @typescript-eslint/no-explicit-any
     // For union, find the first non-null type
     const nonNullSchema = unionSchema.anyOf?.find(
-      (subSchema: JSONSchema.BaseSchema) => subSchema.type !== "null",
+      (subSchema: JSONSchema.BaseSchema) => subSchema.type !== "null"
     );
     if (nonNullSchema) {
       return getSchemaType(nonNullSchema);
@@ -47,7 +47,7 @@ export function getSchemaType(schema: JSONSchema.BaseSchema): string {
     const intersectSchema = schema as any; // eslint-disable-line @typescript-eslint/no-explicit-any
     // For intersect, find the first non-null type
     const nonNullSchema = intersectSchema.allOf?.find(
-      (subSchema: JSONSchema.BaseSchema) => subSchema.type !== "null",
+      (subSchema: JSONSchema.BaseSchema) => subSchema.type !== "null"
     );
     if (nonNullSchema) {
       return getSchemaType(nonNullSchema);
@@ -69,7 +69,7 @@ export function getSchemaType(schema: JSONSchema.BaseSchema): string {
  * Helper functions to check schema types
  */
 export function isArraySchema(
-  schema: JSONSchema.BaseSchema,
+  schema: JSONSchema.BaseSchema
 ): schema is JSONSchema.ArraySchema {
   return schema.type === "array";
 }
@@ -82,13 +82,13 @@ export function extractFirstNotNullableSchema(schema: JSONSchema.BaseSchema): {
   if (schema.type === undefined && schema.anyOf) {
     const anyNullable =
       schema.anyOf?.some(
-        (subSchema: JSONSchema.BaseSchema) => subSchema.type === "null",
+        (subSchema: JSONSchema.BaseSchema) => subSchema.type === "null"
       ) ?? false;
     if (anyNullable) {
       return {
         isNullable: true,
         schema: schema.anyOf?.find(
-          (subSchema: JSONSchema.BaseSchema) => subSchema.type !== "null",
+          (subSchema: JSONSchema.BaseSchema) => subSchema.type !== "null"
         ),
       };
     }
@@ -99,7 +99,7 @@ export function extractFirstNotNullableSchema(schema: JSONSchema.BaseSchema): {
   if (schema.type === undefined && schema.allOf) {
     const allNullable =
       schema.allOf?.some(
-        (subSchema: JSONSchema.BaseSchema) => subSchema.type === "null",
+        (subSchema: JSONSchema.BaseSchema) => subSchema.type === "null"
       ) ?? false;
     if (allNullable) {
       return { isNullable: true, schema: undefined };
@@ -112,7 +112,7 @@ export function extractFirstNotNullableSchema(schema: JSONSchema.BaseSchema): {
 }
 
 export function isObjectSchema(
-  schema: JSONSchema.BaseSchema,
+  schema: JSONSchema.BaseSchema
 ): schema is JSONSchema.ObjectSchema {
   return schema.type === "object";
 }
@@ -133,7 +133,7 @@ export function snakeOrCamelToTitle(str: string): string {
  */
 export function coerceValueToSchemaType(
   value: unknown,
-  schema: JSONSchema.BaseSchema,
+  schema: JSONSchema.BaseSchema
 ): unknown {
   if (value === null || value === undefined || value === "") {
     return null;

@@ -50,7 +50,7 @@ describe("Multi-File Upload Scenarios", () => {
 
       expect(uploads).toHaveLength(5);
       expect(uploads.every((upload) => upload.status === "uploading")).toBe(
-        true,
+        true
       );
       expect(uploads.every((upload) => upload.progress === 0)).toBe(true);
     });
@@ -146,7 +146,7 @@ describe("Multi-File Upload Scenarios", () => {
 
     it("should handle cancel all with large number of files", () => {
       const files = Array.from({ length: 10 }, (_, i) =>
-        createMockFile(`bulk${i + 1}.pdf`),
+        createMockFile(`bulk${i + 1}.pdf`)
       );
 
       let uploads: FileUploadProgress[] = [];
@@ -165,7 +165,7 @@ describe("Multi-File Upload Scenarios", () => {
       uploads = uploads.map((upload) =>
         upload.file.name === files[2].name
           ? { ...upload, status: "error" as const, error: "Server error" }
-          : upload,
+          : upload
       );
 
       // Cancel all remaining uploading files
@@ -201,10 +201,10 @@ describe("Multi-File Upload Scenarios", () => {
 
       expect(uploads).toHaveLength(2);
       expect(
-        uploads.find((u) => u.file.name === "document.pdf")?.progress,
+        uploads.find((u) => u.file.name === "document.pdf")?.progress
       ).toBe(0); // Reset
       expect(uploads.find((u) => u.file.name === "report.pdf")?.progress).toBe(
-        30,
+        30
       ); // Unchanged
     });
 
@@ -260,7 +260,7 @@ describe("Multi-File Upload Scenarios", () => {
       uploads = uploads.map((upload) =>
         upload.file.name === files[1].name
           ? { ...upload, status: "error" as const, error: "Network timeout" }
-          : upload,
+          : upload
       );
 
       uploads = updateFileProgress(uploads, files[2], 100);
@@ -270,7 +270,7 @@ describe("Multi-File Upload Scenarios", () => {
       uploads = uploads.map((upload) =>
         upload.file.name === files[3].name
           ? { ...upload, status: "error" as const, error: "File corrupted" }
-          : upload,
+          : upload
       );
 
       const stats = calculateUploadStats(uploads);
@@ -282,7 +282,7 @@ describe("Multi-File Upload Scenarios", () => {
 
     it("should handle network failure affecting all uploads", () => {
       const files = Array.from({ length: 5 }, (_, i) =>
-        createMockFile(`file${i + 1}.pdf`),
+        createMockFile(`file${i + 1}.pdf`)
       );
 
       let uploads: FileUploadProgress[] = [];
@@ -307,7 +307,7 @@ describe("Multi-File Upload Scenarios", () => {
               status: "error" as const,
               error: "Network connection lost",
             }
-          : upload,
+          : upload
       );
 
       const stats = calculateUploadStats(uploads);
@@ -320,7 +320,7 @@ describe("Multi-File Upload Scenarios", () => {
   describe("Performance with Large File Counts", () => {
     it("should handle 20+ files efficiently", () => {
       const files = Array.from({ length: 25 }, (_, i) =>
-        createMockFile(`batch${i + 1}.pdf`),
+        createMockFile(`batch${i + 1}.pdf`)
       );
 
       let uploads: FileUploadProgress[] = [];
@@ -332,7 +332,7 @@ describe("Multi-File Upload Scenarios", () => {
 
       expect(uploads).toHaveLength(25);
       expect(uploads.every((upload) => upload.status === "uploading")).toBe(
-        true,
+        true
       );
 
       // Simulate various completion states
@@ -352,7 +352,7 @@ describe("Multi-File Upload Scenarios", () => {
                 status: "error" as const,
                 error: "Processing failed",
               }
-            : upload,
+            : upload
         );
       }
 
@@ -369,7 +369,7 @@ describe("Multi-File Upload Scenarios", () => {
 
     it("should calculate correct statistics with many files", () => {
       const files = Array.from({ length: 50 }, (_, i) =>
-        createMockFile(`file${i + 1}.pdf`),
+        createMockFile(`file${i + 1}.pdf`)
       );
 
       let uploads: FileUploadProgress[] = [];

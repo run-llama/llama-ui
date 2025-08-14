@@ -25,7 +25,7 @@ export function getDisplayModes(fileCount: number) {
  */
 export function addUploadToQueue(
   uploads: FileUploadProgress[],
-  file: File,
+  file: File
 ): FileUploadProgress[] {
   const newUpload: FileUploadProgress = {
     file,
@@ -44,12 +44,12 @@ export function addUploadToQueue(
 export function updateFileProgress(
   uploads: FileUploadProgress[],
   file: File,
-  progress: number,
+  progress: number
 ): FileUploadProgress[] {
   return uploads.map((upload) =>
     upload.file.name === file.name
       ? { ...upload, progress: Math.min(progress, 100) }
-      : upload,
+      : upload
   );
 }
 
@@ -58,12 +58,12 @@ export function updateFileProgress(
  */
 export function completeFileUpload(
   uploads: FileUploadProgress[],
-  file: File,
+  file: File
 ): FileUploadProgress[] {
   return uploads.map((upload) =>
     upload.file.name === file.name
       ? { ...upload, progress: 100, status: "completed" as const }
-      : upload,
+      : upload
   );
 }
 
@@ -73,12 +73,12 @@ export function completeFileUpload(
 export function failFileUpload(
   uploads: FileUploadProgress[],
   file: File,
-  error: string,
+  error: string
 ): FileUploadProgress[] {
   return uploads.map((upload) =>
     upload.file.name === file.name
       ? { ...upload, status: "error" as const, error }
-      : upload,
+      : upload
   );
 }
 
@@ -87,12 +87,12 @@ export function failFileUpload(
  */
 export function cancelFileUpload(
   uploads: FileUploadProgress[],
-  file: File,
+  file: File
 ): FileUploadProgress[] {
   return uploads.map((upload) =>
     upload.file.name === file.name && upload.status === "uploading"
       ? { ...upload, status: "canceled" as const }
-      : upload,
+      : upload
   );
 }
 
@@ -100,12 +100,12 @@ export function cancelFileUpload(
  * Cancel all uploading files
  */
 export function cancelAllUploads(
-  uploads: FileUploadProgress[],
+  uploads: FileUploadProgress[]
 ): FileUploadProgress[] {
   return uploads.map((upload) =>
     upload.status === "uploading"
       ? { ...upload, status: "canceled" as const }
-      : upload,
+      : upload
   );
 }
 
@@ -114,7 +114,7 @@ export function cancelAllUploads(
  */
 export function removeFileUpload(
   uploads: FileUploadProgress[],
-  file: File,
+  file: File
 ): FileUploadProgress[] {
   return uploads.filter((upload) => upload.file.name !== file.name);
 }
@@ -123,7 +123,7 @@ export function removeFileUpload(
  * Remove completed uploads from the list
  */
 export function removeCompletedUploads(
-  uploads: FileUploadProgress[],
+  uploads: FileUploadProgress[]
 ): FileUploadProgress[] {
   return uploads.filter((upload) => upload.status !== "completed");
 }
@@ -141,7 +141,7 @@ export interface UploadStats {
 }
 
 export function calculateUploadStats(
-  uploads: FileUploadProgress[],
+  uploads: FileUploadProgress[]
 ): UploadStats {
   return {
     total: uploads.length,
@@ -152,7 +152,7 @@ export function calculateUploadStats(
     totalProgress:
       uploads.length > 0
         ? Math.round(
-            uploads.reduce((sum, f) => sum + f.progress, 0) / uploads.length,
+            uploads.reduce((sum, f) => sum + f.progress, 0) / uploads.length
           )
         : 0,
   };
@@ -171,7 +171,7 @@ export function hasActiveUploads(uploads: FileUploadProgress[]): boolean {
 export function getVisibleFiles(
   uploads: FileUploadProgress[],
   showAll: boolean,
-  maxVisible: number = 5,
+  maxVisible: number = 5
 ): { filesToShow: FileUploadProgress[]; shouldShowViewMore: boolean } {
   const shouldShowViewMore = uploads.length > maxVisible;
   const filesToShow = showAll ? uploads : uploads.slice(0, maxVisible);

@@ -36,7 +36,7 @@ describe("Upload Flow Integration Tests", () => {
 
       expect(uploads).toHaveLength(3);
       expect(uploads.every((upload) => upload.status === "uploading")).toBe(
-        true,
+        true
       );
       expect(uploads.every((upload) => upload.progress === 0)).toBe(true);
     });
@@ -120,7 +120,7 @@ describe("Upload Flow Integration Tests", () => {
       uploads = uploads.map((upload) =>
         upload.file.name === files[3].name
           ? { ...upload, status: "error" as const, error: "Network error" }
-          : upload,
+          : upload
       ); // failed
       uploads = updateFileProgress(uploads, files[4], 10); // uploading
 
@@ -197,7 +197,7 @@ describe("Upload Flow Integration Tests", () => {
       uploads = uploads.map((upload) =>
         upload.file.name === files[4].name
           ? { ...upload, status: "error" as const, error: "Failed" }
-          : upload,
+          : upload
       );
       uploads = updateFileProgress(uploads, files[5], 20);
       uploads = cancelFileUpload(uploads, files[5]);
@@ -232,7 +232,7 @@ describe("Upload Flow Integration Tests", () => {
     it("should simulate typical multi-file upload with some cancellations", () => {
       // Simulate user uploading 5 documents
       const files = Array.from({ length: 5 }, (_, i) =>
-        createMockFile(`document-${i + 1}.pdf`),
+        createMockFile(`document-${i + 1}.pdf`)
       );
 
       let uploads: FileUploadProgress[] = [];
@@ -298,7 +298,7 @@ describe("Upload Flow Integration Tests", () => {
 
     it("should handle cancel all during mixed upload states", () => {
       const files = Array.from({ length: 8 }, (_, i) =>
-        createMockFile(`bulk-upload-${i + 1}.pdf`),
+        createMockFile(`bulk-upload-${i + 1}.pdf`)
       );
 
       let uploads: FileUploadProgress[] = [];
@@ -315,7 +315,7 @@ describe("Upload Flow Integration Tests", () => {
       uploads = uploads.map((upload) =>
         upload.file.name === files[3].name
           ? { ...upload, status: "error" as const, error: "Server error" }
-          : upload,
+          : upload
       ); // Failed
       // files[4-7] remain at 0% uploading
 

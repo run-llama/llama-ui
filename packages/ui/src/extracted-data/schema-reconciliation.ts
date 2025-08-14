@@ -94,7 +94,7 @@ export interface ReconciliationResult<T = Record<string, unknown>> {
  */
 export function reconcileDataWithJsonSchema(
   originalData: Record<string, unknown>,
-  jsonSchema: JSONSchema.ObjectSchema,
+  jsonSchema: JSONSchema.ObjectSchema
 ): ReconciliationResult<Record<string, unknown>> {
   const metadata: Record<string, FieldMetadata> = {};
   const requiredFields = new Set<string>();
@@ -142,7 +142,7 @@ function fillMissingFieldsFromJsonSchema(
   data: unknown,
   jsonSchema: JSONSchema.ObjectSchema,
   currentPath: string[],
-  context: ReconciliationContext,
+  context: ReconciliationContext
 ): void {
   const properties = jsonSchema.properties || {};
 
@@ -211,7 +211,7 @@ function fillMissingFieldsFromJsonSchema(
           generateArrayItemMetadata(
             objectItemSchema,
             [...fieldPath, "*"], // Add "*" wildcard for array items
-            context,
+            context
           );
         } else {
           // For primitive arrays, generate a single metadata entry
@@ -245,7 +245,7 @@ function fillMissingFieldsFromJsonSchema(
         dataObj[fieldName],
         objectSchema,
         fieldPath,
-        context,
+        context
       );
     } else if (
       baseSchema.type === "array" &&
@@ -264,7 +264,7 @@ function fillMissingFieldsFromJsonSchema(
               item,
               itemSchema as JSONSchema.ObjectSchema,
               [...fieldPath, String(index)],
-              context,
+              context
             );
           });
         }
@@ -278,7 +278,7 @@ function fillMissingFieldsFromJsonSchema(
  */
 export function isFieldRequiredAtPath(
   keyPath: string[],
-  metadata: Record<string, FieldMetadata>,
+  metadata: Record<string, FieldMetadata>
 ): boolean {
   const pathString = keyPath.join(".");
   return metadata[pathString]?.isRequired ?? false;
@@ -289,7 +289,7 @@ export function isFieldRequiredAtPath(
  */
 export function wasFieldMissingAtPath(
   keyPath: string[],
-  metadata: Record<string, FieldMetadata>,
+  metadata: Record<string, FieldMetadata>
 ): boolean {
   const pathString = keyPath.join(".");
   return metadata[pathString]?.wasMissing ?? false;
@@ -300,7 +300,7 @@ export function wasFieldMissingAtPath(
  */
 export function getFieldMetadataAtPath(
   keyPath: string[],
-  metadata: Record<string, FieldMetadata>,
+  metadata: Record<string, FieldMetadata>
 ): FieldMetadata | null {
   const pathString = keyPath.join(".");
   return metadata[pathString] || null;
@@ -311,11 +311,11 @@ export function getFieldMetadataAtPath(
  */
 export function getValidationErrorsAtPath(
   keyPath: string[],
-  validationErrors: ValidationError[],
+  validationErrors: ValidationError[]
 ): ValidationError[] {
   const pathString = keyPath.join(".");
   return validationErrors.filter(
-    (error) => error.path.join(".") === pathString,
+    (error) => error.path.join(".") === pathString
   );
 }
 
@@ -335,7 +335,7 @@ export function getValidationErrorsAtPath(
 function generateArrayItemMetadata(
   objectSchema: JSONSchema.ObjectSchema,
   currentPath: string[],
-  context: ReconciliationContext,
+  context: ReconciliationContext
 ): void {
   const { properties } = objectSchema;
   if (!properties || typeof properties !== "object") {
@@ -382,7 +382,7 @@ function generateArrayItemMetadata(
           generateArrayItemMetadata(
             objectItemSchema,
             [...fieldPath, "*"],
-            context,
+            context
           );
         } else {
           // Primitive array item

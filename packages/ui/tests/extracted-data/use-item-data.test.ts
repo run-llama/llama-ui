@@ -9,7 +9,7 @@ import {
 
 // Mock the mock-item-response module
 vi.mock("@/src/extracted-data/mock-item-response", () => ({
-  getMockItemResponse: vi.fn()
+  getMockItemResponse: vi.fn(),
 }));
 
 import { getMockItemResponse } from "@/src/extracted-data/mock-item-response";
@@ -28,9 +28,9 @@ const mockJsonSchema: JSONSchema.ObjectSchema = {
   properties: {
     name: { type: "string" },
     age: { type: "number" },
-    email: { type: "string" }
+    email: { type: "string" },
   },
-  required: ["name", "age", "email"]
+  required: ["name", "age", "email"],
 };
 
 const mockItemData: TypedAgentData<ExtractedData<TestData>> = {
@@ -40,18 +40,18 @@ const mockItemData: TypedAgentData<ExtractedData<TestData>> = {
     data: {
       name: "John Doe",
       age: 30,
-      email: "john@example.com"
+      email: "john@example.com",
     },
     original_data: {
       name: "Original John",
       age: 25,
-      email: "original@example.com"
+      email: "original@example.com",
     } as any,
     status: "completed",
-    confidence: 0.95
+    confidence: 0.95,
   } as any,
   createdAt: new Date(),
-  updatedAt: new Date()
+  updatedAt: new Date(),
 };
 
 const mockUpdatedItemData: TypedAgentData<ExtractedData<TestData>> = {
@@ -61,14 +61,14 @@ const mockUpdatedItemData: TypedAgentData<ExtractedData<TestData>> = {
     data: {
       name: "Jane Doe",
       age: 25,
-      email: "jane@example.com"
+      email: "jane@example.com",
     },
     original_data: {
       name: "Original John",
       age: 25,
-      email: "original@example.com"
+      email: "original@example.com",
     } as any,
-  } as any
+  } as any,
 };
 
 describe("useItemData", () => {
@@ -77,14 +77,14 @@ describe("useItemData", () => {
   beforeEach(() => {
     mockClient = {
       getItem: vi.fn(),
-      updateItem: vi.fn()
+      updateItem: vi.fn(),
     };
 
     // Reset all mocks
     vi.clearAllMocks();
-    
+
     // Mock Math.random to return 0.5 (avoid error simulation)
-    vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
   });
 
   afterEach(() => {
@@ -98,7 +98,7 @@ describe("useItemData", () => {
           jsonSchema: mockJsonSchema,
           itemId: "test-item-1",
           isMock: false,
-          client: mockClient
+          client: mockClient,
         })
       );
 
@@ -122,7 +122,7 @@ describe("useItemData", () => {
           jsonSchema: mockJsonSchema,
           itemId: "test-item-1",
           isMock: false,
-          client: mockClient
+          client: mockClient,
         })
       );
 
@@ -132,7 +132,9 @@ describe("useItemData", () => {
 
       expect(result.current.item).toEqual(mockItemData);
       expect(result.current.data).toEqual(mockItemData.data.data);
-      expect(result.current.originalData).toEqual((mockItemData.data as any).original_data);
+      expect(result.current.originalData).toEqual(
+        (mockItemData.data as any).original_data
+      );
       expect(result.current.error).toBeNull();
       expect(mockClient.getItem).toHaveBeenCalledWith("test-item-1");
     });
@@ -146,7 +148,7 @@ describe("useItemData", () => {
           jsonSchema: mockJsonSchema,
           itemId: "test-item-1",
           isMock: false,
-          client: mockClient
+          client: mockClient,
         })
       );
 
@@ -168,7 +170,7 @@ describe("useItemData", () => {
           jsonSchema: mockJsonSchema,
           itemId: "test-item-1",
           isMock: false,
-          client: mockClient
+          client: mockClient,
         })
       );
 
@@ -192,7 +194,7 @@ describe("useItemData", () => {
           jsonSchema: mockJsonSchema,
           itemId: "test-item-1",
           isMock: true,
-          client: mockClient
+          client: mockClient,
         })
       );
 
@@ -202,7 +204,9 @@ describe("useItemData", () => {
 
       expect(result.current.item).toEqual(mockItemData);
       expect(result.current.data).toEqual(mockItemData.data.data);
-      expect(result.current.originalData).toEqual((mockItemData.data as any).original_data);
+      expect(result.current.originalData).toEqual(
+        (mockItemData.data as any).original_data
+      );
       expect(result.current.error).toBeNull();
       expect(mockGetMockItemResponse).toHaveBeenCalledWith("test-item-1");
       expect(mockClient.getItem).not.toHaveBeenCalled();
@@ -210,14 +214,14 @@ describe("useItemData", () => {
 
     it("should simulate error in mock mode", async () => {
       // Mock Math.random to return 0.05 (less than 0.1, triggers error)
-      vi.spyOn(Math, 'random').mockReturnValue(0.05);
+      vi.spyOn(Math, "random").mockReturnValue(0.05);
 
       const { result } = renderHook(() =>
         useItemData({
           jsonSchema: mockJsonSchema,
           itemId: "test-item-1",
           isMock: true,
-          client: mockClient
+          client: mockClient,
         })
       );
 
@@ -233,14 +237,14 @@ describe("useItemData", () => {
 
     it("should include simulated delay", async () => {
       mockGetMockItemResponse.mockReturnValue(mockItemData as any);
-      
+
       const startTime = Date.now();
       const { result } = renderHook(() =>
         useItemData({
           jsonSchema: mockJsonSchema,
           itemId: "test-item-1",
           isMock: true,
-          client: mockClient
+          client: mockClient,
         })
       );
 
@@ -265,7 +269,7 @@ describe("useItemData", () => {
           jsonSchema: mockJsonSchema,
           itemId: "test-item-1",
           isMock: false,
-          client: mockClient
+          client: mockClient,
         })
       );
 
@@ -276,7 +280,7 @@ describe("useItemData", () => {
       const newData: TestData = {
         name: "Updated Name",
         age: 35,
-        email: "updated@example.com"
+        email: "updated@example.com",
       };
 
       act(() => {
@@ -285,8 +289,10 @@ describe("useItemData", () => {
 
       // User corrections should be updated
       expect(result.current.data).toEqual(newData);
-      // Original AI predictions should remain unchanged  
-      expect(result.current.originalData).toEqual((mockItemData.data as any).original_data);
+      // Original AI predictions should remain unchanged
+      expect(result.current.originalData).toEqual(
+        (mockItemData.data as any).original_data
+      );
       // Item should still exist
       expect(result.current.item).toBeTruthy();
     });
@@ -300,7 +306,7 @@ describe("useItemData", () => {
           jsonSchema: mockJsonSchema,
           itemId: "test-item-1",
           isMock: false,
-          client: mockClient
+          client: mockClient,
         })
       );
 
@@ -312,7 +318,7 @@ describe("useItemData", () => {
       const correctedData: TestData = {
         name: "Corrected Name",
         age: 35,
-        email: "corrected@example.com"
+        email: "corrected@example.com",
       };
 
       act(() => {
@@ -325,11 +331,14 @@ describe("useItemData", () => {
       });
 
       // Should save the current item.data which includes corrected data plus status
-      expect(mockClient.updateItem).toHaveBeenCalledWith("test-item-1", expect.objectContaining({
-        data: correctedData,
-        status: "approved"
-      }));
-      
+      expect(mockClient.updateItem).toHaveBeenCalledWith(
+        "test-item-1",
+        expect.objectContaining({
+          data: correctedData,
+          status: "approved",
+        })
+      );
+
       expect(result.current.item).toEqual(mockUpdatedItemData);
       expect(result.current.data).toEqual(mockUpdatedItemData.data.data);
     });
@@ -340,7 +349,7 @@ describe("useItemData", () => {
           jsonSchema: mockJsonSchema,
           itemId: "test-item-1",
           isMock: false,
-          client: mockClient
+          client: mockClient,
         })
       );
 
@@ -358,8 +367,8 @@ describe("useItemData", () => {
         ...mockItemData,
         data: {
           ...mockItemData.data,
-          data: null // Invalid data that will cause parsing error
-        }
+          data: null, // Invalid data that will cause parsing error
+        },
       };
 
       mockClient.getItem = vi.fn().mockResolvedValue(invalidItemData as any);
@@ -369,7 +378,7 @@ describe("useItemData", () => {
           jsonSchema: mockJsonSchema,
           itemId: "test-item-1",
           isMock: false,
-          client: mockClient
+          client: mockClient,
         })
       );
 
@@ -389,7 +398,7 @@ describe("useItemData", () => {
           jsonSchema: mockJsonSchema,
           itemId: "",
           isMock: false,
-          client: mockClient
+          client: mockClient,
         })
       );
 
@@ -406,7 +415,7 @@ describe("useItemData", () => {
             jsonSchema: mockJsonSchema,
             itemId,
             isMock: false,
-            client: mockClient
+            client: mockClient,
           }),
         { initialProps: { itemId: "item-1" } }
       );
@@ -426,7 +435,7 @@ describe("useItemData", () => {
 
       expect(mockClient.getItem).toHaveBeenCalledTimes(2);
     });
-    
+
     // BUG TEST 1: Empty itemId should set loading to false, not stay true forever
     it("should set loading to false when itemId is empty", async () => {
       const { result } = renderHook(() =>
@@ -434,19 +443,23 @@ describe("useItemData", () => {
           jsonSchema: mockJsonSchema,
           itemId: "",
           isMock: false,
-          client: mockClient
+          client: mockClient,
         })
       );
 
       // This test should now PASS - loading should be false when itemId is empty
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false);
-      }, { timeout: 100 });
+      await waitFor(
+        () => {
+          expect(result.current.loading).toBe(false);
+        },
+        { timeout: 100 }
+      );
     });
 
     // BUG TEST 2: State should be properly reset when fetching new data
     it("should reset previous data when loading new item", async () => {
-      mockClient.getItem = vi.fn()
+      mockClient.getItem = vi
+        .fn()
         .mockResolvedValueOnce(mockItemData)
         .mockResolvedValueOnce(mockUpdatedItemData);
 
@@ -456,7 +469,7 @@ describe("useItemData", () => {
             jsonSchema: mockJsonSchema,
             itemId,
             isMock: false,
-            client: mockClient
+            client: mockClient,
           }),
         { initialProps: { itemId: "item-1" } }
       );
@@ -489,7 +502,7 @@ describe("useItemData", () => {
             jsonSchema: mockJsonSchema,
             itemId: "item-1",
             isMock: false,
-            client
+            client,
           }),
         { initialProps: { client: mockClient } }
       );
@@ -503,7 +516,7 @@ describe("useItemData", () => {
       // Create new client with same methods but different reference
       const newMockClient = {
         getItem: vi.fn().mockResolvedValue(mockItemData),
-        updateItem: vi.fn()
+        updateItem: vi.fn(),
       };
 
       // Change client reference
@@ -513,7 +526,7 @@ describe("useItemData", () => {
       await waitFor(() => {
         expect(newMockClient.getItem).toHaveBeenCalledWith("item-1");
       });
-      
+
       // New client should have been called
       expect(newMockClient.getItem).toHaveBeenCalledTimes(1);
       // Original client should still only have been called once
@@ -530,7 +543,7 @@ describe("useItemData", () => {
           jsonSchema: mockJsonSchema,
           itemId: "test-item-1",
           isMock: false,
-          client: mockClient
+          client: mockClient,
         })
       );
 
@@ -542,7 +555,7 @@ describe("useItemData", () => {
       const modifiedData: TestData = {
         name: "Modified Name",
         age: 40,
-        email: "modified@example.com"
+        email: "modified@example.com",
       };
 
       act(() => {
@@ -554,32 +567,35 @@ describe("useItemData", () => {
         await result.current.save("approved");
       });
 
-      expect(mockClient.updateItem).toHaveBeenCalledWith("test-item-1", expect.objectContaining({
-        data: modifiedData, // Should use the modified data
-        status: "approved"
-      }));
+      expect(mockClient.updateItem).toHaveBeenCalledWith(
+        "test-item-1",
+        expect.objectContaining({
+          data: modifiedData, // Should use the modified data
+          status: "approved",
+        })
+      );
     });
 
     // BUG TEST 5: CRITICAL - Save should include modifications made via updateData
     it("should save the modified data when user changed data via updateData", async () => {
       mockClient.getItem = vi.fn().mockResolvedValue(mockItemData);
-      
+
       // Create a response that includes the modified data
       const expectedSavedData = {
         name: "Modified Name",
-        age: 40,  
-        email: "modified@example.com"
+        age: 40,
+        email: "modified@example.com",
       };
-      
+
       const mockSaveResponse: TypedAgentData<ExtractedData<TestData>> = {
         ...mockItemData,
         data: {
           ...mockItemData.data,
           data: expectedSavedData,
-          status: "reviewed"
-        }
+          status: "reviewed",
+        },
       };
-      
+
       mockClient.updateItem = vi.fn().mockResolvedValue(mockSaveResponse);
 
       const { result } = renderHook(() =>
@@ -587,7 +603,7 @@ describe("useItemData", () => {
           jsonSchema: mockJsonSchema,
           itemId: "test-item-1",
           isMock: false,
-          client: mockClient
+          client: mockClient,
         })
       );
 
@@ -599,7 +615,7 @@ describe("useItemData", () => {
       expect(result.current.data).toEqual({
         name: "John Doe",
         age: 30,
-        email: "john@example.com"
+        email: "john@example.com",
       });
 
       // Modify data locally via updateData
@@ -617,10 +633,13 @@ describe("useItemData", () => {
 
       // CRITICAL TEST: Save should include the modified data from updateData
       // This test should now PASS with the corrected implementation
-      expect(mockClient.updateItem).toHaveBeenCalledWith("test-item-1", expect.objectContaining({
-        data: expectedSavedData,  // Should use the modified data, not original prediction.data
-        status: "approved"
-      }));
+      expect(mockClient.updateItem).toHaveBeenCalledWith(
+        "test-item-1",
+        expect.objectContaining({
+          data: expectedSavedData, // Should use the modified data, not original prediction.data
+          status: "approved",
+        })
+      );
     });
   });
-}); 
+});

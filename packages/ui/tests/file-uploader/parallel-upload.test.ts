@@ -47,7 +47,7 @@ describe("Parallel Upload Scenarios", () => {
       // All files should be in uploading state
       expect(uploads).toHaveLength(5);
       expect(uploads.every((upload) => upload.status === "uploading")).toBe(
-        true,
+        true
       );
       expect(uploads.every((upload) => upload.progress === 0)).toBe(true);
 
@@ -96,7 +96,7 @@ describe("Parallel Upload Scenarios", () => {
 
     it("should handle mixed completion timing in parallel uploads", () => {
       const files = Array.from({ length: 8 }, (_, i) =>
-        createMockFile(`file${i + 1}.pdf`),
+        createMockFile(`file${i + 1}.pdf`)
       );
 
       let uploads: FileUploadProgress[] = [];
@@ -177,7 +177,7 @@ describe("Parallel Upload Scenarios", () => {
 
     it("should handle network interruption affecting some parallel uploads", () => {
       const files = Array.from({ length: 10 }, (_, i) =>
-        createMockFile(`batch${i + 1}.pdf`),
+        createMockFile(`batch${i + 1}.pdf`)
       );
 
       let uploads: FileUploadProgress[] = [];
@@ -221,7 +221,7 @@ describe("Parallel Upload Scenarios", () => {
   describe("Performance with Parallel Uploads", () => {
     it("should efficiently track large number of concurrent uploads", () => {
       const files = Array.from({ length: 20 }, (_, i) =>
-        createMockFile(`concurrent${i + 1}.pdf`),
+        createMockFile(`concurrent${i + 1}.pdf`)
       );
 
       let uploads: FileUploadProgress[] = [];
@@ -339,7 +339,7 @@ describe("Parallel Upload Scenarios", () => {
 
     it("should handle user canceling some uploads while others continue", () => {
       const files = Array.from({ length: 6 }, (_, i) =>
-        createMockFile(`upload${i + 1}.pdf`),
+        createMockFile(`upload${i + 1}.pdf`)
       );
 
       let uploads: FileUploadProgress[] = [];
@@ -364,7 +364,7 @@ describe("Parallel Upload Scenarios", () => {
           upload.file.name === files[5].name) &&
         upload.status === "uploading"
           ? { ...upload, status: "canceled" as const }
-          : upload,
+          : upload
       );
 
       // Remaining files continue uploading

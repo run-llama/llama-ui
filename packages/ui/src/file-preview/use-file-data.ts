@@ -70,7 +70,7 @@ export function useFileData(fileId: string, mockData?: FileData) {
         // eslint-disable-next-line no-console
         console.error("Error fetching file data:", err);
         setError(
-          err instanceof Error ? err.message : "Failed to load file data",
+          err instanceof Error ? err.message : "Failed to load file data"
         );
       } finally {
         setLoading(false);
