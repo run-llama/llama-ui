@@ -14,6 +14,7 @@ export function ExtractedDataDisplay<S extends JSONObject>({
   onChange,
   editable = true,
   jsonSchema,
+  onClickField,
 }: ExtractedDataDisplayProps<S>) {
   const [changedPaths, setChangedPaths] = useState<Set<string>>(new Set());
 
@@ -113,6 +114,7 @@ export function ExtractedDataDisplay<S extends JSONObject>({
                     extracted: field_metadata,
                   }}
                   validationErrors={validationErrors}
+                  onClickField={onClickField}
                 />
               </div>
             </div>
@@ -133,6 +135,7 @@ export function ExtractedDataDisplay<S extends JSONObject>({
                   extracted: field_metadata,
                 }}
                 validationErrors={validationErrors}
+                onClickField={onClickField}
               />
             </div>
           );
@@ -153,6 +156,7 @@ export function ExtractedDataDisplay<S extends JSONObject>({
                       extracted: field_metadata,
                     }}
                     validationErrors={validationErrors}
+                    onClickField={onClickField}
                   />
                 </div>
               </div>

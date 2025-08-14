@@ -22,6 +22,7 @@ import type {
   ValidationError,
 } from "../schema-reconciliation";
 import type { RendererMetadata } from "../types";
+import type { ExtractedFieldMetadata } from "llama-cloud-services/beta/agent";
 import { getFieldDisplayInfo, getFieldLabelText } from "../field-display-utils";
 import {
   buildTableHeaderMetadataPath,
@@ -48,6 +49,8 @@ export interface TableRendererProps<Row extends Record<string, JSONObject>> {
   // Unified metadata
   metadata?: RendererMetadata;
   validationErrors?: ValidationError[];
+  // Field click callback
+  onClickField?: (args: { value: PrimitiveValue; metadata?: ExtractedFieldMetadata; path: string[] }) => void;
 }
 
 export function TableRenderer<Row extends Record<string, JSONObject>>({
@@ -59,6 +62,7 @@ export function TableRenderer<Row extends Record<string, JSONObject>>({
   keyPath = [],
   metadata,
   validationErrors = [],
+  onClickField,
 }: TableRendererProps<Row>) {
   const effectiveMetadata: RendererMetadata = {
     schema: metadata?.schema ?? ({} as Record<string, FieldSchemaMetadata>),
@@ -71,7 +75,6 @@ export function TableRenderer<Row extends Record<string, JSONObject>>({
     }
     return undefined;
   };
-
   const handleAddRow = () => {
     // Try to get schema-based default values first
     const schemaBasedRow = getTableRowDefaultValue(
@@ -391,6 +394,13 @@ export function TableRenderer<Row extends Record<string, JSONObject>>({
                       showBorder={true}
                       expectedType={expectedType}
                       required={isRequired}
+                      onClick={(args) =>
+                        onClickField?.({
+                          value: args.value,
+                          metadata: args.metadata,
+                          path: cellPath,
+                        })
+                      }
                     />
                   </TableCell>
                 );

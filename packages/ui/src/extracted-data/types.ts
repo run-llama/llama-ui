@@ -2,6 +2,7 @@ import type { JSONSchema } from "zod/v4/core";
 import type {
   ExtractedData,
   ExtractedFieldMetadataDict,
+  ExtractedFieldMetadata,
 } from "llama-cloud-services/beta/agent";
 import type { FieldSchemaMetadata } from "./schema-reconciliation";
 
@@ -13,6 +14,8 @@ export interface ExtractedDataDisplayProps<S extends JSONObject> {
   editable?: boolean;
   // Schema reconciliation - pass schema and let component handle reconciliation internally
   jsonSchema?: JSONSchema.ObjectSchema;
+  // Field click callback
+  onClickField?: (args: { value: PrimitiveValue; metadata?: ExtractedFieldMetadata; path: string[] }) => void;
 }
 
 // Convenience type used by renderers to carry both schema metadata and extracted metadata

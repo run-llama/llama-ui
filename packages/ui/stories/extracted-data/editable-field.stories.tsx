@@ -26,7 +26,7 @@ export const Basic: Story = {
 
     const handleSave = (newValue: unknown) => {
       console.log("Saved:", newValue);
-      setValue(newValue);
+      setValue(newValue as string | number | boolean | null | undefined);
     };
 
     return <EditableField {...args} value={value} onSave={handleSave} />;

@@ -51,14 +51,7 @@ export function EditableField<S extends PrimitiveValue>({
     metadata?.confidence ?? 1
   );
 
-  // Debug: Log metadata for low confidence fields
-  if (metadata && metadata.confidence && metadata.confidence < 0.9) {
-    console.log("EditableField received low confidence metadata:", {
-      value: String(value),
-      confidence: metadata.confidence,
-      metadata,
-    });
-  }
+  // Removed noisy debug log for low confidence fields to avoid confusing onClick payload structure
 
   const containerRef = useRef<HTMLDivElement>(null);
 

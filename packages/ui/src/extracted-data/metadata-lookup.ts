@@ -67,28 +67,13 @@ export function isExtractedFieldMetadata(
 
   const obj = value as Record<string, unknown>;
 
-  // All fields are optional except citation
-  if (!("citation" in obj) || !Array.isArray(obj.citation)) {
-    return false;
+  // All fields are optional but confidence is actually always there
+  // TODO: change ts sdk to reflect this fact
+  if ("confidence" in obj && typeof obj.confidence === "number") {
+    return true;
   }
 
-  // Check optional fields if they exist
-  if ("confidence" in obj && typeof obj.confidence !== "number") {
-    return false;
-  }
-
-  if ("reasoning" in obj && typeof obj.reasoning !== "string") {
-    return false;
-  }
-
-  if (
-    "extraction_confidence" in obj &&
-    typeof obj.extraction_confidence !== "number"
-  ) {
-    return false;
-  }
-
-  return true;
+  return false;
 }
 
 /**

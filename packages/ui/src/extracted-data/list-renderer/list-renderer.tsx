@@ -9,6 +9,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { PrimitiveType, toPrimitiveType } from "../primitive-validation";
 import type { FieldSchemaMetadata } from "../schema-reconciliation";
 import type { PrimitiveValue, RendererMetadata } from "../types";
+import type { ExtractedFieldMetadata } from "llama-cloud-services/beta/agent";
 import { findFieldSchemaMetadata } from "../metadata-path-utils";
 import { findExtractedFieldMetadata } from "../metadata-lookup";
 
@@ -22,6 +23,8 @@ interface ListRendererProps<S extends PrimitiveValue> {
   keyPath?: string[];
   // Unified metadata
   metadata?: RendererMetadata;
+  // Field click callback
+  onClickField?: (args: { value: PrimitiveValue; metadata?: ExtractedFieldMetadata; path: string[] }) => void;
 }
 
 export function ListRenderer<S extends PrimitiveValue>({
@@ -32,6 +35,7 @@ export function ListRenderer<S extends PrimitiveValue>({
   changedPaths,
   keyPath = [],
   metadata,
+  onClickField,
 }: ListRendererProps<S>) {
   const effectiveSchema: Record<string, FieldSchemaMetadata> =
     metadata?.schema ?? {};
@@ -67,6 +71,11 @@ export function ListRenderer<S extends PrimitiveValue>({
 
   const expectedType = getExpectedType();
 
+  // Handle field click
+  const handleFieldClick = (args: { value: PrimitiveValue; metadata?: ExtractedFieldMetadata }, index: number) => {
+    onClickField?.({ value: args.value, metadata: args.metadata, path: [...keyPath, String(index)] });
+  };
+
   if (!data || data.length === 0) {
     return (
       <div className="border rounded-md bg-white p-4">
@@ -93,6 +102,11 @@ export function ListRenderer<S extends PrimitiveValue>({
             // Check if this specific array item has been changed
             const isChanged = isArrayItemChanged(changedPaths, keyPath, index);
 
+            // Create field click handler for this specific index
+            const handleItemFieldClick = (args: { value: PrimitiveValue; metadata?: ExtractedFieldMetadata }) => {
+              handleFieldClick(args, index);
+            };
+
             return (
               <TableRow key={index} className="hover:bg-gray-50 border-0">
                 <TableCell className="p-0 border-r border-gray-100 w-12 align-middle h-full">
@@ -115,6 +129,7 @@ export function ListRenderer<S extends PrimitiveValue>({
                       expectedType === PrimitiveType.NUMBER ||
                       expectedType === PrimitiveType.BOOLEAN
                     }
+                    onClick={handleItemFieldClick}
                   />
                 </TableCell>
                 {onDelete && (

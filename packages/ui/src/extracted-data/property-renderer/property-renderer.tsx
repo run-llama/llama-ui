@@ -10,7 +10,8 @@ import type {
   FieldSchemaMetadata,
   ValidationError,
 } from "../schema-reconciliation";
-import type { JSONObject, RendererMetadata } from "../types";
+import type { JSONObject, RendererMetadata, PrimitiveValue } from "../types";
+import type { ExtractedFieldMetadata } from "llama-cloud-services/beta/agent";
 import {
   getFieldDisplayInfo,
   getFieldLabelClasses,
@@ -29,6 +30,8 @@ interface PropertyRendererProps<S extends JSONObject> {
   // Unified metadata
   metadata?: RendererMetadata;
   validationErrors?: ValidationError[];
+  // Field click callback
+  onClickField?: (args: { value: PrimitiveValue; metadata?: ExtractedFieldMetadata; path: string[] }) => void;
 }
 
 export function PropertyRenderer<S extends JSONObject>({
@@ -38,6 +41,7 @@ export function PropertyRenderer<S extends JSONObject>({
   changedPaths,
   metadata,
   validationErrors = [],
+  onClickField,
 }: PropertyRendererProps<S>) {
   const pathString = keyPath.join(".");
   const isChanged = isPropertyChanged(changedPaths, keyPath);
@@ -52,6 +56,11 @@ export function PropertyRenderer<S extends JSONObject>({
       return findExtractedFieldMetadata(path, effectiveMetadata.extracted);
     }
     return undefined;
+  };
+
+  // Handle field click
+  const handleFieldClick = (args: { value: PrimitiveValue; metadata?: ExtractedFieldMetadata }) => {
+    onClickField?.({ value: args.value, metadata: args.metadata, path: keyPath });
   };
 
   // Helper function to render field labels with schema info
@@ -92,6 +101,7 @@ export function PropertyRenderer<S extends JSONObject>({
         isChanged={isChanged}
         expectedType={expectedType}
         required={isRequired}
+        onClick={handleFieldClick}
       />
     );
   }
@@ -168,13 +178,14 @@ export function PropertyRenderer<S extends JSONObject>({
             extracted: effectiveMetadata.extracted,
           }}
           validationErrors={validationErrors}
+          onClickField={onClickField}
         />
       );
     } else {
       // Array of primitives
       return (
-        <ListRenderer
-          data={value}
+        <ListRenderer<PrimitiveValue>
+          data={value as PrimitiveValue[]}
           onUpdate={(index, newValue) => {
             const newArray = [...value];
             newArray[index] = newValue;
@@ -202,6 +213,7 @@ export function PropertyRenderer<S extends JSONObject>({
             schema: effectiveMetadata.schema,
             extracted: effectiveMetadata.extracted,
           }}
+          onClickField={onClickField}
         />
       );
     }
@@ -225,6 +237,7 @@ export function PropertyRenderer<S extends JSONObject>({
                       changedPaths={changedPaths}
                       metadata={effectiveMetadata}
                       validationErrors={validationErrors}
+                      onClickField={onClickField}
                     />
                   </div>
                 </div>
@@ -247,6 +260,7 @@ export function PropertyRenderer<S extends JSONObject>({
                         changedPaths={changedPaths}
                         metadata={effectiveMetadata}
                         validationErrors={validationErrors}
+                        onClickField={onClickField}
                       />
                     </div>
                   </div>
@@ -274,6 +288,7 @@ export function PropertyRenderer<S extends JSONObject>({
       isChanged={isChanged}
       expectedType={expectedType}
       required={isRequired}
+      onClick={handleFieldClick}
     />
   );
 }

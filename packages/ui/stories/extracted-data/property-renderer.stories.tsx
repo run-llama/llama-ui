@@ -4,6 +4,7 @@ import { userEvent, within, expect, screen } from "@storybook/test";
 import { useState } from "react";
 import type { FieldSchemaMetadata } from "../../src/extracted-data/schema-reconciliation";
 import type { ExtractedFieldMetadataDict } from "llama-cloud-services/beta/agent";
+import type { JSONObject } from "../../src/extracted-data/types";
 
 const meta: Meta<typeof PropertyRenderer> = {
   title: "Components/ExtractedData/PropertyRenderer",
@@ -349,7 +350,7 @@ function InteractivePropertyRenderer({
     <div className="w-full max-w-4xl p-4 border rounded">
       <PropertyRenderer
         keyPath={[]}
-        value={data}
+        value={data as JSONObject}
         onUpdate={handleUpdate}
         changedPaths={changedPaths}
         metadata={{
