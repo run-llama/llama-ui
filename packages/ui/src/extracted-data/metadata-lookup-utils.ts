@@ -24,7 +24,7 @@ export function normalizeMetadataPath(pathString: string): string {
  */
 export function lookupFieldMetadata(
   keyPath: string[],
-  fieldMetadata: Record<string, FieldMetadata>,
+  fieldMetadata: Record<string, FieldMetadata>
 ): FieldMetadata | undefined {
   const pathString = keyPath.join(".");
 
@@ -68,7 +68,7 @@ export function lookupFieldMetadata(
  * Get default value for a primitive type
  */
 export function getDefaultValueForType(
-  schemaType: string,
+  schemaType: string
 ): string | number | boolean {
   const PrimitiveType = {
     STRING: "string",

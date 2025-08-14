@@ -193,7 +193,7 @@ export const EmptyArray: Story = {
 
     // Test that the new item shows up as an editable field with empty string
     const newItem = canvasElement.querySelector(
-      'div[class*="cursor-pointer"] span[class*="text-sm"]:empty',
+      'div[class*="cursor-pointer"] span[class*="text-sm"]:empty'
     ); // Empty string displays as blank
     expect(newItem).not.toBeNull();
 
@@ -512,7 +512,7 @@ export const BooleanArray: Story = {
     // Verify the item was updated and shows green background
     const updatedItems = canvas.getAllByText("false");
     const hasGreenBackground = updatedItems.some((item) =>
-      item.closest('[class*="bg-green-50"]'),
+      item.closest('[class*="bg-green-50"]')
     );
     expect(hasGreenBackground).toBe(true);
   },

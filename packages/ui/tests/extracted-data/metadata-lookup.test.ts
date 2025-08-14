@@ -42,7 +42,10 @@ describe("metadata-lookup", () => {
         "items.0.description": sampleMetadata,
       };
 
-      const result = findExtractedFieldMetadata("items.0.description", metadata);
+      const result = findExtractedFieldMetadata(
+        "items.0.description",
+        metadata
+      );
       expect(result).toEqual(sampleMetadata);
     });
 
@@ -81,7 +84,10 @@ describe("metadata-lookup", () => {
       expect(result1).toEqual(sampleMetadata);
 
       // Test nested lookup
-      const result2 = findExtractedFieldMetadata("merchant.address.street", metadata);
+      const result2 = findExtractedFieldMetadata(
+        "merchant.address.street",
+        metadata
+      );
       expect(result2?.confidence).toBe(0.88);
     });
 

@@ -65,8 +65,6 @@ describe("PropertyRenderer Utilities", () => {
     });
   });
 
-
-
   describe("filterMetadataForArray", () => {
     it("should return empty object for undefined metadata", () => {
       const result = filterMetadataForArray(undefined, ["items"]);
@@ -97,7 +95,7 @@ describe("PropertyRenderer Utilities", () => {
       const metadata = {
         "tags.0": { confidence: 0.9, citation: [] },
         "tags.1": { confidence: 0.8, citation: [] },
-        "other": { confidence: 0.7, citation: [] },
+        other: { confidence: 0.7, citation: [] },
       };
       const result = filterMetadataForArray(metadata, ["tags"]);
       expect(result).toEqual({

@@ -21,6 +21,13 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["src/**/*", "base/**/*", "lib/**/*", "lib", "stories/**/*", "tests/**/*"],
+  "include": [
+    "src/**/*",
+    "base/**/*",
+    "lib/**/*",
+    "lib",
+    "stories/**/*",
+    "tests/**/*"
+  ],
   "exclude": ["node_modules", "dist"]
 }

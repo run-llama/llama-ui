@@ -11,7 +11,7 @@ describe("metadata-path-utils", () => {
       const result = buildTableHeaderMetadataPath(
         ["items"],
         ["description"],
-        0,
+        0
       );
       expect(result).toEqual(["items", "0", "description"]);
     });
@@ -20,7 +20,7 @@ describe("metadata-path-utils", () => {
       const result = buildTableHeaderMetadataPath(
         ["items"],
         ["period", "start"],
-        1,
+        1
       );
       expect(result).toEqual(["items", "0", "period", "start"]);
     });
@@ -29,7 +29,7 @@ describe("metadata-path-utils", () => {
       const result = buildTableHeaderMetadataPath(
         ["items"],
         ["customer", "contact", "email"],
-        2,
+        2
       );
       expect(result).toEqual(["items", "0", "customer", "contact", "email"]);
     });
@@ -38,7 +38,7 @@ describe("metadata-path-utils", () => {
       const result = buildTableHeaderMetadataPath(
         ["data", "users"],
         ["profile", "name"],
-        1,
+        1
       );
       expect(result).toEqual(["data", "users", "0", "profile", "name"]);
     });
@@ -88,7 +88,7 @@ describe("metadata-path-utils", () => {
     it("should find exact path match", () => {
       const result = findFieldMetadata(
         ["items", "0", "description"],
-        mockFieldMetadata,
+        mockFieldMetadata
       );
       expect(result).toBeDefined();
       expect(result?.title).toBe("Description");
@@ -98,7 +98,7 @@ describe("metadata-path-utils", () => {
     it("should find nested field with exact match", () => {
       const result = findFieldMetadata(
         ["items", "0", "period", "start"],
-        mockFieldMetadata,
+        mockFieldMetadata
       );
       expect(result).toBeDefined();
       expect(result?.title).toBe("Start Date");
@@ -107,7 +107,7 @@ describe("metadata-path-utils", () => {
     it("should fallback to index 0 when path doesn't include index", () => {
       const result = findFieldMetadata(
         ["items", "description"],
-        mockFieldMetadata,
+        mockFieldMetadata
       );
       expect(result).toBeDefined();
       expect(result?.title).toBe("Description");
@@ -116,7 +116,7 @@ describe("metadata-path-utils", () => {
     it("should fallback to general pattern when specific index not found", () => {
       const result = findFieldMetadata(
         ["items", "5", "period"], // Index 5 doesn't exist in metadata
-        mockFieldMetadata,
+        mockFieldMetadata
       );
       expect(result).toBeDefined();
       expect(result?.title).toBe("Period Info");
@@ -125,7 +125,7 @@ describe("metadata-path-utils", () => {
     it("should return undefined when no metadata found", () => {
       const result = findFieldMetadata(
         ["items", "0", "unknownField"],
-        mockFieldMetadata,
+        mockFieldMetadata
       );
       expect(result).toBeUndefined();
     });
@@ -151,14 +151,14 @@ describe("metadata-path-utils", () => {
       // Test direct match
       let result = findFieldMetadata(
         ["data", "0", "user", "profile", "name"],
-        complexMetadata,
+        complexMetadata
       );
       expect(result?.title).toBe("User Name");
 
       // Test fallback to wildcard pattern
       result = findFieldMetadata(
         ["data", "2", "user", "profile", "name"],
-        complexMetadata,
+        complexMetadata
       );
       expect(result?.title).toBe("User Name");
     });
@@ -187,7 +187,7 @@ describe("metadata-path-utils", () => {
       const keyPath = buildTableHeaderMetadataPath(
         ["items"],
         ["period", "start"],
-        1,
+        1
       );
 
       const metadata = findFieldMetadata(keyPath, mockMetadata);

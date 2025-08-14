@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { WorkflowTrigger } from '../src/workflow-task';
-import { ApiProvider, createMockClients } from '../src/lib';
+import type { Meta, StoryObj } from "@storybook/react";
+import { WorkflowTrigger } from "../src/workflow-task";
+import { ApiProvider, createMockClients } from "../src/lib";
 
 function WorkflowTriggerDemo() {
   return (
@@ -8,7 +8,7 @@ function WorkflowTriggerDemo() {
       <div className="max-w-lg mx-auto p-6">
         <WorkflowTrigger
           deployment="demo-deployment"
-          onSuccess={(result) => console.log('Task created:', result)}
+          onSuccess={(result) => console.log("Task created:", result)}
         />
       </div>
     </ApiProvider>
@@ -16,14 +16,14 @@ function WorkflowTriggerDemo() {
 }
 
 const meta: Meta<typeof WorkflowTriggerDemo> = {
-  title: 'Components/Workflow Trigger',
+  title: "Components/Workflow Trigger",
   component: WorkflowTriggerDemo,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
 };
 
 export default meta;
 type Story = StoryObj<typeof WorkflowTriggerDemo>;
 
-export const Default: Story = {}; 
+export const Default: Story = {};

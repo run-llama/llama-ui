@@ -31,7 +31,7 @@ export function getFieldDisplayInfo(
   key: string,
   fieldMetadata: Record<string, FieldMetadata>,
   validationErrors: Array<{ path: string[]; message: string }> = [],
-  keyPath: string[] = [key],
+  keyPath: string[] = [key]
 ): FieldDisplayInfo {
   const pathString = keyPath.join(".");
   const metadata = findFieldMetadata(keyPath, fieldMetadata);
@@ -41,7 +41,7 @@ export function getFieldDisplayInfo(
 
   // Find validation error for this field
   const fieldError = validationErrors.find(
-    (error) => error.path.join(".") === pathString,
+    (error) => error.path.join(".") === pathString
   );
 
   return {
@@ -75,7 +75,7 @@ export function getFieldLabelClasses(fieldInfo: FieldDisplayInfo): string {
  * Generate the display text for field labels, including requirement indicators
  */
 export function getFieldLabelText(
-  fieldInfo: FieldDisplayInfo,
+  fieldInfo: FieldDisplayInfo
 ): React.ReactNode {
   const { name, isRequired } = fieldInfo;
 

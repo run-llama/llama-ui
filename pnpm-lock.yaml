@@ -271,6 +271,9 @@ importers:
       postcss-cli:
         specifier: ^11.0.0
         version: 11.0.1(jiti@2.4.2)(postcss@8.5.6)
+      prettier:
+        specifier: ^3.6.2
+        version: 3.6.2
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -9099,8 +9102,7 @@ snapshots:
 
   prettier@2.8.8: {}
 
-  prettier@3.6.2:
-    optional: true
+  prettier@3.6.2: {}
 
   pretty-format@27.5.1:
     dependencies:

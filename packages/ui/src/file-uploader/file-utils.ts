@@ -252,7 +252,7 @@ export const isFileTypeMatch = (file: File, fileType: FileType): boolean => {
 export const validateFile = (
   file: File,
   allowedFileTypes: FileType[] = [],
-  maxFileSizeBytes: number = 10 * 1000 * 1000, // 10MB in decimal
+  maxFileSizeBytes: number = 10 * 1000 * 1000 // 10MB in decimal
 ): string | null => {
   // Check file size
   if (file.size > maxFileSizeBytes) {
@@ -290,7 +290,7 @@ export const getFileTypesByCategory = (category: string): FileType[] => {
  */
 export const createFileTypeValidator = (
   allowedTypes: FileType[],
-  maxSizeBytes = 10 * 1000 * 1000,
+  maxSizeBytes = 10 * 1000 * 1000
 ) => {
   return (file: File) => validateFile(file, allowedTypes, maxSizeBytes);
 };

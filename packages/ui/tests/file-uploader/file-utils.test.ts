@@ -41,7 +41,7 @@ class MockFileReader {
       this.result = new ArrayBuffer(file.size);
       this.onload?.call(
         this as unknown as FileReader,
-        {} as ProgressEvent<FileReader>,
+        {} as ProgressEvent<FileReader>
       );
     }, 0);
   }
@@ -56,7 +56,7 @@ describe("validateFile", () => {
   const createMockFile = (
     name: string,
     size: number,
-    type: string = "text/plain",
+    type: string = "text/plain"
   ): File => {
     const file = new File([""], name, { type });
     Object.defineProperty(file, "size", { value: size });
@@ -82,7 +82,7 @@ describe("validateFile", () => {
     // Allow only PDF using enum
     expect(validateFile(pdfFile, [FileType.PDF])).toBeNull();
     expect(validateFile(txtFile, [FileType.PDF])).toContain(
-      "File type not allowed",
+      "File type not allowed"
     );
   });
 
@@ -93,7 +93,7 @@ describe("validateFile", () => {
     // Allow only PDF using enum (should match MIME type)
     expect(validateFile(pdfFile, [FileType.PDF])).toBeNull();
     expect(validateFile(txtFile, [FileType.PDF])).toContain(
-      "File type not allowed",
+      "File type not allowed"
     );
   });
 
@@ -200,7 +200,7 @@ describe("Enhanced FileType validation", () => {
   const createMockFile = (
     name: string,
     size: number,
-    type: string = "text/plain",
+    type: string = "text/plain"
   ): File => {
     const file = new File([""], name, { type });
     Object.defineProperty(file, "size", { value: size });
@@ -225,10 +225,10 @@ describe("Enhanced FileType validation", () => {
 
     // PNG should not match JPEG types
     expect(validateFile(pngFile, [FileType.JPEG])).toContain(
-      "File type not allowed",
+      "File type not allowed"
     );
     expect(validateFile(pngFile, [FileType.JPG])).toContain(
-      "File type not allowed",
+      "File type not allowed"
     );
   });
 
@@ -246,7 +246,7 @@ describe("Enhanced FileType validation", () => {
     // Allow only PDF using enum
     expect(validateFile(pdfFile, [FileType.PDF])).toBeNull();
     expect(validateFile(txtFile, [FileType.PDF])).toContain(
-      "File type not allowed",
+      "File type not allowed"
     );
   });
 
@@ -257,7 +257,7 @@ describe("Enhanced FileType validation", () => {
     // Allow only PDF using enum (should match MIME type)
     expect(validateFile(pdfFile, [FileType.PDF])).toBeNull();
     expect(validateFile(txtFile, [FileType.PDF])).toContain(
-      "File type not allowed",
+      "File type not allowed"
     );
   });
 
@@ -266,7 +266,7 @@ describe("Enhanced FileType validation", () => {
     const docxFile = createMockFile(
       "document.docx",
       1024,
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     );
     const txtFile = createMockFile("document.txt", 1024, "text/plain");
 
@@ -274,7 +274,7 @@ describe("Enhanced FileType validation", () => {
     expect(validateFile(pdfFile, FILE_TYPE_GROUPS.DOCUMENTS)).toBeNull();
     expect(validateFile(docxFile, FILE_TYPE_GROUPS.DOCUMENTS)).toBeNull();
     expect(validateFile(txtFile, FILE_TYPE_GROUPS.DOCUMENTS)).toContain(
-      "File type not allowed",
+      "File type not allowed"
     );
   });
 });
@@ -365,7 +365,7 @@ describe("FileType utility functions", () => {
     ]);
     const documentValidator = createFileTypeValidator(
       [...FILE_TYPE_GROUPS.DOCUMENTS],
-      5 * 1000 * 1000,
+      5 * 1000 * 1000
     );
 
     const jpegFile = new File([""], "test.jpg", { type: "image/jpeg" });

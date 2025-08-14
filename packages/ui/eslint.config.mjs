@@ -13,15 +13,18 @@ export default [
     rules: {
       // React Hooks
       ...reactHooks.configs.recommended.rules,
-      
+
       // TypeScript
-      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_" },
+      ],
       "@typescript-eslint/no-explicit-any": "warn",
-      
+
       // React
       "react/prop-types": "off",
       "react/react-in-jsx-scope": "off",
-      
+
       // basic rules
       "no-console": "warn",
       "prefer-const": "error",

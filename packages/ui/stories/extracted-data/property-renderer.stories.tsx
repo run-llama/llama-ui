@@ -315,13 +315,13 @@ function InteractivePropertyRenderer({
 }) {
   const [data, setData] = useState(initialData);
   const [changedPaths, setChangedPaths] = useState(
-    initialChangedPaths || new Set<string>(),
+    initialChangedPaths || new Set<string>()
   );
 
   const handleUpdate = (
     path: string[],
     newValue: unknown,
-    additionalPaths?: string[][],
+    additionalPaths?: string[][]
   ) => {
     // Update data
     const updatedData = JSON.parse(JSON.stringify(data));
@@ -352,7 +352,10 @@ function InteractivePropertyRenderer({
         value={data}
         onUpdate={handleUpdate}
         changedPaths={changedPaths}
-        metadata={{ schema: schemaFieldMetadata ?? {}, extracted: extractedFieldMetadata ?? {} }}
+        metadata={{
+          schema: schemaFieldMetadata ?? {},
+          extracted: extractedFieldMetadata ?? {},
+        }}
       />
     </div>
   );
@@ -363,48 +366,48 @@ const extractedFieldMetadata: ExtractedFieldMetadataDict = {
   title: {
     confidence: 0.98,
     reasoning: "Title extracted from document header",
-    citation: [{ page_number: 1, matching_text: "Sample Document" }]
+    citation: [{ page_number: 1, matching_text: "Sample Document" }],
   },
   amount: {
     confidence: 0.92,
     reasoning: "Amount extracted from financial section",
-    citation: [{ page_number: 1, matching_text: "1250.75" }]
+    citation: [{ page_number: 1, matching_text: "1250.75" }],
   },
   isActive: {
     confidence: 0.95,
     reasoning: "Status extracted from metadata",
-    citation: [{ page_number: 1, matching_text: "true" }]
+    citation: [{ page_number: 1, matching_text: "true" }],
   },
   "author.name": {
     confidence: 0.97,
     reasoning: "Author name identified",
-    citation: [{ page_number: 1, matching_text: "Jane Smith" }]
+    citation: [{ page_number: 1, matching_text: "Jane Smith" }],
   },
   "author.profile.verified": {
     confidence: 0.85,
     reasoning: "Verification status extracted",
-    citation: [{ page_number: 1, matching_text: "false" }]
+    citation: [{ page_number: 1, matching_text: "false" }],
   },
   "tags.0": {
     confidence: 0.93,
     reasoning: "First tag identified",
-    citation: [{ page_number: 1, matching_text: "urgent" }]
+    citation: [{ page_number: 1, matching_text: "urgent" }],
   },
   "scores.0": {
     confidence: 0.88,
     reasoning: "First score extracted",
-    citation: [{ page_number: 1, matching_text: "88" }]
+    citation: [{ page_number: 1, matching_text: "88" }],
   },
   "flags.0": {
     confidence: 0.91,
     reasoning: "First flag extracted",
-    citation: [{ page_number: 1, matching_text: "true" }]
+    citation: [{ page_number: 1, matching_text: "true" }],
   },
   "items.0.taxable": {
     confidence: 0.82,
     reasoning: "Tax status extracted",
-    citation: [{ page_number: 1, matching_text: "true" }]
-  }
+    citation: [{ page_number: 1, matching_text: "true" }],
+  },
 };
 
 // Interactive Editing - focuses on key editing scenarios

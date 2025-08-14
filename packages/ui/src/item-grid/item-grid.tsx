@@ -1,5 +1,3 @@
-
-
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import {
@@ -121,7 +119,7 @@ export function ItemGrid<T = unknown>({
     useMockData,
     apiFilters,
     apiSort,
-    client,
+    client
   );
 
   // Create hooks object for passing to renderCell
@@ -129,7 +127,7 @@ export function ItemGrid<T = unknown>({
     () => ({
       deleteItem,
     }),
-    [deleteItem],
+    [deleteItem]
   );
 
   // Handle sorting
@@ -208,7 +206,7 @@ export function ItemGrid<T = unknown>({
                   key={column.key}
                   className={cn(
                     "font-medium",
-                    column.key === "actions" && "w-15",
+                    column.key === "actions" && "w-15"
                   )}
                 >
                   <ColumnHeader
@@ -252,7 +250,7 @@ export function ItemGrid<T = unknown>({
                   key={item.id || rowIndex}
                   className={cn(
                     "transition-colors hover:bg-muted/50",
-                    onRowClick && "cursor-pointer",
+                    onRowClick && "cursor-pointer"
                   )}
                   onClick={() => onRowClick?.(item)}
                 >

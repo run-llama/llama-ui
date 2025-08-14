@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useLayoutEffect } from "react";
 import { getConfidenceBackgroundClass } from "../confidence-utils";
 import { isLowConfidence } from "@/lib";
@@ -29,7 +28,10 @@ interface EditableFieldProps {
 
   // metadata and click callback
   metadata?: ExtractedFieldMetadata;
-  onClick?: (args: { value: unknown; metadata?: ExtractedFieldMetadata }) => void;
+  onClick?: (args: {
+    value: unknown;
+    metadata?: ExtractedFieldMetadata;
+  }) => void;
 }
 
 export function EditableField({
@@ -45,9 +47,11 @@ export function EditableField({
 }: EditableFieldProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [editValue, setEditValue] = useState(
-    value === null || value === undefined ? "" : String(value),
+    value === null || value === undefined ? "" : String(value)
   );
-  const [localConfidence, setLocalConfidence] = useState(metadata?.confidence ?? 1);
+  const [localConfidence, setLocalConfidence] = useState(
+    metadata?.confidence ?? 1
+  );
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -76,7 +80,7 @@ export function EditableField({
     const convertedValue = convertPrimitiveValue(
       editValue,
       expectedType,
-      required,
+      required
     );
 
     // Save the converted value

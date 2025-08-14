@@ -157,48 +157,48 @@ const sampleFieldMetadata = {
   receiptNumber: {
     confidence: 0.95,
     reasoning: "Receipt number clearly identified",
-    citation: [{ page_number: 1, matching_text: "uyte1213" }]
+    citation: [{ page_number: 1, matching_text: "uyte1213" }],
   },
   invoiceNumber: {
     confidence: 0.87,
     reasoning: "Invoice number extracted from header",
-    citation: [{ page_number: 1, matching_text: "8336" }]
+    citation: [{ page_number: 1, matching_text: "8336" }],
   },
   "merchant.name": {
     confidence: 0.92,
     reasoning: "Merchant name identified",
-    citation: [{ page_number: 1, matching_text: "Wehner LLC" }]
+    citation: [{ page_number: 1, matching_text: "Wehner LLC" }],
   },
   "merchant.address.street": {
     confidence: 0.78,
     reasoning: "Street address extracted",
-    citation: [{ page_number: 1, matching_text: "Princess" }]
+    citation: [{ page_number: 1, matching_text: "Princess" }],
   },
   "merchant.address.city": {
     confidence: 0.89,
     reasoning: "City name identified",
-    citation: [{ page_number: 1, matching_text: "Funkhaven" }]
+    citation: [{ page_number: 1, matching_text: "Funkhaven" }],
   },
   "items.0.description": {
     confidence: 0.94,
     reasoning: "First item description extracted",
-    citation: [{ page_number: 1, matching_text: "Labour Charges" }]
+    citation: [{ page_number: 1, matching_text: "Labour Charges" }],
   },
   "items.1.description": {
     confidence: 0.88,
     reasoning: "Second item description extracted",
-    citation: [{ page_number: 1, matching_text: "Material" }]
+    citation: [{ page_number: 1, matching_text: "Material" }],
   },
   "tags.0": {
     confidence: 0.96,
     reasoning: "First tag identified",
-    citation: [{ page_number: 1, matching_text: "urgent" }]
+    citation: [{ page_number: 1, matching_text: "urgent" }],
   },
   "tags.1": {
     confidence: 0.85,
     reasoning: "Second tag identified",
-    citation: [{ page_number: 1, matching_text: "paid" }]
-  }
+    citation: [{ page_number: 1, matching_text: "paid" }],
+  },
 };
 
 function BasicStoryComponent() {
@@ -313,12 +313,12 @@ export const Basic: Story = {
       await new Promise((resolve) => setTimeout(resolve, 500));
       const receiptFieldsRetry = canvas.getAllByText("NEW123");
       const changedReceiptField = receiptFieldsRetry[0].closest(
-        '[class*="bg-green-50"]',
+        '[class*="bg-green-50"]'
       );
       expect(changedReceiptField).toBeInTheDocument();
     } else {
       const changedReceiptField = receiptFields[0].closest(
-        '[class*="bg-green-50"]',
+        '[class*="bg-green-50"]'
       );
       expect(changedReceiptField).toBeInTheDocument();
     }
@@ -337,7 +337,7 @@ export const Basic: Story = {
     await new Promise((resolve) => setTimeout(resolve, 300));
     const merchantFields = canvas.getAllByText(/Updated Company LLC/);
     const changedMerchantField = merchantFields[0].closest(
-      '[class*="bg-green-50"]',
+      '[class*="bg-green-50"]'
     );
     expect(changedMerchantField).toBeInTheDocument();
 
@@ -360,7 +360,7 @@ export const Basic: Story = {
 
     // Verify the updated tag has green background
     const tagGreenBg = highPriorityElements[0].closest(
-      '[class*="bg-green-50"]',
+      '[class*="bg-green-50"]'
     );
     expect(tagGreenBg).toBeInTheDocument();
 
@@ -382,7 +382,7 @@ export const Basic: Story = {
 
     // Verify the updated table cell has green background
     const tableGreenBg = updatedLabourElements[0].closest(
-      '[class*="bg-green-50"]',
+      '[class*="bg-green-50"]'
     );
     expect(tableGreenBg).toBeInTheDocument();
   },
@@ -432,78 +432,78 @@ function DataUpdateTestsComponent() {
     title: {
       confidence: 0.95,
       reasoning: "Document title extracted from header",
-      citation: [{ page_number: 1, matching_text: "Test Document" }]
+      citation: [{ page_number: 1, matching_text: "Test Document" }],
     },
     amount: {
       confidence: 0.92,
       reasoning: "Amount extracted from financial section",
-      citation: [{ page_number: 1, matching_text: "1000" }]
+      citation: [{ page_number: 1, matching_text: "1000" }],
     },
     "tags.0": {
       confidence: 0.88,
       reasoning: "First tag identified",
-      citation: [{ page_number: 1, matching_text: "tag1" }]
+      citation: [{ page_number: 1, matching_text: "tag1" }],
     },
     "tags.1": {
       confidence: 0.87,
       reasoning: "Second tag identified",
-      citation: [{ page_number: 1, matching_text: "tag2" }]
+      citation: [{ page_number: 1, matching_text: "tag2" }],
     },
     "scores.0": {
       confidence: 0.91,
       reasoning: "First score extracted",
-      citation: [{ page_number: 1, matching_text: "85" }]
+      citation: [{ page_number: 1, matching_text: "85" }],
     },
     "scores.1": {
       confidence: 0.89,
       reasoning: "Second score extracted",
-      citation: [{ page_number: 1, matching_text: "92" }]
+      citation: [{ page_number: 1, matching_text: "92" }],
     },
     "flags.0": {
       confidence: 0.94,
       reasoning: "First flag extracted",
-      citation: [{ page_number: 1, matching_text: "true" }]
+      citation: [{ page_number: 1, matching_text: "true" }],
     },
     "flags.1": {
       confidence: 0.93,
       reasoning: "Second flag extracted",
-      citation: [{ page_number: 1, matching_text: "false" }]
+      citation: [{ page_number: 1, matching_text: "false" }],
     },
     "metadata.version": {
       confidence: 0.96,
       reasoning: "Version number identified",
-      citation: [{ page_number: 1, matching_text: "1.2.3" }]
+      citation: [{ page_number: 1, matching_text: "1.2.3" }],
     },
     "metadata.priority": {
-      confidence: 0.90,
+      confidence: 0.9,
       reasoning: "Priority level extracted",
-      citation: [{ page_number: 1, matching_text: "5" }]
+      citation: [{ page_number: 1, matching_text: "5" }],
     },
     "metadata.published": {
       confidence: 0.85,
       reasoning: "Published status identified",
-      citation: [{ page_number: 1, matching_text: "false" }]
+      citation: [{ page_number: 1, matching_text: "false" }],
     },
     "items.0.name": {
       confidence: 0.92,
       reasoning: "First item name extracted",
-      citation: [{ page_number: 1, matching_text: "Item 1" }]
+      citation: [{ page_number: 1, matching_text: "Item 1" }],
     },
     "items.0.price": {
       confidence: 0.89,
       reasoning: "First item price extracted",
-      citation: [{ page_number: 1, matching_text: "100" }]
+      citation: [{ page_number: 1, matching_text: "100" }],
     },
     "items.1.name": {
       confidence: 0.91,
       reasoning: "Second item name extracted",
-      citation: [{ page_number: 1, matching_text: "Item 2" }]
+      citation: [{ page_number: 1, matching_text: "Item 2" }],
     },
     "items.1.price": {
       confidence: 0.88,
       reasoning: "Second item price extracted",
-      citation: [{ page_number: 1, matching_text: "200" }]
-    }
+      citation: [{ page_number: 1, matching_text: "200" }],
+    },
   };
 
   const schema: JSONSchema.ObjectSchema = {
@@ -578,7 +578,7 @@ function DataUpdateTestsComponent() {
     original_data: initialData,
     data,
     status: "completed" as const,
-    field_metadata: fieldMetadata
+    field_metadata: fieldMetadata,
   };
 
   return (
@@ -600,67 +600,66 @@ function DataUpdateTestsComponent() {
         </div>
       </div>
 
-        {/* Right panel: JSON comparison */}
-        <div style={{ flex: 1, maxWidth: "500px" }}>
-          <div style={{ marginBottom: "15px" }}>
-            <h4 style={{ fontSize: "14px", margin: "5px 0", color: "#666" }}>
-              Original Data:
-            </h4>
-            <pre
-              style={{
-                fontSize: "11px",
-                background: "#f5f5f5",
-                padding: "8px",
-                borderRadius: "4px",
-                maxHeight: "150px",
-                overflow: "auto",
-              }}
-            >
-              {JSON.stringify(initialData, null, 2)}
-            </pre>
-          </div>
+      {/* Right panel: JSON comparison */}
+      <div style={{ flex: 1, maxWidth: "500px" }}>
+        <div style={{ marginBottom: "15px" }}>
+          <h4 style={{ fontSize: "14px", margin: "5px 0", color: "#666" }}>
+            Original Data:
+          </h4>
+          <pre
+            style={{
+              fontSize: "11px",
+              background: "#f5f5f5",
+              padding: "8px",
+              borderRadius: "4px",
+              maxHeight: "150px",
+              overflow: "auto",
+            }}
+          >
+            {JSON.stringify(initialData, null, 2)}
+          </pre>
+        </div>
 
-          <div style={{ marginBottom: "15px" }}>
-            <h4 style={{ fontSize: "14px", margin: "5px 0", color: "#666" }}>
-              Schema:
-            </h4>
-            <pre
-              style={{
-                fontSize: "11px",
-                background: "#e8f4fd",
-                padding: "8px",
-                borderRadius: "4px",
-                maxHeight: "150px",
-                overflow: "auto",
-              }}
-            >
-              {JSON.stringify(schema, null, 2)}
-            </pre>
-          </div>
+        <div style={{ marginBottom: "15px" }}>
+          <h4 style={{ fontSize: "14px", margin: "5px 0", color: "#666" }}>
+            Schema:
+          </h4>
+          <pre
+            style={{
+              fontSize: "11px",
+              background: "#e8f4fd",
+              padding: "8px",
+              borderRadius: "4px",
+              maxHeight: "150px",
+              overflow: "auto",
+            }}
+          >
+            {JSON.stringify(schema, null, 2)}
+          </pre>
+        </div>
 
-          <div>
-            <h4 style={{ fontSize: "14px", margin: "5px 0", color: "#666" }}>
-              Current Data:
-            </h4>
-            <pre
-              data-testid="current-data"
-              style={{
-                fontSize: "11px",
-                background: updateCount > 0 ? "#f0f9f0" : "#f5f5f5",
-                padding: "8px",
-                borderRadius: "4px",
-                maxHeight: "200px",
-                overflow: "auto",
-                border:
-                  updateCount > 0 ? "2px solid #4caf50" : "1px solid #ddd",
-              }}
-            >
-              {JSON.stringify(data, null, 2)}
-            </pre>
-          </div>
+        <div>
+          <h4 style={{ fontSize: "14px", margin: "5px 0", color: "#666" }}>
+            Current Data:
+          </h4>
+          <pre
+            data-testid="current-data"
+            style={{
+              fontSize: "11px",
+              background: updateCount > 0 ? "#f0f9f0" : "#f5f5f5",
+              padding: "8px",
+              borderRadius: "4px",
+              maxHeight: "200px",
+              overflow: "auto",
+              border: updateCount > 0 ? "2px solid #4caf50" : "1px solid #ddd",
+            }}
+          >
+            {JSON.stringify(data, null, 2)}
+          </pre>
         </div>
       </div>
-    );
+    </div>
+  );
 }
 
 export const DataUpdateTests: Story = {
@@ -674,7 +673,7 @@ export const DataUpdateTests: Story = {
     const waitForUpdate = async (expectedCount: number) => {
       await new Promise((resolve) => setTimeout(resolve, 300));
       expect(canvas.getByTestId("update-counter")).toHaveTextContent(
-        `Updates: ${expectedCount}`,
+        `Updates: ${expectedCount}`
       );
     };
 
@@ -878,7 +877,7 @@ export const DataUpdateTests: Story = {
     if (tableCells.length > 0) {
       // Find the clickable div with cursor-pointer class (EditableField wrapper)
       const editableDiv = tableCells[0].querySelector(
-        'div[class*="cursor-pointer"]',
+        'div[class*="cursor-pointer"]'
       ) as HTMLElement;
       console.log("Found editable div:", !!editableDiv);
 
@@ -952,7 +951,7 @@ export const DataUpdateTests: Story = {
     expect(currentDataText).toContain("300");
 
     expect(canvas.getByTestId("update-counter")).toHaveTextContent(
-      "Updates: 14",
+      "Updates: 14"
     );
   },
 };

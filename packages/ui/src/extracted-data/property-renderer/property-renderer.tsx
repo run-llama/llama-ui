@@ -1,4 +1,3 @@
-
 import { EditableField } from "../editable-field";
 import { TableRenderer } from "../table-renderer";
 import { ListRenderer } from "../list-renderer";
@@ -25,7 +24,7 @@ interface PropertyRendererProps {
   onUpdate: (
     path: string[],
     newValue: unknown,
-    additionalPaths?: string[][],
+    additionalPaths?: string[][]
   ) => void;
 
   changedPaths?: Set<string>;
@@ -48,7 +47,7 @@ export function PropertyRenderer({
     schema: metadata?.schema ?? ({} as Record<string, FieldMetadata>),
     extracted: metadata?.extracted ?? {},
   };
-  
+
   // Get metadata for path
   const getMetadata = (path: string | string[]) => {
     if (effectiveMetadata.extracted) {
@@ -61,13 +60,13 @@ export function PropertyRenderer({
   const renderFieldLabel = (
     key: string,
     currentKeyPath: string[],
-    additionalClasses?: string,
+    additionalClasses?: string
   ) => {
     const fieldInfo = getFieldDisplayInfo(
       key,
       effectiveMetadata.schema,
       validationErrors,
-      currentKeyPath,
+      currentKeyPath
     );
     const baseClasses = getFieldLabelClasses(fieldInfo);
     const finalClasses = additionalClasses
@@ -84,16 +83,16 @@ export function PropertyRenderer({
       : PrimitiveType.STRING;
     const isRequired = fieldInfo?.isRequired || false;
 
-      return (
-        <EditableField
-          value="N/A"
-          onSave={(newValue) => onUpdate(keyPath, newValue)}
-          metadata={getMetadata(pathString)}
-          isChanged={isChanged}
-          expectedType={expectedType}
-          required={isRequired}
-        />
-      );
+    return (
+      <EditableField
+        value="N/A"
+        onSave={(newValue) => onUpdate(keyPath, newValue)}
+        metadata={getMetadata(pathString)}
+        isChanged={isChanged}
+        expectedType={expectedType}
+        required={isRequired}
+      />
+    );
   }
 
   if (Array.isArray(value)) {
@@ -117,7 +116,10 @@ export function PropertyRenderer({
       );
     }
 
-    const arrayMetadata = filterMetadataForArray(effectiveMetadata.extracted, keyPath);
+    const arrayMetadata = filterMetadataForArray(
+      effectiveMetadata.extracted,
+      keyPath
+    );
 
     // Check if it's an array of objects
     if (isArrayOfObjects(value)) {
@@ -154,7 +156,7 @@ export function PropertyRenderer({
           }}
           onDeleteRow={(index) => {
             const newArray = (value as Record<string, unknown>[]).filter(
-              (_, i) => i !== index,
+              (_, i) => i !== index
             );
 
             // Track the array change - when deleting, we track the entire array as changed
@@ -162,7 +164,10 @@ export function PropertyRenderer({
           }}
           changedPaths={changedPaths}
           keyPath={keyPath}
-          metadata={{ schema: effectiveMetadata.schema, extracted: arrayMetadata }}
+          metadata={{
+            schema: effectiveMetadata.schema,
+            extracted: arrayMetadata,
+          }}
           validationErrors={validationErrors}
         />
       );
@@ -194,7 +199,10 @@ export function PropertyRenderer({
           }}
           changedPaths={changedPaths}
           keyPath={keyPath}
-          metadata={{ schema: effectiveMetadata.schema, extracted: arrayMetadata }}
+          metadata={{
+            schema: effectiveMetadata.schema,
+            extracted: arrayMetadata,
+          }}
         />
       );
     }
@@ -230,7 +238,7 @@ export function PropertyRenderer({
                     {renderFieldLabel(
                       key,
                       [...keyPath, key],
-                      "min-w-0 flex-shrink-0",
+                      "min-w-0 flex-shrink-0"
                     )}
                     <div className="flex-1 min-w-0">
                       <PropertyRenderer

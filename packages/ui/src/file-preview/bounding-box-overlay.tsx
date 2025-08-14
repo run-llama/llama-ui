@@ -1,4 +1,3 @@
-
 import type { BoundingBox } from "./types";
 
 export interface BoundingBoxOverlayProps {

@@ -3,10 +3,10 @@
  * Based on workflow-task-suite.md specifications
  */
 
-import { useMemo, useEffect } from 'react';
-import { useTaskStore } from './use-task-store';
-import { useDeployment } from '../../lib/api-provider';
-import type { WorkflowProgressState, RunStatus } from '../types';
+import { useMemo, useEffect } from "react";
+import { useTaskStore } from "./use-task-store";
+import { useDeployment } from "../../lib/api-provider";
+import type { WorkflowProgressState, RunStatus } from "../types";
 
 export function useWorkflowProgress(): WorkflowProgressState {
   // Get deployment from context and store methods
@@ -21,50 +21,52 @@ export function useWorkflowProgress(): WorkflowProgressState {
       try {
         await sync(deployment);
       } catch (error) {
-        console.error('Failed to sync with server for progress:', error);
+        console.error("Failed to sync with server for progress:", error);
       }
     }
-    
+
     syncWithServer();
   }, [deployment, sync]);
-  
+
   // Memoize the calculation based on tasks object
   return useMemo(() => {
-    const taskArray = Object.values(tasks).filter(task => 
-      task.deployment === deployment
+    const taskArray = Object.values(tasks).filter(
+      (task) => task.deployment === deployment
     );
     const total = taskArray.length;
-    
+
     if (total === 0) {
       return {
         current: 0,
         total: 0,
-        status: 'idle' as RunStatus,
+        status: "idle" as RunStatus,
       };
     }
 
     // Count completed tasks
-    const completedTasks = taskArray.filter(task => task.status === 'complete');
+    const completedTasks = taskArray.filter(
+      (task) => task.status === "complete"
+    );
     const current = completedTasks.length;
 
     // Determine overall status
     let status: RunStatus;
-    
+
     // Check for error tasks first
-    if (taskArray.some(task => task.status === 'error')) {
-      status = 'error';
-    } 
+    if (taskArray.some((task) => task.status === "error")) {
+      status = "error";
+    }
     // Check if all tasks are complete
     else if (current === total) {
-      status = 'complete';
+      status = "complete";
     }
     // Check if any tasks are running
-    else if (taskArray.some(task => task.status === 'running')) {
-      status = 'running';
+    else if (taskArray.some((task) => task.status === "running")) {
+      status = "running";
     }
     // Otherwise, tasks are idle
     else {
-      status = 'idle';
+      status = "idle";
     }
 
     return {

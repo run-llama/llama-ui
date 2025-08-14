@@ -1,4 +1,3 @@
-
 import { EditableField } from "../editable-field";
 import { Table, TableBody, TableCell, TableRow } from "@/base/table";
 import { Button } from "@/base/button";
@@ -103,7 +102,7 @@ export function ListRenderer({
                     onSave={(newValue) => onUpdate(index, newValue)}
                     metadata={findExtractedFieldMetadata(
                       [...keyPath, String(index)],
-                      effectiveExtracted,
+                      effectiveExtracted
                     )}
                     isChanged={isChanged}
                     showBorder={true}

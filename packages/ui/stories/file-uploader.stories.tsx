@@ -26,7 +26,7 @@ export const Basic: Story = {
 
     const handleSuccess = async (
       fileData: FileUploadData[],
-      fieldValues: Record<string, string>,
+      fieldValues: Record<string, string>
     ) => {
       console.log("Submitted:", { fileData, fieldValues });
       await args.onSuccess?.(fileData, fieldValues);
@@ -68,11 +68,11 @@ export const MultipleFiles: Story = {
         "Batch upload results:",
         { successFiles, successCount: successFiles.length },
         "with data:",
-        fieldValues,
+        fieldValues
       );
       // Simulate variable processing time
       await new Promise((resolve) =>
-        setTimeout(resolve, Math.random() * 5000 + 1000),
+        setTimeout(resolve, Math.random() * 5000 + 1000)
       );
     },
   },
@@ -81,7 +81,7 @@ export const MultipleFiles: Story = {
 
     const handleSuccess = async (
       fileData: FileUploadData[],
-      fieldValues: Record<string, string>,
+      fieldValues: Record<string, string>
     ) => {
       // fileData is now FileUploadData[] (only successful uploads)
       const successFiles = fileData.map((data) => data.file.name);
@@ -132,36 +132,42 @@ export const WithAPIErrors: StoryObj<typeof FileUploader> = {
     msw: {
       handlers: {
         // Override only the upload endpoint for error testing
-        upload: http.post("https://api.cloud.llamaindex.ai/api/v1/files", async ({ request }) => {
-          const formData = await request.formData();
-          const file = formData.get("upload_file") as File;
+        upload: http.post(
+          "https://api.cloud.llamaindex.ai/api/v1/files",
+          async ({ request }) => {
+            const formData = await request.formData();
+            const file = formData.get("upload_file") as File;
 
-          if (!file) {
-            return new HttpResponse("No file provided", { status: 400 });
-          }
+            if (!file) {
+              return new HttpResponse("No file provided", { status: 400 });
+            }
 
-          // Simulate processing delay
-          await new Promise((resolve) =>
-            setTimeout(resolve, 500 + Math.random() * 1000),
-          );
+            // Simulate processing delay
+            await new Promise((resolve) =>
+              setTimeout(resolve, 500 + Math.random() * 1000)
+            );
 
-          // Randomly fail some uploads to test error handling
-          if (Math.random() < 0.3) {
-            return new HttpResponse("Upload service temporarily unavailable", {
-              status: 503,
+            // Randomly fail some uploads to test error handling
+            if (Math.random() < 0.3) {
+              return new HttpResponse(
+                "Upload service temporarily unavailable",
+                {
+                  status: 503,
+                }
+              );
+            }
+
+            const fileId = `error-test-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+
+            return HttpResponse.json({
+              id: fileId,
+              name: file.name,
+              size: file.size,
+              type: file.type,
+              status: "uploaded",
             });
           }
-
-          const fileId = `error-test-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-
-          return HttpResponse.json({
-            id: fileId,
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            status: "uploaded",
-          });
-        }),
+        ),
       },
     },
   },
@@ -170,14 +176,14 @@ export const WithAPIErrors: StoryObj<typeof FileUploader> = {
 
     const handleSuccess = async (
       fileData: FileUploadData[],
-      fieldValues: Record<string, string>,
+      fieldValues: Record<string, string>
     ) => {
       // fileData contains only successful uploads
       const successFiles = fileData.map((data) => data.file.name);
       console.log(
         "Error Test - Successful uploads:",
         { successFiles },
-        fieldValues,
+        fieldValues
       );
 
       setSuccessfulUploads((prev) => [...prev, ...successFiles]);

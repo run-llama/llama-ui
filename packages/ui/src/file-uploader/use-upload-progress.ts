@@ -41,7 +41,7 @@ export function useUploadProgress(): UseUploadProgressReturn {
       const updated = completeFileUpload(prev, file);
       // Check if all files are now complete
       const allComplete = updated.every(
-        (f) => f.status === "completed" || f.status === "error",
+        (f) => f.status === "completed" || f.status === "error"
       );
       if (allComplete) {
         // Auto-hide after 10 seconds when all files are done

@@ -54,13 +54,16 @@ export function modifyJsonSchema<T extends any = unknown>(
   });
   const result = {
     ...jsonObjectSchema,
-    properties: orderedAndFiltered.reduce((acc, field) => {
-      const key = String(field);
-      if (updatedProperties[key] !== undefined) {
-        acc[key] = updatedProperties[key] as JSONSchema.BaseSchema;
-      }
-      return acc;
-    }, {} as Record<string, JSONSchema.BaseSchema>),
+    properties: orderedAndFiltered.reduce(
+      (acc, field) => {
+        const key = String(field);
+        if (updatedProperties[key] !== undefined) {
+          acc[key] = updatedProperties[key] as JSONSchema.BaseSchema;
+        }
+        return acc;
+      },
+      {} as Record<string, JSONSchema.BaseSchema>
+    ),
   };
 
   // Return as JSONSchema.ObjectSchema

@@ -1,4 +1,3 @@
-
 import React, { useMemo } from "react";
 import { EditableField } from "../editable-field";
 import { Button } from "@/base/button";
@@ -35,7 +34,7 @@ export interface TableRendererProps {
     index: number,
     key: string,
     value: unknown,
-    affectedPaths?: string[],
+    affectedPaths?: string[]
   ) => void;
   onAddRow?: (newRow: Record<string, unknown>) => void;
   onDeleteRow?: (index: number) => void;
@@ -71,7 +70,10 @@ export function TableRenderer({
 
   const handleAddRow = () => {
     // Try to get schema-based default values first
-    const schemaBasedRow = getTableRowDefaultValue(keyPath, effectiveMetadata.schema);
+    const schemaBasedRow = getTableRowDefaultValue(
+      keyPath,
+      effectiveMetadata.schema
+    );
 
     // If we got schema-based defaults and they're not empty, use them
     if (Object.keys(schemaBasedRow).length > 0) {
@@ -86,7 +88,7 @@ export function TableRenderer({
       // If we have existing data, use the structure of the first row
       const firstRow = data[0];
       const fillEmptyValues = (
-        obj: Record<string, unknown>,
+        obj: Record<string, unknown>
       ): Record<string, unknown> => {
         const result: Record<string, unknown> = {};
         Object.keys(obj).forEach((key) => {
@@ -109,7 +111,7 @@ export function TableRenderer({
         const setNestedValue = (
           obj: Record<string, unknown>,
           path: string[],
-          value: unknown,
+          value: unknown
         ) => {
           if (path.length === 1) {
             obj[path[0]] = value;
@@ -120,7 +122,7 @@ export function TableRenderer({
             setNestedValue(
               obj[path[0]] as Record<string, unknown>,
               path.slice(1),
-              value,
+              value
             );
           }
         };
@@ -151,7 +153,10 @@ export function TableRenderer({
           }
         });
       });
-    } else if (effectiveMetadata.schema && Object.keys(effectiveMetadata.schema).length > 0) {
+    } else if (
+      effectiveMetadata.schema &&
+      Object.keys(effectiveMetadata.schema).length > 0
+    ) {
       // If no data but we have schema metadata, generate columns from schema
       Object.keys(effectiveMetadata.schema).forEach((path) => {
         // Only include paths that are for the current level (array items)
@@ -224,13 +229,13 @@ export function TableRenderer({
           const fieldKeyPath = buildTableHeaderMetadataPath(
             keyPath,
             column.path,
-            depth,
+            depth
           );
-                const fieldInfo = getFieldDisplayInfo(
+          const fieldInfo = getFieldDisplayInfo(
             fieldKey,
-                  effectiveMetadata.schema,
+            effectiveMetadata.schema,
             validationErrors,
-            fieldKeyPath,
+            fieldKeyPath
           );
           const headerText = getFieldLabelText(fieldInfo);
           const isLeaf = depth === column.path.length - 1;
@@ -286,7 +291,7 @@ export function TableRenderer({
               <div className="break-words text-zinc-900 font-semibold">
                 {headerText}
               </div>
-            </TableHead>,
+            </TableHead>
           );
 
           colIndex = nextColIndex;
@@ -334,7 +339,7 @@ export function TableRenderer({
                   changedPaths,
                   keyPath,
                   rowIndex,
-                  column.key,
+                  column.key
                 );
 
                 // UNIFIED TABLE RENDERER FIELD TYPE LOOKUP
@@ -345,7 +350,7 @@ export function TableRenderer({
                 const fieldKeyPath = [...keyPath, "*", ...column.path];
                 const fieldInfo = findFieldMetadata(
                   fieldKeyPath,
-                  effectiveMetadata.schema,
+                  effectiveMetadata.schema
                 );
                 const expectedType = fieldInfo?.schemaType
                   ? toPrimitiveType(fieldInfo.schemaType)
