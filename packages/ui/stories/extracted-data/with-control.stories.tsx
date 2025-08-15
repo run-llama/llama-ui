@@ -57,7 +57,9 @@ export const WithControl: Story = {
     await new Promise((resolve) => setTimeout(resolve, 200));
 
     // Test that invoice number field has orange background (bg-orange-50)
-    const invoiceNumberField = invoiceNumberValue.closest('[class*="bg-orange-50"]');
+    const invoiceNumberField = invoiceNumberValue.closest(
+      '[class*="bg-orange-50"]'
+    );
     expect(invoiceNumberField).toBeInTheDocument();
 
     // Change threshold to 80% - invoice number (87%) should no longer be orange
@@ -67,7 +69,9 @@ export const WithControl: Story = {
     await new Promise((resolve) => setTimeout(resolve, 200));
 
     // Test that invoice number field no longer has orange background
-    const invoiceNumberFieldAfter = invoiceNumberValue.closest('[class*="bg-orange-50"]');
+    const invoiceNumberFieldAfter = invoiceNumberValue.closest(
+      '[class*="bg-orange-50"]'
+    );
     expect(invoiceNumberFieldAfter).not.toBeInTheDocument();
   },
 };

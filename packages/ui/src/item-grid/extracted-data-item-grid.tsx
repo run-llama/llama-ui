@@ -27,7 +27,9 @@ export function ExtractedDataItemGrid<T>({
   onRowClick,
   defaultPageSize = 20,
 }: ExtractedDataItemGridProps<T>) {
-  const confidenceThreshold = useUIConfigStore((state) => state.confidenceThreshold);
+  const confidenceThreshold = useUIConfigStore(
+    (state) => state.confidenceThreshold
+  );
   // Generate final columns array
   const columns: Column<ExtractedData<T>>[] = [];
 
@@ -39,7 +41,11 @@ export function ExtractedDataItemGrid<T>({
     const config = builtInColumns[name as keyof typeof builtInColumns];
     if (config !== false && config !== undefined) {
       try {
-        const builtInColumn = createExtractedDataColumn<T>(name, config, confidenceThreshold);
+        const builtInColumn = createExtractedDataColumn<T>(
+          name,
+          config,
+          confidenceThreshold
+        );
         columns.push(builtInColumn);
       } catch {
         // Skip disabled columns

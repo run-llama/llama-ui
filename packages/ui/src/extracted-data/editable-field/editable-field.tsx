@@ -46,7 +46,9 @@ export function EditableField<S extends PrimitiveValue>({
   metadata,
   onClick,
 }: EditableFieldProps<S>) {
-  const confidenceThreshold = useUIConfigStore((state) => state.confidenceThreshold);
+  const confidenceThreshold = useUIConfigStore(
+    (state) => state.confidenceThreshold
+  );
   const [isOpen, setIsOpen] = useState(false);
   const [editValue, setEditValue] = useState(
     value === null || value === undefined ? "" : String(value)
