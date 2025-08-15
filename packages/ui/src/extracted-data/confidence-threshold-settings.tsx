@@ -2,6 +2,7 @@ import { Label } from "@/base/label";
 import { Slider } from "@/base/slider";
 import { cn } from "@/lib/utils";
 import { useUIConfigStore } from "@/src/store/ui-config-store";
+import { useEffect } from "react";
 
 export interface ConfidenceThresholdSettingsProps {
   onThresholdChange?: (value: number) => void;
@@ -9,10 +10,12 @@ export interface ConfidenceThresholdSettingsProps {
   max?: number;
   step?: number;
   className?: string;
+  defaultThreshold?: number;
 }
 
 export function ConfidenceThresholdSettings({
   onThresholdChange,
+  defaultThreshold,
   min = 0,
   max = 100,
   step = 1,
@@ -20,6 +23,12 @@ export function ConfidenceThresholdSettings({
 }: ConfidenceThresholdSettingsProps) {
   const { confidenceThreshold, setConfidenceThreshold } = useUIConfigStore();
   const roundedConfidenceThreshold = Math.round(confidenceThreshold * 100);
+
+  useEffect(() => {
+    if (defaultThreshold) {
+      setConfidenceThreshold(defaultThreshold);
+    }
+  }, [defaultThreshold, setConfidenceThreshold]);
 
   return (
     <div
