@@ -10,7 +10,7 @@ import type {
   ExtractedData,
 } from "llama-cloud-services/beta/agent";
 import { STATUS_OPTIONS } from "./built-in-columns";
-import { isLowConfidence } from "@/lib";
+import { DEFAULT_CONFIDENCE_THRESHOLD } from "@/src/store/ui-config-store";
 
 // Public list of extracted-data column names to preserve order and API surface
 export const EXTRACTED_DATA_COLUMN_NAMES = [
@@ -26,7 +26,8 @@ export type ExtractedDataColumnName =
 // Helper: count low-confidence leaf metadata from extracted field metadata
 // Leaf definition: an object that contains numeric `confidence` and has no nested object properties
 export function getExtractedDataItemsToReviewCount<T>(
-  item: TypedAgentData<ExtractedData<T>>
+  item: TypedAgentData<ExtractedData<T>>,
+  confidenceThreshold: number = DEFAULT_CONFIDENCE_THRESHOLD
 ): number {
   const metadata = item.data.field_metadata;
   if (!metadata || typeof metadata !== "object") return 0;
@@ -49,7 +50,7 @@ export function getExtractedDataItemsToReviewCount<T>(
     );
 
     if (typeof confidence === "number" && !hasNestedObjectChild) {
-      if (isLowConfidence(confidence)) lowConfidenceCount++;
+      if (confidence < confidenceThreshold) lowConfidenceCount++;
       return; // do not traverse deeper
     }
 
@@ -64,7 +65,8 @@ export function getExtractedDataItemsToReviewCount<T>(
 // Factory function to create a single extracted-data column by name
 export function createExtractedDataColumn<T>(
   columnName: ExtractedDataColumnName,
-  config: boolean | Partial<Column<ExtractedData<T>>>
+  config: boolean | Partial<Column<ExtractedData<T>>>,
+  confidenceThreshold: number = DEFAULT_CONFIDENCE_THRESHOLD
 ): Column<ExtractedData<T>> {
   // Build base column by name
   let baseColumn: Column<ExtractedData<T>> | undefined;
@@ -97,7 +99,7 @@ export function createExtractedDataColumn<T>(
         key: "items_to_review",
         header: "Items to Review",
         getValue: (item: TypedAgentData<ExtractedData<T>>) =>
-          getExtractedDataItemsToReviewCount(item),
+          getExtractedDataItemsToReviewCount(item, confidenceThreshold),
         renderCell: (value: unknown) => {
           const count = value as number;
           return (

@@ -1,9 +1,19 @@
-import { isLowConfidence } from "@/lib";
-
-export function getConfidenceBackgroundClass(confidence?: number): string {
+export function getConfidenceBackgroundClass(
+  threshold: number,
+  confidence?: number
+): string {
   if (!confidence || confidence === 0) return "";
 
-  // Only show orange background for low confidence (<90%)
-  // High confidence (>=90%) gets normal background
-  return isLowConfidence(confidence) ? "bg-orange-50" : "";
+  return confidence < threshold ? "bg-orange-50" : "";
+}
+
+export function getConfidenceBorderClass(
+  threshold: number,
+  confidence?: number
+): string {
+  if (!confidence || confidence === 0) return "";
+
+  return confidence < threshold
+    ? "border-b-2 border-orange-300"
+    : "border-b border-gray-200";
 }
