@@ -10,7 +10,13 @@ import type {
   FieldSchemaMetadata,
   ValidationError,
 } from "../schema-reconciliation";
-import type { JsonShape, RendererMetadata, PrimitiveValue, JsonValue, JsonObject } from "../types";
+import type {
+  JsonShape,
+  RendererMetadata,
+  PrimitiveValue,
+  JsonValue,
+  JsonObject,
+} from "../types";
 import type { ExtractedFieldMetadata } from "llama-cloud-services/beta/agent";
 import {
   getFieldDisplayInfo,
@@ -24,7 +30,11 @@ import { findExtractedFieldMetadata } from "../metadata-lookup";
 interface PropertyRendererProps<S extends JsonShape<S>> {
   keyPath: string[];
   value: JsonValue;
-  onUpdate: (path: string[], newValue: JsonValue, additionalPaths?: string[][]) => void;
+  onUpdate: (
+    path: string[],
+    newValue: JsonValue,
+    additionalPaths?: string[][]
+  ) => void;
 
   changedPaths?: Set<string>;
   // Unified metadata

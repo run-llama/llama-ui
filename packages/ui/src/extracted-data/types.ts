@@ -30,8 +30,5 @@ export interface RendererMetadata {
 
 export type PrimitiveValue = string | number | boolean | null | undefined;
 export type JsonObject = { [k: string]: JsonValue };
-export type JsonValue =
-  | PrimitiveValue
-  | JsonObject
-  | JsonValue[];
+export type JsonValue = PrimitiveValue | JsonObject | JsonValue[];
 export type JsonShape<T> = { [K in keyof T]: JsonValue };

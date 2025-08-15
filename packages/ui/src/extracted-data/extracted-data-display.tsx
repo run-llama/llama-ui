@@ -1,5 +1,10 @@
 import { useState, useMemo } from "react";
-import type { ExtractedDataDisplayProps, JsonObject, JsonShape, JsonValue } from "./types";
+import type {
+  ExtractedDataDisplayProps,
+  JsonObject,
+  JsonShape,
+  JsonValue,
+} from "./types";
 import { PropertyRenderer } from "./property-renderer";
 import {
   getFieldDisplayInfo,

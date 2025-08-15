@@ -98,9 +98,7 @@ export function TableRenderer<Row extends JsonObject>({
     if (data.length > 0) {
       // If we have existing data, use the structure of the first row
       const firstRow = data[0];
-      const fillEmptyValues = (
-        obj: JsonObject
-      ): JsonObject => {
+      const fillEmptyValues = (obj: JsonObject): JsonObject => {
         const result: JsonObject = {};
         Object.keys(obj).forEach((key) => {
           const value = obj[key];
@@ -135,11 +133,7 @@ export function TableRenderer<Row extends JsonObject>({
             ) {
               obj[path[0]] = {};
             }
-            setNestedValue(
-              obj[path[0]] as JsonObject,
-              path.slice(1),
-              value
-            );
+            setNestedValue(obj[path[0]] as JsonObject, path.slice(1), value);
           }
         };
         setNestedValue(newRow as JsonObject, column.path, "");
@@ -349,10 +343,7 @@ export function TableRenderer<Row extends JsonObject>({
           {data.map((item, rowIndex) => (
             <TableRow key={rowIndex} className="hover:bg-gray-50 border-0">
               {columns.map((column, colIndex) => {
-                const value = getValue(
-                  item,
-                  column
-                ) as PrimitiveValue;
+                const value = getValue(item, column) as PrimitiveValue;
                 const cellPath = [...keyPath, String(rowIndex), ...column.path];
                 const isChanged = isTableCellChanged(
                   changedPaths,
