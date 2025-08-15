@@ -21,16 +21,11 @@ export function ConfidenceThresholdSettings({
   step = 1,
   className,
 }: ConfidenceThresholdSettingsProps) {
-  const { confidenceThreshold, setConfidenceThreshold } = useUIConfigStore(
-    (state) => ({
-      confidenceThreshold: state.confidenceThreshold,
-      setConfidenceThreshold: state.setConfidenceThreshold,
-    })
-  );
+  const { confidenceThreshold, setConfidenceThreshold } = useUIConfigStore();
   const roundedConfidenceThreshold = Math.round(confidenceThreshold * 100);
 
   useEffect(() => {
-    if (defaultThreshold) {
+    if (defaultThreshold !== undefined) {
       setConfidenceThreshold(defaultThreshold);
     }
   }, [defaultThreshold, setConfidenceThreshold]);
