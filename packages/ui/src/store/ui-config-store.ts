@@ -7,8 +7,22 @@ export interface UIConfigState {
   setConfidenceThreshold: (value: number) => void;
 }
 
-export const useUIConfigStore = create<UIConfigState>((set) => ({
-  confidenceThreshold: DEFAULT_CONFIDENCE_THRESHOLD,
-  setConfidenceThreshold: (value: number) =>
-    set({ confidenceThreshold: value }),
-}));
+export const createUIConfigStore = () =>
+  create<UIConfigState>((set) => ({
+    confidenceThreshold: DEFAULT_CONFIDENCE_THRESHOLD,
+    setConfidenceThreshold: (value: number) =>
+      set({ confidenceThreshold: value }),
+  }));
+
+let globalUIConfigStore: ReturnType<typeof createUIConfigStore> | null = null;
+
+export function useUIConfigStore(): UIConfigState;
+export function useUIConfigStore<T>(selector: (state: UIConfigState) => T): T;
+
+export function useUIConfigStore<T>(selector?: (state: UIConfigState) => T) {
+  if (!globalUIConfigStore) {
+    globalUIConfigStore = createUIConfigStore();
+  }
+
+  return selector ? globalUIConfigStore(selector) : globalUIConfigStore();
+}
