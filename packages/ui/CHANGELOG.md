@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 0.5.1
+
+### Patch Changes
+
+- 55254c7: better shcema
+
 ## 0.5.0
 
 ### Minor Changes
