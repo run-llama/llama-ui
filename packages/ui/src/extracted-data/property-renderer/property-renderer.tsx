@@ -10,7 +10,7 @@ import type {
   FieldSchemaMetadata,
   ValidationError,
 } from "../schema-reconciliation";
-import type { JSONObject, RendererMetadata, PrimitiveValue } from "../types";
+import type { JsonShape, RendererMetadata, PrimitiveValue, JsonValue, JsonObject } from "../types";
 import type { ExtractedFieldMetadata } from "llama-cloud-services/beta/agent";
 import {
   getFieldDisplayInfo,
@@ -21,10 +21,10 @@ import { PrimitiveType, toPrimitiveType } from "../primitive-validation";
 import { findFieldSchemaMetadata } from "../metadata-path-utils";
 import { findExtractedFieldMetadata } from "../metadata-lookup";
 
-interface PropertyRendererProps<S extends JSONObject> {
+interface PropertyRendererProps<S extends JsonShape<S>> {
   keyPath: string[];
-  value: S;
-  onUpdate: (path: string[], newValue: S, additionalPaths?: string[][]) => void;
+  value: JsonValue;
+  onUpdate: (path: string[], newValue: JsonValue, additionalPaths?: string[][]) => void;
 
   changedPaths?: Set<string>;
   // Unified metadata
@@ -38,7 +38,7 @@ interface PropertyRendererProps<S extends JSONObject> {
   }) => void;
 }
 
-export function PropertyRenderer<S extends JSONObject>({
+export function PropertyRenderer<S extends JsonShape<S>>({
   keyPath,
   value,
   onUpdate,
@@ -105,9 +105,9 @@ export function PropertyRenderer<S extends JSONObject>({
     const isRequired = fieldInfo?.isRequired || false;
 
     return (
-      <EditableField
+      <EditableField<PrimitiveValue>
         value="N/A"
-        onSave={(newValue) => onUpdate(keyPath, newValue as S)}
+        onSave={(newValue) => onUpdate(keyPath, newValue)}
         metadata={getMetadata(pathString)}
         isChanged={isChanged}
         expectedType={expectedType}
@@ -121,15 +121,15 @@ export function PropertyRenderer<S extends JSONObject>({
     if (value.length === 0) {
       // For empty arrays, still show the ListRenderer so users can add items
       return (
-        <ListRenderer
-          data={value}
+        <ListRenderer<PrimitiveValue>
+          data={value as PrimitiveValue[]}
           onUpdate={() => {}} // Empty array has no items to update
           onAdd={(newValue) => {
             const newArray = [newValue];
 
             // Track the array change and the new item
             const newItemPath = [...keyPath, "0"];
-            onUpdate(keyPath, newArray as S, [newItemPath]);
+            onUpdate(keyPath, newArray, [newItemPath]);
           }}
           changedPaths={changedPaths}
           keyPath={keyPath}
@@ -143,10 +143,10 @@ export function PropertyRenderer<S extends JSONObject>({
       // For arrays of objects, we want to show the table below the key
       // This will be handled by the parent component
       return (
-        <TableRenderer<Record<string, JSONObject>>
-          data={value as Array<Record<string, JSONObject>>}
+        <TableRenderer<JsonObject>
+          data={value as JsonObject[]}
           onUpdate={(index, key, newValue, affectedPaths) => {
-            const newArray = [...(value as Array<Record<string, JSONObject>>)];
+            const newArray = [...(value as JsonObject[])];
             newArray[index] = { ...newArray[index], [key]: newValue };
 
             // Use the affectedPaths provided by TableRenderer for accurate path tracking
@@ -157,30 +157,30 @@ export function PropertyRenderer<S extends JSONObject>({
                 const pathParts = path.split(".");
                 return [...keyPath, ...pathParts];
               });
-              onUpdate(keyPath, newArray as S, absolutePaths);
+              onUpdate(keyPath, newArray as JsonObject[], absolutePaths);
             } else {
               // Fallback for backward compatibility
               const cellPath = [...keyPath, String(index), key];
-              onUpdate(keyPath, newArray as S, [cellPath]);
+              onUpdate(keyPath, newArray as JsonObject[], [cellPath]);
             }
           }}
           onAddRow={(newRow) => {
             const newArray = [
-              ...(value as Array<Record<string, JSONObject>>),
+              ...(value as Array<Record<string, JsonShape<S>>>),
               newRow,
             ];
 
             // Track the array change and the new row
             const newRowPath = [...keyPath, String(value.length)];
-            onUpdate(keyPath, newArray as S, [newRowPath]);
+            onUpdate(keyPath, newArray as JsonObject[], [newRowPath]);
           }}
           onDeleteRow={(index) => {
             const newArray = (
-              value as Array<Record<string, JSONObject>>
+              value as Array<Record<string, JsonShape<S>>>
             ).filter((_, i) => i !== index);
 
             // Track the array change - when deleting, we track the entire array as changed
-            onUpdate(keyPath, newArray as S, [keyPath]);
+            onUpdate(keyPath, newArray as JsonObject[], [keyPath]);
           }}
           changedPaths={changedPaths}
           keyPath={keyPath}
@@ -203,20 +203,20 @@ export function PropertyRenderer<S extends JSONObject>({
 
             // Track both the array change and the specific item change
             const itemPath = [...keyPath, String(index)];
-            onUpdate(keyPath, newArray as S, [itemPath]);
+            onUpdate(keyPath, newArray as JsonObject[], [itemPath]);
           }}
           onAdd={(newValue) => {
             const newArray = [...value, newValue];
 
             // Track the array change and the new item
             const newItemPath = [...keyPath, String(value.length)];
-            onUpdate(keyPath, newArray as S, [newItemPath]);
+            onUpdate(keyPath, newArray as JsonObject[], [newItemPath]);
           }}
           onDelete={(index) => {
             const newArray = value.filter((_, i) => i !== index);
 
             // Track the array change - when deleting, we track the entire array as changed
-            onUpdate(keyPath, newArray as S, [keyPath]);
+            onUpdate(keyPath, newArray as JsonObject[], [keyPath]);
           }}
           changedPaths={changedPaths}
           keyPath={keyPath}
