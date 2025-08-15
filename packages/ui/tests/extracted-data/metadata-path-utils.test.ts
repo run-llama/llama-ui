@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
 import {
   buildTableHeaderMetadataPath,
-  findFieldMetadata,
+  findFieldSchemaMetadata,
 } from "@/src/extracted-data/metadata-path-utils";
-import type { FieldMetadata } from "@/src/extracted-data/schema-reconciliation";
+import type { FieldSchemaMetadata } from "@/src/extracted-data/schema-reconciliation";
 
 describe("metadata-path-utils", () => {
   describe("buildTableHeaderMetadataPath", () => {
@@ -45,7 +45,7 @@ describe("metadata-path-utils", () => {
   });
 
   describe("findFieldMetadata", () => {
-    const mockFieldMetadata: Record<string, FieldMetadata> = {
+    const mockFieldMetadata: Record<string, FieldSchemaMetadata> = {
       // Direct matches
       "items.0.description": {
         isRequired: true,
@@ -86,7 +86,7 @@ describe("metadata-path-utils", () => {
     };
 
     it("should find exact path match", () => {
-      const result = findFieldMetadata(
+      const result = findFieldSchemaMetadata(
         ["items", "0", "description"],
         mockFieldMetadata
       );
@@ -96,7 +96,7 @@ describe("metadata-path-utils", () => {
     });
 
     it("should find nested field with exact match", () => {
-      const result = findFieldMetadata(
+      const result = findFieldSchemaMetadata(
         ["items", "0", "period", "start"],
         mockFieldMetadata
       );
@@ -105,7 +105,7 @@ describe("metadata-path-utils", () => {
     });
 
     it("should fallback to index 0 when path doesn't include index", () => {
-      const result = findFieldMetadata(
+      const result = findFieldSchemaMetadata(
         ["items", "description"],
         mockFieldMetadata
       );
@@ -114,7 +114,7 @@ describe("metadata-path-utils", () => {
     });
 
     it("should fallback to general pattern when specific index not found", () => {
-      const result = findFieldMetadata(
+      const result = findFieldSchemaMetadata(
         ["items", "5", "period"], // Index 5 doesn't exist in metadata
         mockFieldMetadata
       );
@@ -123,7 +123,7 @@ describe("metadata-path-utils", () => {
     });
 
     it("should return undefined when no metadata found", () => {
-      const result = findFieldMetadata(
+      const result = findFieldSchemaMetadata(
         ["items", "0", "unknownField"],
         mockFieldMetadata
       );
@@ -149,14 +149,14 @@ describe("metadata-path-utils", () => {
       };
 
       // Test direct match
-      let result = findFieldMetadata(
+      let result = findFieldSchemaMetadata(
         ["data", "0", "user", "profile", "name"],
         complexMetadata
       );
       expect(result?.title).toBe("User Name");
 
       // Test fallback to wildcard pattern
-      result = findFieldMetadata(
+      result = findFieldSchemaMetadata(
         ["data", "2", "user", "profile", "name"],
         complexMetadata
       );
@@ -166,7 +166,7 @@ describe("metadata-path-utils", () => {
 
   describe("integration test", () => {
     it("should work together for table header scenario", () => {
-      const mockMetadata: Record<string, FieldMetadata> = {
+      const mockMetadata: Record<string, FieldSchemaMetadata> = {
         "items.0.period.start": {
           isRequired: true,
           isOptional: false,
@@ -190,7 +190,7 @@ describe("metadata-path-utils", () => {
         1
       );
 
-      const metadata = findFieldMetadata(keyPath, mockMetadata);
+      const metadata = findFieldSchemaMetadata(keyPath, mockMetadata);
 
       expect(keyPath).toEqual(["items", "0", "period", "start"]);
       expect(metadata).toBeDefined();

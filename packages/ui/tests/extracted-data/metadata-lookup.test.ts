@@ -1,214 +1,148 @@
 import { describe, it, expect } from "vitest";
-import {
-  findExtractedFieldMetadata,
-  isExtractedFieldMetadata,
-  buildMetadataPaths,
-  type ExtractedFieldMetadata,
-} from "../../src/extracted-data/metadata-lookup";
+import { findExtractedFieldMetadata } from "../../src/extracted-data/metadata-lookup";
+import type { ExtractedFieldMetadataDict } from "llama-cloud-services/beta/agent";
 
-describe("metadata-lookup", () => {
-  const sampleMetadata: ExtractedFieldMetadata = {
-    confidence: 0.95,
-    reasoning: "Test reasoning",
-    citation: [
+describe("findExtractedFieldMetadata", () => {
+  // Mock API-style tree metadata structure (mirrors data structure)
+  const apiMetadata: ExtractedFieldMetadataDict = {
+    invoice_number: {
+      confidence: 0.95,
+      reasoning: "Invoice number clearly identified",
+      citation: [{ page_number: 1, matching_text: "INV-001" }],
+    },
+    total_amount: {
+      confidence: 0.92,
+      reasoning: "Total amount found in summary",
+      citation: [{ page_number: 1, matching_text: "$1,000.00" }],
+    },
+    vendor: {
+      name: {
+        confidence: 0.88,
+        reasoning: "Vendor name extracted from header",
+        citation: [{ page_number: 1, matching_text: "Test Vendor" }],
+      },
+      address: {
+        street: {
+          confidence: 0.85,
+          reasoning: "Street address found",
+          citation: [{ page_number: 1, matching_text: "123 Main St" }],
+        },
+      },
+    },
+    line_items: [
       {
-        page_number: 1,
-        matching_text: "Test text",
+        description: {
+          confidence: 0.9,
+          reasoning: "First item description",
+          citation: [{ page_number: 1, matching_text: "Item 1" }],
+        },
+        amount: {
+          confidence: 0.87,
+          reasoning: "First item amount",
+          citation: [{ page_number: 1, matching_text: "$100" }],
+        },
+      },
+      {
+        description: {
+          confidence: 0.85,
+          reasoning: "Second item description",
+          citation: [{ page_number: 1, matching_text: "Item 2" }],
+        },
+        amount: {
+          confidence: 0.92,
+          reasoning: "Second item amount",
+          citation: [{ page_number: 1, matching_text: "$200" }],
+        },
       },
     ],
   };
 
-  describe("findExtractedFieldMetadata", () => {
-    it("should find metadata with direct path lookup", () => {
-      const metadata = {
-        "merchant.name": sampleMetadata,
-      };
-
-      const result = findExtractedFieldMetadata("merchant.name", metadata);
-      expect(result).toEqual(sampleMetadata);
-    });
-
-    it("should find metadata with array path", () => {
-      const metadata = {
-        "merchant.name": sampleMetadata,
-      };
-
-      const result = findExtractedFieldMetadata(["merchant", "name"], metadata);
-      expect(result).toEqual(sampleMetadata);
-    });
-
-    it("should find metadata with array indices", () => {
-      const metadata = {
-        "items.0.description": sampleMetadata,
-      };
-
-      const result = findExtractedFieldMetadata(
-        "items.0.description",
-        metadata
-      );
-      expect(result).toEqual(sampleMetadata);
-    });
-
-    it("should find nested metadata", () => {
-      const metadata = {
-        merchant: {
-          name: sampleMetadata,
-        },
-      };
-
-      const result = findExtractedFieldMetadata("merchant.name", metadata);
-      expect(result).toEqual(sampleMetadata);
-    });
-
-    it("should return undefined for non-existent path", () => {
-      const metadata = {
-        "merchant.name": sampleMetadata,
-      };
-
-      const result = findExtractedFieldMetadata("merchant.address", metadata);
-      expect(result).toBeUndefined();
-    });
-
-    it("should handle mixed nested and flattened structure", () => {
-      const metadata = {
-        "items.0.price": sampleMetadata,
-        merchant: {
-          address: {
-            street: { ...sampleMetadata, confidence: 0.88 },
-          },
-        },
-      };
-
-      // Test flattened lookup
-      const result1 = findExtractedFieldMetadata("items.0.price", metadata);
-      expect(result1).toEqual(sampleMetadata);
-
-      // Test nested lookup
-      const result2 = findExtractedFieldMetadata(
-        "merchant.address.street",
-        metadata
-      );
-      expect(result2?.confidence).toBe(0.88);
-    });
-
-    it("should handle invalid metadata gracefully", () => {
-      const metadata = {
-        "merchant.name": { invalid: "data" },
-        "items.0": "not an object",
-      };
-
-      const result1 = findExtractedFieldMetadata("merchant.name", metadata);
-      expect(result1).toBeUndefined();
-
-      const result2 = findExtractedFieldMetadata("items.0", metadata);
-      expect(result2).toBeUndefined();
-    });
+  it("should find metadata for simple field names", () => {
+    const result = findExtractedFieldMetadata("invoice_number", apiMetadata);
+    expect(result).toBeDefined();
+    expect(result?.confidence).toBe(0.95);
+    expect(result?.reasoning).toBe("Invoice number clearly identified");
   });
 
-  describe("isExtractedFieldMetadata", () => {
-    it("should return true for valid metadata", () => {
-      expect(isExtractedFieldMetadata(sampleMetadata)).toBe(true);
-    });
-
-    it("should return false for invalid metadata", () => {
-      expect(isExtractedFieldMetadata(null)).toBe(false);
-      expect(isExtractedFieldMetadata(undefined)).toBe(false);
-      expect(isExtractedFieldMetadata("string")).toBe(false);
-      expect(isExtractedFieldMetadata(123)).toBe(false);
-      expect(isExtractedFieldMetadata({})).toBe(false);
-      expect(isExtractedFieldMetadata({ confidence: 0.95 })).toBe(false);
-      expect(
-        isExtractedFieldMetadata({
-          confidence: "0.95", // Wrong type
-          reasoning: "Test",
-          citation: [],
-        })
-      ).toBe(false);
-    });
-
-    it("should validate all required fields", () => {
-      const partialMetadata = {
-        confidence: 0.95,
-        reasoning: "Test",
-        // Missing citation
-      };
-      expect(isExtractedFieldMetadata(partialMetadata)).toBe(false);
-
-      const invalidCitation = {
-        confidence: 0.95,
-        reasoning: "Test",
-        citation: "not an array",
-      };
-      expect(isExtractedFieldMetadata(invalidCitation)).toBe(false);
-    });
+  it("should find metadata for nested object fields", () => {
+    // "vendor.name" should find metadata at vendor.name path
+    const result = findExtractedFieldMetadata("vendor.name", apiMetadata);
+    expect(result).toBeDefined();
+    expect(result?.confidence).toBe(0.88);
+    expect(result?.reasoning).toBe("Vendor name extracted from header");
   });
 
-  describe("buildMetadataPaths", () => {
-    it("should build paths for simple object", () => {
-      const data = {
-        name: "John",
-        age: 30,
-      };
+  it("should find metadata for deeply nested object fields", () => {
+    // "vendor.address.street" should find metadata at vendor.address.street path
+    const result = findExtractedFieldMetadata(
+      "vendor.address.street",
+      apiMetadata
+    );
+    expect(result).toBeDefined();
+    expect(result?.confidence).toBe(0.85);
+    expect(result?.reasoning).toBe("Street address found");
+  });
 
-      const paths = buildMetadataPaths(data);
-      expect(paths).toContain("name");
-      expect(paths).toContain("age");
-      expect(paths).toHaveLength(2);
-    });
+  it("should find metadata for array item fields", () => {
+    // "line_items.0.description" should find metadata at line_items[0].description
+    const result = findExtractedFieldMetadata(
+      "line_items.0.description",
+      apiMetadata
+    );
+    expect(result).toBeDefined();
+    expect(result?.confidence).toBe(0.9);
+    expect(result?.reasoning).toBe("First item description");
 
-    it("should build paths for nested object", () => {
-      const data = {
-        merchant: {
-          name: "ACME Corp",
-          address: {
-            street: "123 Main St",
-            city: "New York",
-          },
-        },
-      };
+    // Test second array item
+    const result2 = findExtractedFieldMetadata(
+      "line_items.1.amount",
+      apiMetadata
+    );
+    expect(result2).toBeDefined();
+    expect(result2?.confidence).toBe(0.92);
+    expect(result2?.reasoning).toBe("Second item amount");
+  });
 
-      const paths = buildMetadataPaths(data);
-      expect(paths).toContain("merchant");
-      expect(paths).toContain("merchant.name");
-      expect(paths).toContain("merchant.address");
-      expect(paths).toContain("merchant.address.street");
-      expect(paths).toContain("merchant.address.city");
-    });
+  it("should return undefined for non-existent fields", () => {
+    const result = findExtractedFieldMetadata(
+      "non_existent_field",
+      apiMetadata
+    );
+    expect(result).toBeUndefined();
+  });
 
-    it("should build paths for arrays", () => {
-      const data = {
-        items: [
-          { name: "Item 1", price: 100 },
-          { name: "Item 2", price: 200 },
-        ],
-      };
+  it("should handle empty metadata", () => {
+    const result = findExtractedFieldMetadata("any_field", {});
+    expect(result).toBeUndefined();
+  });
 
-      const paths = buildMetadataPaths(data);
-      expect(paths).toContain("items");
-      expect(paths).toContain("items.0");
-      expect(paths).toContain("items.0.name");
-      expect(paths).toContain("items.0.price");
-      expect(paths).toContain("items.1");
-      expect(paths).toContain("items.1.name");
-      expect(paths).toContain("items.1.price");
-    });
+  it("should work with array notation", () => {
+    // Test with array path notation
+    const result = findExtractedFieldMetadata(["vendor", "name"], apiMetadata);
+    expect(result).toBeDefined();
+    expect(result?.confidence).toBe(0.88);
 
-    it("should handle empty data", () => {
-      expect(buildMetadataPaths(null)).toEqual([]);
-      expect(buildMetadataPaths(undefined)).toEqual([]);
-      expect(buildMetadataPaths("string")).toEqual([]);
-      expect(buildMetadataPaths(123)).toEqual([]);
-    });
+    // Test with array item
+    const result2 = findExtractedFieldMetadata(
+      ["line_items", "0", "description"],
+      apiMetadata
+    );
+    expect(result2).toBeDefined();
+    expect(result2?.confidence).toBe(0.9);
+  });
 
-    it("should handle empty objects and arrays", () => {
-      expect(buildMetadataPaths({})).toEqual([]);
-      expect(buildMetadataPaths([])).toEqual([]);
-    });
+  it("should return undefined for non-existent nested paths", () => {
+    const result = findExtractedFieldMetadata(
+      "vendor.non_existent",
+      apiMetadata
+    );
+    expect(result).toBeUndefined();
 
-    it("should work with prefix", () => {
-      const data = { name: "John" };
-      const paths = buildMetadataPaths(data, "user");
-      expect(paths).toContain("user.name");
-    });
+    // Test non-existent array index
+    const result2 = findExtractedFieldMetadata(
+      "line_items.5.description",
+      apiMetadata
+    );
+    expect(result2).toBeUndefined();
   });
 });

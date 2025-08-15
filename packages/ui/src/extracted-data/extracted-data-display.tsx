@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import type { ExtractedDataDisplayProps } from "./types";
+import type { ExtractedDataDisplayProps, JSONObject } from "./types";
 import { PropertyRenderer } from "./property-renderer";
 import {
   getFieldDisplayInfo,
@@ -8,38 +8,36 @@ import {
 } from "./field-display-utils";
 import { reconcileDataWithJsonSchema } from "./schema-reconciliation";
 
-export function ExtractedDataDisplay({
+export function ExtractedDataDisplay<S extends JSONObject>({
   extractedData,
   emptyMessage = "No extracted data available",
   onChange,
   editable = true,
   jsonSchema,
-}: ExtractedDataDisplayProps) {
+  onClickField,
+}: ExtractedDataDisplayProps<S>) {
   const [changedPaths, setChangedPaths] = useState<Set<string>>(new Set());
 
   // Extract data from extractedData
-  const { data } = extractedData;
+  const { data, field_metadata } = extractedData;
 
   // Perform schema reconciliation if schema is provided
   const reconciliationResult = useMemo(() => {
     if (!jsonSchema) {
       return null;
     }
-    return reconcileDataWithJsonSchema(
-      data as Record<string, unknown>,
-      jsonSchema
-    );
+    return reconcileDataWithJsonSchema<S>(data, jsonSchema);
   }, [data, jsonSchema]);
 
   // Use reconciled data if available, otherwise use original data
   const displayData = reconciliationResult?.data || data;
-  const fieldMetadata = reconciliationResult?.metadata || {};
+  const schemaMetadata = reconciliationResult?.schemaMetadata || {};
   const validationErrors = reconciliationResult?.validationErrors || [];
 
   const renderFieldLabel = (key: string, additionalClasses?: string) => {
     const fieldInfo = getFieldDisplayInfo(
       key,
-      fieldMetadata,
+      schemaMetadata,
       validationErrors,
       [key]
     );
@@ -61,17 +59,17 @@ export function ExtractedDataDisplay({
 
   const handleUpdate = (
     path: string[],
-    newValue: unknown,
+    newValue: S,
     additionalPaths?: string[][]
   ) => {
     if (!editable || !onChange) return;
 
-    const newData = { ...(data as Record<string, unknown>) };
-    let current: Record<string, unknown> = newData;
+    const newData = { ...(data as Record<string, JSONObject>) };
+    let current = newData;
 
     // Navigate to the parent of the target property
     for (let i = 0; i < path.length - 1; i++) {
-      current = current[path[i]] as Record<string, unknown>;
+      current = current[path[i]] as Record<string, JSONObject>;
     }
 
     // Set the new value
@@ -88,7 +86,7 @@ export function ExtractedDataDisplay({
       return newSet;
     });
 
-    onChange(newData);
+    onChange(newData as S);
   };
 
   return (
@@ -106,16 +104,17 @@ export function ExtractedDataDisplay({
             <div key={key}>
               {renderFieldLabel(key)}
               <div>
-                <PropertyRenderer
+                <PropertyRenderer<S>
                   keyPath={[key]}
-                  value={value}
+                  value={value as S}
                   onUpdate={handleUpdate}
                   changedPaths={changedPaths}
                   metadata={{
-                    schema: fieldMetadata,
-                    extracted: extractedData.field_metadata,
+                    schema: schemaMetadata,
+                    extracted: field_metadata,
                   }}
                   validationErrors={validationErrors}
+                  onClickField={onClickField}
                 />
               </div>
             </div>
@@ -126,16 +125,17 @@ export function ExtractedDataDisplay({
           return (
             <div key={key}>
               {renderFieldLabel(key)}
-              <PropertyRenderer
+              <PropertyRenderer<S>
                 keyPath={[key]}
-                value={value}
+                value={value as S}
                 onUpdate={handleUpdate}
                 changedPaths={changedPaths}
                 metadata={{
-                  schema: fieldMetadata,
-                  extracted: extractedData.field_metadata,
+                  schema: schemaMetadata,
+                  extracted: field_metadata,
                 }}
                 validationErrors={validationErrors}
+                onClickField={onClickField}
               />
             </div>
           );
@@ -146,16 +146,17 @@ export function ExtractedDataDisplay({
               <div className="flex items-start gap-6">
                 {renderFieldLabel(key, "min-w-0 flex-shrink-0")}
                 <div className="flex-1 min-w-0">
-                  <PropertyRenderer
+                  <PropertyRenderer<S>
                     keyPath={[key]}
-                    value={value}
+                    value={value as S}
                     onUpdate={handleUpdate}
                     changedPaths={changedPaths}
                     metadata={{
-                      schema: fieldMetadata,
-                      extracted: extractedData.field_metadata,
+                      schema: schemaMetadata,
+                      extracted: field_metadata,
                     }}
                     validationErrors={validationErrors}
+                    onClickField={onClickField}
                   />
                 </div>
               </div>

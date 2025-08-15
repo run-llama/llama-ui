@@ -1,5 +1,5 @@
-import type { FieldMetadata } from "./schema-reconciliation";
-import { lookupFieldMetadata } from "./metadata-lookup-utils";
+import type { FieldSchemaMetadata } from "./schema-reconciliation";
+import { lookupFieldSchemaMetadata } from "./schema-metadata-lookup";
 
 /**
  * Construct metadata lookup path for table headers
@@ -22,21 +22,21 @@ export function buildTableHeaderMetadataPath(
 }
 
 /**
- * UNIFIED FIELD METADATA LOOKUP ALGORITHM
+ * UNIFIED FIELD SCHEMA METADATA LOOKUP ALGORITHM
  * =======================================
  *
- * Find field metadata using normalized path lookup with "*" wildcards.
+ * Find field schema metadata using normalized path lookup with "*" wildcards.
  * This algorithm unifies list and table renderers to use the same lookup mechanism.
  *
  * Delegates to the shared lookup utility to avoid code duplication.
  *
  * @param keyPath - The full key path (e.g., ["users", "2", "name"])
- * @param fieldMetadata - The metadata lookup object with normalized keys
+ * @param fieldSchemaMetadata - The metadata lookup object with normalized keys
  * @returns The field metadata or undefined if not found
  */
-export function findFieldMetadata(
+export function findFieldSchemaMetadata(
   keyPath: string[],
-  fieldMetadata: Record<string, FieldMetadata>
-): FieldMetadata | undefined {
-  return lookupFieldMetadata(keyPath, fieldMetadata);
+  fieldSchemaMetadata: Record<string, FieldSchemaMetadata>
+): FieldSchemaMetadata | undefined {
+  return lookupFieldSchemaMetadata(keyPath, fieldSchemaMetadata);
 }

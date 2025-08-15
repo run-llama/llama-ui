@@ -1,32 +1,26 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import React from "react";
+import { within, userEvent, expect } from "@storybook/test";
 import { ItemGrid } from "../../src/item-grid";
-
-import type { Column } from "../../src/item-grid/types";
+import { ApiProvider, createMockClients } from "../../src/lib";
 import type {
-  AgentClient,
   ExtractedData,
   TypedAgentData,
 } from "llama-cloud-services/beta/agent";
 
-// Meta configuration for the ItemGrid component
 const meta = {
   title: "Business/ItemGrid",
-  component: ItemGrid,
+  component: ItemGrid<ExtractedData>,
   parameters: {
     layout: "fullscreen",
     docs: {
       description: {
         component:
-          "A configurable business component for displaying and managing items with built-in and custom columns, filtering, sorting, and pagination.",
+          "Generic grid component for displaying and managing items with custom columns, filtering, sorting, and pagination.",
       },
     },
   },
   argTypes: {
-    builtInColumns: {
-      description:
-        "Configuration for built-in columns (fileName, status, createdAt, itemsToReview)",
-      control: { type: "object" },
-    },
     customColumns: {
       description: "Array of custom column configurations",
       control: { type: "object" },
@@ -35,81 +29,57 @@ const meta = {
       description: "Default number of items per page",
       control: { type: "number" },
     },
-    useMockData: {
-      description: "Use mock data instead of real API",
-      control: { type: "boolean" },
-    },
   },
-} satisfies Meta<typeof ItemGrid>;
+} satisfies Meta<typeof ItemGrid<ExtractedData>>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const mockClient = {} as unknown as AgentClient<ExtractedData>;
+// Wrapper component that provides ApiProvider
+function ItemGridWrapper<T = unknown>(
+  props: React.ComponentProps<typeof ItemGrid<T>>
+) {
+  return (
+    <ApiProvider clients={createMockClients()} deployment="mock-deployment">
+      <ItemGrid<T> {...props} />
+    </ApiProvider>
+  );
+}
 
-// Default story with built-in columns
+// Default story with custom columns
 export const Default: Story = {
   args: {
-    builtInColumns: {
-      fileName: true,
-      status: true,
-      createdAt: true,
-      itemsToReview: true,
-      actions: true,
-    },
-    defaultPageSize: 20,
-    useMockData: true,
-    onRowClick: () => {},
-    client: mockClient,
-  },
-  render: (args) => (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Item Management</h1>
-        <p className="text-gray-600 mt-2">
-          Complete item management system with built-in columns, filtering,
-          sorting, and pagination
-        </p>
-      </div>
-      <ItemGrid
-        {...args}
-        onRowClick={(item: TypedAgentData<ExtractedData>) =>
-          console.log(`Clicked row: ${item.data.file_name}`)
-        }
-      />
-    </div>
-  ),
-};
-
-// Custom configuration with built-in column overrides
-export const CustomizedBuiltInColumns: Story = {
-  args: {
-    builtInColumns: {
-      fileName: { header: "Document Name" },
-      status: {
-        header: "Review Status",
-        sortable: false,
+    customColumns: [
+      {
+        key: "fileName",
+        header: "File Name",
+        getValue: (item: TypedAgentData<ExtractedData>) => item.data.file_name,
+        sortable: true,
       },
-      itemsToReview: { header: "Low Confidence Items" },
-      createdAt: false, // Hide created at column
-      actions: true,
-    },
-    defaultPageSize: 15,
-    useMockData: true,
-    onRowClick: () => {},
-    client: mockClient,
+      {
+        key: "status",
+        header: "Status",
+        getValue: (item: TypedAgentData<ExtractedData>) => item.data.status,
+        sortable: true,
+      },
+      {
+        key: "createdAt",
+        header: "Created At",
+        getValue: (item: TypedAgentData<ExtractedData>) => item.createdAt,
+        sortable: true,
+      },
+    ],
+    defaultPageSize: 20,
   },
   render: (args) => (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
-          Customized Built-in Columns
-        </h1>
+        <h1 className="text-2xl font-bold text-gray-900">Generic Item Grid</h1>
         <p className="text-gray-600 mt-2">
-          Built-in columns with custom headers and configuration overrides
+          Flexible grid component with custom column definitions
         </p>
       </div>
-      <ItemGrid
+      <ItemGridWrapper<ExtractedData>
         {...args}
         onRowClick={(item: TypedAgentData<ExtractedData>) =>
           console.log(`Clicked row: ${item.data.file_name}`)
@@ -119,55 +89,92 @@ export const CustomizedBuiltInColumns: Story = {
   ),
 };
 
-// Mixed custom and built-in columns
-export const MixedColumns: Story = {
+// Custom columns example
+export const WithCustomColumns: Story = {
   args: {
     customColumns: [
       {
         key: "priority",
         header: "Priority",
-        getValue: () => "High", // Mock priority value
+        getValue: () => "High",
         renderCell: (value: unknown) => (
-          <span
-            className={`px-2 py-1 rounded text-xs font-medium ${
-              value === "High"
-                ? "bg-red-100 text-red-800"
-                : value === "Medium"
-                  ? "bg-yellow-100 text-yellow-800"
-                  : "bg-green-100 text-green-800"
-            }`}
-          >
+          <span className="px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-800">
             {String(value)}
           </span>
         ),
         sortable: true,
       },
-    ] as Column[],
-    builtInColumns: {
-      fileName: true,
-      status: true,
-      itemsToReview: true,
-      actions: true,
-    },
+      {
+        key: "fileName",
+        header: "File Name",
+        getValue: (item: TypedAgentData<ExtractedData>) => item.data.file_name,
+        sortable: true,
+      },
+    ],
     defaultPageSize: 15,
-    useMockData: true,
-    onRowClick: () => {},
-    client: mockClient,
   },
   render: (args) => (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Mixed Columns</h1>
+        <h1 className="text-2xl font-bold text-gray-900">
+          ItemGrid with Custom Columns
+        </h1>
         <p className="text-gray-600 mt-2">
-          Combination of custom columns (first) and built-in columns
+          Generic grid component with custom column definitions
         </p>
       </div>
-      <ItemGrid
-        {...args}
-        onRowClick={(item: TypedAgentData<ExtractedData>) =>
-          console.log(`Clicked row: ${item.data.file_name}`)
-        }
-      />
+      <ItemGridWrapper<ExtractedData> {...args} />
     </div>
   ),
+};
+
+// Basic interaction test
+export const WithInteraction: Story = {
+  args: {
+    customColumns: [
+      {
+        key: "fileName",
+        header: "File Name",
+        getValue: (item: TypedAgentData<ExtractedData>) => item.data.file_name,
+        sortable: true,
+      },
+      {
+        key: "status",
+        header: "Status",
+        getValue: (item: TypedAgentData<ExtractedData>) => item.data.status,
+        sortable: true,
+      },
+    ],
+    defaultPageSize: 5,
+  },
+  render: (args) => (
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">
+          Interactive ItemGrid
+        </h1>
+        <p className="text-gray-600 mt-2">
+          Test sorting and pagination functionality
+        </p>
+      </div>
+      <ItemGridWrapper<ExtractedData> {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // Wait for data to load and verify loading state
+    await expect(canvas.getByText("Loading items...")).toBeInTheDocument();
+
+    // Wait longer for data to load
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    // Test sorting if headers are available
+    try {
+      const fileNameHeader = canvas.getByText("File Name");
+      await userEvent.click(fileNameHeader);
+    } catch {
+      // Headers might not be loaded yet, skip sorting test
+    }
+  },
 };

@@ -1,8 +1,8 @@
-import type { FieldMetadata } from "../schema-reconciliation";
+import type { FieldSchemaMetadata } from "../schema-reconciliation";
 import {
-  lookupFieldMetadata,
+  lookupFieldSchemaMetadata,
   getDefaultValueForType,
-} from "../metadata-lookup-utils";
+} from "../schema-metadata-lookup";
 
 // Utility function to build full path for array item
 export function buildArrayItemPath(keyPath: string[], index: number): string {
@@ -34,11 +34,11 @@ export function isArrayItemChanged(
  */
 export function getArrayItemDefaultValue(
   keyPath: string[],
-  fieldMetadata: Record<string, FieldMetadata>
+  fieldMetadata: Record<string, FieldSchemaMetadata>
 ): string | number | boolean {
   // Use shared metadata lookup utility - no code duplication!
   const itemFieldPath = [...keyPath, "*"];
-  const itemMetadata = lookupFieldMetadata(itemFieldPath, fieldMetadata);
+  const itemMetadata = lookupFieldSchemaMetadata(itemFieldPath, fieldMetadata);
 
   if (!itemMetadata?.schemaType) {
     // No item metadata available, default to empty string

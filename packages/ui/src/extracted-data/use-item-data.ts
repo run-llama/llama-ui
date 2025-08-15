@@ -6,9 +6,10 @@ import {
 } from "llama-cloud-services/beta/agent";
 import { getMockItemResponse } from "./mock-item-response";
 import { JSONSchema } from "zod/v4/core";
+import { JSONObject } from "./types";
 // Remove reconciliation imports since ExtractedDataDisplay handles it internally
 
-export interface ItemHookData<T extends Record<string, unknown>> {
+export interface ItemHookData<T extends JSONObject> {
   /** the complete item object from API containing both AI predictions and user corrections */
   item: TypedAgentData<ExtractedData<T>> | null;
   /** the JSON schema used for validation and reconciliation */
@@ -27,14 +28,14 @@ export interface ItemHookData<T extends Record<string, unknown>> {
   save: (status: "approved" | "rejected") => Promise<void>;
 }
 
-export interface UseItemDataOptions<T extends Record<string, unknown>> {
+export interface UseItemDataOptions<T extends JSONObject> {
   jsonSchema: JSONSchema.ObjectSchema;
   itemId: string;
   isMock: boolean;
   client: AgentClient<ExtractedData<T>>;
 }
 
-export function useItemData<T extends Record<string, unknown>>({
+export function useItemData<T extends JSONObject>({
   jsonSchema,
   itemId,
   isMock,

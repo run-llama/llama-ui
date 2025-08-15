@@ -1,5 +1,6 @@
 import { JSONSchema } from "zod/v4/core";
 import { isNullable } from "@/lib/json-schema";
+import type { JSONObject } from "./types";
 
 /**
  * JSON SCHEMA-BASED RECONCILIATION DESIGN
@@ -25,7 +26,7 @@ import { isNullable } from "@/lib/json-schema";
 /**
  * Field metadata for UI rendering
  */
-export interface FieldMetadata {
+export interface FieldSchemaMetadata {
   /** Whether this field is required by schema */
   isRequired: boolean;
   /** Whether this field can be null/undefined */
@@ -74,11 +75,13 @@ export interface ValidationError {
 /**
  * Result of zod-based reconciliation
  */
-export interface ReconciliationResult<T = Record<string, unknown>> {
+export interface ReconciliationResult<S extends JSONObject> {
   /** Complete data with all schema fields filled */
-  data: T;
+  data: S;
   /** Metadata for each field path */
-  metadata: Record<string, FieldMetadata>;
+  // key is the path string, and array index will be replaced with "*"
+  // e.g "users.*.name", "users.*.contact.email"
+  schemaMetadata: Record<string, FieldSchemaMetadata>;
   /** Set of required field paths */
   requiredFields: Set<string>;
   /** Set of optional field paths that were missing */
@@ -92,11 +95,11 @@ export interface ReconciliationResult<T = Record<string, unknown>> {
 /**
  * Reconcile data with JSON schema, filling missing optional fields
  */
-export function reconcileDataWithJsonSchema(
-  originalData: Record<string, unknown>,
+export function reconcileDataWithJsonSchema<S extends JSONObject>(
+  originalData: S,
   jsonSchema: JSONSchema.ObjectSchema
-): ReconciliationResult<Record<string, unknown>> {
-  const metadata: Record<string, FieldMetadata> = {};
+): ReconciliationResult<S> {
+  const metadata: Record<string, FieldSchemaMetadata> = {};
   const requiredFields = new Set<string>();
   const addedOptionalFields = new Set<string>();
   const validationErrors: ValidationError[] = [];
@@ -105,7 +108,7 @@ export function reconcileDataWithJsonSchema(
   const data = structuredClone(originalData);
 
   // Fill missing fields from JSON schema
-  fillMissingFieldsFromJsonSchema(data, jsonSchema, [], {
+  fillMissingFieldsFromJsonSchema<S>(data, jsonSchema, [], {
     metadata,
     requiredFields,
     addedOptionalFields,
@@ -117,7 +120,7 @@ export function reconcileDataWithJsonSchema(
 
   return {
     data,
-    metadata,
+    schemaMetadata: metadata,
     requiredFields,
     addedOptionalFields,
     validationErrors,
@@ -128,25 +131,24 @@ export function reconcileDataWithJsonSchema(
 /**
  * Internal context for reconciliation process
  */
-interface ReconciliationContext {
-  metadata: Record<string, FieldMetadata>;
+interface ReconciliationContext<S extends JSONObject> {
+  metadata: Record<string, FieldSchemaMetadata>;
   requiredFields: Set<string>;
   addedOptionalFields: Set<string>;
-  originalData: Record<string, unknown>;
+  originalData: S;
 }
 
 /**
  * Fill missing fields from JSON Schema object
  */
-function fillMissingFieldsFromJsonSchema(
-  data: unknown,
+function fillMissingFieldsFromJsonSchema<S extends JSONObject>(
+  data: S,
   jsonSchema: JSONSchema.ObjectSchema,
   currentPath: string[],
-  context: ReconciliationContext
+  context: ReconciliationContext<S>
 ): void {
   const properties = jsonSchema.properties || {};
 
-  // Ensure data is an object
   if (
     data === null ||
     data === undefined ||
@@ -156,7 +158,7 @@ function fillMissingFieldsFromJsonSchema(
     return;
   }
 
-  const dataObj = data as Record<string, unknown>;
+  const dataObj = data as Record<string, JSONObject>;
 
   // Process all schema fields
   for (const [fieldName, fieldSchema] of Object.entries(properties)) {
@@ -180,7 +182,7 @@ function fillMissingFieldsFromJsonSchema(
     const baseSchema = fieldSchema as JSONSchema.BaseSchema;
 
     // Store metadata
-    const metadata: FieldMetadata = {
+    const metadata: FieldSchemaMetadata = {
       isRequired,
       isOptional: !isRequired,
       schemaType: baseSchema.type || "unknown",
@@ -217,7 +219,7 @@ function fillMissingFieldsFromJsonSchema(
           // For primitive arrays, generate a single metadata entry
           // Generate paths like "tags.*" for string arrays
           const itemPathString = [...fieldPath, "*"].join(".");
-          const itemMetadata: FieldMetadata = {
+          const itemMetadata: FieldSchemaMetadata = {
             isRequired: false, // Array items themselves are not required
             isOptional: true,
             schemaType: itemSchema.type || "unknown",
@@ -241,8 +243,8 @@ function fillMissingFieldsFromJsonSchema(
       dataObj[fieldName] !== undefined
     ) {
       const objectSchema = baseSchema as JSONSchema.ObjectSchema;
-      fillMissingFieldsFromJsonSchema(
-        dataObj[fieldName],
+      fillMissingFieldsFromJsonSchema<S>(
+        dataObj[fieldName] as S,
         objectSchema,
         fieldPath,
         context
@@ -260,8 +262,8 @@ function fillMissingFieldsFromJsonSchema(
         const itemSchema = arraySchema.items as JSONSchema.BaseSchema;
         if (itemSchema.type === "object") {
           (dataObj[fieldName] as unknown[]).forEach((item, index) => {
-            fillMissingFieldsFromJsonSchema(
-              item,
+            fillMissingFieldsFromJsonSchema<S>(
+              item as S,
               itemSchema as JSONSchema.ObjectSchema,
               [...fieldPath, String(index)],
               context
@@ -278,7 +280,7 @@ function fillMissingFieldsFromJsonSchema(
  */
 export function isFieldRequiredAtPath(
   keyPath: string[],
-  metadata: Record<string, FieldMetadata>
+  metadata: Record<string, FieldSchemaMetadata>
 ): boolean {
   const pathString = keyPath.join(".");
   return metadata[pathString]?.isRequired ?? false;
@@ -289,7 +291,7 @@ export function isFieldRequiredAtPath(
  */
 export function wasFieldMissingAtPath(
   keyPath: string[],
-  metadata: Record<string, FieldMetadata>
+  metadata: Record<string, FieldSchemaMetadata>
 ): boolean {
   const pathString = keyPath.join(".");
   return metadata[pathString]?.wasMissing ?? false;
@@ -300,8 +302,8 @@ export function wasFieldMissingAtPath(
  */
 export function getFieldMetadataAtPath(
   keyPath: string[],
-  metadata: Record<string, FieldMetadata>
-): FieldMetadata | null {
+  metadata: Record<string, FieldSchemaMetadata>
+): FieldSchemaMetadata | null {
   const pathString = keyPath.join(".");
   return metadata[pathString] || null;
 }
@@ -332,10 +334,10 @@ export function getValidationErrorsAtPath(
  * - "users.*.age"
  * - "users.*.contact.email"
  */
-function generateArrayItemMetadata(
+function generateArrayItemMetadata<S extends JSONObject>(
   objectSchema: JSONSchema.ObjectSchema,
   currentPath: string[],
-  context: ReconciliationContext
+  context: ReconciliationContext<S>
 ): void {
   const { properties } = objectSchema;
   if (!properties || typeof properties !== "object") {
@@ -350,7 +352,7 @@ function generateArrayItemMetadata(
     const isRequired = objectSchema.required?.includes(fieldName) ?? false;
 
     // Generate metadata for this field
-    const metadata: FieldMetadata = {
+    const metadata: FieldSchemaMetadata = {
       isRequired,
       isOptional: !isRequired,
       schemaType: baseSchema.type || "unknown",
@@ -387,7 +389,7 @@ function generateArrayItemMetadata(
         } else {
           // Primitive array item
           const itemPathString = [...fieldPath, "*"].join(".");
-          const itemMetadata: FieldMetadata = {
+          const itemMetadata: FieldSchemaMetadata = {
             isRequired: false,
             isOptional: true,
             schemaType: itemSchema.type || "unknown",

@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { getFieldDisplayInfo } from "@/src/extracted-data/field-display-utils";
-import type { FieldMetadata } from "@/src/extracted-data/schema-reconciliation";
+import type { FieldSchemaMetadata } from "@/src/extracted-data/schema-reconciliation";
 
 describe("field-display-utils path construction", () => {
-  const mockFieldMetadata: Record<string, FieldMetadata> = {
+  const mockFieldMetadata: Record<string, FieldSchemaMetadata> = {
     // Simple field
     receiptNumber: {
       isRequired: true,

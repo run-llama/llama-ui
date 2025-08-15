@@ -4,11 +4,16 @@ import type {
 } from "llama-cloud-services/beta/agent";
 
 /**
- * Find metadata for a specific field path in the metadata object
- * Supports nested paths like "merchant.address.street" and array indices like "items.0.description"
+ * Find metadata for a specific field path in the API metadata object
+ * The metadata structure mirrors the data structure (tree-like)
+ *
+ * Algorithm:
+ * Direct tree traversal following the exact path structure:
+ * - For objects: metadata.merchant.name
+ * - For arrays: metadata.items[0].description
  *
  * @param path - The field path as a string (e.g., "merchant.name") or array of path segments
- * @param metadata - The metadata object, which can have nested structure
+ * @param metadata - The metadata object from API (ExtractedFieldMetadataDict)
  * @returns The metadata for the field, or undefined if not found
  */
 export function findExtractedFieldMetadata(
@@ -18,16 +23,8 @@ export function findExtractedFieldMetadata(
   // Convert string path to array
   const pathArray = Array.isArray(path) ? path : path.split(".");
 
-  // Try direct lookup first (for flattened metadata)
-  const directPath = pathArray.join(".");
-  const directResult = metadata[directPath];
-  if (isExtractedFieldMetadata(directResult)) {
-    return directResult;
-  }
-
-  // Try nested lookup
+  // Direct tree traversal following the exact path structure
   let current: unknown = metadata;
-
   for (let i = 0; i < pathArray.length; i++) {
     const segment = pathArray[i];
 
@@ -35,24 +32,24 @@ export function findExtractedFieldMetadata(
       return undefined;
     }
 
-    // Handle array index in the path
+    // Handle array indices
     if (!isNaN(Number(segment))) {
-      // This is an array index, but metadata structure might use different notation
-      // Try looking for array-specific metadata patterns
-      const arrayMetadataKey = pathArray.slice(0, i + 1).join(".");
-      const arrayMetadata = metadata[arrayMetadataKey];
-      if (isExtractedFieldMetadata(arrayMetadata)) {
-        return arrayMetadata;
+      if (Array.isArray(current)) {
+        const index = Number(segment);
+        current = current[index];
+      } else {
+        // If we expect an array but current is not an array, path doesn't exist
+        return undefined;
       }
+    } else {
+      // Handle object properties
+      current = (current as Record<string, unknown>)[segment];
     }
 
-    // Continue traversing
-    current = (current as Record<string, unknown>)[segment];
-  }
-
-  // Check if the final result is valid metadata
-  if (isExtractedFieldMetadata(current)) {
-    return current;
+    // Check if we found metadata at this level
+    if (isExtractedFieldMetadata(current)) {
+      return current;
+    }
   }
 
   return undefined;
@@ -70,28 +67,13 @@ export function isExtractedFieldMetadata(
 
   const obj = value as Record<string, unknown>;
 
-  // All fields are optional except citation
-  if (!("citation" in obj) || !Array.isArray(obj.citation)) {
-    return false;
+  // All fields are optional but confidence is actually always there
+  // TODO: change ts sdk to reflect this fact
+  if ("confidence" in obj && typeof obj.confidence === "number") {
+    return true;
   }
 
-  // Check optional fields if they exist
-  if ("confidence" in obj && typeof obj.confidence !== "number") {
-    return false;
-  }
-
-  if ("reasoning" in obj && typeof obj.reasoning !== "string") {
-    return false;
-  }
-
-  if (
-    "extraction_confidence" in obj &&
-    typeof obj.extraction_confidence !== "number"
-  ) {
-    return false;
-  }
-
-  return true;
+  return false;
 }
 
 /**

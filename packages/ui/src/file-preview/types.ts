@@ -24,3 +24,11 @@ export interface FileData {
   pages: PageData[];
   totalPages: number;
 }
+
+export interface Highlight {
+  page: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
