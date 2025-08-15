@@ -1,5 +1,10 @@
 import { useState, useMemo } from "react";
-import type { ExtractedDataDisplayProps, JSONObject } from "./types";
+import type {
+  ExtractedDataDisplayProps,
+  JsonObject,
+  JsonShape,
+  JsonValue,
+} from "./types";
 import { PropertyRenderer } from "./property-renderer";
 import {
   getFieldDisplayInfo,
@@ -8,7 +13,7 @@ import {
 } from "./field-display-utils";
 import { reconcileDataWithJsonSchema } from "./schema-reconciliation";
 
-export function ExtractedDataDisplay<S extends JSONObject>({
+export function ExtractedDataDisplay<S extends JsonShape<S>>({
   extractedData,
   emptyMessage = "No extracted data available",
   onChange,
@@ -59,17 +64,17 @@ export function ExtractedDataDisplay<S extends JSONObject>({
 
   const handleUpdate = (
     path: string[],
-    newValue: S,
+    newValue: JsonValue,
     additionalPaths?: string[][]
   ) => {
     if (!editable || !onChange) return;
 
-    const newData = { ...(data as Record<string, JSONObject>) };
+    const newData = { ...(data as JsonObject) };
     let current = newData;
 
     // Navigate to the parent of the target property
     for (let i = 0; i < path.length - 1; i++) {
-      current = current[path[i]] as Record<string, JSONObject>;
+      current = current[path[i]] as JsonObject;
     }
 
     // Set the new value
@@ -92,7 +97,7 @@ export function ExtractedDataDisplay<S extends JSONObject>({
   return (
     <div>
       {Object.keys(jsonSchema?.properties || {}).map((key) => {
-        const value = (displayData as Record<string, unknown>)[key];
+        const value = (displayData as JsonObject)[key];
         // If the value is an array of objects, show key on separate line with table below
         if (
           Array.isArray(value) &&
@@ -104,9 +109,9 @@ export function ExtractedDataDisplay<S extends JSONObject>({
             <div key={key}>
               {renderFieldLabel(key)}
               <div>
-                <PropertyRenderer<S>
+                <PropertyRenderer<JsonValue>
                   keyPath={[key]}
-                  value={value as S}
+                  value={value}
                   onUpdate={handleUpdate}
                   changedPaths={changedPaths}
                   metadata={{
@@ -148,7 +153,7 @@ export function ExtractedDataDisplay<S extends JSONObject>({
                 <div className="flex-1 min-w-0">
                   <PropertyRenderer<S>
                     keyPath={[key]}
-                    value={value as S}
+                    value={value}
                     onUpdate={handleUpdate}
                     changedPaths={changedPaths}
                     metadata={{

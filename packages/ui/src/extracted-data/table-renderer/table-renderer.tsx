@@ -31,14 +31,14 @@ import {
 import { findExtractedFieldMetadata } from "../metadata-lookup";
 import { Plus, Trash2 } from "lucide-react";
 import { PrimitiveType, toPrimitiveType } from "../primitive-validation";
-import type { PrimitiveValue, JSONObject } from "../types";
+import type { PrimitiveValue, JsonValue, JsonObject } from "../types";
 
-export interface TableRendererProps<Row extends Record<string, JSONObject>> {
+export interface TableRendererProps<Row extends JsonObject> {
   data: Row[];
   onUpdate: (
     index: number,
     key: string,
-    value: JSONObject,
+    value: JsonObject,
     affectedPaths?: string[]
   ) => void;
   onAddRow?: (newRow: Row) => void;
@@ -57,7 +57,7 @@ export interface TableRendererProps<Row extends Record<string, JSONObject>> {
   }) => void;
 }
 
-export function TableRenderer<Row extends Record<string, JSONObject>>({
+export function TableRenderer<Row extends JsonObject>({
   data,
   onUpdate,
   onAddRow,
@@ -97,11 +97,9 @@ export function TableRenderer<Row extends Record<string, JSONObject>>({
 
     if (data.length > 0) {
       // If we have existing data, use the structure of the first row
-      const firstRow = data[0] as Record<string, JSONObject>;
-      const fillEmptyValues = (
-        obj: Record<string, JSONObject>
-      ): Record<string, JSONObject> => {
-        const result: Record<string, JSONObject> = {};
+      const firstRow = data[0];
+      const fillEmptyValues = (obj: JsonObject): JsonObject => {
+        const result: JsonObject = {};
         Object.keys(obj).forEach((key) => {
           const value = obj[key];
           if (
@@ -109,7 +107,7 @@ export function TableRenderer<Row extends Record<string, JSONObject>>({
             typeof value === "object" &&
             !Array.isArray(value)
           ) {
-            result[key] = fillEmptyValues(value as Record<string, JSONObject>);
+            result[key] = fillEmptyValues(value);
           } else {
             result[key] = "";
           }
@@ -121,9 +119,9 @@ export function TableRenderer<Row extends Record<string, JSONObject>>({
       // If no existing data, create structure based on columns
       columns.forEach((column) => {
         const setNestedValue = (
-          obj: Record<string, JSONObject>,
+          obj: JsonObject,
           path: string[],
-          value: JSONObject
+          value: JsonValue
         ) => {
           if (path.length === 1) {
             obj[path[0]] = value;
@@ -135,14 +133,10 @@ export function TableRenderer<Row extends Record<string, JSONObject>>({
             ) {
               obj[path[0]] = {};
             }
-            setNestedValue(
-              obj[path[0]] as Record<string, JSONObject>,
-              path.slice(1),
-              value
-            );
+            setNestedValue(obj[path[0]] as JsonObject, path.slice(1), value);
           }
         };
-        setNestedValue(newRow as Record<string, JSONObject>, column.path, "");
+        setNestedValue(newRow as JsonObject, column.path, "");
       });
     }
 
@@ -161,7 +155,7 @@ export function TableRenderer<Row extends Record<string, JSONObject>>({
     if (data && data.length > 0) {
       // If we have data, use the data to generate columns
       data.forEach((item) => {
-        const itemColumns = flattenObject(item as Record<string, unknown>);
+        const itemColumns = flattenObject(item);
         itemColumns.forEach((col) => {
           if (!allColumns.has(col.key)) {
             allColumns.set(col.key, col);
@@ -349,10 +343,7 @@ export function TableRenderer<Row extends Record<string, JSONObject>>({
           {data.map((item, rowIndex) => (
             <TableRow key={rowIndex} className="hover:bg-gray-50 border-0">
               {columns.map((column, colIndex) => {
-                const value = getValue(
-                  item as Record<string, unknown>,
-                  column
-                ) as PrimitiveValue;
+                const value = getValue(item, column) as PrimitiveValue;
                 const cellPath = [...keyPath, String(rowIndex), ...column.path];
                 const isChanged = isTableCellChanged(
                   changedPaths,
@@ -388,9 +379,9 @@ export function TableRenderer<Row extends Record<string, JSONObject>>({
                           rowIndex,
                           column,
                           newValue,
-                          data as Array<Record<string, unknown>>,
+                          data,
                           (idx, key, val, paths) =>
-                            onUpdate(idx, key, val as JSONObject, paths)
+                            onUpdate(idx, key, val as JsonObject, paths)
                         )
                       }
                       metadata={getMetadata(cellPath)}

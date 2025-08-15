@@ -6,7 +6,7 @@ import type {
 } from "llama-cloud-services/beta/agent";
 import type { FieldSchemaMetadata } from "./schema-reconciliation";
 
-export interface ExtractedDataDisplayProps<S extends JSONObject> {
+export interface ExtractedDataDisplayProps<S extends JsonShape<S>> {
   extractedData: ExtractedData<S>;
   title?: string;
   emptyMessage?: string;
@@ -29,7 +29,6 @@ export interface RendererMetadata {
 }
 
 export type PrimitiveValue = string | number | boolean | null | undefined;
-export type JSONObject =
-  | PrimitiveValue
-  | JSONObject[]
-  | { [key: string]: JSONObject };
+export type JsonObject = { [k: string]: JsonValue };
+export type JsonValue = PrimitiveValue | JsonObject | JsonValue[];
+export type JsonShape<T> = { [K in keyof T]: JsonValue };

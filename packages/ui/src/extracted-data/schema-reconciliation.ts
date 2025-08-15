@@ -1,6 +1,6 @@
 import { JSONSchema } from "zod/v4/core";
 import { isNullable } from "@/lib/json-schema";
-import type { JSONObject } from "./types";
+import type { JsonShape, JsonValue } from "./types";
 
 /**
  * JSON SCHEMA-BASED RECONCILIATION DESIGN
@@ -75,7 +75,7 @@ export interface ValidationError {
 /**
  * Result of zod-based reconciliation
  */
-export interface ReconciliationResult<S extends JSONObject> {
+export interface ReconciliationResult<S extends JsonShape<S>> {
   /** Complete data with all schema fields filled */
   data: S;
   /** Metadata for each field path */
@@ -95,7 +95,7 @@ export interface ReconciliationResult<S extends JSONObject> {
 /**
  * Reconcile data with JSON schema, filling missing optional fields
  */
-export function reconcileDataWithJsonSchema<S extends JSONObject>(
+export function reconcileDataWithJsonSchema<S extends JsonShape<S>>(
   originalData: S,
   jsonSchema: JSONSchema.ObjectSchema
 ): ReconciliationResult<S> {
@@ -131,7 +131,7 @@ export function reconcileDataWithJsonSchema<S extends JSONObject>(
 /**
  * Internal context for reconciliation process
  */
-interface ReconciliationContext<S extends JSONObject> {
+interface ReconciliationContext<S extends JsonShape<S>> {
   metadata: Record<string, FieldSchemaMetadata>;
   requiredFields: Set<string>;
   addedOptionalFields: Set<string>;
@@ -141,7 +141,7 @@ interface ReconciliationContext<S extends JSONObject> {
 /**
  * Fill missing fields from JSON Schema object
  */
-function fillMissingFieldsFromJsonSchema<S extends JSONObject>(
+function fillMissingFieldsFromJsonSchema<S extends JsonShape<S>>(
   data: S,
   jsonSchema: JSONSchema.ObjectSchema,
   currentPath: string[],
@@ -158,7 +158,7 @@ function fillMissingFieldsFromJsonSchema<S extends JSONObject>(
     return;
   }
 
-  const dataObj = data as Record<string, JSONObject>;
+  const dataObj = data as Record<string, JsonValue>;
 
   // Process all schema fields
   for (const [fieldName, fieldSchema] of Object.entries(properties)) {
@@ -334,7 +334,7 @@ export function getValidationErrorsAtPath(
  * - "users.*.age"
  * - "users.*.contact.email"
  */
-function generateArrayItemMetadata<S extends JSONObject>(
+function generateArrayItemMetadata<S extends JsonShape<S>>(
   objectSchema: JSONSchema.ObjectSchema,
   currentPath: string[],
   context: ReconciliationContext<S>
