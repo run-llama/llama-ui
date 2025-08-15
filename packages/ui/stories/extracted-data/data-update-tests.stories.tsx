@@ -3,7 +3,6 @@ import { expect, userEvent, within, screen } from "@storybook/test";
 import { useState } from "react";
 import { ExtractedDataDisplay } from "../../src/extracted-data";
 import type { JSONSchema } from "zod/v4/core";
-import { ExtractedDataDisplayControl } from "@/src/extracted-data/extracted-data-display-control";
 
 const meta: Meta<typeof ExtractedDataDisplay> = {
   title: "Components/ExtractedDataDisplay/DataUpdateTests",

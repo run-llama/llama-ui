@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/base/select";
 import { PrimitiveValue } from "../types";
+import { useUIConfigStore } from "@/src/store/ui-config-store";
 
 interface EditableFieldProps<S extends PrimitiveValue> {
   value: S;
@@ -45,6 +46,7 @@ export function EditableField<S extends PrimitiveValue>({
   metadata,
   onClick,
 }: EditableFieldProps<S>) {
+  const confidenceThreshold = useUIConfigStore((state) => state.confidenceThreshold);
   const [isOpen, setIsOpen] = useState(false);
   const [editValue, setEditValue] = useState(
     value === null || value === undefined ? "" : String(value)

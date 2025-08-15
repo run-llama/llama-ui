@@ -8,6 +8,7 @@ import {
   EXTRACTED_DATA_COLUMN_NAMES,
 } from "./extracted-data-columns";
 import type { Column, BuiltInColumnConfig } from "./types";
+import { useUIConfigStore } from "../store/ui-config-store";
 
 export interface ExtractedDataItemGridProps<T> {
   // Custom columns (displayed first)
@@ -26,6 +27,7 @@ export function ExtractedDataItemGrid<T>({
   onRowClick,
   defaultPageSize = 20,
 }: ExtractedDataItemGridProps<T>) {
+  const confidenceThreshold = useUIConfigStore((state) => state.confidenceThreshold);
   // Generate final columns array
   const columns: Column<ExtractedData<T>>[] = [];
 
@@ -37,7 +39,7 @@ export function ExtractedDataItemGrid<T>({
     const config = builtInColumns[name as keyof typeof builtInColumns];
     if (config !== false && config !== undefined) {
       try {
-        const builtInColumn = createExtractedDataColumn<T>(name, config);
+        const builtInColumn = createExtractedDataColumn<T>(name, config, confidenceThreshold);
         columns.push(builtInColumn);
       } catch {
         // Skip disabled columns
