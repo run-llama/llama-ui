@@ -4,6 +4,7 @@ export { EditableField } from "./editable-field";
 export { TableRenderer } from "./table-renderer";
 export { ListRenderer } from "./list-renderer";
 export { PropertyRenderer } from "./property-renderer";
+export { ConfidenceThresholdSettings } from "./confidence-threshold-settings";
 export * from "./types";
 export * from "./use-item-data";
 export * from "./accept-reject";
