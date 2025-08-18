@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 0.5.2
+
+### Patch Changes
+
+- 7317488: fix some bugs
+
 ## 0.5.1
 
 ### Patch Changes
