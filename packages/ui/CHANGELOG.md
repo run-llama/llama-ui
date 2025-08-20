@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 0.5.3
+
+### Patch Changes
+
+- 58e7ba2: Fix: Do not show the edit value popup when clicking on uneditable fields.
+
 ## 0.5.2
 
 ### Patch Changes
