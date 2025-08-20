@@ -120,6 +120,7 @@ export function ExtractedDataDisplay<S extends JsonShape<S>>({
                   }}
                   validationErrors={validationErrors}
                   onClickField={onClickField}
+                  editable={editable}
                 />
               </div>
             </div>
@@ -141,6 +142,7 @@ export function ExtractedDataDisplay<S extends JsonShape<S>>({
                 }}
                 validationErrors={validationErrors}
                 onClickField={onClickField}
+                editable={editable}
               />
             </div>
           );
@@ -162,6 +164,7 @@ export function ExtractedDataDisplay<S extends JsonShape<S>>({
                     }}
                     validationErrors={validationErrors}
                     onClickField={onClickField}
+                    editable={editable}
                   />
                 </div>
               </div>

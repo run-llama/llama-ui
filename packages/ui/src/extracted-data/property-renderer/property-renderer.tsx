@@ -46,6 +46,7 @@ interface PropertyRendererProps<S extends JsonShape<S>> {
     metadata?: ExtractedFieldMetadata;
     path: string[];
   }) => void;
+  editable?: boolean;
 }
 
 export function PropertyRenderer<S extends JsonShape<S>>({
@@ -56,6 +57,7 @@ export function PropertyRenderer<S extends JsonShape<S>>({
   metadata,
   validationErrors = [],
   onClickField,
+  editable = true,
 }: PropertyRendererProps<S>) {
   const pathString = keyPath.join(".");
   const isChanged = isPropertyChanged(changedPaths, keyPath);
@@ -123,6 +125,7 @@ export function PropertyRenderer<S extends JsonShape<S>>({
         expectedType={expectedType}
         required={isRequired}
         onClick={handleFieldClick}
+        editable={editable}
       />
     );
   }
@@ -144,6 +147,7 @@ export function PropertyRenderer<S extends JsonShape<S>>({
           changedPaths={changedPaths}
           keyPath={keyPath}
           metadata={{ schema: effectiveMetadata.schema, extracted: {} }}
+          editable={editable}
         />
       );
     }
@@ -200,6 +204,7 @@ export function PropertyRenderer<S extends JsonShape<S>>({
           }}
           validationErrors={validationErrors}
           onClickField={onClickField}
+          editable={editable}
         />
       );
     } else {
@@ -235,6 +240,7 @@ export function PropertyRenderer<S extends JsonShape<S>>({
             extracted: effectiveMetadata.extracted,
           }}
           onClickField={onClickField}
+          editable={editable}
         />
       );
     }
@@ -259,6 +265,7 @@ export function PropertyRenderer<S extends JsonShape<S>>({
                       metadata={effectiveMetadata}
                       validationErrors={validationErrors}
                       onClickField={onClickField}
+                      editable={editable}
                     />
                   </div>
                 </div>
@@ -282,6 +289,7 @@ export function PropertyRenderer<S extends JsonShape<S>>({
                         metadata={effectiveMetadata}
                         validationErrors={validationErrors}
                         onClickField={onClickField}
+                        editable={editable}
                       />
                     </div>
                   </div>
@@ -310,6 +318,7 @@ export function PropertyRenderer<S extends JsonShape<S>>({
       expectedType={expectedType}
       required={isRequired}
       onClick={handleFieldClick}
+      editable={editable}
     />
   );
 }
