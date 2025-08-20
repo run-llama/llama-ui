@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, userEvent, waitFor, within, screen } from "@storybook/test";
 import { ExtractedDataDisplay } from "../../src/extracted-data";
-import { sampleData, sampleSchema, sampleFieldMetadata } from "./shared-data";
+import { sampleData, sampleFieldMetadata, sampleSchema } from "./shared-data";
 
 const meta: Meta<typeof ExtractedDataDisplay> = {
   title: "Components/ExtractedDataDisplay/Readonly",
@@ -32,4 +33,19 @@ function ReadonlyStoryComponent() {
 
 export const Readonly: Story = {
   render: () => <ReadonlyStoryComponent />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // Find clickable fields (they should be present but not open popovers)
+    const fields = canvas.getAllByTestId("editable-field-trigger");
+
+    for (const field of fields) {
+      await userEvent.click(field);
+
+      await waitFor(() => {
+        const popovers = screen.queryAllByTestId("editable-field-popover");
+        expect(popovers).toHaveLength(0);
+      });
+    }
+  },
 };

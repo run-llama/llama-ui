@@ -211,6 +211,7 @@ export function EditableField<S extends PrimitiveValue>({
           ref={containerRef}
           onClick={() => onClick?.({ value, metadata })}
           className={`cursor-pointer ${showBorder ? "min-h-8" : "w-full"} flex items-center ${defaultBorderClass} ${paddingClass} ${backgroundClass} ${hoverClass} ${className}`}
+          data-testid="editable-field-trigger"
         >
           <span className="text-sm accent-foreground truncate leading-tight block w-full">
             {displayValue}
@@ -219,7 +220,7 @@ export function EditableField<S extends PrimitiveValue>({
       </PopoverTrigger>
 
       <PopoverContent className="w-80" align="start">
-        <div className="space-y-3">
+        <div className="space-y-3" data-testid="editable-field-popover">
           <div className="flex items-center gap-2">
             <div className="text-sm font-medium text-gray-700">Edit Value</div>
           </div>
