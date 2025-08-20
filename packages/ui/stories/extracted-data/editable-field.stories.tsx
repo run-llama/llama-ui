@@ -70,6 +70,16 @@ export const Basic: Story = {
   },
 };
 
+export const Readonly: Story = {
+  args: {
+    value: "This is a readonly field",
+    editable: false,
+  },
+  render: function Render(args) {
+    return <EditableField {...args} value={args.value} onSave={() => {}} />;
+  },
+};
+
 export const LowConfidence: Story = {
   args: {
     value: "Low confidence value",

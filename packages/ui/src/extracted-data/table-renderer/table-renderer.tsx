@@ -55,6 +55,7 @@ export interface TableRendererProps<Row extends JsonObject> {
     metadata?: ExtractedFieldMetadata;
     path: string[];
   }) => void;
+  editable?: boolean;
 }
 
 export function TableRenderer<Row extends JsonObject>({
@@ -67,6 +68,7 @@ export function TableRenderer<Row extends JsonObject>({
   metadata,
   validationErrors = [],
   onClickField,
+  editable = true,
 }: TableRendererProps<Row>) {
   const effectiveMetadata: RendererMetadata = {
     schema: metadata?.schema ?? ({} as Record<string, FieldSchemaMetadata>),
@@ -396,6 +398,7 @@ export function TableRenderer<Row extends JsonObject>({
                           path: cellPath,
                         })
                       }
+                      editable={editable}
                     />
                   </TableCell>
                 );

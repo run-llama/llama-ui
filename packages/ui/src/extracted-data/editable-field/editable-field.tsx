@@ -29,7 +29,7 @@ interface EditableFieldProps<S extends PrimitiveValue> {
   isChanged?: boolean;
   showBorder?: boolean;
   className?: string;
-
+  editable?: boolean;
   // metadata and click callback
   metadata?: ExtractedFieldMetadata;
   onClick?: (args: { value: S; metadata?: ExtractedFieldMetadata }) => void;
@@ -45,6 +45,7 @@ export function EditableField<S extends PrimitiveValue>({
   className,
   metadata,
   onClick,
+  editable = true,
 }: EditableFieldProps<S>) {
   const confidenceThreshold = useUIConfigStore(
     (state) => state.confidenceThreshold
@@ -204,7 +205,7 @@ export function EditableField<S extends PrimitiveValue>({
   };
 
   return (
-    <Popover open={isOpen} onOpenChange={handleOpenChange}>
+    <Popover open={isOpen && editable} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <div
           ref={containerRef}

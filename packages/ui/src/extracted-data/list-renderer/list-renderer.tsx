@@ -29,6 +29,7 @@ interface ListRendererProps<S extends PrimitiveValue> {
     metadata?: ExtractedFieldMetadata;
     path: string[];
   }) => void;
+  editable?: boolean;
 }
 
 export function ListRenderer<S extends PrimitiveValue>({
@@ -40,6 +41,7 @@ export function ListRenderer<S extends PrimitiveValue>({
   keyPath = [],
   metadata,
   onClickField,
+  editable = true,
 }: ListRendererProps<S>) {
   const effectiveSchema: Record<string, FieldSchemaMetadata> =
     metadata?.schema ?? {};
@@ -144,6 +146,7 @@ export function ListRenderer<S extends PrimitiveValue>({
                       expectedType === PrimitiveType.BOOLEAN
                     }
                     onClick={handleItemFieldClick}
+                    editable={editable}
                   />
                 </TableCell>
                 {onDelete && (
