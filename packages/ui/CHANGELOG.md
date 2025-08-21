@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 0.5.4
+
+### Patch Changes
+
+- 6d2f609: show full field value on hover if not editable
+
 ## 0.5.3
 
 ### Patch Changes
