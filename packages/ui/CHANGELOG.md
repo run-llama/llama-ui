@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 0.5.5
+
+### Patch Changes
+
+- bf0cb7f: feat: enhance pdf-viewer behavior
+
 ## 0.5.4
 
 ### Patch Changes
