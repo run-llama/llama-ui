@@ -43,6 +43,7 @@ export const PdfPreviewImpl = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const pageRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
+  const isInitialScaleSet = useRef(false);
 
   const [pageBaseDims, setPageBaseDims] = useState<PageBaseDims>({}); // store page viewport to use for bounding box overlay
   const [showHighlight, setShowHighlight] = useState<boolean>(false); // whether to show the highlight
@@ -84,6 +85,18 @@ export const PdfPreviewImpl = ({
         height: viewport.height,
       },
     }));
+
+    // Auto-scale PDF to fit the container width at the initial load
+    if (
+      !isInitialScaleSet.current &&
+      page.pageNumber === 1 &&
+      containerRef.current
+    ) {
+      const containerWidth = containerRef.current.clientWidth;
+      const newScale = containerWidth / viewport.width;
+      setScale(newScale);
+      isInitialScaleSet.current = true; // prevent further auto-scaling
+    }
   };
 
   // click anywhere on the page to hide the highlight
@@ -161,6 +174,9 @@ export const PdfPreviewImpl = ({
 
   // Handle keyboard navigation
   useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "ArrowLeft") {
         event.preventDefault();
@@ -181,8 +197,14 @@ export const PdfPreviewImpl = ({
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    container.addEventListener("keydown", handleKeyDown);
+
+    // Make sure the container can actually receive keyboard focus
+    container.tabIndex = 0;
+
+    return () => {
+      container.removeEventListener("keydown", handleKeyDown);
+    };
   }, [currentPage, numPages]);
 
   const handleDownload = () => {
