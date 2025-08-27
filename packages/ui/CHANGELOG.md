@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 0.5.6
+
+### Patch Changes
+
+- 46bc176: Add warning for unsupported nested table/list
+
 ## 0.5.5
 
 ### Patch Changes
