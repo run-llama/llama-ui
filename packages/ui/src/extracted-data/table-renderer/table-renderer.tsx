@@ -56,8 +56,6 @@ export interface TableRendererProps<Row extends JsonObject> {
     path: string[];
   }) => void;
   editable?: boolean;
-  // When true, render in compact in-cell style (no outer borders/background)
-  inCell?: boolean;
 }
 
 export function TableRenderer<Row extends JsonObject>({
@@ -71,7 +69,6 @@ export function TableRenderer<Row extends JsonObject>({
   validationErrors = [],
   onClickField,
   editable = true,
-  inCell = false,
 }: TableRendererProps<Row>) {
   const effectiveMetadata: RendererMetadata = {
     schema: metadata?.schema ?? ({} as Record<string, FieldSchemaMetadata>),
@@ -341,7 +338,7 @@ export function TableRenderer<Row extends JsonObject>({
   };
 
   return (
-    <div className={inCell ? "" : "border border-b-0 rounded-md bg-white"}>
+    <div className="border border-b-0 rounded-md bg-white">
       <Table className="table-auto">
         <TableHeader>{generateHeaderRows()}</TableHeader>
         <TableBody>
