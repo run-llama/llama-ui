@@ -59,7 +59,15 @@ export function flattenObject(
         currentPath
       );
       columns.push(...nestedColumns);
-    } else if (value !== null && value !== undefined && !Array.isArray(value)) {
+    } else if (Array.isArray(value)) {
+      // Arrays are treated as leaf columns to allow nested renderers in table cells
+      columns.push({
+        key: currentPath.join("."),
+        header: formatFieldName(key),
+        path: currentPath,
+        isLeaf: true,
+      });
+    } else if (value !== null && value !== undefined) {
       // Leaf node - create column (only for non-null, non-undefined, non-array values)
       columns.push({
         key: currentPath.join("."),
