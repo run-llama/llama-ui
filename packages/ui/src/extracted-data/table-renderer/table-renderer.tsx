@@ -345,7 +345,9 @@ export function TableRenderer<Row extends JsonObject>({
           {data.map((item, rowIndex) => (
             <TableRow key={rowIndex} className="hover:bg-gray-50 border-0">
               {columns.map((column, colIndex) => {
-                const value = getValue(item, column) as PrimitiveValue | JsonValue;
+                const value = getValue(item, column) as
+                  | PrimitiveValue
+                  | JsonValue;
                 const cellPath = [...keyPath, String(rowIndex), ...column.path];
                 const isChanged = isTableCellChanged(
                   changedPaths,
