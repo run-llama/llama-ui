@@ -171,7 +171,7 @@ describe("TableRenderer Utilities", () => {
       expect(result.find((col) => col.key === "address.street")).toBeDefined();
     });
 
-    it("should skip arrays", () => {
+    it("should include arrays as leaf columns (primitives and objects)", () => {
       const obj = {
         name: "John",
         tags: ["tag1", "tag2"],
@@ -179,8 +179,26 @@ describe("TableRenderer Utilities", () => {
       };
       const result = flattenObject(obj);
 
-      expect(result).toHaveLength(1);
-      expect(result[0].key).toBe("name");
+      // name + tags + items
+      expect(result).toHaveLength(3);
+      expect(result.find((c) => c.key === "name")).toEqual({
+        key: "name",
+        header: "Name",
+        path: ["name"],
+        isLeaf: true,
+      });
+      expect(result.find((c) => c.key === "tags")).toEqual({
+        key: "tags",
+        header: "Tags",
+        path: ["tags"],
+        isLeaf: true,
+      });
+      expect(result.find((c) => c.key === "items")).toEqual({
+        key: "items",
+        header: "Items",
+        path: ["items"],
+        isLeaf: true,
+      });
     });
   });
 

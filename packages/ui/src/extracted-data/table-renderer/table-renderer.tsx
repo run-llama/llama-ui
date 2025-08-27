@@ -56,6 +56,8 @@ export interface TableRendererProps<Row extends JsonObject> {
     path: string[];
   }) => void;
   editable?: boolean;
+  // When true, render in compact in-cell style (no outer borders/background)
+  inCell?: boolean;
 }
 
 export function TableRenderer<Row extends JsonObject>({
@@ -69,6 +71,7 @@ export function TableRenderer<Row extends JsonObject>({
   validationErrors = [],
   onClickField,
   editable = true,
+  inCell = false,
 }: TableRendererProps<Row>) {
   const effectiveMetadata: RendererMetadata = {
     schema: metadata?.schema ?? ({} as Record<string, FieldSchemaMetadata>),
@@ -338,14 +341,14 @@ export function TableRenderer<Row extends JsonObject>({
   };
 
   return (
-    <div className="border border-b-0 rounded-md bg-white">
+    <div className={inCell ? "" : "border border-b-0 rounded-md bg-white"}>
       <Table className="table-auto">
         <TableHeader>{generateHeaderRows()}</TableHeader>
         <TableBody>
           {data.map((item, rowIndex) => (
             <TableRow key={rowIndex} className="hover:bg-gray-50 border-0">
               {columns.map((column, colIndex) => {
-                const value = getValue(item, column) as PrimitiveValue;
+                const value = getValue(item, column) as PrimitiveValue | JsonValue;
                 const cellPath = [...keyPath, String(rowIndex), ...column.path];
                 const isChanged = isTableCellChanged(
                   changedPaths,
@@ -354,6 +357,21 @@ export function TableRenderer<Row extends JsonObject>({
                   column.key
                 );
 
+                // If the value is an array, show a non-interactive warning placeholder
+                if (Array.isArray(value)) {
+                  return (
+                    <TableCell
+                      key={colIndex}
+                      className="p-0 border-r border-gray-100 min-w-[160px] max-w-[360px] align-top"
+                    >
+                      <div className="px-2 py-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-sm m-1">
+                        Nested list/table is not supported.
+                      </div>
+                    </TableCell>
+                  );
+                }
+
+                // Primitive or object leaf -> EditableField as before
                 // UNIFIED TABLE RENDERER FIELD TYPE LOOKUP
                 // ========================================
                 // Use normalized path lookup with "*" wildcard for all rows.
@@ -375,7 +393,7 @@ export function TableRenderer<Row extends JsonObject>({
                     className="p-0 border-r border-gray-100 min-w-[80px] max-w-[200px]"
                   >
                     <EditableField<PrimitiveValue>
-                      value={value}
+                      value={value as PrimitiveValue}
                       onSave={(newValue) =>
                         handleUpdate(
                           rowIndex,
