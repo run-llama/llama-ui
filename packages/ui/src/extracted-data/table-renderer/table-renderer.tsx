@@ -109,7 +109,7 @@ export function TableRenderer<Row extends JsonObject>({
             typeof value === "object" &&
             !Array.isArray(value)
           ) {
-            result[key] = fillEmptyValues(value);
+            result[key] = fillEmptyValues(value as JsonObject);
           } else {
             result[key] = "";
           }
