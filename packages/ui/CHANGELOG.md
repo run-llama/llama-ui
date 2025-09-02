@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 0.5.7
+
+### Patch Changes
+
+- 648bcf3: fix json value type issue
+
 ## 0.5.6
 
 ### Patch Changes
