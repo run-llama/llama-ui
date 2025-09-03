@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 0.5.8
+
+### Patch Changes
+
+- 79fa4f3: use shadcn tooltip to show hover titles for schema fields
+
 ## 0.5.7
 
 ### Patch Changes
