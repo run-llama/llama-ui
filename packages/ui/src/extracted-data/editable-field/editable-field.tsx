@@ -18,6 +18,7 @@ import {
 } from "@/base/select";
 import { PrimitiveValue } from "../types";
 import { useUIConfigStore } from "@/src/store/ui-config-store";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/base/tooltip";
 
 interface EditableFieldProps<S extends PrimitiveValue> {
   value: S;
@@ -204,15 +205,37 @@ export function EditableField<S extends PrimitiveValue>({
     }
   };
 
+  if (!editable) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div
+            ref={containerRef}
+            onClick={() => onClick?.({ value, metadata })}
+            className={`cursor-pointer ${showBorder ? "min-h-8" : "w-full"} flex items-center ${defaultBorderClass} ${paddingClass} ${backgroundClass} ${hoverClass} ${className}`}
+            data-testid="editable-field-trigger"
+          >
+            <span className="text-sm accent-foreground truncate leading-tight block w-full">
+              {displayValue}
+            </span>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{displayValue}</p>
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+
   return (
-    <Popover open={isOpen && editable} onOpenChange={handleOpenChange}>
+    <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <div
           ref={containerRef}
           onClick={() => onClick?.({ value, metadata })}
           className={`cursor-pointer ${showBorder ? "min-h-8" : "w-full"} flex items-center ${defaultBorderClass} ${paddingClass} ${backgroundClass} ${hoverClass} ${className}`}
           data-testid="editable-field-trigger"
-          title={editable ? undefined : displayValue} // Show full value on hover if not editable
+          title={displayValue}
         >
           <span className="text-sm accent-foreground truncate leading-tight block w-full">
             {displayValue}
