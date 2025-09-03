@@ -235,7 +235,6 @@ export function EditableField<S extends PrimitiveValue>({
           onClick={() => onClick?.({ value, metadata })}
           className={`cursor-pointer ${showBorder ? "min-h-8" : "w-full"} flex items-center ${defaultBorderClass} ${paddingClass} ${backgroundClass} ${hoverClass} ${className}`}
           data-testid="editable-field-trigger"
-          title={displayValue}
         >
           <span className="text-sm accent-foreground truncate leading-tight block w-full">
             {displayValue}
