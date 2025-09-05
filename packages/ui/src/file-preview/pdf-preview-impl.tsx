@@ -29,7 +29,11 @@ type PageBaseDims = {
 
 const pdfOptions = {
   cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+  wasmUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/wasm/`,
 };
+
+// show rendering progress bar for files larger than this
+const FILE_SIZE_THRESHOLD = 10 * 1024 * 1024; // 10MB
 
 export const PdfPreviewImpl = ({
   url,
@@ -41,6 +45,8 @@ export const PdfPreviewImpl = ({
   const [scale, setScale] = useState<number>(1.0);
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [renderedPages, setRenderedPages] = useState<number>(0);
+  const [isRendering, setIsRendering] = useState<boolean>(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const pageRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const isInitialScaleSet = useRef(false);
@@ -62,6 +68,18 @@ export const PdfPreviewImpl = ({
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }): void {
     setNumPages(numPages);
+    setRenderedPages(0);
+    setIsRendering(true);
+  }
+
+  function handlePageRenderSuccess() {
+    setRenderedPages((prev) => {
+      const next = prev + 1;
+      if (next === numPages) {
+        setIsRendering(false); // all pages finished
+      }
+      return next;
+    });
   }
 
   // when highlight is set, go to the page and show the highlight
@@ -252,11 +270,19 @@ export const PdfPreviewImpl = ({
 
   return (
     <div className="relative h-full">
+      {/* Only show rendering progress bar for large files */}
+      {isRendering && file && file.size > FILE_SIZE_THRESHOLD && (
+        <PdfRenderingProgress
+          renderedPages={renderedPages}
+          numPages={numPages}
+        />
+      )}
+
       <div ref={containerRef} className="overflow-auto h-full">
         <Document
           file={file}
           onLoadSuccess={onDocumentLoadSuccess}
-          loading={isLoading}
+          loading=""
           options={pdfOptions}
         >
           {Array.from(new Array(numPages), (_, index) => (
@@ -275,6 +301,7 @@ export const PdfPreviewImpl = ({
                   renderAnnotationLayer={true}
                   onLoadSuccess={handleLoadPage}
                   onClick={handleClickOnPage}
+                  onRenderSuccess={handlePageRenderSuccess}
                 />
                 {highlight &&
                   showHighlight &&
@@ -308,3 +335,45 @@ export const PdfPreviewImpl = ({
     </div>
   );
 };
+
+function PdfRenderingProgress({
+  renderedPages,
+  numPages,
+}: {
+  renderedPages: number;
+  numPages: number | undefined;
+}) {
+  return (
+    <div className="absolute inset-0 flex items-center justify-center bg-gray-50 bg-opacity-90 z-50">
+      <div className="bg-white shadow-lg rounded-2xl p-6 w-80 text-center">
+        <div className="flex justify-center mb-4">
+          <div className="animate-spin rounded-full h-10 w-10 border-4 border-primary border-t-transparent"></div>
+        </div>
+
+        <h2 className="text-lg font-semibold text-gray-800 mb-2">
+          Rendering PDF…
+        </h2>
+
+        <p className="text-sm text-gray-600 mb-3">
+          Page {renderedPages} of {numPages}
+        </p>
+
+        <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+          <div
+            className="bg-primary h-2.5 rounded-full transition-all duration-300"
+            style={{
+              width:
+                numPages && numPages > 0
+                  ? `${Math.round((renderedPages / numPages) * 100)}%`
+                  : "0%",
+            }}
+          />
+        </div>
+
+        <p className="text-xs text-gray-500">
+          Large PDFs or those with heavy images may take longer to render.
+        </p>
+      </div>
+    </div>
+  );
+}

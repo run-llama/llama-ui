@@ -468,3 +468,53 @@ export const HighlightInteractiveTests: Story = {
     );
   },
 };
+
+export const UploadAndPreview: Story = {
+  render: () => <UploadAndPreviewExample />,
+};
+
+// We can use these files for testing:
+// https://issuu.com/pamperedchef/docs/pamperedchef-ss25-us-catalog
+function UploadAndPreviewExample() {
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type === "application/pdf") {
+      const url = URL.createObjectURL(file);
+      setPdfUrl(url);
+    }
+  };
+
+  return (
+    <div className="h-screen flex flex-col">
+      {/* Upload Section */}
+      <div className="p-4 border-b bg-gray-50">
+        <h2 className="text-lg font-semibold mb-2">PDF Upload & Preview</h2>
+        <input
+          type="file"
+          accept=".pdf,application/pdf"
+          onChange={handleFileChange}
+          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+        />
+      </div>
+
+      {/* PDF Preview Section */}
+      <div className="flex-1 min-h-0">
+        {pdfUrl ? (
+          <div className="h-full min-h-0">
+            <PdfPreview url={pdfUrl} />
+          </div>
+        ) : (
+          <div className="flex items-center justify-center h-full text-gray-500">
+            <div className="text-center">
+              <div className="text-4xl mb-2">📄</div>
+              <div>No PDF selected</div>
+              <div className="text-sm">Choose a PDF file to preview</div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
