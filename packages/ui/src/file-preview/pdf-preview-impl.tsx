@@ -282,7 +282,7 @@ export const PdfPreviewImpl = ({
         <Document
           file={file}
           onLoadSuccess={onDocumentLoadSuccess}
-          loading=""
+          loading={isLoading}
           options={pdfOptions}
         >
           {Array.from(new Array(numPages), (_, index) => (
