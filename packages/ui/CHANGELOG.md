@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 0.5.9
+
+### Patch Changes
+
+- f6ce884: feat: support display large pdf file with images
+
 ## 0.5.8
 
 ### Patch Changes
