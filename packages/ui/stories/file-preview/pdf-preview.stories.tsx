@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
-import { expect, within, userEvent } from "@storybook/test";
+import { expect, within, userEvent, waitFor } from "@storybook/test";
 import { PdfPreview } from "../../src/file-preview/pdf-preview";
 
 const meta: Meta<typeof PdfPreview> = {
@@ -468,3 +468,89 @@ export const HighlightInteractiveTests: Story = {
     );
   },
 };
+
+export const UploadAndPreview: Story = {
+  render: () => <UploadAndPreviewExample />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // Load the local PDF file from Storybook static directory
+    const response = await fetch("/large-pdf-file.pdf");
+    const pdfBlob = await response.blob();
+    const mockFile = new File([pdfBlob], "large-pdf-file.pdf", {
+      type: "application/pdf",
+    });
+
+    // Simulate file upload
+    const fileInputElement = canvas.getByTestId(
+      "pdf-file-input"
+    ) as HTMLInputElement;
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(mockFile);
+    fileInputElement.files = dataTransfer.files;
+    const changeEvent = new Event("change", { bubbles: true });
+    fileInputElement.dispatchEvent(changeEvent);
+
+    // Verify PDF preview container is present
+    const pdfContainer = canvas.getByTestId("pdf-preview-container");
+
+    // Check pdf container is present
+    expect(pdfContainer).toBeInTheDocument();
+
+    // Check showing rendering progress bar
+    await waitFor(() => {
+      const loadingText = canvas.getByText("Rendering PDF…");
+      expect(loadingText).toBeInTheDocument();
+    });
+  },
+};
+
+// We can use these files for testing:
+// https://issuu.com/pamperedchef/docs/pamperedchef-ss25-us-catalog
+function UploadAndPreviewExample() {
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type === "application/pdf") {
+      const url = URL.createObjectURL(file);
+      setPdfUrl(url);
+    }
+  };
+
+  return (
+    <div className="h-screen flex flex-col">
+      {/* Upload Section */}
+      <div className="p-4 border-b bg-gray-50">
+        <h2 className="text-lg font-semibold mb-2">PDF Upload & Preview</h2>
+        <input
+          type="file"
+          accept=".pdf,application/pdf"
+          onChange={handleFileChange}
+          data-testid="pdf-file-input"
+          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+        />
+      </div>
+
+      {/* PDF Preview Section */}
+      <div className="flex-1 min-h-0" data-testid="pdf-preview-container">
+        {pdfUrl ? (
+          <div className="h-full min-h-0" data-testid="pdf-preview">
+            <PdfPreview url={pdfUrl} />
+          </div>
+        ) : (
+          <div
+            className="flex items-center justify-center h-full text-gray-500"
+            data-testid="no-pdf-selected"
+          >
+            <div className="text-center">
+              <div className="text-4xl mb-2">📄</div>
+              <div>No PDF selected</div>
+              <div className="text-sm">Choose a PDF file to preview</div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
