@@ -8,6 +8,8 @@
 
 // Re-export everything from generated code
 export * from './generated';
+export { createClient, createConfig } from './generated/client';
+export { client } from './generated/client.gen';
 
 // Export version from package.json
 export { version as VERSION } from '../package.json';
