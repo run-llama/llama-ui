@@ -78,10 +78,10 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: update workflows SDK to v${{ env.VERSION }}"
-          title: "chore: update workflows SDK to v${{ env.VERSION }}"
+          commit-message: "chore: update workflows SDK"
+          title: "chore: update workflows SDK"
           body: |
-            Updates the workflows SDK to version `${{ env.VERSION }}`.
+            Updates the workflows SDK`.
             
             - Updated OpenAPI spec from workflows-py v${{ env.VERSION }}
             - Regenerated TypeScript client
@@ -92,3 +92,6 @@ jobs:
           labels: |
             dependencies
             automated
+          reviewers: |
+            zhaotai
+            adrianlyjak
