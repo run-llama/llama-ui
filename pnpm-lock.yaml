@@ -72,9 +72,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.1.1
         version: 5.1.1(react-hook-form@7.60.0(react@18.3.1))
-      '@llamaindex/llama-deploy':
-        specifier: 0.0.2
-        version: 0.0.2
+      '@llamaindex/workflows-client':
+        specifier: 1.0.1
+        version: 1.0.1
       '@radix-ui/react-accordion':
         specifier: ^1.2.11
         version: 1.2.11(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1012,9 +1012,6 @@ packages:
       gpt-tokenizer:
         optional: true
 
-  '@llamaindex/llama-deploy@0.0.2':
-    resolution: {integrity: sha512-Vh41PKVtgaNtiyXKwQEDteS4S7Bt0mS8a44OmqRE8bIGeBwQ3GRZExMXTeERuJH4va6UO/2KzHU6u6m6kSeAvg==}
-
   '@llamaindex/workflow-core@0.4.6':
     resolution: {integrity: sha512-SsEgLVR5EfaBcogW1AAy3VJRdPRXo2tYsqQvNWCQF8dS7Uw199MmFyQKzrpeiMBnYPYg8lmLE7HxpStwwdJ3Ng==}
     peerDependencies:
@@ -1037,6 +1034,10 @@ packages:
         optional: true
       zod:
         optional: true
+
+  '@llamaindex/workflows-client@1.0.1':
+    resolution: {integrity: sha512-OoeiG3XXUGnLNw1UQjRwegP74A7c4D6IMsfq4yTed6jvOWY9PsOT4cd4VwRuBPwXanp1etoqhpA3djzaZwFb3A==}
+    engines: {node: '>=18.0.0'}
 
   '@manypkg/find-root@1.1.0':
     resolution: {integrity: sha512-mki5uBvhHzO8kYYix/WRy2WX8S3B5wdVSc9D6KcU5lQNglP2yt58/VfLuAK49glRXChosY8ap2oJ1qgma3GUVA==}
@@ -5983,14 +5984,14 @@ snapshots:
       js-tiktoken: 1.0.21
       pathe: 1.1.2
 
-  '@llamaindex/llama-deploy@0.0.2': {}
-
   '@llamaindex/workflow-core@0.4.6(next@15.4.1(@babel/core@7.28.0)(@playwright/test@1.54.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(p-retry@6.2.1)(rxjs@7.8.2)(zod@3.25.76)':
     optionalDependencies:
       next: 15.4.1(@babel/core@7.28.0)(@playwright/test@1.54.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       p-retry: 6.2.1
       rxjs: 7.8.2
       zod: 3.25.76
+
+  '@llamaindex/workflows-client@1.0.1': {}
 
   '@manypkg/find-root@1.1.0':
     dependencies:
