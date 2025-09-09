@@ -1,5 +1,11 @@
 # @llamaindex/workflows-client
 
+## 1.0.3
+
+### Patch Changes
+
+- 1587aff: export type Client
+
 ## 1.0.2
 
 ### Patch Changes
