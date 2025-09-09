@@ -95,7 +95,7 @@ export function useLlamaDeployClient(): LlamaDeployClient {
 
   if (!clients.llamaDeployClient) {
     throw new Error(
-      "No workflows client configured. " +
+      "No llama-deploy client configured. " +
         "Please ensure llamaDeployClient is configured in ApiProvider."
     );
   }
