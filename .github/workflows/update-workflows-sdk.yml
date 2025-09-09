@@ -1,0 +1,94 @@
+name: Update Workflows SDK
+
+on:
+  repository_dispatch:
+    types: [workflows-sdk-update]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g., 0.1.0)'
+        required: true
+        type: string
+      openapi_url:
+        description: 'OpenAPI spec URL'
+        required: true
+        type: string
+      change_type:
+        description: 'Change type for changeset'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: minor
+      change_description:
+        description: 'Change description for changeset'
+        required: false
+        type: string
+        default: 'Update workflows SDK'
+
+jobs:
+  update-sdk:
+    name: Update Workflows SDK
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ github.event.client_payload.version || github.event.inputs.version }}
+      OPENAPI_URL: ${{ github.event.client_payload.openapi_url || github.event.inputs.openapi_url }}
+      CHANGE_TYPE: ${{ github.event.client_payload.change_type || github.event.inputs.change_type }}
+      CHANGE_DESCRIPTION: ${{ github.event.client_payload.change_description || github.event.inputs.change_description }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download OpenAPI spec and generate SDK
+        run: |
+          echo "Downloading OpenAPI spec from: ${{ env.OPENAPI_URL }}"
+          curl -L -o packages/workflows-client/openapi.json "${{ env.OPENAPI_URL }}"
+          
+          cd packages/workflows-client
+          pnpm run generate
+          pnpm run build
+
+      - name: Create changeset
+        run: |
+          cat > .changeset/update-workflows-sdk.md << EOF
+          ---
+          "@llamaindex/workflows-client": ${{ env.CHANGE_TYPE }}
+          ---
+          
+          ${{ env.CHANGE_DESCRIPTION }}
+          EOF
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update workflows SDK to v${{ env.VERSION }}"
+          title: "chore: update workflows SDK to v${{ env.VERSION }}"
+          body: |
+            Updates the workflows SDK to version `${{ env.VERSION }}`.
+            
+            - Updated OpenAPI spec from workflows-py v${{ env.VERSION }}
+            - Regenerated TypeScript client
+            
+            The changeset will handle versioning and publishing when merged.
+          branch: update-workflows-sdk-${{ env.VERSION }}
+          delete-branch: true
+          labels: |
+            dependencies
+            automated
