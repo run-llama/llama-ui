@@ -204,6 +204,53 @@ export type GetEventsByHandlerIdResponses = {
 
 export type GetEventsByHandlerIdResponse = GetEventsByHandlerIdResponses[keyof GetEventsByHandlerIdResponses];
 
+export type PostEventsByHandlerIdData = {
+    body: {
+        /**
+         * Serialized event in JSON format.
+         */
+        event: string;
+        /**
+         * Optional target step name. If not provided, event is sent to all steps.
+         */
+        step?: string;
+    };
+    path: {
+        /**
+         * Workflow handler identifier.
+         */
+        handler_id: string;
+    };
+    query?: never;
+    url: '/events/{handler_id}';
+};
+
+export type PostEventsByHandlerIdErrors = {
+    /**
+     * Invalid event data
+     */
+    400: unknown;
+    /**
+     * Handler not found
+     */
+    404: unknown;
+    /**
+     * Workflow already completed
+     */
+    409: unknown;
+};
+
+export type PostEventsByHandlerIdResponses = {
+    /**
+     * Event sent successfully
+     */
+    200: {
+        status: 'sent';
+    };
+};
+
+export type PostEventsByHandlerIdResponse = PostEventsByHandlerIdResponses[keyof PostEventsByHandlerIdResponses];
+
 export type GetHealthData = {
     body?: never;
     path?: never;
@@ -221,6 +268,33 @@ export type GetHealthResponses = {
 };
 
 export type GetHealthResponse = GetHealthResponses[keyof GetHealthResponses];
+
+export type GetHandlersData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/handlers';
+};
+
+export type GetHandlersResponses = {
+    /**
+     * List of handlers
+     */
+    200: {
+        handlers: Array<{
+            handler_id?: string;
+            result?: {
+                [key: string]: unknown;
+            };
+            error?: {
+                [key: string]: unknown;
+            };
+            status?: 'running' | 'completed' | 'failed';
+        }>;
+    };
+};
+
+export type GetHandlersResponse = GetHandlersResponses[keyof GetHandlersResponses];
 
 export type ClientOptions = {
     baseUrl: `${string}://${string}` | (string & {});
