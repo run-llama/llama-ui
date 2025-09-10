@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Workflows API",
-    "version": "2.0.1"
+    "version": "2.1.0"
   },
   "paths": {
     "/workflows": {
@@ -278,6 +278,76 @@
             "description": "Handler not found"
           }
         }
+      },
+      "post": {
+        "summary": "Send event to workflow",
+        "description": "Sends an event to a running workflow's context.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "handler_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Workflow handler identifier."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "event": {
+                    "type": "string",
+                    "description": "Serialized event in JSON format."
+                  },
+                  "step": {
+                    "type": "string",
+                    "description": "Optional target step name. If not provided, event is sent to all steps."
+                  }
+                },
+                "required": [
+                  "event"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "sent"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid event data"
+          },
+          "404": {
+            "description": "Handler not found"
+          },
+          "409": {
+            "description": "Workflow already completed"
+          }
+        }
       }
     },
     "/health": {
@@ -299,6 +369,54 @@
                   },
                   "required": [
                     "status"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/handlers": {
+      "get": {
+        "summary": "Get handlers",
+        "description": "Returns all workflow handlers.",
+        "responses": {
+          "200": {
+            "description": "List of handlers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "handlers": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "handler_id": {
+                            "type": "string"
+                          },
+                          "result": {
+                            "type": "object"
+                          },
+                          "error": {
+                            "type": "object"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "running",
+                              "completed",
+                              "failed"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "handlers"
                   ]
                 }
               }
