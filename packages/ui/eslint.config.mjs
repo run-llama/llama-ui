@@ -7,10 +7,7 @@ const rules = {
   ...reactHooks.configs.recommended.rules,
 
   // TypeScript
-  "@typescript-eslint/no-unused-vars": [
-    "error",
-    { argsIgnorePattern: "^_" },
-  ],
+  "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
   "@typescript-eslint/no-explicit-any": "warn",
 
   // React
@@ -23,7 +20,7 @@ const rules = {
 };
 
 const plugins = {
-  '@typescript-eslint': tseslint.plugin,
+  "@typescript-eslint": tseslint.plugin,
   react,
   "react-hooks": reactHooks,
 };
@@ -36,27 +33,21 @@ const languageOptions = {
     sourceType: "module",
     projectService: true,
   },
-}
+};
 
 const settings = {
   react: {
     version: "detect",
   },
-}
+};
 
 export default [
   ...tseslint.configs.recommended.map((c) => ({
     ...c,
-    files: [
-      "src/**/*.{ts,tsx}",
-      "lib/**/*.{ts,tsx}",
-      "base/**/*.{ts,tsx}",
-    ],
+    files: ["src/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}", "base/**/*.{ts,tsx}"],
   })),
   {
-    files: [
-      "stories/**/*.{ts,tsx}"
-    ],
+    files: ["stories/**/*.{ts,tsx}"],
     plugins,
     languageOptions,
     rules: {
@@ -66,11 +57,7 @@ export default [
     settings,
   },
   {
-    files: [
-      "src/**/*.{ts,tsx}",
-      "lib/**/*.{ts,tsx}",
-      "base/**/*.{ts,tsx}",
-    ],
+    files: ["src/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}", "base/**/*.{ts,tsx}"],
     languageOptions,
     plugins,
     rules,

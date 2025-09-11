@@ -12,7 +12,11 @@ import {
   getRunningHandlers,
 } from "../../../src/workflow-task/store/helper";
 import { workflowStreamingManager } from "../../../src/lib/shared-streaming";
-import { createClient, createConfig, type Client } from "@llamaindex/workflows-client";
+import {
+  createClient,
+  createConfig,
+  type Client,
+} from "@llamaindex/workflows-client";
 import type {
   WorkflowHandlerSummary,
   WorkflowEvent,
@@ -62,7 +66,9 @@ describe("Complete Task Store Tests", () => {
 
   // Real client instance (no network since APIs are mocked in tests)
   const mockClient: Client = createClient(
-    createConfig({ baseUrl: "http://localhost:8000" as unknown as `${string}://${string}` })
+    createConfig({
+      baseUrl: "http://localhost:8000" as unknown as `${string}://${string}`,
+    })
   );
   let testStore: ReturnType<typeof createTaskStore>;
 
@@ -108,9 +114,7 @@ describe("Complete Task Store Tests", () => {
     });
 
     it("should call createTaskAPI with correct parameters", async () => {
-      await testStore
-        .getState()
-        .createTask("test-workflow", "test input");
+      await testStore.getState().createTask("test-workflow", "test input");
 
       expect(createTaskAPI).toHaveBeenCalledWith({
         client: mockClient,
@@ -209,9 +213,7 @@ describe("Complete Task Store Tests", () => {
       const closeStream = workflowStreamingManager.closeStream;
       testStore.getState().unsubscribe("task-123");
 
-      expect(closeStream).toHaveBeenCalledWith(
-        "handler:task-123"
-      );
+      expect(closeStream).toHaveBeenCalledWith("handler:task-123");
     });
   });
 
@@ -230,9 +232,7 @@ describe("Complete Task Store Tests", () => {
 
       expect(result).toBe(true);
       const isActiveMethod = workflowStreamingManager.isStreamActive;
-      expect(isActiveMethod).toHaveBeenCalledWith(
-        "handler:task-123"
-      );
+      expect(isActiveMethod).toHaveBeenCalledWith("handler:task-123");
     });
 
     it("should return false for non-existent task", () => {
@@ -307,9 +307,7 @@ describe("Complete Task Store Tests", () => {
       (getRunningHandlers as any).mockRejectedValue(new Error("Server error"));
 
       // Should not throw
-      await expect(
-        testStore.getState().sync()
-      ).resolves.toBeUndefined();
+      await expect(testStore.getState().sync()).resolves.toBeUndefined();
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         "Failed to sync with server:",

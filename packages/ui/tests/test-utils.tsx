@@ -14,9 +14,7 @@ export function renderHookWithProvider<T>(
   }
 ): ReturnType<typeof renderHook<T, any>> {
   const wrapper = ({ children }: { children: ReactNode }) => (
-    <ApiProvider
-      clients={options?.apiClients || createMockClients()}
-    >
+    <ApiProvider clients={options?.apiClients || createMockClients()}>
       {children}
     </ApiProvider>
   );

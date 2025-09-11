@@ -11,9 +11,7 @@ import {
   sendEventToHandler,
 } from "../../../src/workflow-task/store/helper";
 import { workflowStreamingManager } from "../../../src/lib/shared-streaming";
-import type {
-  WorkflowEvent,
-} from "../../../src/workflow-task/types";
+import type { WorkflowEvent } from "../../../src/workflow-task/types";
 
 // Mock dependencies
 vi.mock("@llamaindex/workflows-client");
@@ -218,14 +216,14 @@ describe("Helper Functions Tests", () => {
         data: undefined,
         response: {
           ok: true,
-          body: { 
+          body: {
             getReader: () => ({
               read: async () => {
                 // Simulate reading being interrupted by abort
                 throw new Error("Stream aborted");
               },
               releaseLock: vi.fn(),
-            })
+            }),
           },
         },
       } as any);
@@ -237,7 +235,10 @@ describe("Helper Functions Tests", () => {
           executor: any,
           signal?: AbortSignal
         ) => {
-          const promise = executor(subscriber, signal ?? new AbortController().signal);
+          const promise = executor(
+            subscriber,
+            signal ?? new AbortController().signal
+          );
           return { promise, unsubscribe: vi.fn() } as any;
         }
       );

@@ -115,7 +115,6 @@ export async function fetchHandlerEvents<E extends WorkflowEvent>(
     let retryParsedLines: string[] = [];
 
     try {
-       
       while (true) {
         if (signal.aborted) {
           throw new Error("Stream aborted");

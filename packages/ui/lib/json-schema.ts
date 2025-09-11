@@ -1,7 +1,9 @@
 import { z } from "zod/v4";
 import { JSONSchema } from "zod/v4/core";
 
-export interface JsonSchemaReformatOptions<T extends object = Record<string, never>> {
+export interface JsonSchemaReformatOptions<
+  T extends object = Record<string, never>,
+> {
   selectFields?: (keyof T)[];
   firstFields?: (keyof T)[];
   lastFields?: (keyof T)[];
@@ -194,7 +196,13 @@ export function isObjectSchema(
 export function derefLocalRefs<T extends JSONSchema.BaseSchema>(schema: T): T {
   const root = schema;
   // Use a JSON-like structural type to avoid `any`
-  type JsonValue = string | number | boolean | null | { [key: string]: JsonValue } | JsonValue[];
+  type JsonValue =
+    | string
+    | number
+    | boolean
+    | null
+    | { [key: string]: JsonValue }
+    | JsonValue[];
   const cache = new Map<object, JsonValue>(); // handle cycles
 
   function cloneAndDeref(node: JsonValue, trail: string[] = []): JsonValue {
@@ -212,14 +220,20 @@ export function derefLocalRefs<T extends JSONSchema.BaseSchema>(schema: T): T {
           const rest: { [key: string]: JsonValue } = { ...obj };
           delete rest["$ref"];
           const expanded = cloneAndDeref(target, trail.concat([refValue]));
-          return cloneAndDeref({ ...(expanded as object), ...rest } as JsonValue, trail);
+          return cloneAndDeref(
+            { ...(expanded as object), ...rest } as JsonValue,
+            trail
+          );
         }
       }
 
       const out: JsonValue = Array.isArray(node) ? [] : {};
       cache.set(key, out);
       for (const [k, v] of Object.entries(node)) {
-        (out as { [key: string]: JsonValue })[k] = cloneAndDeref(v as JsonValue, trail.concat([k]));
+        (out as { [key: string]: JsonValue })[k] = cloneAndDeref(
+          v as JsonValue,
+          trail.concat([k])
+        );
       }
       return out;
     }
@@ -257,4 +271,3 @@ function resolvePointer(obj: unknown, pointer: string) {
 function unescapeToken(t: string) {
   return t.replace(/~1/g, "/").replace(/~0/g, "~");
 }
-

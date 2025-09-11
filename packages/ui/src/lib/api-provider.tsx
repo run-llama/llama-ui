@@ -3,12 +3,7 @@
  * Manages pre-created API clients for different services
  */
 
-import {
-  createContext,
-  useContext,
-  useMemo,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useMemo, type ReactNode } from "react";
 import {
   CloudAgentClient,
   cloudApiClient,
@@ -39,10 +34,7 @@ const ApiContext = createContext<ApiContextValue | null>(null);
 
 // ===== Provider =====
 
-export function ApiProvider({
-  children,
-  clients
-}: ApiProviderProps) {
+export function ApiProvider({ children, clients }: ApiProviderProps) {
   const contextValue = useMemo(
     () => ({
       clients,
@@ -128,4 +120,3 @@ export function useApiClients(): ApiClients {
   const { clients } = useApiContext();
   return clients;
 }
-
