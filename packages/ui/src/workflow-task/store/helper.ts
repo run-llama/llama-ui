@@ -115,7 +115,7 @@ export async function fetchHandlerEvents<E extends WorkflowEvent>(
     let retryParsedLines: string[] = [];
 
     try {
-      // eslint-disable-next-line no-constant-condition -- needed
+       
       while (true) {
         if (signal.aborted) {
           throw new Error("Stream aborted");
@@ -129,10 +129,6 @@ export async function fetchHandlerEvents<E extends WorkflowEvent>(
         if (retryParsedLines.length > 0) {
           // if there are lines that failed to parse, append them to the current chunk
           chunk = `${retryParsedLines.join("")}${chunk}`;
-          console.info("Retry parsing with chunk:", {
-            retryParsedLines,
-            chunk,
-          });
           retryParsedLines = []; // reset for next iteration
         }
 
@@ -212,7 +208,6 @@ function toWorkflowEvents<E extends WorkflowEvent>(
   failedLines: string[];
 } {
   if (typeof chunk !== "string") {
-    console.warn("Skipping non-string chunk:", chunk);
     return { events: [], failedLines: [] };
   }
 
@@ -251,15 +246,15 @@ function parseChunkLine<E extends WorkflowEvent>(
   try {
     const event = JSON.parse(line) as RawEvent;
     if (!isRawEvent(event)) {
-      console.warn("Skipping invalid raw event:", event);
       return null;
     }
     return {
       line,
       event: { type: event.qualified_name, data: event.value } as E,
     };
-  } catch (error) {
-    console.warn(`Failed to parse chunk in line: ${line}`, error);
+  } catch (error: unknown) {
+    // eslint-disable-next-line no-console -- needed
+    console.error(`Failed to parse chunk in line: ${line}`, error);
     return {
       line,
       event: null,
@@ -275,7 +270,7 @@ function toRawEvent(event: WorkflowEvent): RawEvent {
   };
 }
 
-function isRawEvent(event: any): event is RawEvent {
+function isRawEvent(event: object): event is RawEvent {
   return (
     event &&
     typeof event === "object" &&

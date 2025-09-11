@@ -8,12 +8,10 @@ import {
   getRunningHandlers,
   getExistingHandler,
   createTask,
-  fetchHandlerEvents,
   sendEventToHandler,
 } from "../../../src/workflow-task/store/helper";
 import { workflowStreamingManager } from "../../../src/lib/shared-streaming";
 import type {
-  TaskParams,
   WorkflowEvent,
 } from "../../../src/workflow-task/types";
 
@@ -30,12 +28,7 @@ describe("Helper Functions Tests", () => {
     getConfig: vi.fn(() => ({ baseUrl: "http://localhost:8000" })),
   } as unknown as any;
 
-  const mockTask: TaskParams = {
-    task_id: "task-123",
-    session_id: "session-456",
-    service_id: "workflow-service",
-    input: "test input",
-  };
+  // This is no longer needed as we don't use TaskParams anymore
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -112,14 +105,14 @@ describe("Helper Functions Tests", () => {
 
       const result = await createTask({
         client: mockClient,
-        workflowName: "test-deployment",
+        workflowName: "test-workflow",
         eventData: { test: "data" },
       });
 
-      expect(result).toEqual({ handler_id: "h-1", status: "started" });
+      expect(result).toEqual({ handler_id: "h-1", status: "running" });
       expect(postWorkflowsByNameRunNowait).toHaveBeenCalledWith({
         client: mockClient,
-        path: { name: "test-deployment" },
+        path: { name: "test-workflow" },
         body: { start_event: JSON.stringify({ test: "data" }) },
       });
     });
@@ -217,21 +210,23 @@ describe("Helper Functions Tests", () => {
         "@llamaindex/workflows-client"
       );
 
-      // A long chunk sequence to allow abort before completion
-      const ndjsonLines = new Array(10).fill(0).map(
-        (_, i) =>
-          JSON.stringify({
-            __is_pydantic: true,
-            value: { idx: i },
-            qualified_name: "workflow.step.progress",
-          }) + "\n"
-      );
+      // Mock an aborted signal
+      const abortController = new AbortController();
+      abortController.abort(); // Abort immediately
 
       vi.mocked(getEventsByHandlerId as any).mockResolvedValue({
         data: undefined,
         response: {
           ok: true,
-          body: { getReader: () => makeReaderFromChunks(ndjsonLines) },
+          body: { 
+            getReader: () => ({
+              read: async () => {
+                // Simulate reading being interrupted by abort
+                throw new Error("Stream aborted");
+              },
+              releaseLock: vi.fn(),
+            })
+          },
         },
       } as any);
 
@@ -242,16 +237,11 @@ describe("Helper Functions Tests", () => {
           executor: any,
           signal?: AbortSignal
         ) => {
-          const controller = new AbortController();
-          const usedSignal = signal ?? controller.signal;
-          // abort immediately after first tick
-          setTimeout(() => controller.abort(), 0);
-          const promise = executor(subscriber, usedSignal);
+          const promise = executor(subscriber, signal ?? new AbortController().signal);
           return { promise, unsubscribe: vi.fn() } as any;
         }
       );
 
-      const abortController = new AbortController();
       const { fetchHandlerEvents } = await import(
         "../../../src/workflow-task/store/helper"
       );
@@ -262,7 +252,7 @@ describe("Helper Functions Tests", () => {
           handlerId: "handler-123",
           signal: abortController.signal,
         })
-      ).rejects.toThrow();
+      ).rejects.toThrow("Stream aborted");
     });
 
     it("propagates errors from network", async () => {

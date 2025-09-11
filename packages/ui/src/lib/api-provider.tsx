@@ -3,7 +3,7 @@
  * Manages pre-created API clients for different services
  */
 
-import React, {
+import {
   createContext,
   useContext,
   useMemo,
@@ -27,12 +27,10 @@ export interface ApiClients {
 export interface ApiProviderProps {
   children: ReactNode;
   clients: ApiClients;
-  deployment: string;
 }
 
 interface ApiContextValue {
   clients: ApiClients;
-  deployment: string;
 }
 
 // ===== Context =====
@@ -43,15 +41,13 @@ const ApiContext = createContext<ApiContextValue | null>(null);
 
 export function ApiProvider({
   children,
-  clients,
-  deployment,
+  clients
 }: ApiProviderProps) {
   const contextValue = useMemo(
     () => ({
       clients,
-      deployment,
     }),
-    [clients, deployment]
+    [clients]
   );
 
   return (
@@ -133,7 +129,3 @@ export function useApiClients(): ApiClients {
   return clients;
 }
 
-export function useDeployment(): string {
-  const { deployment } = useApiContext();
-  return deployment;
-}

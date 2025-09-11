@@ -8,17 +8,16 @@ import { useTaskStore } from "./use-task-store";
 import type { WorkflowProgressState, RunStatus } from "../types";
 
 export function useWorkflowProgress(): WorkflowProgressState {
-  // Get deployment from context and store methods
   const store = useTaskStore();
   const tasks = store.tasks;
   const sync = store.sync;
 
-  // Sync with server on mount and when deployment changes
   useEffect(() => {
     async function syncWithServer() {
       try {
         await sync();
       } catch (error) {
+        // eslint-disable-next-line no-console -- needed
         console.error("Failed to sync with server for progress:", error);
       }
     }

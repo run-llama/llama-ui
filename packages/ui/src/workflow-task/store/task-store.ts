@@ -58,41 +58,37 @@ export const createTaskStore = (client: Client) =>
       }),
 
     createTask: async (workflowName: string, input: JSONValue) => {
+      // Call API to create task
+      const workflowHandler = await createTaskAPI({
+        client,
+        eventData: input,
+        workflowName,
+      });
+
+      const task: WorkflowHandlerSummary = {
+        handler_id: workflowHandler.handler_id ?? "",
+        status: "running",
+      };
+
+      // Internal method to set task
+      set((state) => ({
+        tasks: { ...state.tasks, [task.handler_id]: task },
+        events: { ...state.events, [task.handler_id]: [] },
+      }));
+
+      // Automatically subscribe to task events after creation
       try {
-        // Call API to create task
-        const workflowHandler = await createTaskAPI({
-          client,
-          eventData: input,
-          workflowName,
-        });
-
-        const task: WorkflowHandlerSummary = {
-          handler_id: workflowHandler.handler_id ?? "",
-          status: "running",
-        };
-
-        // Internal method to set task
-        set((state) => ({
-          tasks: { ...state.tasks, [task.handler_id]: task },
-          events: { ...state.events, [task.handler_id]: [] },
-        }));
-
-        // Automatically subscribe to task events after creation
-        try {
-          get().subscribe(task.handler_id);
-        } catch (error) {
-          console.error(
-            `Failed to auto-subscribe to task ${task.handler_id}:`,
-            error
-          );
-          // Continue execution, subscription can be retried later
-        }
-
-        return task;
+        get().subscribe(task.handler_id);
       } catch (error) {
-        console.error("Failed to create task:", error);
-        throw error;
+        // eslint-disable-next-line no-console -- needed
+        console.error(
+          `Failed to auto-subscribe to task ${task.handler_id}:`,
+          error
+        );
+        // Continue execution, subscription can be retried later
       }
+
+      return task;
     },
 
     clearEvents: (taskId: string) =>
@@ -121,7 +117,9 @@ export const createTaskStore = (client: Client) =>
           }
         });
       } catch (error) {
+        // eslint-disable-next-line no-console -- needed for visibility and tests
         console.error("Failed to sync with server:", error);
+        // Swallow error to fail gracefully
       }
     },
 
@@ -129,6 +127,7 @@ export const createTaskStore = (client: Client) =>
     subscribe: (taskId: string) => {
       const task = get().tasks[taskId];
       if (!task) {
+        // eslint-disable-next-line no-console -- needed
         console.warn(`Task ${taskId} not found for subscription`);
         return;
       }
@@ -171,7 +170,6 @@ export const createTaskStore = (client: Client) =>
           ) {
             return;
           }
-          console.error(`Streaming error for task ${taskId}:`, error);
           // Update task status to error
           set((state) => ({
             tasks: {
@@ -199,10 +197,6 @@ export const createTaskStore = (client: Client) =>
         ) {
           return;
         }
-        console.error(
-          `Failed to start task events streaming for ${taskId}:`,
-          error
-        );
         // Update task status to error
         set((state) => ({
           tasks: {
@@ -221,7 +215,7 @@ export const createTaskStore = (client: Client) =>
       const task = get().tasks[taskId];
       if (!task) return;
 
-      const streamKey = `task:${taskId}`;
+      const streamKey = `handler:${taskId}`;
       workflowStreamingManager.closeStream(streamKey);
     },
 
@@ -229,7 +223,7 @@ export const createTaskStore = (client: Client) =>
       const task = get().tasks[taskId];
       if (!task) return false;
 
-      const streamKey = `task:${taskId}`;
+      const streamKey = `handler:${taskId}`;
       return workflowStreamingManager.isStreamActive(streamKey);
     },
   }));

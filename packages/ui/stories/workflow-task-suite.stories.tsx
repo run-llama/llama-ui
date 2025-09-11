@@ -9,7 +9,6 @@ import {
 } from "../src/workflow-task";
 import { AgentStreamDisplay } from "../src/workflow-task/components/agent-stream-display";
 import { ApiProvider, createMockClients } from "../src/lib";
-import { useDeployment } from "@/src/lib/api-provider";
 
 // Task Trigger & Progress Component
 function TaskTriggerSection({
@@ -20,7 +19,6 @@ function TaskTriggerSection({
   selectedTaskId: string | null;
 }) {
   const { tasks, clearCompleted } = useWorkflowTaskList();
-  const deployment = useDeployment();
   const { createTask } = useTaskStore();
   const [batchSize, setBatchSize] = useState(3);
   const [isCreatingBatch, setIsCreatingBatch] = useState(false);
@@ -63,7 +61,7 @@ function TaskTriggerSection({
 
         // Stagger the creation slightly to see the effect
         await new Promise((resolve) => setTimeout(resolve, index * 100));
-        return createTask(deployment, input);
+        return createTask("test-workflow", input);
       });
 
       await Promise.all(promises);
@@ -145,7 +143,7 @@ function TaskTriggerSection({
               <div className="text-xs text-gray-500">
                 Running: {tasks.filter((t) => t.status === "running").length} |
                 Complete: {tasks.filter((t) => t.status === "complete").length}{" "}
-                | Error: {tasks.filter((t) => t.status === "error").length}
+                | Error: {tasks.filter((t) => t.status === "failed").length}
               </div>
             </div>
             <div className="max-h-48 overflow-y-auto space-y-1 border rounded-lg">
@@ -178,7 +176,7 @@ function TaskTriggerSection({
                       className={`px-2 py-1 rounded text-xs font-medium flex-shrink-0 ${
                         task.status === "complete"
                           ? "bg-green-100 text-green-800"
-                          : task.status === "error"
+                          : task.status === "failed"
                             ? "bg-red-100 text-red-800"
                             : task.status === "running"
                               ? "bg-blue-100 text-blue-800"
@@ -248,16 +246,12 @@ function TaskDetailSection({ taskId }: { taskId: string | null }) {
             {taskDetail.task.handler_id}
           </div>
           <div>
-            <span className="font-medium">Deployment:</span>{" "}
-            {taskDetail.task.deployment}
-          </div>
-          <div>
             <span className="font-medium">Status:</span>
             <span
               className={`ml-2 px-2 py-1 rounded text-sm ${
                 taskDetail.task.status === "complete"
                   ? "bg-green-100 text-green-800"
-                  : taskDetail.task.status === "error"
+                  : taskDetail.task.status === "failed"
                     ? "bg-red-100 text-red-800"
                     : taskDetail.task.status === "running"
                       ? "bg-blue-100 text-blue-800"
@@ -336,7 +330,7 @@ function WorkflowTaskSuiteInternal() {
 // Main Suite Component with ApiProvider
 function WorkflowTaskSuite() {
   return (
-    <ApiProvider clients={createMockClients()} deployment="mock-deployment">
+    <ApiProvider clients={createMockClients()}>
       <WorkflowTaskSuiteInternal />
     </ApiProvider>
   );

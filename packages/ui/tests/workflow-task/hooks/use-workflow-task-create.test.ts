@@ -48,10 +48,6 @@ Object.defineProperty(window, "localStorage", {
 describe("useWorkflowTaskCreate", () => {
   const mockTask: WorkflowHandlerSummary = {
     handler_id: "test-task-1",
-    session_id: "session-1",
-    service_id: "workflow-1",
-    input: "test input",
-    deployment: "test-deployment",
     status: "running",
   };
 
@@ -79,7 +75,7 @@ describe("useWorkflowTaskCreate", () => {
       let createPromise: Promise<WorkflowHandlerSummary>;
       act(() => {
         createPromise = result.current.createTask(
-          "test-deployment",
+          "test-workflow",
           "test input"
         );
       });
@@ -103,7 +99,7 @@ describe("useWorkflowTaskCreate", () => {
       // Verify the API was called correctly
       expect(createTaskAPI).toHaveBeenCalledWith({
         client: expect.any(Object),
-        workflowName: "test-deployment",
+        workflowName: "test-workflow",
         eventData: "test input",
       });
     });
@@ -128,7 +124,7 @@ describe("useWorkflowTaskCreate", () => {
       let createPromise: Promise<WorkflowHandlerSummary>;
       act(() => {
         createPromise = result.current.createTask(
-          "test-deployment",
+          "test-workflow",
           "test input"
         );
       });
@@ -152,7 +148,7 @@ describe("useWorkflowTaskCreate", () => {
       // Verify the API was called
       expect(createTaskAPI).toHaveBeenCalledWith({
         client: expect.any(Object),
-        workflowName: "test-deployment",
+        workflowName: "test-workflow",
         eventData: "test input",
       });
     });
