@@ -44,7 +44,7 @@ function ExtractedDataItemGridWrapper(
   props: React.ComponentProps<typeof ExtractedDataItemGrid>
 ) {
   return (
-    <ApiProvider clients={createMockClients()} deployment="mock-deployment">
+    <ApiProvider clients={createMockClients()}>
       <ExtractedDataItemGrid {...props} />
     </ApiProvider>
   );

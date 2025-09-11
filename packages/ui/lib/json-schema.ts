@@ -1,7 +1,9 @@
 import { z } from "zod/v4";
 import { JSONSchema } from "zod/v4/core";
 
-export interface JsonSchemaReformatOptions<T extends any = unknown> {
+export interface JsonSchemaReformatOptions<
+  T extends object = Record<string, never>,
+> {
   selectFields?: (keyof T)[];
   firstFields?: (keyof T)[];
   lastFields?: (keyof T)[];
@@ -19,7 +21,7 @@ export function zodToJsonSchema<T extends z.ZodRawShape>(
   return modifyJsonSchema(jsonSchema, options);
 }
 
-export function modifyJsonSchema<T extends any = unknown>(
+export function modifyJsonSchema<T extends object = Record<string, never>>(
   jsonSchema: JSONSchema.BaseSchema,
   {
     selectFields,
@@ -193,43 +195,75 @@ export function isObjectSchema(
 
 export function derefLocalRefs<T extends JSONSchema.BaseSchema>(schema: T): T {
   const root = schema;
-  const cache = new Map<any, any>(); // handle cycles
+  // Use a JSON-like structural type to avoid `any`
+  type JsonValue =
+    | string
+    | number
+    | boolean
+    | null
+    | { [key: string]: JsonValue }
+    | JsonValue[];
+  const cache = new Map<object, JsonValue>(); // handle cycles
 
-  function cloneAndDeref(node: any, trail: string[] = []): any {
+  function cloneAndDeref(node: JsonValue, trail: string[] = []): JsonValue {
     if (node && typeof node === "object") {
-      if (cache.has(node)) return cache.get(node);
+      const key = node as object;
+      if (cache.has(key)) return cache.get(key)!;
 
       // $ref?
-      if (typeof node.$ref === "string" && node.$ref.startsWith("#/")) {
-        const target = resolvePointer(root, node.$ref);
-        // merge with siblings (spec allows siblings, could either merge or override)
-        const { $ref, ...rest } = node;
-        const expanded = cloneAndDeref(target, trail.concat([node.$ref]));
-        return cloneAndDeref({ ...expanded, ...rest }, trail);
+      if (!Array.isArray(node)) {
+        const obj = node as { [key: string]: JsonValue };
+        const refValue = obj["$ref"];
+        if (typeof refValue === "string" && refValue.startsWith("#/")) {
+          const target = resolvePointer(root, refValue) as unknown as JsonValue;
+          // merge with siblings (spec allows siblings, could either merge or override)
+          const rest: { [key: string]: JsonValue } = { ...obj };
+          delete rest["$ref"];
+          const expanded = cloneAndDeref(target, trail.concat([refValue]));
+          return cloneAndDeref(
+            { ...(expanded as object), ...rest } as JsonValue,
+            trail
+          );
+        }
       }
 
-      const out: any = Array.isArray(node) ? [] : {};
-      cache.set(node, out);
+      const out: JsonValue = Array.isArray(node) ? [] : {};
+      cache.set(key, out);
       for (const [k, v] of Object.entries(node)) {
-        out[k] = cloneAndDeref(v, trail.concat([k]));
+        (out as { [key: string]: JsonValue })[k] = cloneAndDeref(
+          v as JsonValue,
+          trail.concat([k])
+        );
       }
       return out;
     }
     return node;
   }
 
-  return cloneAndDeref(schema);
+  return cloneAndDeref(schema as unknown as JsonValue) as unknown as T;
 }
 
-function resolvePointer(obj: any, pointer: string) {
+function resolvePointer(obj: unknown, pointer: string) {
   // pointer like "#/foo/bar"
   const parts = pointer.slice(2).split("/").map(unescapeToken);
-  let cur = obj;
+  let cur: unknown = obj;
   for (const p of parts) {
-    if (cur == null || typeof cur !== "object" || !(p in cur)) {
+    if (cur == null || typeof cur !== "object") {
       throw new Error(`Pointer ${pointer} not found at "${p}"`);
     }
-    cur = cur[p];
+    if (Array.isArray(cur)) {
+      const index = Number(p);
+      if (!Number.isInteger(index) || index < 0 || index >= cur.length) {
+        throw new Error(`Pointer ${pointer} not found at "${p}"`);
+      }
+      cur = cur[index];
+    } else {
+      const objCur = cur as Record<string, unknown>;
+      if (!(p in objCur)) {
+        throw new Error(`Pointer ${pointer} not found at "${p}"`);
+      }
+      cur = objCur[p];
+    }
   }
   return cur;
 }

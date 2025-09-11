@@ -9,7 +9,6 @@ import {
 } from "../src/workflow-task";
 import { AgentStreamDisplay } from "../src/workflow-task/components/agent-stream-display";
 import { ApiProvider, createMockClients } from "../src/lib";
-import { useDeployment } from "@/src/lib/api-provider";
 
 // Task Trigger & Progress Component
 function TaskTriggerSection({
@@ -20,7 +19,6 @@ function TaskTriggerSection({
   selectedTaskId: string | null;
 }) {
   const { tasks, clearCompleted } = useWorkflowTaskList();
-  const deployment = useDeployment();
   const { createTask } = useTaskStore();
   const [batchSize, setBatchSize] = useState(3);
   const [isCreatingBatch, setIsCreatingBatch] = useState(false);
@@ -63,7 +61,7 @@ function TaskTriggerSection({
 
         // Stagger the creation slightly to see the effect
         await new Promise((resolve) => setTimeout(resolve, index * 100));
-        return createTask(deployment, input);
+        return createTask("test-workflow", input);
       });
 
       await Promise.all(promises);
@@ -121,7 +119,7 @@ function TaskTriggerSection({
       <div>
         <h3 className="text-lg font-medium mb-3">Or Create Single Task</h3>
         <WorkflowTrigger
-          deployment={deployment}
+          workflowName="test-workflow"
           onSuccess={() => {
             // Task completed successfully
           }}
@@ -145,21 +143,21 @@ function TaskTriggerSection({
               <div className="text-xs text-gray-500">
                 Running: {tasks.filter((t) => t.status === "running").length} |
                 Complete: {tasks.filter((t) => t.status === "complete").length}{" "}
-                | Error: {tasks.filter((t) => t.status === "error").length}
+                | Error: {tasks.filter((t) => t.status === "failed").length}
               </div>
             </div>
             <div className="max-h-48 overflow-y-auto space-y-1 border rounded-lg">
               {tasks.map((task, index) => {
-                const isSelected = selectedTaskId === task.task_id;
+                const isSelected = selectedTaskId === task.handler_id;
                 return (
                   <div
-                    key={task.task_id}
+                    key={task.handler_id}
                     className={`flex justify-between items-center text-sm p-3 cursor-pointer transition-colors border-b last:border-b-0 ${
                       isSelected
                         ? "bg-blue-50 border-l-4 border-l-blue-500"
                         : "hover:bg-gray-50"
                     }`}
-                    onClick={() => onTaskClick(task.task_id)}
+                    onClick={() => onTaskClick(task.handler_id)}
                   >
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       <span className="text-xs text-gray-500 flex-shrink-0">
@@ -170,7 +168,7 @@ function TaskTriggerSection({
                           Task {index + 1}
                         </div>
                         <div className="font-mono text-xs text-gray-500 truncate">
-                          {task.task_id}
+                          {task.handler_id}
                         </div>
                       </div>
                     </div>
@@ -178,7 +176,7 @@ function TaskTriggerSection({
                       className={`px-2 py-1 rounded text-xs font-medium flex-shrink-0 ${
                         task.status === "complete"
                           ? "bg-green-100 text-green-800"
-                          : task.status === "error"
+                          : task.status === "failed"
                             ? "bg-red-100 text-red-800"
                             : task.status === "running"
                               ? "bg-blue-100 text-blue-800"
@@ -245,11 +243,7 @@ function TaskDetailSection({ taskId }: { taskId: string | null }) {
         <div className="bg-gray-50 rounded-lg p-4 space-y-3">
           <div>
             <span className="font-medium">Task ID:</span>{" "}
-            {taskDetail.task.task_id}
-          </div>
-          <div>
-            <span className="font-medium">Deployment:</span>{" "}
-            {taskDetail.task.deployment}
+            {taskDetail.task.handler_id}
           </div>
           <div>
             <span className="font-medium">Status:</span>
@@ -257,7 +251,7 @@ function TaskDetailSection({ taskId }: { taskId: string | null }) {
               className={`ml-2 px-2 py-1 rounded text-sm ${
                 taskDetail.task.status === "complete"
                   ? "bg-green-100 text-green-800"
-                  : taskDetail.task.status === "error"
+                  : taskDetail.task.status === "failed"
                     ? "bg-red-100 text-red-800"
                     : taskDetail.task.status === "running"
                       ? "bg-blue-100 text-blue-800"
@@ -290,7 +284,7 @@ function TaskDetailSection({ taskId }: { taskId: string | null }) {
 
       {/* Agent Stream - use taskId instead of events */}
       <AgentStreamDisplay
-        taskId={taskDetail.task.task_id}
+        taskId={taskDetail.task.handler_id}
         title="Processing Steps"
         className="mb-4"
       />
@@ -305,7 +299,7 @@ function WorkflowTaskSuiteInternal() {
 
   // Get the selected task or the most recent task for details
   const selectedTask = selectedTaskId
-    ? tasks.find((t) => t.task_id === selectedTaskId)
+    ? tasks.find((t) => t.handler_id === selectedTaskId)
     : tasks.length > 0
       ? tasks[tasks.length - 1]
       : null;
@@ -327,7 +321,7 @@ function WorkflowTaskSuiteInternal() {
           onTaskClick={setSelectedTaskId}
           selectedTaskId={selectedTaskId}
         />
-        <TaskDetailSection taskId={selectedTask?.task_id || null} />
+        <TaskDetailSection taskId={selectedTask?.handler_id || null} />
       </div>
     </div>
   );
@@ -336,7 +330,7 @@ function WorkflowTaskSuiteInternal() {
 // Main Suite Component with ApiProvider
 function WorkflowTaskSuite() {
   return (
-    <ApiProvider clients={createMockClients()} deployment="mock-deployment">
+    <ApiProvider clients={createMockClients()}>
       <WorkflowTaskSuiteInternal />
     </ApiProvider>
   );

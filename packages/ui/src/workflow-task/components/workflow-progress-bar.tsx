@@ -50,7 +50,7 @@ export function WorkflowProgressBar({
         return "Uploaded files are processing";
       case "complete":
         return "All files processed successfully";
-      case "error":
+      case "failed":
         return "Error processing files";
       case "idle":
       default:
@@ -65,7 +65,7 @@ export function WorkflowProgressBar({
         return <Loader className="h-4 w-4 text-gray-600 animate-spin" />;
       case "complete":
         return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case "error":
+      case "failed":
         return <XCircle className="h-4 w-4 text-red-600" />;
       case "idle":
       default:

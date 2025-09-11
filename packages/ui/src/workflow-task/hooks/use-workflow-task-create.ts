@@ -5,14 +5,13 @@
 
 import { useState, useCallback } from "react";
 import { useTaskStore } from "./use-task-store";
-import type { JSONValue, WorkflowTaskSummary } from "../types";
+import type { JSONValue, WorkflowHandlerSummary } from "../types";
 
 interface UseWorkflowTaskCreateResult {
   createTask: (
-    deployment: string,
-    input: JSONValue,
-    workflow?: string
-  ) => Promise<WorkflowTaskSummary>;
+    workflowName: string,
+    input: JSONValue
+  ) => Promise<WorkflowHandlerSummary>;
   isCreating: boolean;
   error: Error | null;
 }
@@ -24,16 +23,15 @@ export function useWorkflowTaskCreate(): UseWorkflowTaskCreateResult {
 
   const createTask = useCallback(
     async (
-      deployment: string,
-      input: JSONValue,
-      workflow?: string
-    ): Promise<WorkflowTaskSummary> => {
+      workflowName: string,
+      input: JSONValue
+    ): Promise<WorkflowHandlerSummary> => {
       setIsCreating(true);
       setError(null);
 
       try {
         // Call store method to create task (handles API call and store update)
-        const task = await storeCreateTask(deployment, input, workflow);
+        const task = await storeCreateTask(workflowName, input);
 
         setIsCreating(false);
         return task;

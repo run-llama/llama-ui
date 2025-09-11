@@ -1,112 +1,104 @@
 import {
   Client,
-  createDeploymentTaskNowaitDeploymentsDeploymentNameTasksCreatePost,
-  getTasksDeploymentsDeploymentNameTasksGet,
-  sendEventDeploymentsDeploymentNameTasksTaskIdEventsPost,
-} from "@llamaindex/llama-deploy";
+  postWorkflowsByNameRunNowait,
+  getHandlers,
+  postEventsByHandlerId,
+  getEventsByHandlerId,
+} from "@llamaindex/workflows-client";
 import {
   RawEvent,
   StreamingEventCallback,
   WorkflowEvent,
   WorkflowEventType,
-  TaskDefinition,
-  TaskParams,
-  WorkflowTaskSummary,
+  WorkflowHandlerSummary,
+  RunStatus,
 } from "../types";
 import {
   workflowStreamingManager,
   type StreamSubscriber,
 } from "../../lib/shared-streaming";
 
-export async function getRunningTasks(params: {
+export async function getRunningHandlers(params: {
   client: Client;
-  deploymentName: string;
-}): Promise<WorkflowTaskSummary[]> {
-  const data = await getTasksDeploymentsDeploymentNameTasksGet({
+}): Promise<WorkflowHandlerSummary[]> {
+  const resp = await getHandlers({
     client: params.client,
-    path: { deployment_name: params.deploymentName },
   });
-  const allTasks = data.data ?? [];
+  const allHandlers = resp.data?.handlers ?? [];
 
   // Now the API will only return running tasks because there is no persistent layer for tasks.
-  return allTasks.map((task) => ({
-    task_id: task.task_id ?? "",
-    session_id: task.session_id ?? "",
-    service_id: task.service_id ?? "",
-    input: task.input ?? "",
-    deployment: params.deploymentName,
-    status: "running" as const,
-  }));
+  return allHandlers
+    .filter((handler) => handler.status === "running")
+    .map((handler) => ({
+      handler_id: handler.handler_id ?? "",
+      status: handler.status as RunStatus,
+    }));
 }
 
-export async function getExistingTask(params: {
+export async function getExistingHandler(params: {
   client: Client;
-  deploymentName: string;
-  taskId: string;
-}): Promise<TaskDefinition> {
-  const data = await getTasksDeploymentsDeploymentNameTasksGet({
+  handlerId: string;
+}): Promise<WorkflowHandlerSummary> {
+  const resp = await getHandlers({
     client: params.client,
-    path: { deployment_name: params.deploymentName },
   });
-  const allTasks = data.data ?? [];
-  const task = allTasks.find((t) => t.task_id === params.taskId);
+  const allHandlers = resp.data?.handlers ?? [];
+  const handler = allHandlers.find((h) => h.handler_id === params.handlerId);
 
-  if (!task) {
-    throw new Error(`Task ${params.taskId} not found`);
+  if (!handler) {
+    throw new Error(`Handler ${params.handlerId} not found`);
   }
 
-  return task;
+  return handler as WorkflowHandlerSummary;
 }
 
 export async function createTask<E extends WorkflowEvent>(params: {
   client: Client;
-  deploymentName: string;
+  workflowName: string;
   eventData: E["data"];
-  workflow?: string; // create task in default service if not provided
-}): Promise<TaskDefinition> {
-  const data =
-    await createDeploymentTaskNowaitDeploymentsDeploymentNameTasksCreatePost({
-      client: params.client,
-      path: { deployment_name: params.deploymentName },
-      body: {
-        input: JSON.stringify(params.eventData ?? {}),
-        service_id: params.workflow,
-      },
-    });
+}): Promise<WorkflowHandlerSummary> {
+  const data = await postWorkflowsByNameRunNowait({
+    client: params.client,
+    path: { name: params.workflowName },
+    body: {
+      start_event: JSON.stringify(params.eventData ?? {}),
+    },
+  });
 
   if (!data.data) {
-    throw new Error("Task creation failed");
+    throw new Error("Handler creation failed");
   }
 
-  return data.data;
+  return {
+    handler_id: data.data.handler_id ?? "",
+    status: "running",
+  };
 }
 
-export async function fetchTaskEvents<E extends WorkflowEvent>(
+export async function fetchHandlerEvents<E extends WorkflowEvent>(
   params: {
     client: Client;
-    deploymentName: string;
-    task: TaskParams;
+    handlerId: string;
     signal?: AbortSignal;
   },
   callback?: StreamingEventCallback<E>
 ): Promise<E[]> {
-  const streamKey = `task:${params.task.task_id}:${params.deploymentName}`;
+  const streamKey = `handler:${params.handlerId}`;
 
   // Create executor function that implements the actual streaming logic
   const executor = async (
     subscriber: StreamSubscriber<E>,
     signal: AbortSignal
   ): Promise<E[]> => {
-    const baseUrl = params.client.getConfig().baseUrl || "";
-    const { task_id, session_id } = params.task;
-    const url = `${baseUrl}/deployments/${params.deploymentName}/tasks/${task_id}/events?session_id=${session_id}&raw_event=true`;
-
-    const response = await fetch(url, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      signal,
+    const resp = await getEventsByHandlerId({
+      client: params.client,
+      path: { handler_id: params.handlerId },
+      // NDJSON stream
+      query: { sse: false },
+      // Ensure we get a ReadableStream without auto-parsing
+      parseAs: "stream",
     });
+    const response = resp.response;
 
     if (!response.ok) {
       const error = new Error(`HTTP error! status: ${response.status}`);
@@ -123,7 +115,6 @@ export async function fetchTaskEvents<E extends WorkflowEvent>(
     let retryParsedLines: string[] = [];
 
     try {
-      // eslint-disable-next-line no-constant-condition -- needed
       while (true) {
         if (signal.aborted) {
           throw new Error("Stream aborted");
@@ -137,10 +128,6 @@ export async function fetchTaskEvents<E extends WorkflowEvent>(
         if (retryParsedLines.length > 0) {
           // if there are lines that failed to parse, append them to the current chunk
           chunk = `${retryParsedLines.join("")}${chunk}`;
-          console.info("Retry parsing with chunk:", {
-            retryParsedLines,
-            chunk,
-          });
           retryParsedLines = []; // reset for next iteration
         }
 
@@ -194,23 +181,19 @@ export async function fetchTaskEvents<E extends WorkflowEvent>(
   return promise;
 }
 
-export async function sendEventToTask<E extends WorkflowEvent>(params: {
+export async function sendEventToHandler<E extends WorkflowEvent>(params: {
   client: Client;
-  deploymentName: string;
-  task: TaskParams;
+  handlerId: string;
   event: E;
+  step?: string;
 }) {
-  const { task_id, session_id, service_id } = params.task;
-
   const rawEvent = toRawEvent(params.event); // convert to raw event before sending
-
-  const data = await sendEventDeploymentsDeploymentNameTasksTaskIdEventsPost({
+  const data = await postEventsByHandlerId({
     client: params.client,
-    path: { deployment_name: params.deploymentName, task_id },
-    query: { session_id },
+    path: { handler_id: params.handlerId },
     body: {
-      service_id,
-      event_obj_str: JSON.stringify(rawEvent),
+      event: JSON.stringify(rawEvent),
+      step: params.step,
     },
   });
 
@@ -224,7 +207,6 @@ function toWorkflowEvents<E extends WorkflowEvent>(
   failedLines: string[];
 } {
   if (typeof chunk !== "string") {
-    console.warn("Skipping non-string chunk:", chunk);
     return { events: [], failedLines: [] };
   }
 
@@ -263,15 +245,15 @@ function parseChunkLine<E extends WorkflowEvent>(
   try {
     const event = JSON.parse(line) as RawEvent;
     if (!isRawEvent(event)) {
-      console.warn("Skipping invalid raw event:", event);
       return null;
     }
     return {
       line,
       event: { type: event.qualified_name, data: event.value } as E,
     };
-  } catch (error) {
-    console.warn(`Failed to parse chunk in line: ${line}`, error);
+  } catch (error: unknown) {
+    // eslint-disable-next-line no-console -- needed
+    console.error(`Failed to parse chunk in line: ${line}`, error);
     return {
       line,
       event: null,
@@ -287,7 +269,7 @@ function toRawEvent(event: WorkflowEvent): RawEvent {
   };
 }
 
-function isRawEvent(event: any): event is RawEvent {
+function isRawEvent(event: object): event is RawEvent {
   return (
     event &&
     typeof event === "object" &&

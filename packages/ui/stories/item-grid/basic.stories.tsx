@@ -40,7 +40,7 @@ function ItemGridWrapper<T = unknown>(
   props: React.ComponentProps<typeof ItemGrid<T>>
 ) {
   return (
-    <ApiProvider clients={createMockClients()} deployment="mock-deployment">
+    <ApiProvider clients={createMockClients()}>
       <ItemGrid<T> {...props} />
     </ApiProvider>
   );

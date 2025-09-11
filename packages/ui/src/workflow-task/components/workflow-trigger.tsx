@@ -9,12 +9,11 @@ import { toast } from "sonner";
 import { FileUploader, type FileUploaderProps } from "../../file-uploader";
 import { useWorkflowTaskCreate } from "../hooks/use-workflow-task-create";
 import type { FileUploadData } from "../../file-uploader/use-file-upload";
-import { JSONValue, WorkflowTaskSummary } from "../types";
+import { JSONValue, WorkflowHandlerSummary } from "../types";
 
 export interface WorkflowTriggerProps
   extends Omit<FileUploaderProps, "onSuccess"> {
-  deployment: string;
-  workflow?: string;
+  workflowName: string;
 
   // support for custom workflow input
   customWorkflowInput?: (
@@ -23,13 +22,12 @@ export interface WorkflowTriggerProps
   ) => JSONValue;
 
   // Override onSuccess to provide workflow task result
-  onSuccess?: (task: WorkflowTaskSummary) => void;
+  onSuccess?: (task: WorkflowHandlerSummary) => void;
   onError?: (error: Error) => void;
 }
 
 export function WorkflowTrigger({
-  deployment,
-  workflow,
+  workflowName,
   customWorkflowInput,
   onSuccess,
   onError,
@@ -51,7 +49,7 @@ export function WorkflowTrigger({
         // If customWorkflowInput is provided, use it to create the workflow input
         if (customWorkflowInput) {
           const workflowInput = customWorkflowInput(data, fieldValues);
-          const task = await createTask(deployment, workflowInput, workflow);
+          const task = await createTask(workflowName, workflowInput);
           toast.success("Workflow task created successfully!");
           onSuccess?.(task);
           return;
@@ -69,7 +67,7 @@ export function WorkflowTrigger({
         } as JSONValue;
 
         // Create workflow task
-        const task = await createTask(deployment, workflowInput, workflow);
+        const task = await createTask(workflowName, workflowInput);
 
         toast.success("Workflow task created successfully!");
         onSuccess?.(task);
@@ -80,7 +78,7 @@ export function WorkflowTrigger({
         throw error; // Re-throw to let FileUploader handle UI state
       }
     },
-    [deployment, workflow, createTask, onSuccess, onError, customWorkflowInput]
+    [workflowName, createTask, onSuccess, onError, customWorkflowInput]
   );
 
   return (

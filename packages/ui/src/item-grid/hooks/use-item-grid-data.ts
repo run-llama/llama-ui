@@ -64,9 +64,9 @@ export function useItemGridData<T = unknown>(
           prevData.filter((item) => String(item.id) !== String(itemId))
         );
         setTotalSize((prevTotal) => prevTotal - 1);
-        console.log("Item deleted successfully:", itemId);
         return { success: true };
       } catch (error) {
+        // eslint-disable-next-line no-console -- needed
         console.error("Delete error:", error);
         return {
           success: false,

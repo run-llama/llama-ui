@@ -3,24 +3,18 @@
  * Manages pre-created API clients for different services
  */
 
-import React, {
-  createContext,
-  useContext,
-  useMemo,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useMemo, type ReactNode } from "react";
 import {
   CloudAgentClient,
   cloudApiClient,
   CloudApiClient,
-  LlamaDeployClient,
-  createLlamaDeployClient,
-  createLlamaDeployConfig,
+  WorkflowsClient,
+  workflowsClient,
   createCloudAgentClient,
 } from "./clients";
 
 export interface ApiClients {
-  llamaDeployClient?: LlamaDeployClient;
+  workflowsClient?: WorkflowsClient;
   cloudApiClient?: CloudApiClient;
   agentDataClient?: CloudAgentClient;
 }
@@ -28,12 +22,10 @@ export interface ApiClients {
 export interface ApiProviderProps {
   children: ReactNode;
   clients: ApiClients;
-  deployment: string;
 }
 
 interface ApiContextValue {
   clients: ApiClients;
-  deployment: string;
 }
 
 // ===== Context =====
@@ -42,17 +34,12 @@ const ApiContext = createContext<ApiContextValue | null>(null);
 
 // ===== Provider =====
 
-export function ApiProvider({
-  children,
-  clients,
-  deployment,
-}: ApiProviderProps) {
+export function ApiProvider({ children, clients }: ApiProviderProps) {
   const contextValue = useMemo(
     () => ({
       clients,
-      deployment,
     }),
-    [clients, deployment]
+    [clients]
   );
 
   return (
@@ -64,7 +51,7 @@ export function ApiProvider({
 
 export function createMockClients(): ApiClients {
   return {
-    llamaDeployClient: createLlamaDeployClient(createLlamaDeployConfig()),
+    workflowsClient: workflowsClient,
     cloudApiClient: cloudApiClient,
     agentDataClient: createCloudAgentClient({
       baseUrl: "https://api.llamaindex.cloud",
@@ -90,17 +77,17 @@ function useApiContext(): ApiContextValue {
   return context;
 }
 
-export function useLlamaDeployClient(): LlamaDeployClient {
+export function useLlamaDeployClient(): WorkflowsClient {
   const { clients } = useApiContext();
 
-  if (!clients.llamaDeployClient) {
+  if (!clients.workflowsClient) {
     throw new Error(
-      "No llama-deploy client configured. " +
+      "No workflows client configured. " +
         "Please ensure llamaDeployClient is configured in ApiProvider."
     );
   }
 
-  return clients.llamaDeployClient;
+  return clients.workflowsClient;
 }
 
 export function useCloudApiClient(): CloudApiClient {
@@ -132,9 +119,4 @@ export function useAgentDataClient(): CloudAgentClient {
 export function useApiClients(): ApiClients {
   const { clients } = useApiContext();
   return clients;
-}
-
-export function useDeployment(): string {
-  const { deployment } = useApiContext();
-  return deployment;
 }

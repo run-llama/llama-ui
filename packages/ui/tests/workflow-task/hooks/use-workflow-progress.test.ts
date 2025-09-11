@@ -7,6 +7,24 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { useWorkflowProgress } from "../../../src/workflow-task/hooks/use-workflow-progress";
 import { renderHookWithProvider } from "../../test-utils";
 
+// Mock the helper functions to prevent real HTTP calls
+vi.mock("../../../src/workflow-task/store/helper", () => ({
+  getRunningHandlers: vi.fn().mockResolvedValue([]),
+  getExistingHandler: vi.fn(),
+  createTask: vi.fn(),
+  fetchHandlerEvents: vi.fn().mockResolvedValue([]),
+  sendEventToHandler: vi.fn(),
+}));
+
+// Mock the shared streaming manager
+vi.mock("../../../src/lib/shared-streaming", () => ({
+  workflowStreamingManager: {
+    subscribe: vi.fn(),
+    isStreamActive: vi.fn().mockReturnValue(false),
+    closeStream: vi.fn(),
+  },
+}));
+
 // Mock localStorage
 const localStorageMock = (() => {
   let store: Record<string, string> = {};

@@ -4,10 +4,10 @@ import { ApiProvider, createMockClients } from "../src/lib";
 
 function WorkflowTriggerDemo() {
   return (
-    <ApiProvider clients={createMockClients()} deployment="demo-deployment">
+    <ApiProvider clients={createMockClients()}>
       <div className="max-w-lg mx-auto p-6">
         <WorkflowTrigger
-          deployment="demo-deployment"
+          workflowName="demo-workflow"
           onSuccess={(result) => console.log("Task created:", result)}
         />
       </div>

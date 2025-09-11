@@ -5,20 +5,16 @@
 
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import {
-  getRunningTasks,
-  getExistingTask,
+  getRunningHandlers,
+  getExistingHandler,
   createTask,
-  fetchTaskEvents,
-  sendEventToTask,
+  sendEventToHandler,
 } from "../../../src/workflow-task/store/helper";
 import { workflowStreamingManager } from "../../../src/lib/shared-streaming";
-import type {
-  TaskParams,
-  WorkflowEvent,
-} from "../../../src/workflow-task/types";
+import type { WorkflowEvent } from "../../../src/workflow-task/types";
 
 // Mock dependencies
-vi.mock("@llamaindex/llama-deploy");
+vi.mock("@llamaindex/workflows-client");
 vi.mock("../../../src/lib/shared-streaming");
 
 // Mock fetch globally
@@ -30,12 +26,7 @@ describe("Helper Functions Tests", () => {
     getConfig: vi.fn(() => ({ baseUrl: "http://localhost:8000" })),
   } as unknown as any;
 
-  const mockTask: TaskParams = {
-    task_id: "task-123",
-    session_id: "session-456",
-    service_id: "workflow-service",
-    input: "test input",
-  };
+  // This is no longer needed as we don't use TaskParams anymore
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -46,556 +37,292 @@ describe("Helper Functions Tests", () => {
     vi.restoreAllMocks();
   });
 
-  describe("getRunningTasks", () => {
-    const mockGetTasksResponse = {
-      data: [
-        {
-          task_id: "task-1",
-          session_id: "session-1",
-          service_id: "service-1",
-          input: "input-1",
-          // No status field - backend doesn't return it
+  describe("getRunningHandlers", () => {
+    it("returns running handlers from server", async () => {
+      const { getHandlers } = await import("@llamaindex/workflows-client");
+      vi.mocked(getHandlers as any).mockResolvedValue({
+        data: {
+          handlers: [
+            { handler_id: "h-1", status: "running" },
+            { handler_id: "h-2", status: "completed" },
+            { handler_id: "h-3", status: "running" },
+          ],
         },
-        {
-          task_id: "task-2",
-          session_id: "session-2",
-          service_id: "service-2",
-          input: "input-2",
-          // No status field - backend doesn't return it
-        },
-        {
-          task_id: "task-3",
-          session_id: "session-3",
-          service_id: "service-3",
-          input: "input-3",
-          // No status field - backend doesn't return it
-        },
-      ],
-    };
-
-    it("should fetch all tasks from server (all are running)", async () => {
-      const { getTasksDeploymentsDeploymentNameTasksGet } = await import(
-        "@llamaindex/llama-deploy"
-      );
-      vi.mocked(getTasksDeploymentsDeploymentNameTasksGet).mockResolvedValue(
-        mockGetTasksResponse as any
-      );
-
-      const result = await getRunningTasks({
-        client: mockClient,
-        deploymentName: "test-deployment",
-      });
-
-      expect(getTasksDeploymentsDeploymentNameTasksGet).toHaveBeenCalledWith({
-        client: mockClient,
-        path: { deployment_name: "test-deployment" },
-      });
-
-      // All tasks from backend are running tasks
-      expect(result).toHaveLength(3);
-      expect(result[0]).toEqual({
-        task_id: "task-1",
-        session_id: "session-1",
-        service_id: "service-1",
-        input: "input-1",
-        deployment: "test-deployment",
-        status: "running",
-      });
-      expect(result[1]).toEqual({
-        task_id: "task-2",
-        session_id: "session-2",
-        service_id: "service-2",
-        input: "input-2",
-        deployment: "test-deployment",
-        status: "running",
-      });
-    });
-
-    it("should return empty array when no tasks", async () => {
-      const { getTasksDeploymentsDeploymentNameTasksGet } = await import(
-        "@llamaindex/llama-deploy"
-      );
-      vi.mocked(getTasksDeploymentsDeploymentNameTasksGet).mockResolvedValue({
-        data: [],
       } as any);
 
-      const result = await getRunningTasks({
-        client: mockClient,
-        deploymentName: "test-deployment",
-      });
-
-      expect(result).toHaveLength(0);
+      const result = await getRunningHandlers({ client: mockClient });
+      expect(getHandlers).toHaveBeenCalledWith({ client: mockClient });
+      expect(result).toEqual([
+        { handler_id: "h-1", status: "running" },
+        { handler_id: "h-3", status: "running" },
+      ]);
     });
 
-    it("should handle missing fields with defaults", async () => {
-      const { getTasksDeploymentsDeploymentNameTasksGet } = await import(
-        "@llamaindex/llama-deploy"
-      );
-      vi.mocked(getTasksDeploymentsDeploymentNameTasksGet).mockResolvedValue({
-        data: [
-          {
-            // Missing some fields
-            task_id: "task-1",
-            // No other fields
-          },
-        ],
+    it("returns empty when no handlers", async () => {
+      const { getHandlers } = await import("@llamaindex/workflows-client");
+      vi.mocked(getHandlers as any).mockResolvedValue({
+        data: { handlers: [] },
       } as any);
-
-      const result = await getRunningTasks({
-        client: mockClient,
-        deploymentName: "test-deployment",
-      });
-
-      expect(result).toHaveLength(1);
-      expect(result[0]).toEqual({
-        task_id: "task-1",
-        session_id: "",
-        service_id: "",
-        input: "",
-        deployment: "test-deployment",
-        status: "running",
-      });
+      const result = await getRunningHandlers({ client: mockClient });
+      expect(result).toEqual([]);
     });
   });
 
   describe("getExistingTask", () => {
-    it("should successfully retrieve an existing task", async () => {
-      const mockResponse = {
-        data: [
-          {
-            task_id: "task-123",
-            session_id: "session-456",
-            service_id: "workflow-service",
-            input: "test input",
-          },
-          {
-            task_id: "other-task",
-            session_id: "other-session",
-            service_id: "other-service",
-            input: "other input",
-          },
-        ],
-      };
-
-      const { getTasksDeploymentsDeploymentNameTasksGet } = await import(
-        "@llamaindex/llama-deploy"
-      );
-      vi.mocked(getTasksDeploymentsDeploymentNameTasksGet).mockResolvedValue(
-        mockResponse as any
-      );
-
-      const result = await getExistingTask({
+    it("retrieves an existing handler by id", async () => {
+      const { getHandlers } = await import("@llamaindex/workflows-client");
+      vi.mocked(getHandlers as any).mockResolvedValue({
+        data: { handlers: [{ handler_id: "h-1" }, { handler_id: "h-2" }] },
+      } as any);
+      const result = await getExistingHandler({
         client: mockClient,
-        deploymentName: "test-deployment",
-        taskId: "task-123",
+        handlerId: "h-2",
       });
-
-      expect(result).toEqual({
-        task_id: "task-123",
-        session_id: "session-456",
-        service_id: "workflow-service",
-        input: "test input",
-      });
-
-      expect(getTasksDeploymentsDeploymentNameTasksGet).toHaveBeenCalledWith({
-        client: mockClient,
-        path: { deployment_name: "test-deployment" },
-      });
+      expect(result).toEqual({ handler_id: "h-2" });
     });
 
-    it("should throw error when task is not found", async () => {
-      const mockResponse = {
-        data: [
-          {
-            task_id: "other-task",
-            session_id: "other-session",
-            service_id: "other-service",
-            input: "other input",
-          },
-        ],
-      };
-
-      const { getTasksDeploymentsDeploymentNameTasksGet } = await import(
-        "@llamaindex/llama-deploy"
-      );
-      vi.mocked(getTasksDeploymentsDeploymentNameTasksGet).mockResolvedValue(
-        mockResponse as any
-      );
-
+    it("throws when not found", async () => {
+      const { getHandlers } = await import("@llamaindex/workflows-client");
+      vi.mocked(getHandlers as any).mockResolvedValue({
+        data: { handlers: [{ handler_id: "h-1" }] },
+      } as any);
       await expect(
-        getExistingTask({
-          client: mockClient,
-          deploymentName: "test-deployment",
-          taskId: "non-existent-task",
-        })
-      ).rejects.toThrow("Task non-existent-task not found");
+        getExistingHandler({ client: mockClient, handlerId: "h-x" })
+      ).rejects.toThrow("Handler h-x not found");
     });
   });
 
   describe("createTask", () => {
-    it("should successfully create a new task", async () => {
-      const mockResponse = {
-        data: {
-          task_id: "new-task-123",
-          session_id: "new-session-456",
-          service_id: "workflow-service",
-          input: '{"test":"data"}',
-        },
-      };
-
-      const {
-        createDeploymentTaskNowaitDeploymentsDeploymentNameTasksCreatePost,
-      } = await import("@llamaindex/llama-deploy");
-      vi.mocked(
-        createDeploymentTaskNowaitDeploymentsDeploymentNameTasksCreatePost
-      ).mockResolvedValue(mockResponse as any);
+    it("creates a handler via nowait endpoint", async () => {
+      const { postWorkflowsByNameRunNowait } = await import(
+        "@llamaindex/workflows-client"
+      );
+      vi.mocked(postWorkflowsByNameRunNowait as any).mockResolvedValue({
+        data: { handler_id: "h-1", status: "started" },
+      } as any);
 
       const result = await createTask({
         client: mockClient,
-        deploymentName: "test-deployment",
-        eventData: { test: "data" },
-        workflow: "custom-workflow",
-      });
-
-      expect(result).toEqual({
-        task_id: "new-task-123",
-        session_id: "new-session-456",
-        service_id: "workflow-service",
-        input: '{"test":"data"}',
-      });
-
-      expect(
-        createDeploymentTaskNowaitDeploymentsDeploymentNameTasksCreatePost
-      ).toHaveBeenCalledWith({
-        client: mockClient,
-        path: { deployment_name: "test-deployment" },
-        body: {
-          input: '{"test":"data"}',
-          service_id: "custom-workflow",
-        },
-      });
-    });
-
-    it("should create task without workflow parameter", async () => {
-      const mockResponse = {
-        data: {
-          task_id: "new-task-123",
-          session_id: "new-session-456",
-          service_id: "default-service",
-          input: '{"test":"data"}',
-        },
-      };
-
-      const {
-        createDeploymentTaskNowaitDeploymentsDeploymentNameTasksCreatePost,
-      } = await import("@llamaindex/llama-deploy");
-      vi.mocked(
-        createDeploymentTaskNowaitDeploymentsDeploymentNameTasksCreatePost
-      ).mockResolvedValue(mockResponse as any);
-
-      const result = await createTask({
-        client: mockClient,
-        deploymentName: "test-deployment",
+        workflowName: "test-workflow",
         eventData: { test: "data" },
       });
 
-      expect(result).toEqual({
-        task_id: "new-task-123",
-        session_id: "new-session-456",
-        service_id: "default-service",
-        input: '{"test":"data"}',
-      });
-
-      expect(
-        createDeploymentTaskNowaitDeploymentsDeploymentNameTasksCreatePost
-      ).toHaveBeenCalledWith({
+      expect(result).toEqual({ handler_id: "h-1", status: "running" });
+      expect(postWorkflowsByNameRunNowait).toHaveBeenCalledWith({
         client: mockClient,
-        path: { deployment_name: "test-deployment" },
-        body: {
-          input: '{"test":"data"}',
-          service_id: undefined,
-        },
+        path: { name: "test-workflow" },
+        body: { start_event: JSON.stringify({ test: "data" }) },
       });
     });
   });
 
-  describe("fetchTaskEvents", () => {
-    const mockEvents = [
-      {
-        type: "workflow.step.start",
-        data: { step: "step1" },
-      },
-      {
-        type: "workflow.step.complete",
-        data: { step: "step1", result: "success" },
-      },
-    ];
+  describe("fetchHandlerEvents (NDJSON streaming)", () => {
+    function makeReaderFromChunks(chunks: string[]) {
+      let index = 0;
+      return {
+        read: async () => {
+          if (index < chunks.length) {
+            const value = new TextEncoder().encode(chunks[index++]);
+            return { done: false, value } as const;
+          }
+          return { done: true, value: undefined } as const;
+        },
+        releaseLock: vi.fn(),
+      };
+    }
 
-    it("should successfully fetch and stream events", async () => {
+    it("streams NDJSON, emits onData, stops on StopEvent", async () => {
+      const { getEventsByHandlerId } = await import(
+        "@llamaindex/workflows-client"
+      );
+
+      const ndjsonLines = [
+        JSON.stringify({
+          __is_pydantic: true,
+          value: { step: "step1" },
+          qualified_name: "workflow.step.start",
+        }) + "\n",
+        JSON.stringify({
+          __is_pydantic: true,
+          value: { step: "step1", result: "success" },
+          qualified_name: "workflow.step.complete",
+        }) + "\n",
+        JSON.stringify({
+          __is_pydantic: true,
+          value: {},
+          qualified_name: "workflow.events.StopEvent",
+        }) + "\n",
+      ];
+
+      vi.mocked(getEventsByHandlerId as any).mockResolvedValue({
+        data: undefined,
+        response: {
+          ok: true,
+          body: { getReader: () => makeReaderFromChunks(ndjsonLines) },
+        },
+      } as any);
+
+      // Make subscribe call executor directly to exercise parsing
+      vi.mocked(workflowStreamingManager.subscribe).mockImplementation(
+        (
+          _key: string,
+          subscriber: any,
+          executor: any,
+          signal?: AbortSignal
+        ) => {
+          const promise = executor(
+            subscriber,
+            signal ?? new AbortController().signal
+          );
+          return { promise, unsubscribe: vi.fn() } as any;
+        }
+      );
+
       const mockCallback = {
         onStart: vi.fn(),
         onData: vi.fn(),
-        onError: vi.fn(),
         onFinish: vi.fn(),
         onStopEvent: vi.fn(),
       };
 
-      // Mock the streaming manager
-      const mockPromise = Promise.resolve(mockEvents);
-      vi.mocked(workflowStreamingManager.subscribe).mockReturnValue({
-        promise: mockPromise,
-        unsubscribe: vi.fn(),
-      });
+      const { fetchHandlerEvents } = await import(
+        "../../../src/workflow-task/store/helper"
+      );
 
-      const result = await fetchTaskEvents(
+      const result = await fetchHandlerEvents(
         {
           client: mockClient,
-          deploymentName: "test-deployment",
-          task: mockTask,
+          handlerId: "handler-123",
         },
         mockCallback
       );
 
-      expect(result).toEqual(mockEvents);
-      expect(workflowStreamingManager.subscribe).toHaveBeenCalledWith(
-        "task:task-123:test-deployment",
-        expect.objectContaining({
-          onStart: mockCallback.onStart,
-          onData: mockCallback.onData,
-          onError: mockCallback.onError,
-          onFinish: mockCallback.onFinish,
-        }),
-        expect.any(Function),
-        undefined
-      );
+      expect(mockCallback.onData).toHaveBeenCalledTimes(3);
+      expect(mockCallback.onStopEvent).toHaveBeenCalledTimes(1);
+      expect(mockCallback.onFinish).toHaveBeenCalledWith(result);
+      expect(result).toHaveLength(3);
     });
 
-    it("should handle streaming with abort signal", async () => {
+    it("supports AbortSignal to cancel stream", async () => {
+      const { getEventsByHandlerId } = await import(
+        "@llamaindex/workflows-client"
+      );
+
+      // Mock an aborted signal
       const abortController = new AbortController();
-      const mockCallback = {
-        onStart: vi.fn(),
-        onData: vi.fn(),
-        onError: vi.fn(),
-        onFinish: vi.fn(),
-      };
+      abortController.abort(); // Abort immediately
 
-      const mockPromise = Promise.resolve(mockEvents);
-      vi.mocked(workflowStreamingManager.subscribe).mockReturnValue({
-        promise: mockPromise,
-        unsubscribe: vi.fn(),
-      });
-
-      const result = await fetchTaskEvents(
-        {
-          client: mockClient,
-          deploymentName: "test-deployment",
-          task: mockTask,
-          signal: abortController.signal,
+      vi.mocked(getEventsByHandlerId as any).mockResolvedValue({
+        data: undefined,
+        response: {
+          ok: true,
+          body: {
+            getReader: () => ({
+              read: async () => {
+                // Simulate reading being interrupted by abort
+                throw new Error("Stream aborted");
+              },
+              releaseLock: vi.fn(),
+            }),
+          },
         },
-        mockCallback
+      } as any);
+
+      vi.mocked(workflowStreamingManager.subscribe).mockImplementation(
+        (
+          _key: string,
+          subscriber: any,
+          executor: any,
+          signal?: AbortSignal
+        ) => {
+          const promise = executor(
+            subscriber,
+            signal ?? new AbortController().signal
+          );
+          return { promise, unsubscribe: vi.fn() } as any;
+        }
       );
 
-      expect(result).toEqual(mockEvents);
-      expect(workflowStreamingManager.subscribe).toHaveBeenCalledWith(
-        "task:task-123:test-deployment",
-        expect.any(Object),
-        expect.any(Function),
-        abortController.signal
+      const { fetchHandlerEvents } = await import(
+        "../../../src/workflow-task/store/helper"
       );
+
+      await expect(
+        fetchHandlerEvents({
+          client: mockClient,
+          handlerId: "handler-123",
+          signal: abortController.signal,
+        })
+      ).rejects.toThrow("Stream aborted");
     });
 
-    it("should work without callback parameter", async () => {
-      const mockPromise = Promise.resolve(mockEvents);
-      vi.mocked(workflowStreamingManager.subscribe).mockReturnValue({
-        promise: mockPromise,
-        unsubscribe: vi.fn(),
-      });
-
-      const result = await fetchTaskEvents({
-        client: mockClient,
-        deploymentName: "test-deployment",
-        task: mockTask,
-      });
-
-      expect(result).toEqual(mockEvents);
-      expect(workflowStreamingManager.subscribe).toHaveBeenCalledWith(
-        "task:task-123:test-deployment",
-        expect.objectContaining({
-          onStart: undefined,
-          onData: undefined,
-          onError: undefined,
-          onFinish: undefined,
-        }),
-        expect.any(Function),
-        undefined
+    it("propagates errors from network", async () => {
+      const { getEventsByHandlerId } = await import(
+        "@llamaindex/workflows-client"
       );
+
+      vi.mocked(getEventsByHandlerId as any).mockResolvedValue({
+        data: undefined,
+        response: { ok: false, status: 500 },
+      } as any);
+
+      vi.mocked(workflowStreamingManager.subscribe).mockImplementation(
+        (
+          _key: string,
+          _subscriber: any,
+          executor: any,
+          signal?: AbortSignal
+        ) => {
+          const promise = executor({}, signal ?? new AbortController().signal);
+          return { promise, unsubscribe: vi.fn() } as any;
+        }
+      );
+
+      const { fetchHandlerEvents } = await import(
+        "../../../src/workflow-task/store/helper"
+      );
+
+      await expect(
+        fetchHandlerEvents({ client: mockClient, handlerId: "handler-500" })
+      ).rejects.toThrow();
     });
   });
 
   describe("sendEventToTask", () => {
-    it("should successfully send event to task", async () => {
-      const mockResponse = {
-        data: { success: true },
-      };
+    it("sends event to handler id", async () => {
+      const { postEventsByHandlerId } = await import(
+        "@llamaindex/workflows-client"
+      );
+      vi.mocked(postEventsByHandlerId as any).mockResolvedValue({
+        data: { status: "sent" },
+      } as any);
 
       const mockEvent: WorkflowEvent = {
         type: "user.input",
         data: { message: "Hello" },
       };
 
-      const { sendEventDeploymentsDeploymentNameTasksTaskIdEventsPost } =
-        await import("@llamaindex/llama-deploy");
-      vi.mocked(
-        sendEventDeploymentsDeploymentNameTasksTaskIdEventsPost
-      ).mockResolvedValue(mockResponse as any);
-
-      const result = await sendEventToTask({
+      const result = await sendEventToHandler({
         client: mockClient,
-        deploymentName: "test-deployment",
-        task: mockTask,
+        handlerId: "handler-123",
         event: mockEvent,
       });
 
-      expect(result).toEqual({ success: true });
-      expect(
-        sendEventDeploymentsDeploymentNameTasksTaskIdEventsPost
-      ).toHaveBeenCalledWith({
+      expect(result).toEqual({ status: "sent" });
+      expect(postEventsByHandlerId).toHaveBeenCalledWith({
         client: mockClient,
-        path: { deployment_name: "test-deployment", task_id: "task-123" },
-        query: { session_id: "session-456" },
+        path: { handler_id: "handler-123" },
         body: {
-          service_id: "workflow-service",
-          event_obj_str: JSON.stringify({
+          event: JSON.stringify({
             __is_pydantic: true,
             value: { message: "Hello" },
             qualified_name: "user.input",
           }),
-        },
-      });
-    });
-
-    it("should handle event with empty data", async () => {
-      const mockResponse = {
-        data: { success: true },
-      };
-
-      const mockEvent: WorkflowEvent = {
-        type: "empty.event",
-        data: {},
-      };
-
-      const { sendEventDeploymentsDeploymentNameTasksTaskIdEventsPost } =
-        await import("@llamaindex/llama-deploy");
-      vi.mocked(
-        sendEventDeploymentsDeploymentNameTasksTaskIdEventsPost
-      ).mockResolvedValue(mockResponse as any);
-
-      const result = await sendEventToTask({
-        client: mockClient,
-        deploymentName: "test-deployment",
-        task: mockTask,
-        event: mockEvent,
-      });
-
-      expect(result).toEqual({ success: true });
-      expect(
-        sendEventDeploymentsDeploymentNameTasksTaskIdEventsPost
-      ).toHaveBeenCalledWith({
-        client: mockClient,
-        path: { deployment_name: "test-deployment", task_id: "task-123" },
-        query: { session_id: "session-456" },
-        body: {
-          service_id: "workflow-service",
-          event_obj_str: JSON.stringify({
-            __is_pydantic: true,
-            value: {},
-            qualified_name: "empty.event",
-          }),
+          step: undefined,
         },
       });
     });
   });
 
-  describe("Internal utility functions coverage", () => {
-    it("should call streaming manager with correct parameters", async () => {
-      const mockEvents = [{ type: "test.event", data: { test: "data" } }];
-      const mockPromise = Promise.resolve(mockEvents);
-
-      vi.mocked(workflowStreamingManager.subscribe).mockReturnValue({
-        promise: mockPromise,
-        unsubscribe: vi.fn(),
-      });
-
-      const result = await fetchTaskEvents({
-        client: mockClient,
-        deploymentName: "test-deployment",
-        task: mockTask,
-      });
-
-      expect(result).toEqual(mockEvents);
-      expect(workflowStreamingManager.subscribe).toHaveBeenCalledWith(
-        "task:task-123:test-deployment",
-        expect.any(Object),
-        expect.any(Function),
-        undefined
-      );
-    });
-
-    it("should handle streaming errors", async () => {
-      const mockError = new Error("Streaming failed");
-      const mockPromise = Promise.reject(mockError);
-
-      vi.mocked(workflowStreamingManager.subscribe).mockReturnValue({
-        promise: mockPromise,
-        unsubscribe: vi.fn(),
-      });
-
-      await expect(
-        fetchTaskEvents({
-          client: mockClient,
-          deploymentName: "test-deployment",
-          task: mockTask,
-        })
-      ).rejects.toThrow("Streaming failed");
-    });
-
-    it("should pass callback functions to subscriber", async () => {
-      const mockEvents = [{ type: "test.event", data: { test: "data" } }];
-      const mockPromise = Promise.resolve(mockEvents);
-
-      const mockCallback = {
-        onStart: vi.fn(),
-        onData: vi.fn(),
-        onError: vi.fn(),
-        onFinish: vi.fn(),
-        onStopEvent: vi.fn(),
-      };
-
-      vi.mocked(workflowStreamingManager.subscribe).mockReturnValue({
-        promise: mockPromise,
-        unsubscribe: vi.fn(),
-      });
-
-      await fetchTaskEvents(
-        {
-          client: mockClient,
-          deploymentName: "test-deployment",
-          task: mockTask,
-        },
-        mockCallback
-      );
-
-      expect(workflowStreamingManager.subscribe).toHaveBeenCalledWith(
-        "task:task-123:test-deployment",
-        expect.objectContaining({
-          onStart: mockCallback.onStart,
-          onData: mockCallback.onData,
-          onError: mockCallback.onError,
-          onFinish: mockCallback.onFinish,
-        }),
-        expect.any(Function),
-        undefined
-      );
-    });
-  });
+  // Internal coverage tests are omitted for the handler-based API
 });

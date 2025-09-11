@@ -5,7 +5,7 @@
 
 // Types
 export type {
-  WorkflowTaskSummary,
+  WorkflowHandlerSummary,
   WorkflowEvent,
   WorkflowProgressState,
   RunStatus,
