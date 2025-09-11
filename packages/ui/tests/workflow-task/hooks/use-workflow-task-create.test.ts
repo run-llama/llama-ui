@@ -7,12 +7,12 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { act } from "@testing-library/react";
 import { useWorkflowTaskCreate } from "../../../src/workflow-task/hooks/use-workflow-task-create";
 import { renderHookWithProvider } from "../../test-utils";
-import type { WorkflowTaskSummary } from "../../../src/workflow-task/types";
+import type { WorkflowHandlerSummary } from "../../../src/workflow-task/types";
 
 // Mock the helper functions
 vi.mock("../../../src/workflow-task/store/helper", () => ({
   createTask: vi.fn(),
-  fetchTaskEvents: vi.fn().mockResolvedValue(undefined),
+  fetchHandlerEvents: vi.fn().mockResolvedValue([]),
 }));
 
 // Mock the shared streaming manager
@@ -46,8 +46,8 @@ Object.defineProperty(window, "localStorage", {
 });
 
 describe("useWorkflowTaskCreate", () => {
-  const mockTask: WorkflowTaskSummary = {
-    task_id: "test-task-1",
+  const mockTask: WorkflowHandlerSummary = {
+    handler_id: "test-task-1",
     session_id: "session-1",
     service_id: "workflow-1",
     input: "test input",
@@ -76,7 +76,7 @@ describe("useWorkflowTaskCreate", () => {
       expect(result.current.error).toBe(null);
 
       // Start creation
-      let createPromise: Promise<WorkflowTaskSummary>;
+      let createPromise: Promise<WorkflowHandlerSummary>;
       act(() => {
         createPromise = result.current.createTask(
           "test-deployment",
@@ -88,7 +88,7 @@ describe("useWorkflowTaskCreate", () => {
       expect(result.current.isCreating).toBe(true);
 
       // Wait for completion and get result
-      let createdTask: WorkflowTaskSummary;
+      let createdTask: WorkflowHandlerSummary;
       await act(async () => {
         createdTask = await createPromise!;
       });
@@ -98,16 +98,13 @@ describe("useWorkflowTaskCreate", () => {
       expect(result.current.error).toBe(null);
 
       // Verify the created task is returned correctly
-      expect(createdTask!.task_id).toBe(mockTask.task_id);
-      expect(createdTask!.deployment).toBe("test-deployment");
-      expect(createdTask!.input).toBe("test input");
+      expect(createdTask!.handler_id).toBe(mockTask.handler_id);
 
       // Verify the API was called correctly
       expect(createTaskAPI).toHaveBeenCalledWith({
         client: expect.any(Object),
-        deploymentName: "test-deployment",
+        workflowName: "test-deployment",
         eventData: "test input",
-        workflow: undefined,
       });
     });
   });
@@ -128,7 +125,7 @@ describe("useWorkflowTaskCreate", () => {
       expect(result.current.isCreating).toBe(false);
 
       // Start creation that will fail
-      let createPromise: Promise<WorkflowTaskSummary>;
+      let createPromise: Promise<WorkflowHandlerSummary>;
       act(() => {
         createPromise = result.current.createTask(
           "test-deployment",
@@ -155,9 +152,8 @@ describe("useWorkflowTaskCreate", () => {
       // Verify the API was called
       expect(createTaskAPI).toHaveBeenCalledWith({
         client: expect.any(Object),
-        deploymentName: "test-deployment",
+        workflowName: "test-deployment",
         eventData: "test input",
-        workflow: undefined,
       });
     });
   });

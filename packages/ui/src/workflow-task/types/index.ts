@@ -3,8 +3,6 @@
  * Based on workflow-task-suite.md specifications
  */
 
-import type { TaskDefinition } from "@llamaindex/llama-deploy";
-
 // ===== Core Types =====
 
 export type JSONValue =
@@ -15,21 +13,13 @@ export type JSONValue =
   | { [key: string]: JSONValue }
   | Array<JSONValue>;
 
-export type RunStatus = "idle" | "running" | "complete" | "error";
+export type RunStatus = "idle" | "running" | "complete" | "failed";
 
-export type TaskParams = TaskDefinition & {
-  task_id: string;
-  session_id: string;
-  service_id: string;
-};
-
-export interface WorkflowTaskSummary {
-  task_id: string;
-  session_id: string;
-  service_id: string; // workflow name
-  input: string; // task input
-  deployment: string; // deployment name
+export interface WorkflowHandlerSummary {
+  handler_id: string;
   status: RunStatus;
+  result?: unknown;
+  error?: unknown;
 }
 
 export interface WorkflowEvent {
@@ -63,5 +53,3 @@ export type RawEvent = {
   value: JSONValue;
   qualified_name: string;
 };
-
-export type { TaskDefinition };

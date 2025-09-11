@@ -13,14 +13,13 @@ import {
   CloudAgentClient,
   cloudApiClient,
   CloudApiClient,
-  LlamaDeployClient,
-  createLlamaDeployClient,
-  createLlamaDeployConfig,
+  WorkflowsClient,
+  workflowsClient,
   createCloudAgentClient,
 } from "./clients";
 
 export interface ApiClients {
-  llamaDeployClient?: LlamaDeployClient;
+  workflowsClient?: WorkflowsClient;
   cloudApiClient?: CloudApiClient;
   agentDataClient?: CloudAgentClient;
 }
@@ -64,7 +63,7 @@ export function ApiProvider({
 
 export function createMockClients(): ApiClients {
   return {
-    llamaDeployClient: createLlamaDeployClient(createLlamaDeployConfig()),
+    workflowsClient: workflowsClient,
     cloudApiClient: cloudApiClient,
     agentDataClient: createCloudAgentClient({
       baseUrl: "https://api.llamaindex.cloud",
@@ -90,17 +89,17 @@ function useApiContext(): ApiContextValue {
   return context;
 }
 
-export function useLlamaDeployClient(): LlamaDeployClient {
+export function useLlamaDeployClient(): WorkflowsClient {
   const { clients } = useApiContext();
 
-  if (!clients.llamaDeployClient) {
+  if (!clients.workflowsClient) {
     throw new Error(
-      "No llama-deploy client configured. " +
+      "No workflows client configured. " +
         "Please ensure llamaDeployClient is configured in ApiProvider."
     );
   }
 
-  return clients.llamaDeployClient;
+  return clients.workflowsClient;
 }
 
 export function useCloudApiClient(): CloudApiClient {

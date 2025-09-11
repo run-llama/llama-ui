@@ -1,11 +1,21 @@
 import { client as cloudApiClient } from "llama-cloud-services/api";
+import { client as workflowsClient } from "@llamaindex/workflows-client";
 
 // Export individual creator functions and types with clear names
+// Primary (new) names
 export {
-  createClient as createLlamaDeployClient,
+  createClient as createWorkflowsClient,
+  createConfig as createWorkflowsConfig,
+} from "@llamaindex/workflows-client";
+
+// Backward-compatible aliases expected by existing stories/exports
+export {
+  createClient as createWorkflowClient,
   createConfig as createLlamaDeployConfig,
   type Client as LlamaDeployClient,
-} from "@llamaindex/llama-deploy";
+} from "@llamaindex/workflows-client";
+export { workflowsClient };
+export type WorkflowsClient = typeof workflowsClient;
 
 export {
   createAgentDataClient as createCloudAgentClient,

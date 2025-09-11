@@ -13,7 +13,7 @@ export {
 } from "./api-provider";
 
 export {
-  createLlamaDeployClient,
+  createWorkflowClient as createLlamaDeployClient,
   createLlamaDeployConfig,
   createCloudAgentClient,
   cloudApiClient,

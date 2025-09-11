@@ -121,7 +121,7 @@ function TaskTriggerSection({
       <div>
         <h3 className="text-lg font-medium mb-3">Or Create Single Task</h3>
         <WorkflowTrigger
-          deployment={deployment}
+          workflowName="test-workflow"
           onSuccess={() => {
             // Task completed successfully
           }}
@@ -150,16 +150,16 @@ function TaskTriggerSection({
             </div>
             <div className="max-h-48 overflow-y-auto space-y-1 border rounded-lg">
               {tasks.map((task, index) => {
-                const isSelected = selectedTaskId === task.task_id;
+                const isSelected = selectedTaskId === task.handler_id;
                 return (
                   <div
-                    key={task.task_id}
+                    key={task.handler_id}
                     className={`flex justify-between items-center text-sm p-3 cursor-pointer transition-colors border-b last:border-b-0 ${
                       isSelected
                         ? "bg-blue-50 border-l-4 border-l-blue-500"
                         : "hover:bg-gray-50"
                     }`}
-                    onClick={() => onTaskClick(task.task_id)}
+                    onClick={() => onTaskClick(task.handler_id)}
                   >
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       <span className="text-xs text-gray-500 flex-shrink-0">
@@ -170,7 +170,7 @@ function TaskTriggerSection({
                           Task {index + 1}
                         </div>
                         <div className="font-mono text-xs text-gray-500 truncate">
-                          {task.task_id}
+                          {task.handler_id}
                         </div>
                       </div>
                     </div>
@@ -245,7 +245,7 @@ function TaskDetailSection({ taskId }: { taskId: string | null }) {
         <div className="bg-gray-50 rounded-lg p-4 space-y-3">
           <div>
             <span className="font-medium">Task ID:</span>{" "}
-            {taskDetail.task.task_id}
+            {taskDetail.task.handler_id}
           </div>
           <div>
             <span className="font-medium">Deployment:</span>{" "}
@@ -290,7 +290,7 @@ function TaskDetailSection({ taskId }: { taskId: string | null }) {
 
       {/* Agent Stream - use taskId instead of events */}
       <AgentStreamDisplay
-        taskId={taskDetail.task.task_id}
+        taskId={taskDetail.task.handler_id}
         title="Processing Steps"
         className="mb-4"
       />
@@ -305,7 +305,7 @@ function WorkflowTaskSuiteInternal() {
 
   // Get the selected task or the most recent task for details
   const selectedTask = selectedTaskId
-    ? tasks.find((t) => t.task_id === selectedTaskId)
+    ? tasks.find((t) => t.handler_id === selectedTaskId)
     : tasks.length > 0
       ? tasks[tasks.length - 1]
       : null;
@@ -327,7 +327,7 @@ function WorkflowTaskSuiteInternal() {
           onTaskClick={setSelectedTaskId}
           selectedTaskId={selectedTaskId}
         />
-        <TaskDetailSection taskId={selectedTask?.task_id || null} />
+        <TaskDetailSection taskId={selectedTask?.handler_id || null} />
       </div>
     </div>
   );

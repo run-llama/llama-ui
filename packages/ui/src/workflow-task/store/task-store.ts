@@ -5,15 +5,15 @@
  */
 
 import { create } from "zustand";
-import { Client } from "@llamaindex/llama-deploy";
+import { Client } from "@llamaindex/workflows-client";
 import { workflowStreamingManager } from "../../lib/shared-streaming";
 import {
   createTask as createTaskAPI,
-  fetchTaskEvents,
-  getRunningTasks,
+  fetchHandlerEvents,
+  getRunningHandlers,
 } from "./helper";
 import type {
-  WorkflowTaskSummary,
+  WorkflowHandlerSummary,
   WorkflowEvent,
   StreamingEventCallback,
   JSONValue,
@@ -21,23 +21,22 @@ import type {
 
 export interface TaskStoreState {
   // State
-  tasks: Record<string, WorkflowTaskSummary>;
+  tasks: Record<string, WorkflowHandlerSummary>;
   events: Record<string, WorkflowEvent[]>;
 
   // Basic operations
   clearCompleted(): void;
   createTask(
-    deployment: string,
-    input: JSONValue,
-    workflow?: string
-  ): Promise<WorkflowTaskSummary>;
+    workflowName: string,
+    input: JSONValue
+  ): Promise<WorkflowHandlerSummary>;
   clearEvents(taskId: string): void;
 
   // Server synchronization
-  sync(deployment: string): Promise<void>;
+  sync(): Promise<void>;
 
   // Stream subscription management
-  subscribe(taskId: string, deployment: string): void;
+  subscribe(taskId: string): void;
   unsubscribe(taskId: string): void;
   isSubscribed(taskId: string): boolean;
 }
@@ -53,47 +52,37 @@ export const createTaskStore = (client: Client) =>
       set({
         tasks: Object.fromEntries(
           Object.entries(get().tasks).filter(
-            ([, t]) => t.status !== "complete" && t.status !== "error"
+            ([, t]) => t.status !== "complete" && t.status !== "failed"
           )
         ),
       }),
 
-    createTask: async (
-      deployment: string,
-      input: JSONValue,
-      workflow?: string
-    ) => {
+    createTask: async (workflowName: string, input: JSONValue) => {
       try {
         // Call API to create task
-        const workflowTask = await createTaskAPI({
+        const workflowHandler = await createTaskAPI({
           client,
-          deploymentName: deployment,
           eventData: input,
-          workflow,
+          workflowName,
         });
 
-        // Convert to WorkflowTaskSummary and store
-        const task: WorkflowTaskSummary = {
-          task_id: workflowTask.task_id ?? "",
-          session_id: workflowTask.session_id ?? "",
-          service_id: workflowTask.service_id ?? "",
-          input: workflowTask.input,
-          deployment,
+        const task: WorkflowHandlerSummary = {
+          handler_id: workflowHandler.handler_id ?? "",
           status: "running",
         };
 
         // Internal method to set task
         set((state) => ({
-          tasks: { ...state.tasks, [task.task_id]: task },
-          events: { ...state.events, [task.task_id]: [] },
+          tasks: { ...state.tasks, [task.handler_id]: task },
+          events: { ...state.events, [task.handler_id]: [] },
         }));
 
         // Automatically subscribe to task events after creation
         try {
-          get().subscribe(task.task_id, deployment);
+          get().subscribe(task.handler_id);
         } catch (error) {
           console.error(
-            `Failed to auto-subscribe to task ${task.task_id}:`,
+            `Failed to auto-subscribe to task ${task.handler_id}:`,
             error
           );
           // Continue execution, subscription can be retried later
@@ -112,24 +101,23 @@ export const createTaskStore = (client: Client) =>
       })),
 
     // Server synchronization
-    sync: async (deployment: string) => {
+    sync: async () => {
       try {
         // 1. Get running tasks from server
-        const serverTasks = await getRunningTasks({
+        const serverTasks = await getRunningHandlers({
           client,
-          deploymentName: deployment,
         });
 
         // 2. Update store with server tasks
         const newTasksRecord = Object.fromEntries(
-          serverTasks.map((task) => [task.task_id, task])
+          serverTasks.map((task) => [task.handler_id, task])
         );
         set({ tasks: newTasksRecord });
 
         // 3. Auto-subscribe to running tasks
         serverTasks.forEach((task) => {
-          if (!get().isSubscribed(task.task_id)) {
-            get().subscribe(task.task_id, task.deployment);
+          if (!get().isSubscribed(task.handler_id)) {
+            get().subscribe(task.handler_id);
           }
         });
       } catch (error) {
@@ -138,7 +126,7 @@ export const createTaskStore = (client: Client) =>
     },
 
     // Stream subscription management
-    subscribe: (taskId: string, deployment: string) => {
+    subscribe: (taskId: string) => {
       const task = get().tasks[taskId];
       if (!task) {
         console.warn(`Task ${taskId} not found for subscription`);
@@ -190,7 +178,7 @@ export const createTaskStore = (client: Client) =>
               ...state.tasks,
               [taskId]: {
                 ...state.tasks[taskId],
-                status: "error",
+                status: "failed",
                 updatedAt: new Date(),
               },
             },
@@ -198,18 +186,9 @@ export const createTaskStore = (client: Client) =>
         },
       };
 
-      // Use fetchTaskEvents directly - it already handles SharedStreamingManager internally
-      fetchTaskEvents(
-        {
-          client,
-          deploymentName: deployment,
-          task: {
-            task_id: task.task_id,
-            session_id: task.session_id,
-            service_id: task.service_id,
-            input: task.input,
-          },
-        },
+      // Use handler-based streaming
+      fetchHandlerEvents(
+        { client, handlerId: task.handler_id },
         callback
       ).catch((error) => {
         // Ignore network errors caused by page refresh/unload
@@ -230,7 +209,7 @@ export const createTaskStore = (client: Client) =>
             ...state.tasks,
             [taskId]: {
               ...state.tasks[taskId],
-              status: "error",
+              status: "failed",
               updatedAt: new Date(),
             },
           },
@@ -242,7 +221,7 @@ export const createTaskStore = (client: Client) =>
       const task = get().tasks[taskId];
       if (!task) return;
 
-      const streamKey = `task:${taskId}:${task.deployment}`;
+      const streamKey = `task:${taskId}`;
       workflowStreamingManager.closeStream(streamKey);
     },
 
@@ -250,7 +229,7 @@ export const createTaskStore = (client: Client) =>
       const task = get().tasks[taskId];
       if (!task) return false;
 
-      const streamKey = `task:${taskId}:${task.deployment}`;
+      const streamKey = `task:${taskId}`;
       return workflowStreamingManager.isStreamActive(streamKey);
     },
   }));

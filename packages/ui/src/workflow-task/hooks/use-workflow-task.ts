@@ -1,9 +1,9 @@
 import { useEffect, useCallback, useMemo } from "react";
 import { useTaskStore } from "./use-task-store";
-import type { WorkflowTaskSummary, WorkflowEvent } from "../types";
+import type { WorkflowHandlerSummary, WorkflowEvent } from "../types";
 
 interface UseWorkflowTaskResult {
-  task: WorkflowTaskSummary | null;
+  task: WorkflowHandlerSummary | null;
   events: WorkflowEvent[];
   isStreaming: boolean;
   stopStreaming: () => void;
@@ -32,7 +32,7 @@ export function useWorkflowTask(
     if (task.status !== "running") return;
 
     // Use store's subscribe method
-    subscribe(taskId, task.deployment);
+    subscribe(taskId);
 
     // Cleanup when task is no longer running or component unmounts
     return () => {

@@ -5,12 +5,10 @@
 
 import { useMemo, useEffect } from "react";
 import { useTaskStore } from "./use-task-store";
-import { useDeployment } from "../../lib/api-provider";
 import type { WorkflowProgressState, RunStatus } from "../types";
 
 export function useWorkflowProgress(): WorkflowProgressState {
   // Get deployment from context and store methods
-  const deployment = useDeployment();
   const store = useTaskStore();
   const tasks = store.tasks;
   const sync = store.sync;
@@ -19,19 +17,19 @@ export function useWorkflowProgress(): WorkflowProgressState {
   useEffect(() => {
     async function syncWithServer() {
       try {
-        await sync(deployment);
+        await sync();
       } catch (error) {
         console.error("Failed to sync with server for progress:", error);
       }
     }
 
     syncWithServer();
-  }, [deployment, sync]);
+  }, [sync]);
 
   // Memoize the calculation based on tasks object
   return useMemo(() => {
     const taskArray = Object.values(tasks).filter(
-      (task) => task.deployment === deployment
+      (task) => task.status === "running"
     );
     const total = taskArray.length;
 
@@ -53,8 +51,8 @@ export function useWorkflowProgress(): WorkflowProgressState {
     let status: RunStatus;
 
     // Check for error tasks first
-    if (taskArray.some((task) => task.status === "error")) {
-      status = "error";
+    if (taskArray.some((task) => task.status === "failed")) {
+      status = "failed";
     }
     // Check if all tasks are complete
     else if (current === total) {
@@ -74,5 +72,5 @@ export function useWorkflowProgress(): WorkflowProgressState {
       total,
       status,
     };
-  }, [tasks, deployment]); // Only recalculate when tasks object reference or deployment changes
+  }, [tasks]); // Only recalculate when tasks object reference changes
 }

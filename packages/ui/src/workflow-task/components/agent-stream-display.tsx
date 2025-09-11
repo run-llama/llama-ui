@@ -77,7 +77,7 @@ export function AgentStreamDisplay({
                 ? "bg-blue-500 animate-pulse"
                 : task.status === "complete"
                   ? "bg-green-500"
-                  : task.status === "error"
+                  : task.status === "failed"
                     ? "bg-red-500"
                     : "bg-gray-400"
             }`}
