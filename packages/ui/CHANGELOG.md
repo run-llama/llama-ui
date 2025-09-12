@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 1.0.2
+
+### Patch Changes
+
+- 6b618d8: Bump workflows-client dependency
+
 ## 1.0.1
 
 ### Patch Changes
