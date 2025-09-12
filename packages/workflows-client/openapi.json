@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Workflows API",
-    "version": "2.1.0"
+    "version": "2.2.0"
   },
   "paths": {
     "/workflows": {
@@ -57,8 +57,8 @@
                 "type": "object",
                 "properties": {
                   "start_event": {
-                    "type": "string",
-                    "description": "Serialized StartEvent in JSON."
+                    "type": "object",
+                    "description": "Plain JSON object representing the start event (e.g., {\"message\": \"...\"})."
                   },
                   "context": {
                     "type": "object",
@@ -127,8 +127,8 @@
                 "type": "object",
                 "properties": {
                   "start_event": {
-                    "type": "string",
-                    "description": "Serialized StartEvent in JSON."
+                    "type": "object",
+                    "description": "Plain JSON object representing the start event (e.g., {\"message\": \"...\"})."
                   },
                   "context": {
                     "type": "object",
@@ -174,6 +174,56 @@
           },
           "404": {
             "description": "Workflow not found"
+          }
+        }
+      }
+    },
+    "/workflows/{name}/schema": {
+      "get": {
+        "summary": "Get JSON schema for start event",
+        "description": "Gets the JSON schema of the start and stop events from the specified workflow and returns it under \"start\" (start event) and \"stop\" (stop event)\n",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Registered workflow name."
+          }
+        ],
+        "requestBody": {
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "JSON schema successfully retrieved for start event",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "start": {
+                      "description": "JSON schema for the start event"
+                    },
+                    "stop": {
+                      "description": "JSON schema for the stop event"
+                    }
+                  },
+                  "required": [
+                    "start",
+                    "stop"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Workflow not found"
+          },
+          "500": {
+            "description": "Error while getting the JSON schema for the start or stop event"
           }
         }
       }
