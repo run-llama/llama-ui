@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 1.0.1
+
+### Patch Changes
+
+- 95b893c: Fix naming issue
+
 ## 1.0.0
 
 ### Major Changes
