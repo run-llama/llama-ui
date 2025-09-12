@@ -73,8 +73,8 @@ importers:
         specifier: ^5.1.1
         version: 5.1.1(react-hook-form@7.60.0(react@18.3.1))
       '@llamaindex/workflows-client':
-        specifier: ^1.1.0
-        version: 1.1.0
+        specifier: ^1.2.0
+        version: 1.2.0
       '@radix-ui/react-accordion':
         specifier: ^1.2.11
         version: 1.2.11(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1038,8 +1038,8 @@ packages:
       zod:
         optional: true
 
-  '@llamaindex/workflows-client@1.1.0':
-    resolution: {integrity: sha512-lLnJMNRfTZfjJbHSOz5FZCIeRiPNsFbmAX0PrYgBvL5u5YhV+spEY0Nx38JqUnnAEoUOylQHjJkfqGLdozlaIg==}
+  '@llamaindex/workflows-client@1.2.0':
+    resolution: {integrity: sha512-TXre1LeVsIPMwWH6HOj1aa9Pch1y/n4RY8njfafJkYbXBD5Ty2obHVwmXU5vFlive5VCfnK2HbZWOeuifuUPkw==}
     engines: {node: '>=18.0.0'}
 
   '@manypkg/find-root@1.1.0':
@@ -5994,7 +5994,7 @@ snapshots:
       rxjs: 7.8.2
       zod: 3.25.76
 
-  '@llamaindex/workflows-client@1.1.0': {}
+  '@llamaindex/workflows-client@1.2.0': {}
 
   '@manypkg/find-root@1.1.0':
     dependencies:
