@@ -21,9 +21,11 @@ export type GetWorkflowsResponse = GetWorkflowsResponses[keyof GetWorkflowsRespo
 export type PostWorkflowsByNameRunData = {
     body?: {
         /**
-         * Serialized StartEvent in JSON.
+         * Plain JSON object representing the start event (e.g., {"message": "..."}).
          */
-        start_event?: string;
+        start_event?: {
+            [key: string]: unknown;
+        };
         /**
          * Serialized workflow Context.
          */
@@ -79,9 +81,11 @@ export type PostWorkflowsByNameRunResponse = PostWorkflowsByNameRunResponses[key
 export type PostWorkflowsByNameRunNowaitData = {
     body?: {
         /**
-         * Serialized StartEvent in JSON.
+         * Plain JSON object representing the start event (e.g., {"message": "..."}).
          */
-        start_event?: string;
+        start_event?: {
+            [key: string]: unknown;
+        };
         /**
          * Serialized workflow Context.
          */
@@ -127,6 +131,47 @@ export type PostWorkflowsByNameRunNowaitResponses = {
 };
 
 export type PostWorkflowsByNameRunNowaitResponse = PostWorkflowsByNameRunNowaitResponses[keyof PostWorkflowsByNameRunNowaitResponses];
+
+export type GetWorkflowsByNameSchemaData = {
+    body?: never;
+    path: {
+        /**
+         * Registered workflow name.
+         */
+        name: string;
+    };
+    query?: never;
+    url: '/workflows/{name}/schema';
+};
+
+export type GetWorkflowsByNameSchemaErrors = {
+    /**
+     * Workflow not found
+     */
+    404: unknown;
+    /**
+     * Error while getting the JSON schema for the start or stop event
+     */
+    500: unknown;
+};
+
+export type GetWorkflowsByNameSchemaResponses = {
+    /**
+     * JSON schema successfully retrieved for start event
+     */
+    200: {
+        /**
+         * JSON schema for the start event
+         */
+        start: unknown;
+        /**
+         * JSON schema for the stop event
+         */
+        stop: unknown;
+    };
+};
+
+export type GetWorkflowsByNameSchemaResponse = GetWorkflowsByNameSchemaResponses[keyof GetWorkflowsByNameSchemaResponses];
 
 export type GetResultsByHandlerIdData = {
     body?: never;
