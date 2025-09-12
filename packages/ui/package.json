@@ -319,7 +319,7 @@
     "zustand": "^5.0.6"
   },
   "peerDependencies": {
-    "@llamaindex/workflows-client": "^1.1.0",
+    "@llamaindex/workflows-client": "^1.2.0",
     "llama-cloud-services": "^0.3.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
