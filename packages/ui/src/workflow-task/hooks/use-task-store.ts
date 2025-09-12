@@ -4,7 +4,7 @@
  */
 
 import { useMemo } from "react";
-import { useLlamaDeployClient } from "../../lib/api-provider";
+import { useWorkflowsClient } from "../../lib/api-provider";
 import { createTaskStore } from "../store/task-store";
 import type { TaskStoreState } from "../store/task-store";
 
@@ -16,7 +16,7 @@ export function useTaskStore(): TaskStoreState;
 export function useTaskStore<T>(selector: (state: TaskStoreState) => T): T;
 
 export function useTaskStore<T>(selector?: (state: TaskStoreState) => T) {
-  const client = useLlamaDeployClient();
+  const client = useWorkflowsClient();
 
   // Create store instance once and reuse
   const store = useMemo(() => {
