@@ -77,13 +77,13 @@ function useApiContext(): ApiContextValue {
   return context;
 }
 
-export function useLlamaDeployClient(): WorkflowsClient {
+export function useWorkflowsClient(): WorkflowsClient {
   const { clients } = useApiContext();
 
   if (!clients.workflowsClient) {
     throw new Error(
       "No workflows client configured. " +
-        "Please ensure llamaDeployClient is configured in ApiProvider."
+        "Please ensure workflowsClient is configured in ApiProvider."
     );
   }
 

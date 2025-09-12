@@ -11,11 +11,10 @@ export {
 // Backward-compatible aliases expected by existing stories/exports
 export {
   createClient as createWorkflowClient,
-  createConfig as createLlamaDeployConfig,
-  type Client as LlamaDeployClient,
+  createConfig as createWorkflowConfig,
+  type Client as WorkflowsClient,
 } from "@llamaindex/workflows-client";
 export { workflowsClient };
-export type WorkflowsClient = typeof workflowsClient;
 
 export {
   createAgentDataClient as createCloudAgentClient,

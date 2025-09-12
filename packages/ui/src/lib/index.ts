@@ -4,7 +4,7 @@
 
 export {
   ApiProvider,
-  useLlamaDeployClient,
+  useWorkflowsClient,
   useCloudApiClient,
   useApiClients,
   createMockClients,
@@ -13,11 +13,12 @@ export {
 } from "./api-provider";
 
 export {
-  createWorkflowClient as createLlamaDeployClient,
-  createLlamaDeployConfig,
+  createWorkflowClient,
+  createWorkflowConfig,
   createCloudAgentClient,
+  workflowsClient,
   cloudApiClient,
-  type LlamaDeployClient,
+  type WorkflowsClient,
   type CloudAgentClient,
   type CloudApiClient,
 } from "./clients";
