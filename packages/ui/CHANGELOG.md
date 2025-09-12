@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 1.0.0
+
+### Major Changes
+
+- 7510770: upgrade workflow v2 client sdk and related hooks
+
 ## 0.5.9
 
 ### Patch Changes
