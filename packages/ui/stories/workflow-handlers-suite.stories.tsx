@@ -141,9 +141,10 @@ function TaskTriggerSection({
                 Task List (click to view details):
               </h4>
               <div className="text-xs text-gray-500">
-                Running: {handlers.filter((t) => t.status === "running").length} |
-                Complete: {handlers.filter((t) => t.status === "complete").length}{" "}
-                | Error: {handlers.filter((t) => t.status === "failed").length}
+                Running: {handlers.filter((t) => t.status === "running").length}{" "}
+                | Complete:{" "}
+                {handlers.filter((t) => t.status === "complete").length} |
+                Error: {handlers.filter((t) => t.status === "failed").length}
               </div>
             </div>
             <div className="max-h-48 overflow-y-auto space-y-1 border rounded-lg">

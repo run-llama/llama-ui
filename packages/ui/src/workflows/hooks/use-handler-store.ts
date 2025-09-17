@@ -13,7 +13,9 @@ let globalStore: ReturnType<typeof createHandlerStore> | null = null;
 
 // Overloaded function signatures for different use cases
 export function useHandlerStore(): HandlerStoreState;
-export function useHandlerStore<T>(selector: (state: HandlerStoreState) => T): T;
+export function useHandlerStore<T>(
+  selector: (state: HandlerStoreState) => T
+): T;
 
 export function useHandlerStore<T>(selector?: (state: HandlerStoreState) => T) {
   const client = useWorkflowsClient();
