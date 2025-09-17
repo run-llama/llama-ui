@@ -1,8 +1,3 @@
-/**
- * Test cases for useWorkflowTaskCreate hook (H1-H2)
- * Based on workflow-task-suite-test-cases.md
- */
-
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { act } from "@testing-library/react";
 import { useWorkflowCreate } from "../../../src/workflows/hooks/use-workflow-create";
@@ -10,7 +5,7 @@ import { renderHookWithProvider } from "../../test-utils";
 import type { WorkflowHandlerSummary } from "../../../src/workflows/types";
 
 // Mock the helper functions
-vi.mock("../../../src/workflow-task/store/helper", () => ({
+vi.mock("../../../src/workflows/store/helper", () => ({
   createTask: vi.fn(),
   fetchHandlerEvents: vi.fn().mockResolvedValue([]),
 }));
@@ -45,7 +40,7 @@ Object.defineProperty(window, "localStorage", {
   value: localStorageMock,
 });
 
-describe("useWorkflowTaskCreate", () => {
+describe("useWorkflowCreate", () => {
   const mockTask: WorkflowHandlerSummary = {
     handler_id: "test-task-1",
     status: "running",

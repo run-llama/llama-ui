@@ -1,14 +1,9 @@
-/**
- * Test cases for useWorkflowProgress hook (H9)
- * Based on workflow-task-suite-test-cases.md
- */
-
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { useWorkflowProgress } from "../../../src/workflows/hooks/use-workflow-progress";
 import { renderHookWithProvider } from "../../test-utils";
 
 // Mock the helper functions to prevent real HTTP calls
-vi.mock("../../../src/workflow-task/store/helper", () => ({
+vi.mock("../../../src/workflows/store/helper", () => ({
   getRunningHandlers: vi.fn().mockResolvedValue([]),
   getExistingHandler: vi.fn(),
   createTask: vi.fn(),

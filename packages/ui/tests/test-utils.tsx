@@ -1,5 +1,5 @@
 /**
- * Test utilities for workflow-task tests
+ * Test utilities for workflows tests
  */
 
 import { type ReactNode } from "react";

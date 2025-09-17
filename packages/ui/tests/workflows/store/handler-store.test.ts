@@ -1,13 +1,8 @@
-/**
- * Test cases for task store functionality
- * Based on workflow-task-suite-test-cases.md
- */
-
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { createHandlerStore } from "../../../src/workflows/store/handler-store";
 /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any */
 import {
-  createHandler as createTaskAPI,
+  createHandler,
   fetchHandlerEvents,
   getRunningHandlers,
 } from "../../../src/workflows/store/helper";
@@ -23,7 +18,7 @@ import type {
 } from "../../../src/workflows/types";
 
 // Mock the helper functions
-vi.mock("../../../src/workflow-task/store/helper");
+vi.mock("../../../src/workflows/store/helper");
 vi.mock("../../../src/lib/shared-streaming", () => ({
   workflowStreamingManager: {
     subscribe: vi.fn(),
@@ -86,12 +81,12 @@ describe("Complete Task Store Tests", () => {
     localStorageMock.clear();
 
     // Setup default mock implementations
-    const mockedCreateTaskAPI = vi.mocked(createTaskAPI);
+    const mockedCreateHandler = vi.mocked(createHandler);
     const mockedFetchHandlerEvents = vi.mocked(fetchHandlerEvents);
     const mockedGetRunningHandlers = vi.mocked(getRunningHandlers);
     const mockedStreaming = vi.mocked(workflowStreamingManager);
 
-    mockedCreateTaskAPI.mockResolvedValue(mockTaskSummary);
+    mockedCreateHandler.mockResolvedValue(mockTaskSummary);
     mockedFetchHandlerEvents.mockResolvedValue([]);
     mockedGetRunningHandlers.mockResolvedValue([]);
     mockedStreaming.isStreamActive.mockReturnValue(false);
@@ -116,7 +111,7 @@ describe("Complete Task Store Tests", () => {
     it("should call createTaskAPI with correct parameters", async () => {
       await testStore.getState().createHandler("test-workflow", "test input");
 
-      expect(createTaskAPI).toHaveBeenCalledWith({
+      expect(createHandler).toHaveBeenCalledWith({
         client: mockClient,
         workflowName: "test-workflow",
         eventData: "test input",

@@ -1,8 +1,3 @@
-/**
- * WorkflowProgressBar Component
- * Based on workflow-task-suite.md specifications
- */
-
 import { useWorkflowProgress } from "../hooks/use-workflow-progress";
 import { Progress } from "../../../base/progress";
 import { FileText, CheckCircle, XCircle, Clock, Loader } from "lucide-react";

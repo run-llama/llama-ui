@@ -1,15 +1,10 @@
-/**
- * Test cases for useWorkflowTask hook (H6-H8)
- * Based on workflow-task-suite-test-cases.md
- */
-
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { act } from "@testing-library/react";
 import { useWorkflowHandler } from "../../../src/workflows/hooks/use-workflow-handler";
 import { renderHookWithProvider } from "../../test-utils";
 
 // Mock the helper functions to prevent real HTTP calls
-vi.mock("../../../src/workflow-task/store/helper", () => ({
+vi.mock("../../../src/workflows/store/helper", () => ({
   getRunningHandlers: vi.fn().mockResolvedValue([]),
   getExistingHandler: vi.fn(),
   createTask: vi.fn(),

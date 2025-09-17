@@ -1,8 +1,3 @@
-/**
- * Types for Workflow Task Suite
- * Based on workflow-task-suite.md specifications
- */
-
 // ===== Core Types =====
 
 export type JSONValue =

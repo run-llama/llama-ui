@@ -1,6 +1,5 @@
 /**
  * WorkflowTrigger Component
- * Based on workflow-task-suite.md specifications
  * A wrapper around FileUploader that creates workflow tasks after file upload
  */
 
