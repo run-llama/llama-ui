@@ -43,6 +43,63 @@ export interface TaskStoreState {
 
 export const createTaskStore = (client: Client) =>
   create<TaskStoreState>()((set, get) => ({
+    // Internal retry state for reconnect logic (not exposed in store state)
+    // Map of taskId -> { attempt count and scheduled timeout }
+    // Using closure variables so they don't trigger re-renders
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - This property is for internal use within the store closure
+    _retryState: new Map<string, { attempt: number; timeoutId: ReturnType<typeof setTimeout> | null }>(),
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - helper to schedule reconnection attempts
+    _scheduleReconnect(taskId: string) {
+      // Ensure task still exists and is running
+      const task = get().tasks[taskId];
+      if (!task || task.status !== "running") return;
+      // Skip if already subscribed
+      if (get().isSubscribed(taskId)) return;
+
+      const retryState = (get() as unknown as { _retryState: Map<string, { attempt: number; timeoutId: ReturnType<typeof setTimeout> | null }>; })._retryState;
+      const current = retryState.get(taskId) || { attempt: 0, timeoutId: null };
+
+      // Clear any existing scheduled timeout before scheduling a new one
+      if (current.timeoutId) {
+        clearTimeout(current.timeoutId);
+      }
+
+      const nextAttempt = current.attempt + 1;
+      const baseMs = 500;
+      const maxMs = 30000;
+      const delay = Math.min(baseMs * 2 ** (nextAttempt - 1), maxMs);
+
+      const timeoutId = setTimeout(() => {
+        // If already resubscribed elsewhere, skip
+        if (get().isSubscribed(taskId)) return;
+        try {
+          get().subscribe(taskId);
+        } catch (err) {
+          // eslint-disable-next-line no-console -- visibility for errors
+          console.error(`Reconnect subscribe failed for ${taskId}:`, err);
+          // Schedule another attempt
+          (get() as unknown as { _scheduleReconnect: (id: string) => void })._scheduleReconnect(taskId);
+        }
+      }, delay);
+
+      retryState.set(taskId, { attempt: nextAttempt, timeoutId });
+    },
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - helper to clear any scheduled reconnection
+    _clearReconnect(taskId: string) {
+      const retryState = (get() as unknown as { _retryState: Map<string, { attempt: number; timeoutId: ReturnType<typeof setTimeout> | null }>; })._retryState;
+      const entry = retryState.get(taskId);
+      if (entry?.timeoutId) {
+        clearTimeout(entry.timeoutId);
+      }
+      if (entry) {
+        retryState.delete(taskId);
+      }
+    },
     // Initial state
     tasks: {},
     events: {},
@@ -137,8 +194,18 @@ export const createTaskStore = (client: Client) =>
         return;
       }
 
+      // Clear any pending reconnect attempts when (re)subscribing
+      (get() as unknown as { _clearReconnect: (id: string) => void })._clearReconnect(taskId);
+
       // Create streaming callback
       const callback: StreamingEventCallback = {
+        onStart: () => {
+          // Reset retry attempts on successful start
+          (get() as unknown as { _retryState: Map<string, { attempt: number; timeoutId: ReturnType<typeof setTimeout> | null }>; })._retryState.set(
+            taskId,
+            { attempt: 0, timeoutId: null }
+          );
+        },
         onData: (event: WorkflowEvent) => {
           // Internal method to append event
           set((state) => ({
@@ -149,6 +216,8 @@ export const createTaskStore = (client: Client) =>
           }));
         },
         onFinish: () => {
+          // Clear any pending reconnect attempts
+          (get() as unknown as { _clearReconnect: (id: string) => void })._clearReconnect(taskId);
           // Update task status to complete
           set((state) => ({
             tasks: {
@@ -166,11 +235,18 @@ export const createTaskStore = (client: Client) =>
           if (
             error.name === "AbortError" ||
             (error.name === "TypeError" &&
-              error.message.includes("network error"))
+              error.message.includes("network error")) ||
+            error.message.includes("Stream aborted")
           ) {
             return;
           }
-          // Update task status to error
+          // Schedule reconnect while task is still running
+          const currentTask = get().tasks[taskId];
+          if (currentTask && currentTask.status === "running") {
+            (get() as unknown as { _scheduleReconnect: (id: string) => void })._scheduleReconnect(taskId);
+            return;
+          }
+          // If not running anymore, mark as failed
           set((state) => ({
             tasks: {
               ...state.tasks,
@@ -193,11 +269,18 @@ export const createTaskStore = (client: Client) =>
         if (
           error.name === "AbortError" ||
           (error.name === "TypeError" &&
-            error.message.includes("network error"))
+            error.message.includes("network error")) ||
+          error.message.includes("Stream aborted")
         ) {
           return;
         }
-        // Update task status to error
+        // On other errors, schedule reconnect while task is running
+        const currentTask = get().tasks[taskId];
+        if (currentTask && currentTask.status === "running") {
+          (get() as unknown as { _scheduleReconnect: (id: string) => void })._scheduleReconnect(taskId);
+          return;
+        }
+        // If not running anymore, mark as failed
         set((state) => ({
           tasks: {
             ...state.tasks,
@@ -217,6 +300,8 @@ export const createTaskStore = (client: Client) =>
 
       const streamKey = `handler:${taskId}`;
       workflowStreamingManager.closeStream(streamKey);
+      // Clear any scheduled reconnect
+      (get() as unknown as { _clearReconnect: (id: string) => void })._clearReconnect(taskId);
     },
 
     isSubscribed: (taskId: string): boolean => {
