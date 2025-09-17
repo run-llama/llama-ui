@@ -46,7 +46,7 @@ vi.mock("../../src/item-grid/built-in-columns", () => ({
 describe("extracted-data-columns", () => {
   const mockItem: TypedAgentData<ExtractedData<Record<string, unknown>>> = {
     id: "test-id",
-    agentUrlId: "test-agent",
+    deploymentName: "test-agent",
     createdAt: new Date("2024-01-01T00:00:00Z"),
     updatedAt: new Date("2024-01-01T00:00:00Z"),
     data: {
@@ -191,7 +191,7 @@ describe("extracted-data-columns", () => {
     it("counts only leaf confidence values below threshold", () => {
       const item: TypedAgentData<ExtractedData<JSONObject>> = {
         id: "test-id",
-        agentUrlId: "test-agent",
+        deploymentName: "test-agent",
         createdAt: new Date("2024-01-01T00:00:00Z"),
         updatedAt: new Date("2024-01-01T00:00:00Z"),
         data: {
