@@ -1,14 +1,9 @@
-/**
- * useWorkflowTaskCreate Hook
- * Based on workflow-task-suite.md specifications
- */
-
 import { useState, useCallback } from "react";
 import { useHandlerStore } from "./use-handler-store";
 import type { JSONValue, WorkflowHandlerSummary } from "../types";
 
-interface UseWorkflowTaskCreateResult {
-  createRun: (
+interface UseWorkflowCreateResult {
+  runWorkflow: (
     workflowName: string,
     input: JSONValue
   ) => Promise<WorkflowHandlerSummary>;
@@ -16,12 +11,12 @@ interface UseWorkflowTaskCreateResult {
   error: Error | null;
 }
 
-export function useWorkflowCreate(): UseWorkflowTaskCreateResult {
+export function useWorkflowCreate(): UseWorkflowCreateResult {
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const storeCreateTask = useHandlerStore((state) => state.createHandler);
+  const storeCreateHandler = useHandlerStore((state) => state.createHandler);
 
-  const createRun = useCallback(
+  const runWorkflow = useCallback(
     async (
       workflowName: string,
       input: JSONValue
@@ -30,11 +25,11 @@ export function useWorkflowCreate(): UseWorkflowTaskCreateResult {
       setError(null);
 
       try {
-        // Call store method to create task (handles API call and store update)
-        const task = await storeCreateTask(workflowName, input);
+        // Call store method to create handler (handles API call and store update)
+        const handler = await storeCreateHandler(workflowName, input);
 
         setIsCreating(false);
-        return task;
+        return handler;
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
         setError(error);
@@ -42,11 +37,11 @@ export function useWorkflowCreate(): UseWorkflowTaskCreateResult {
         throw error;
       }
     },
-    [storeCreateTask]
+    [storeCreateHandler]
   );
 
   return {
-    createRun: createRun,
+    runWorkflow,
     isCreating,
     error,
   };

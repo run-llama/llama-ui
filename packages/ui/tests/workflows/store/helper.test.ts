@@ -9,9 +9,9 @@ import {
   getExistingHandler,
   createHandler,
   sendEventToHandler,
-} from "../../../src/workflow-task/store/helper";
+} from "../../../src/workflows/store/helper";
 import { workflowStreamingManager } from "../../../src/lib/shared-streaming";
-import type { WorkflowEvent } from "../../../src/workflow-task/types";
+import type { WorkflowEvent } from "../../../src/workflows/types";
 
 // Mock dependencies
 vi.mock("@llamaindex/workflows-client");
@@ -186,7 +186,7 @@ describe("Helper Functions Tests", () => {
       };
 
       const { fetchHandlerEvents } = await import(
-        "../../../src/workflow-task/store/helper"
+        "../../../src/workflows/store/helper"
       );
 
       const result = await fetchHandlerEvents(
@@ -244,7 +244,7 @@ describe("Helper Functions Tests", () => {
       );
 
       const { fetchHandlerEvents } = await import(
-        "../../../src/workflow-task/store/helper"
+        "../../../src/workflows/store/helper"
       );
 
       await expect(
@@ -279,7 +279,7 @@ describe("Helper Functions Tests", () => {
       );
 
       const { fetchHandlerEvents } = await import(
-        "../../../src/workflow-task/store/helper"
+        "../../../src/workflows/store/helper"
       );
 
       await expect(

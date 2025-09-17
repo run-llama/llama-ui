@@ -22,7 +22,7 @@ export interface WorkflowTriggerProps
   ) => JSONValue;
 
   // Override onSuccess to provide workflow task result
-  onSuccess?: (task: WorkflowHandlerSummary) => void;
+  onSuccess?: (handler: WorkflowHandlerSummary) => void;
   onError?: (error: Error) => void;
 }
 
@@ -35,11 +35,11 @@ export function WorkflowTrigger({
   description = "Upload files to start workflow processing",
   ...fileUploaderProps
 }: WorkflowTriggerProps) {
-  const { createRun: createTask, isCreating, error } = useWorkflowCreate();
+  const { runWorkflow: createRun, isCreating, error } = useWorkflowCreate();
 
   useEffect(() => {
     if (error) {
-      toast.error(`Failed to create workflow task: ${error.message}`);
+      toast.error(`Failed to create workflow handler: ${error.message}`);
     }
   }, [error]);
 
@@ -49,7 +49,7 @@ export function WorkflowTrigger({
         // If customWorkflowInput is provided, use it to create the workflow input
         if (customWorkflowInput) {
           const workflowInput = customWorkflowInput(data, fieldValues);
-          const task = await createTask(workflowName, workflowInput);
+          const task = await createRun(workflowName, workflowInput);
           toast.success("Workflow task created successfully!");
           onSuccess?.(task);
           return;
@@ -67,7 +67,7 @@ export function WorkflowTrigger({
         } as JSONValue;
 
         // Create workflow task
-        const task = await createTask(workflowName, workflowInput);
+        const task = await createRun(workflowName, workflowInput);
 
         toast.success("Workflow task created successfully!");
         onSuccess?.(task);
@@ -78,7 +78,7 @@ export function WorkflowTrigger({
         throw error; // Re-throw to let FileUploader handle UI state
       }
     },
-    [workflowName, createTask, onSuccess, onError, customWorkflowInput]
+    [workflowName, createRun, onSuccess, onError, customWorkflowInput]
   );
 
   return (

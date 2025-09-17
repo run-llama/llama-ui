@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { useWorkflowProgress } from "../../../src/workflow-task/hooks/use-workflow-progress";
+import { useWorkflowProgress } from "../../../src/workflows/hooks/use-workflow-progress";
 import { renderHookWithProvider } from "../../test-utils";
 
 // Mock the helper functions to prevent real HTTP calls

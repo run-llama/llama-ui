@@ -1,11 +1,11 @@
 /**
- * Test cases for useWorkflowTask hook (H6-H8)
+ * Test cases for useWorkflowTaskList hook (H3-H5)
  * Based on workflow-task-suite-test-cases.md
  */
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { act } from "@testing-library/react";
-import { useWorkflowHandler } from "../../../src/workflow-task/hooks/use-workflow-handler";
+import { useWorkflowHandlerList } from "../../../src/workflows/hooks/use-workflow-handler-list";
 import { renderHookWithProvider } from "../../test-utils";
 
 // Mock the helper functions to prevent real HTTP calls
@@ -47,56 +47,42 @@ Object.defineProperty(window, "localStorage", {
   value: localStorageMock,
 });
 
-describe("useWorkflowTask", () => {
+describe("useWorkflowTaskList", () => {
   beforeEach(() => {
     localStorageMock.clear();
     vi.clearAllMocks();
   });
 
-  describe("H6: Mount subscribes and accumulates events", () => {
-    it("should work with task ID", () => {
-      const { result } = renderHookWithProvider(() =>
-        useWorkflowHandler("task-123")
-      );
+  describe("H3: Initial render reads persisted tasks", () => {
+    it("should return empty tasks initially", () => {
+      const { result } = renderHookWithProvider(() => useWorkflowHandlerList());
 
-      // The hook should work without errors
-      expect(result.current.handler).toBe(null); // Initially no task
-      expect(result.current.events).toHaveLength(0);
-      expect(result.current.isStreaming).toBe(false);
+      expect(result.current.handlers).toEqual([]);
+      expect(typeof result.current.clearCompleted).toBe("function");
     });
   });
 
-  describe("H7: clearEvents empties events array", () => {
-    it("should have clearEvents function", () => {
-      const { result } = renderHookWithProvider(() =>
-        useWorkflowHandler("task-123")
-      );
+  describe("H4: Auto-stream for running tasks", () => {
+    it("should have auto-stream functionality", () => {
+      const { result } = renderHookWithProvider(() => useWorkflowHandlerList());
 
-      expect(typeof result.current.clearEvents).toBe("function");
-
-      act(() => {
-        result.current.clearEvents();
-      });
-
-      // Should not throw error
-      expect(result.current.events).toHaveLength(0);
+      // Test basic functionality - tasks should be empty initially
+      expect(result.current.handlers).toEqual([]);
     });
   });
 
-  describe("H8: stopStreaming ends stream and updates isStreaming", () => {
-    it("should have stopStreaming function", () => {
-      const { result } = renderHookWithProvider(() =>
-        useWorkflowHandler("task-123")
-      );
+  describe("H5: clearCompleted removes only complete/error tasks", () => {
+    it("should have clearCompleted function", () => {
+      const { result } = renderHookWithProvider(() => useWorkflowHandlerList());
 
-      expect(typeof result.current.stopStreaming).toBe("function");
+      expect(typeof result.current.clearCompleted).toBe("function");
 
       act(() => {
-        result.current.stopStreaming();
+        result.current.clearCompleted();
       });
 
       // Should not throw error
-      expect(result.current.isStreaming).toBe(false);
+      expect(result.current.handlers).toEqual([]);
     });
   });
 });

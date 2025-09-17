@@ -6,20 +6,20 @@ import {
   WorkflowTrigger,
   WorkflowProgressBar,
   useHandlerStore,
-} from "../src/workflow-task";
-import { AgentStreamDisplay } from "../src/workflow-task/components/agent-stream-display";
+} from "../src/workflows";
+import { AgentStreamDisplay } from "../src/workflows/components/agent-stream-display";
 import { ApiProvider, createMockClients } from "../src/lib";
 
 // Task Trigger & Progress Component
 function TaskTriggerSection({
-  onTaskClick,
-  selectedTaskId,
+  onHandlerClick,
+  selectedHandlerId,
 }: {
-  onTaskClick: (taskId: string) => void;
-  selectedTaskId: string | null;
+  onHandlerClick: (handlerId: string) => void;
+  selectedHandlerId: string | null;
 }) {
-  const { handlers: tasks, clearCompleted } = useWorkflowHandlerList();
-  const { createHandler: createTask } = useHandlerStore();
+  const { handlers, clearCompleted } = useWorkflowHandlerList();
+  const { createHandler } = useHandlerStore();
   const [batchSize, setBatchSize] = useState(3);
   const [isCreatingBatch, setIsCreatingBatch] = useState(false);
 
@@ -61,7 +61,7 @@ function TaskTriggerSection({
 
         // Stagger the creation slightly to see the effect
         await new Promise((resolve) => setTimeout(resolve, index * 100));
-        return createTask("test-workflow", input);
+        return createHandler("test-workflow", input);
       });
 
       await Promise.all(promises);
@@ -103,7 +103,7 @@ function TaskTriggerSection({
             >
               {isCreatingBatch ? "Creating..." : `Create ${batchSize} Tasks`}
             </button>
-            {tasks.length > 0 && (
+            {handlers.length > 0 && (
               <button
                 onClick={clearCompleted}
                 className="px-4 py-2 text-sm font-medium rounded bg-gray-600 text-white hover:bg-gray-700"
@@ -127,10 +127,10 @@ function TaskTriggerSection({
       </div>
 
       {/* Progress Section with WorkflowProgressBar */}
-      {tasks.length > 0 && (
+      {handlers.length > 0 && (
         <div>
           <h3 className="text-lg font-medium mb-3">
-            Overall Progress ({tasks.length} tasks)
+            Overall Progress ({handlers.length} tasks)
           </h3>
           <WorkflowProgressBar />
 
@@ -141,14 +141,14 @@ function TaskTriggerSection({
                 Task List (click to view details):
               </h4>
               <div className="text-xs text-gray-500">
-                Running: {tasks.filter((t) => t.status === "running").length} |
-                Complete: {tasks.filter((t) => t.status === "complete").length}{" "}
-                | Error: {tasks.filter((t) => t.status === "failed").length}
+                Running: {handlers.filter((t) => t.status === "running").length} |
+                Complete: {handlers.filter((t) => t.status === "complete").length}{" "}
+                | Error: {handlers.filter((t) => t.status === "failed").length}
               </div>
             </div>
             <div className="max-h-48 overflow-y-auto space-y-1 border rounded-lg">
-              {tasks.map((task, index) => {
-                const isSelected = selectedTaskId === task.handler_id;
+              {handlers.map((task, index) => {
+                const isSelected = selectedHandlerId === task.handler_id;
                 return (
                   <div
                     key={task.handler_id}
@@ -157,7 +157,7 @@ function TaskTriggerSection({
                         ? "bg-blue-50 border-l-4 border-l-blue-500"
                         : "hover:bg-gray-50"
                     }`}
-                    onClick={() => onTaskClick(task.handler_id)}
+                    onClick={() => onHandlerClick(task.handler_id)}
                   >
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       <span className="text-xs text-gray-500 flex-shrink-0">
@@ -318,8 +318,8 @@ function WorkflowTaskSuiteInternal() {
       {/* Main Content */}
       <div className="flex h-[800px] border rounded-lg">
         <TaskTriggerSection
-          onTaskClick={setSelectedTaskId}
-          selectedTaskId={selectedTaskId}
+          onHandlerClick={setSelectedTaskId}
+          selectedHandlerId={selectedTaskId}
         />
         <TaskDetailSection taskId={selectedTask?.handler_id || null} />
       </div>

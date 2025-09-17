@@ -5,9 +5,9 @@
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { act } from "@testing-library/react";
-import { useWorkflowCreate } from "../../../src/workflow-task/hooks/use-workflow-create";
+import { useWorkflowCreate } from "../../../src/workflows/hooks/use-workflow-create";
 import { renderHookWithProvider } from "../../test-utils";
-import type { WorkflowHandlerSummary } from "../../../src/workflow-task/types";
+import type { WorkflowHandlerSummary } from "../../../src/workflows/types";
 
 // Mock the helper functions
 vi.mock("../../../src/workflow-task/store/helper", () => ({
@@ -61,7 +61,7 @@ describe("useWorkflowTaskCreate", () => {
     it("should have isCreating true then false, and return created task", async () => {
       // Mock successful API response
       const { createHandler: createTaskAPI } = await import(
-        "../../../src/workflow-task/store/helper"
+        "../../../src/workflows/store/helper"
       );
       vi.mocked(createTaskAPI).mockResolvedValue(mockTask);
 
@@ -74,7 +74,7 @@ describe("useWorkflowTaskCreate", () => {
       // Start creation
       let createPromise: Promise<WorkflowHandlerSummary>;
       act(() => {
-        createPromise = result.current.createRun(
+        createPromise = result.current.runWorkflow(
           "test-workflow",
           "test input"
         );
@@ -109,7 +109,7 @@ describe("useWorkflowTaskCreate", () => {
     it("should capture error and set error state", async () => {
       // Mock API error
       const { createHandler: createTaskAPI } = await import(
-        "../../../src/workflow-task/store/helper"
+        "../../../src/workflows/store/helper"
       );
       const testError = new Error("API Error");
       vi.mocked(createTaskAPI).mockRejectedValue(testError);
@@ -123,7 +123,7 @@ describe("useWorkflowTaskCreate", () => {
       // Start creation that will fail
       let createPromise: Promise<WorkflowHandlerSummary>;
       act(() => {
-        createPromise = result.current.createRun(
+        createPromise = result.current.runWorkflow(
           "test-workflow",
           "test input"
         );

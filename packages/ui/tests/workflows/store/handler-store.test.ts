@@ -4,13 +4,13 @@
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import { createHandlerStore } from "../../../src/workflow-task/store/handler-store";
+import { createHandlerStore } from "../../../src/workflows/store/handler-store";
 /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any */
 import {
   createHandler as createTaskAPI,
   fetchHandlerEvents,
   getRunningHandlers,
-} from "../../../src/workflow-task/store/helper";
+} from "../../../src/workflows/store/helper";
 import { workflowStreamingManager } from "../../../src/lib/shared-streaming";
 import {
   createClient,
@@ -20,7 +20,7 @@ import {
 import type {
   WorkflowHandlerSummary,
   WorkflowEvent,
-} from "../../../src/workflow-task/types";
+} from "../../../src/workflows/types";
 
 // Mock the helper functions
 vi.mock("../../../src/workflow-task/store/helper");
