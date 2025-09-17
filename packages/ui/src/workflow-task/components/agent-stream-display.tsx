@@ -15,7 +15,7 @@ import {
   Download,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../base/card";
-import { useWorkflowTask } from "../hooks/use-workflow-task";
+import { useWorkflowHandler } from "../hooks/use-workflow-handler";
 import type { WorkflowEvent } from "../types";
 
 const iconPool = [
@@ -46,7 +46,7 @@ export function AgentStreamDisplay({
   maxEvents = 20,
   className,
 }: AgentStreamDisplayProps) {
-  const { task, events } = useWorkflowTask(taskId, true);
+  const { handler: task, events } = useWorkflowHandler(taskId, true);
 
   // Filter and limit events to show only AgentStream events
   const agentEvents = useMemo(() => {

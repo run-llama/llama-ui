@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import React, { useState } from "react";
 import {
-  useWorkflowTaskList,
-  useWorkflowTask,
+  useWorkflowHandlerList,
+  useWorkflowHandler,
   WorkflowTrigger,
   WorkflowProgressBar,
-  useTaskStore,
+  useHandlerStore,
 } from "../src/workflow-task";
 import { AgentStreamDisplay } from "../src/workflow-task/components/agent-stream-display";
 import { ApiProvider, createMockClients } from "../src/lib";
@@ -18,8 +18,8 @@ function TaskTriggerSection({
   onTaskClick: (taskId: string) => void;
   selectedTaskId: string | null;
 }) {
-  const { tasks, clearCompleted } = useWorkflowTaskList();
-  const { createTask } = useTaskStore();
+  const { handlers: tasks, clearCompleted } = useWorkflowHandlerList();
+  const { createHandler: createTask } = useHandlerStore();
   const [batchSize, setBatchSize] = useState(3);
   const [isCreatingBatch, setIsCreatingBatch] = useState(false);
 
@@ -199,7 +199,7 @@ function TaskTriggerSection({
 // Task Detail Component with AgentStreamDisplay
 function TaskDetailSection({ taskId }: { taskId: string | null }) {
   // Always call hooks at the top level
-  const taskDetail = useWorkflowTask(taskId || "");
+  const taskDetail = useWorkflowHandler(taskId || "");
 
   if (!taskId) {
     return (
@@ -211,7 +211,7 @@ function TaskDetailSection({ taskId }: { taskId: string | null }) {
 
   // Task detail information available in taskDetail object
 
-  if (!taskDetail.task) {
+  if (!taskDetail.handler) {
     return (
       <div className="p-6 w-1/2 flex items-center justify-center text-gray-500">
         Loading task details...
@@ -243,22 +243,22 @@ function TaskDetailSection({ taskId }: { taskId: string | null }) {
         <div className="bg-gray-50 rounded-lg p-4 space-y-3">
           <div>
             <span className="font-medium">Task ID:</span>{" "}
-            {taskDetail.task.handler_id}
+            {taskDetail.handler.handler_id}
           </div>
           <div>
             <span className="font-medium">Status:</span>
             <span
               className={`ml-2 px-2 py-1 rounded text-sm ${
-                taskDetail.task.status === "complete"
+                taskDetail.handler.status === "complete"
                   ? "bg-green-100 text-green-800"
-                  : taskDetail.task.status === "failed"
+                  : taskDetail.handler.status === "failed"
                     ? "bg-red-100 text-red-800"
-                    : taskDetail.task.status === "running"
+                    : taskDetail.handler.status === "running"
                       ? "bg-blue-100 text-blue-800"
                       : "bg-gray-100 text-gray-800"
               }`}
             >
-              {taskDetail.task.status}
+              {taskDetail.handler.status}
             </span>
           </div>
           <div>
@@ -284,7 +284,7 @@ function TaskDetailSection({ taskId }: { taskId: string | null }) {
 
       {/* Agent Stream - use taskId instead of events */}
       <AgentStreamDisplay
-        taskId={taskDetail.task.handler_id}
+        taskId={taskDetail.handler.handler_id}
         title="Processing Steps"
         className="mb-4"
       />
@@ -294,7 +294,7 @@ function TaskDetailSection({ taskId }: { taskId: string | null }) {
 
 // Internal Suite Component (uses hooks inside Provider)
 function WorkflowTaskSuiteInternal() {
-  const { tasks } = useWorkflowTaskList();
+  const { handlers: tasks } = useWorkflowHandlerList();
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   // Get the selected task or the most recent task for details

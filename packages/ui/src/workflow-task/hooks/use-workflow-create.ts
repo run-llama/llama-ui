@@ -4,11 +4,11 @@
  */
 
 import { useState, useCallback } from "react";
-import { useTaskStore } from "./use-task-store";
+import { useHandlerStore } from "./use-handler-store";
 import type { JSONValue, WorkflowHandlerSummary } from "../types";
 
 interface UseWorkflowTaskCreateResult {
-  createTask: (
+  createRun: (
     workflowName: string,
     input: JSONValue
   ) => Promise<WorkflowHandlerSummary>;
@@ -16,12 +16,12 @@ interface UseWorkflowTaskCreateResult {
   error: Error | null;
 }
 
-export function useWorkflowTaskCreate(): UseWorkflowTaskCreateResult {
+export function useWorkflowCreate(): UseWorkflowTaskCreateResult {
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const storeCreateTask = useTaskStore((state) => state.createTask);
+  const storeCreateTask = useHandlerStore((state) => state.createHandler);
 
-  const createTask = useCallback(
+  const createRun = useCallback(
     async (
       workflowName: string,
       input: JSONValue
@@ -46,7 +46,7 @@ export function useWorkflowTaskCreate(): UseWorkflowTaskCreateResult {
   );
 
   return {
-    createTask,
+    createRun: createRun,
     isCreating,
     error,
   };

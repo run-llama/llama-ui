@@ -5,7 +5,7 @@
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { act } from "@testing-library/react";
-import { useWorkflowTaskCreate } from "../../../src/workflow-task/hooks/use-workflow-task-create";
+import { useWorkflowCreate } from "../../../src/workflow-task/hooks/use-workflow-create";
 import { renderHookWithProvider } from "../../test-utils";
 import type { WorkflowHandlerSummary } from "../../../src/workflow-task/types";
 
@@ -60,12 +60,12 @@ describe("useWorkflowTaskCreate", () => {
   describe("H1: Success creates and writes to store", () => {
     it("should have isCreating true then false, and return created task", async () => {
       // Mock successful API response
-      const { createTask: createTaskAPI } = await import(
+      const { createHandler: createTaskAPI } = await import(
         "../../../src/workflow-task/store/helper"
       );
       vi.mocked(createTaskAPI).mockResolvedValue(mockTask);
 
-      const { result } = renderHookWithProvider(() => useWorkflowTaskCreate());
+      const { result } = renderHookWithProvider(() => useWorkflowCreate());
 
       // Initial state
       expect(result.current.isCreating).toBe(false);
@@ -74,7 +74,7 @@ describe("useWorkflowTaskCreate", () => {
       // Start creation
       let createPromise: Promise<WorkflowHandlerSummary>;
       act(() => {
-        createPromise = result.current.createTask(
+        createPromise = result.current.createRun(
           "test-workflow",
           "test input"
         );
@@ -108,13 +108,13 @@ describe("useWorkflowTaskCreate", () => {
   describe("H2: Backend error returns error and does not write store", () => {
     it("should capture error and set error state", async () => {
       // Mock API error
-      const { createTask: createTaskAPI } = await import(
+      const { createHandler: createTaskAPI } = await import(
         "../../../src/workflow-task/store/helper"
       );
       const testError = new Error("API Error");
       vi.mocked(createTaskAPI).mockRejectedValue(testError);
 
-      const { result } = renderHookWithProvider(() => useWorkflowTaskCreate());
+      const { result } = renderHookWithProvider(() => useWorkflowCreate());
 
       // Initial state
       expect(result.current.error).toBe(null);
@@ -123,7 +123,7 @@ describe("useWorkflowTaskCreate", () => {
       // Start creation that will fail
       let createPromise: Promise<WorkflowHandlerSummary>;
       act(() => {
-        createPromise = result.current.createTask(
+        createPromise = result.current.createRun(
           "test-workflow",
           "test input"
         );

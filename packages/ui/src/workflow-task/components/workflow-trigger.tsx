@@ -7,7 +7,7 @@
 import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
 import { FileUploader, type FileUploaderProps } from "../../file-uploader";
-import { useWorkflowTaskCreate } from "../hooks/use-workflow-task-create";
+import { useWorkflowCreate } from "../hooks/use-workflow-create";
 import type { FileUploadData } from "../../file-uploader/use-file-upload";
 import { JSONValue, WorkflowHandlerSummary } from "../types";
 
@@ -35,7 +35,7 @@ export function WorkflowTrigger({
   description = "Upload files to start workflow processing",
   ...fileUploaderProps
 }: WorkflowTriggerProps) {
-  const { createTask, isCreating, error } = useWorkflowTaskCreate();
+  const { createRun: createTask, isCreating, error } = useWorkflowCreate();
 
   useEffect(() => {
     if (error) {

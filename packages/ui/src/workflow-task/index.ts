@@ -1,8 +1,3 @@
-/**
- * Workflow Task Suite - Main Export
- * Based on workflow-task-suite.md specifications
- */
-
 // Types
 export type {
   WorkflowHandlerSummary,
@@ -12,15 +7,15 @@ export type {
 } from "./types";
 
 // Store (deprecated - use hooks instead)
-export { createTaskStore } from "./store/task-store";
+export { createHandlerStore } from "./store/handler-store";
 
 // Hooks
 export {
-  useWorkflowTaskCreate,
-  useWorkflowTaskList,
-  useWorkflowTask,
+  useWorkflowCreate,
+  useWorkflowHandlerList,
+  useWorkflowHandler,
   useWorkflowProgress,
-  useTaskStore,
+  useHandlerStore,
 } from "./hooks";
 
 // Components

@@ -1,25 +1,20 @@
-/**
- * useWorkflowTaskList Hook
- * Based on workflow-task-suite.md specifications
- */
-
 import { useEffect, useMemo, useState } from "react";
-import { useTaskStore } from "./use-task-store";
+import { useHandlerStore } from "./use-handler-store";
 import type { WorkflowHandlerSummary } from "../types";
 
-interface UseWorkflowTaskListResult {
-  tasks: WorkflowHandlerSummary[];
+interface UseWorkflowHandlerListResult {
+  handlers: WorkflowHandlerSummary[];
   clearCompleted: () => void;
   loading: boolean;
   error: string | null;
 }
 
-export function useWorkflowTaskList(): UseWorkflowTaskListResult {
+export function useWorkflowHandlerList(): UseWorkflowHandlerListResult {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const store = useTaskStore();
-  const tasksRecord = store.tasks;
+  const store = useHandlerStore();
+  const handlersRecord = store.handlers;
   const clearCompleted = store.clearCompleted;
   const sync = store.sync;
 
@@ -44,13 +39,13 @@ export function useWorkflowTaskList(): UseWorkflowTaskListResult {
   }, [sync]);
 
   // Memoize tasks array and filtering based on tasksRecord
-  const filteredTasks = useMemo(() => {
-    const allTasks = Object.values(tasksRecord);
-    return allTasks;
-  }, [tasksRecord]);
+  const filteredHandlers = useMemo(() => {
+    const allHandlers = Object.values(handlersRecord);
+    return allHandlers;
+  }, [handlersRecord]);
 
   return {
-    tasks: filteredTasks,
+    handlers: filteredHandlers,
     clearCompleted,
     loading,
     error,

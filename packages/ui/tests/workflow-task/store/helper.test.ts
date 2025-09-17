@@ -7,7 +7,7 @@ import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import {
   getRunningHandlers,
   getExistingHandler,
-  createTask,
+  createHandler,
   sendEventToHandler,
 } from "../../../src/workflow-task/store/helper";
 import { workflowStreamingManager } from "../../../src/lib/shared-streaming";
@@ -101,7 +101,7 @@ describe("Helper Functions Tests", () => {
         data: { handler_id: "h-1", status: "started" },
       } as any);
 
-      const result = await createTask({
+      const result = await createHandler({
         client: mockClient,
         workflowName: "test-workflow",
         eventData: { test: "data" },
