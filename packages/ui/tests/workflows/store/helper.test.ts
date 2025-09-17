@@ -111,7 +111,7 @@ describe("Helper Functions Tests", () => {
       expect(postWorkflowsByNameRunNowait).toHaveBeenCalledWith({
         client: mockClient,
         path: { name: "test-workflow" },
-        body: { start_event: JSON.stringify({ test: "data" }) },
+        body: { start_event: { test: "data" } },
       });
     });
   });
