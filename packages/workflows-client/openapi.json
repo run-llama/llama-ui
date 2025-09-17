@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Workflows API",
-    "version": "2.2.0"
+    "version": "2.2.2"
   },
   "paths": {
     "/workflows": {
