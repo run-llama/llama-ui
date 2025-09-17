@@ -6,7 +6,7 @@ import type { WorkflowHandlerSummary } from "../../../src/workflows/types";
 
 // Mock the helper functions
 vi.mock("../../../src/workflows/store/helper", () => ({
-  createTask: vi.fn(),
+  createHandler: vi.fn(),
   fetchHandlerEvents: vi.fn().mockResolvedValue([]),
 }));
 
@@ -41,7 +41,7 @@ Object.defineProperty(window, "localStorage", {
 });
 
 describe("useWorkflowCreate", () => {
-  const mockTask: WorkflowHandlerSummary = {
+  const mockHandler: WorkflowHandlerSummary = {
     handler_id: "test-task-1",
     status: "running",
   };
@@ -55,10 +55,10 @@ describe("useWorkflowCreate", () => {
   describe("H1: Success creates and writes to store", () => {
     it("should have isCreating true then false, and return created task", async () => {
       // Mock successful API response
-      const { createHandler: createTaskAPI } = await import(
+      const { createHandler } = await import(
         "../../../src/workflows/store/helper"
       );
-      vi.mocked(createTaskAPI).mockResolvedValue(mockTask);
+      vi.mocked(createHandler).mockResolvedValue(mockHandler);
 
       const { result } = renderHookWithProvider(() => useWorkflowCreate());
 
@@ -89,10 +89,10 @@ describe("useWorkflowCreate", () => {
       expect(result.current.error).toBe(null);
 
       // Verify the created task is returned correctly
-      expect(createdTask!.handler_id).toBe(mockTask.handler_id);
+      expect(createdTask!.handler_id).toBe(mockHandler.handler_id);
 
       // Verify the API was called correctly
-      expect(createTaskAPI).toHaveBeenCalledWith({
+      expect(createHandler).toHaveBeenCalledWith({
         client: expect.any(Object),
         workflowName: "test-workflow",
         eventData: "test input",
@@ -103,11 +103,11 @@ describe("useWorkflowCreate", () => {
   describe("H2: Backend error returns error and does not write store", () => {
     it("should capture error and set error state", async () => {
       // Mock API error
-      const { createHandler: createTaskAPI } = await import(
+      const { createHandler } = await import(
         "../../../src/workflows/store/helper"
       );
       const testError = new Error("API Error");
-      vi.mocked(createTaskAPI).mockRejectedValue(testError);
+      vi.mocked(createHandler).mockRejectedValue(testError);
 
       const { result } = renderHookWithProvider(() => useWorkflowCreate());
 
@@ -141,7 +141,7 @@ describe("useWorkflowCreate", () => {
       expect(result.current.error).toBe(testError);
 
       // Verify the API was called
-      expect(createTaskAPI).toHaveBeenCalledWith({
+      expect(createHandler).toHaveBeenCalledWith({
         client: expect.any(Object),
         workflowName: "test-workflow",
         eventData: "test input",
