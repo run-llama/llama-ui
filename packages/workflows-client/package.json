@@ -1,6 +1,6 @@
 {
   "name": "@llamaindex/workflows-client",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "TypeScript client for LlamaIndex Workflows server",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
