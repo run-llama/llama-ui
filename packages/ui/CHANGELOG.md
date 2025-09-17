@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 1.0.3
+
+### Patch Changes
+
+- 72e8b9c: Update llama-cloud-services dependency to encourage moving off of deprecated agent_url_id
+
 ## 1.0.2
 
 ### Patch Changes

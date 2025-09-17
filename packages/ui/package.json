@@ -1,6 +1,6 @@
 {
   "name": "@llamaindex/ui",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A comprehensive UI component library built with React, TypeScript, and Tailwind CSS for LlamaIndex applications",
   "keywords": [
     "react",
