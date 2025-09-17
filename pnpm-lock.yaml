@@ -257,8 +257,8 @@ importers:
         specifier: ^26.1.0
         version: 26.1.0(canvas@3.1.2)
       llama-cloud-services:
-        specifier: ^0.3.3
-        version: 0.3.3(@llamaindex/core@0.6.14)(@llamaindex/env@0.1.30)(@llamaindex/workflow-core@0.4.6(next@15.4.1(@babel/core@7.28.0)(@playwright/test@1.54.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(p-retry@6.2.1)(rxjs@7.8.2)(zod@3.25.76))
+        specifier: ^0.3.6
+        version: 0.3.6(@llamaindex/core@0.6.14)(@llamaindex/env@0.1.30)(@llamaindex/workflow-core@0.4.6(next@15.4.1(@babel/core@7.28.0)(@playwright/test@1.54.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(p-retry@6.2.1)(rxjs@7.8.2)(zod@3.25.76))
       msw:
         specifier: ^2.10.2
         version: 2.10.4(@types/node@20.19.8)(typescript@5.8.3)
@@ -3715,8 +3715,8 @@ packages:
   lines-and-columns@1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
 
-  llama-cloud-services@0.3.3:
-    resolution: {integrity: sha512-WW79Pa2L6wiMtSfZrEWv/CEGbNzC8YQetBeDxMCwquK5wYT/YC+7Aju/MJnB/bGY+fHJVeONJf+9TOOjNFYnpA==}
+  llama-cloud-services@0.3.6:
+    resolution: {integrity: sha512-88DU4AS2U+4oDFtTnJBudRXGpm+IZ4IhlcIkIm/Gt1hAwu/6iGNWRXu/6rl4knFwsJ8lA+UoIQ+5fPs5+SqJow==}
     peerDependencies:
       '@llamaindex/core': ^0.6.19
       '@llamaindex/env': ^0.1.30
@@ -8866,7 +8866,7 @@ snapshots:
 
   lines-and-columns@1.2.4: {}
 
-  llama-cloud-services@0.3.3(@llamaindex/core@0.6.14)(@llamaindex/env@0.1.30)(@llamaindex/workflow-core@0.4.6(next@15.4.1(@babel/core@7.28.0)(@playwright/test@1.54.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(p-retry@6.2.1)(rxjs@7.8.2)(zod@3.25.76)):
+  llama-cloud-services@0.3.6(@llamaindex/core@0.6.14)(@llamaindex/env@0.1.30)(@llamaindex/workflow-core@0.4.6(next@15.4.1(@babel/core@7.28.0)(@playwright/test@1.54.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(p-retry@6.2.1)(rxjs@7.8.2)(zod@3.25.76)):
     dependencies:
       '@llamaindex/core': 0.6.14
       '@llamaindex/env': 0.1.30

@@ -50,7 +50,7 @@ const mockItemData: Record<
 > = {
   "invoice-001": {
     id: "invoice-001",
-    agentUrlId: "extraction-agent",
+    deploymentName: "extraction-agent",
     collection: "mock-collection",
     data: {
       file_name: "acme-corp-invoice-2024-001.pdf",
@@ -179,7 +179,7 @@ const mockItemData: Record<
   },
   "contract-002": {
     id: "contract-002",
-    agentUrlId: "extraction-agent",
+    deploymentName: "extraction-agent",
     collection: "mock-collection",
     data: {
       file_name: "tech-solutions-contract-2024.pdf",
@@ -307,7 +307,7 @@ const defaultMockItem = (
   itemId: string
 ): TypedAgentData<ExtractedData<GenericDocumentData>> => ({
   id: itemId,
-  agentUrlId: "extraction-agent",
+  deploymentName: "extraction-agent",
   collection: "mock-collection",
   data: {
     file_name: `document-${itemId}.pdf`,

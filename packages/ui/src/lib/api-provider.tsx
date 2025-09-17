@@ -54,9 +54,7 @@ export function createMockClients(): ApiClients {
     workflowsClient: workflowsClient,
     cloudApiClient: cloudApiClient,
     agentDataClient: createCloudAgentClient({
-      baseUrl: "https://api.llamaindex.cloud",
-      apiKey: "your-api-key",
-      agentUrlId: "your-agent-url-id",
+      deploymentName: "your-agent-url-id",
       collection: "your-collection",
     }),
   };
