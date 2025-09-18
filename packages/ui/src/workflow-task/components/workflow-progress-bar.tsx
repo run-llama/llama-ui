@@ -9,6 +9,7 @@ import { FileText, CheckCircle, XCircle, Clock, Loader } from "lucide-react";
 import { cn } from "../../../lib/utils";
 
 interface WorkflowProgressBarProps {
+  workflowName: string;
   className?: string;
   /**
    * Controls auto-show/hide behavior
@@ -19,10 +20,11 @@ interface WorkflowProgressBarProps {
 }
 
 export function WorkflowProgressBar({
+  workflowName,
   className,
   mode = "auto",
 }: WorkflowProgressBarProps) {
-  const { current, total, status } = useWorkflowProgress();
+  const { current, total, status } = useWorkflowProgress(workflowName);
 
   const percentage = total > 0 ? (current / total) * 100 : 0;
 

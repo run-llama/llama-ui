@@ -54,9 +54,11 @@ Object.defineProperty(window, "localStorage", {
 });
 
 describe("Complete Task Store Tests", () => {
+  const mockWorkflowName = "test-workflow";
   const mockTaskSummary: WorkflowHandlerSummary = {
     handler_id: "task-123",
     status: "running",
+    workflowName: mockWorkflowName,
   };
 
   const mockEvent: WorkflowEvent = {
@@ -105,26 +107,29 @@ describe("Complete Task Store Tests", () => {
     it("should create task and add to store", async () => {
       const result = await testStore
         .getState()
-        .createTask("test-workflow", "test input");
+        .createTask(mockWorkflowName, "test input");
 
       expect(result.handler_id).toBe("task-123");
       expect(result.status).toBe("running");
       expect(testStore.getState().tasks["task-123"]).toBeDefined();
       expect(testStore.getState().events["task-123"]).toEqual([]);
+      expect(testStore.getState().tasks["task-123"].workflowName).toBe(
+        mockWorkflowName
+      );
     });
 
     it("should call createTaskAPI with correct parameters", async () => {
-      await testStore.getState().createTask("test-workflow", "test input");
+      await testStore.getState().createTask(mockWorkflowName, "test input");
 
       expect(createTaskAPI).toHaveBeenCalledWith({
         client: mockClient,
-        workflowName: "test-workflow",
+        workflowName: mockWorkflowName,
         eventData: "test input",
       });
     });
 
     it("should automatically call fetchTaskEvents for subscription", async () => {
-      await testStore.getState().createTask("test-workflow", "test input");
+      await testStore.getState().createTask(mockWorkflowName, "test input");
 
       // Should call subscribe which internally calls fetchTaskEvents
       expect(vi.mocked(fetchHandlerEvents)).toHaveBeenCalled();
@@ -137,16 +142,19 @@ describe("Complete Task Store Tests", () => {
         ...mockTaskSummary,
         handler_id: "completed",
         status: "complete",
+        workflowName: mockWorkflowName,
       };
       const errorTask: WorkflowHandlerSummary = {
         ...mockTaskSummary,
         handler_id: "error",
         status: "failed",
+        workflowName: mockWorkflowName,
       };
       const runningTask: WorkflowHandlerSummary = {
         ...mockTaskSummary,
         handler_id: "running",
         status: "running",
+        workflowName: mockWorkflowName,
       };
 
       testStore.setState({
@@ -158,10 +166,38 @@ describe("Complete Task Store Tests", () => {
         events: {},
       });
 
-      testStore.getState().clearCompleted();
+      testStore.getState().clearCompleted(mockWorkflowName);
 
       expect(testStore.getState().tasks).toEqual({
         running: runningTask,
+      });
+    });
+
+    it("should only clear completed tasks for specified workflow", () => {
+      const otherWorkflowTask: WorkflowHandlerSummary = {
+        ...mockTaskSummary,
+        handler_id: "other",
+        status: "complete",
+        workflowName: "other-workflow",
+      };
+
+      testStore.setState({
+        tasks: {
+          completed: {
+            ...mockTaskSummary,
+            handler_id: "completed",
+            status: "complete",
+            workflowName: mockWorkflowName,
+          },
+          other: otherWorkflowTask,
+        },
+        events: {},
+      });
+
+      testStore.getState().clearCompleted(mockWorkflowName);
+
+      expect(testStore.getState().tasks).toEqual({
+        other: otherWorkflowTask,
       });
     });
   });
@@ -247,20 +283,23 @@ describe("Complete Task Store Tests", () => {
       {
         handler_id: "server-task-1",
         status: "running",
+        workflowName: mockWorkflowName,
       },
       {
         handler_id: "server-task-2",
         status: "running",
+        workflowName: mockWorkflowName,
       },
     ];
 
     it("should fetch and sync running tasks from server", async () => {
       (getRunningHandlers as any).mockResolvedValue(mockServerTasks);
 
-      await testStore.getState().sync();
+      await testStore.getState().sync(mockWorkflowName);
 
       expect(getRunningHandlers).toHaveBeenCalledWith({
         client: mockClient,
+        workflowName: mockWorkflowName,
       });
 
       // Check if tasks were added to store
@@ -273,7 +312,7 @@ describe("Complete Task Store Tests", () => {
       (getRunningHandlers as any).mockResolvedValue(mockServerTasks);
       (workflowStreamingManager.isStreamActive as any).mockReturnValue(false);
 
-      await testStore.getState().sync();
+      await testStore.getState().sync(mockWorkflowName);
 
       // Should call fetchTaskEvents for each task
       expect(fetchHandlerEvents).toHaveBeenCalledTimes(2);
@@ -292,7 +331,7 @@ describe("Complete Task Store Tests", () => {
       (getRunningHandlers as any).mockResolvedValue(mockServerTasks);
       (workflowStreamingManager.isStreamActive as any).mockReturnValue(true);
 
-      await testStore.getState().sync();
+      await testStore.getState().sync(mockWorkflowName);
 
       // Should not call fetchTaskEvents since tasks are already subscribed
       expect(fetchHandlerEvents).not.toHaveBeenCalled();
@@ -307,7 +346,9 @@ describe("Complete Task Store Tests", () => {
       (getRunningHandlers as any).mockRejectedValue(new Error("Server error"));
 
       // Should not throw
-      await expect(testStore.getState().sync()).resolves.toBeUndefined();
+      await expect(
+        testStore.getState().sync(mockWorkflowName)
+      ).resolves.toBeUndefined();
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         "Failed to sync with server:",
@@ -323,6 +364,7 @@ describe("Complete Task Store Tests", () => {
         ...mockTaskSummary,
         handler_id: "local-task",
         status: "running",
+        workflowName: mockWorkflowName,
       };
 
       testStore.setState({
@@ -333,7 +375,7 @@ describe("Complete Task Store Tests", () => {
       // Mock server returning different tasks
       (getRunningHandlers as any).mockResolvedValue(mockServerTasks);
 
-      await testStore.getState().sync();
+      await testStore.getState().sync(mockWorkflowName);
 
       const state = testStore.getState();
 
@@ -341,6 +383,30 @@ describe("Complete Task Store Tests", () => {
       expect(state.tasks["local-task"]).toBeUndefined();
       expect(state.tasks["server-task-1"]).toBeDefined();
       expect(state.tasks["server-task-2"]).toBeDefined();
+    });
+
+    it("should retain tasks from other workflows when syncing", async () => {
+      const otherWorkflowTask: WorkflowHandlerSummary = {
+        handler_id: "other-task",
+        status: "running",
+        workflowName: "other-workflow",
+      };
+
+      testStore.setState({
+        tasks: { "other-task": otherWorkflowTask },
+        events: {},
+      });
+
+      (getRunningHandlers as any).mockResolvedValue(mockServerTasks);
+
+      await testStore.getState().sync(mockWorkflowName);
+
+      expect(testStore.getState().tasks).toMatchObject({
+        "other-task": otherWorkflowTask,
+        "server-task-1": expect.objectContaining({
+          workflowName: mockWorkflowName,
+        }),
+      });
     });
   });
 });

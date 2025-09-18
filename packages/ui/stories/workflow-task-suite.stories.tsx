@@ -12,13 +12,15 @@ import { ApiProvider, createMockClients } from "../src/lib";
 
 // Task Trigger & Progress Component
 function TaskTriggerSection({
+  workflowName,
   onTaskClick,
   selectedTaskId,
 }: {
+  workflowName: string;
   onTaskClick: (taskId: string) => void;
   selectedTaskId: string | null;
 }) {
-  const { tasks, clearCompleted } = useWorkflowTaskList();
+  const { tasks, clearCompleted } = useWorkflowTaskList(workflowName);
   const { createTask } = useTaskStore();
   const [batchSize, setBatchSize] = useState(3);
   const [isCreatingBatch, setIsCreatingBatch] = useState(false);
@@ -61,7 +63,7 @@ function TaskTriggerSection({
 
         // Stagger the creation slightly to see the effect
         await new Promise((resolve) => setTimeout(resolve, index * 100));
-        return createTask("test-workflow", input);
+        return createTask(workflowName, input);
       });
 
       await Promise.all(promises);
@@ -119,7 +121,7 @@ function TaskTriggerSection({
       <div>
         <h3 className="text-lg font-medium mb-3">Or Create Single Task</h3>
         <WorkflowTrigger
-          workflowName="test-workflow"
+          workflowName={workflowName}
           onSuccess={() => {
             // Task completed successfully
           }}
@@ -132,7 +134,7 @@ function TaskTriggerSection({
           <h3 className="text-lg font-medium mb-3">
             Overall Progress ({tasks.length} tasks)
           </h3>
-          <WorkflowProgressBar />
+          <WorkflowProgressBar workflowName={workflowName} />
 
           {/* Enhanced Task List */}
           <div className="mt-4 space-y-2">
@@ -294,7 +296,8 @@ function TaskDetailSection({ taskId }: { taskId: string | null }) {
 
 // Internal Suite Component (uses hooks inside Provider)
 function WorkflowTaskSuiteInternal() {
-  const { tasks } = useWorkflowTaskList();
+  const workflowName = "test-workflow";
+  const { tasks } = useWorkflowTaskList(workflowName);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   // Get the selected task or the most recent task for details
@@ -318,6 +321,7 @@ function WorkflowTaskSuiteInternal() {
       {/* Main Content */}
       <div className="flex h-[800px] border rounded-lg">
         <TaskTriggerSection
+          workflowName={workflowName}
           onTaskClick={setSelectedTaskId}
           selectedTaskId={selectedTaskId}
         />

@@ -20,6 +20,7 @@ export interface WorkflowHandlerSummary {
   status: RunStatus;
   result?: unknown;
   error?: unknown;
+  workflowName: string;
 }
 
 export interface WorkflowEvent {

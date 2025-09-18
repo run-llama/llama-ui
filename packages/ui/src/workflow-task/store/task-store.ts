@@ -25,7 +25,7 @@ export interface TaskStoreState {
   events: Record<string, WorkflowEvent[]>;
 
   // Basic operations
-  clearCompleted(): void;
+  clearCompleted(workflowName: string): void;
   createTask(
     workflowName: string,
     input: JSONValue
@@ -33,7 +33,7 @@ export interface TaskStoreState {
   clearEvents(taskId: string): void;
 
   // Server synchronization
-  sync(): Promise<void>;
+  sync(workflowName: string): Promise<void>;
 
   // Stream subscription management
   subscribe(taskId: string): void;
@@ -48,14 +48,25 @@ export const createTaskStore = (client: Client) =>
     events: {},
 
     // Basic operations
-    clearCompleted: () =>
-      set({
+    clearCompleted: (workflowName: string) => {
+      if (!workflowName) {
+        // eslint-disable-next-line no-console -- surfaced in tests
+        console.error("workflowName is required for clearCompleted");
+        return;
+      }
+
+      set((state) => ({
         tasks: Object.fromEntries(
-          Object.entries(get().tasks).filter(
-            ([, t]) => t.status !== "complete" && t.status !== "failed"
-          )
+          Object.entries(state.tasks).filter(([_, task]) => {
+            if (task.workflowName !== workflowName) {
+              return true;
+            }
+
+            return task.status !== "complete" && task.status !== "failed";
+          })
         ),
-      }),
+      }));
+    },
 
     createTask: async (workflowName: string, input: JSONValue) => {
       // Call API to create task
@@ -68,6 +79,7 @@ export const createTaskStore = (client: Client) =>
       const task: WorkflowHandlerSummary = {
         handler_id: workflowHandler.handler_id ?? "",
         status: "running",
+        workflowName,
       };
 
       // Internal method to set task
@@ -97,18 +109,39 @@ export const createTaskStore = (client: Client) =>
       })),
 
     // Server synchronization
-    sync: async () => {
+    sync: async (workflowName: string) => {
       try {
+        if (!workflowName) {
+          throw new Error("workflowName is required for sync");
+        }
         // 1. Get running tasks from server
         const serverTasks = await getRunningHandlers({
           client,
+          workflowName,
         });
 
         // 2. Update store with server tasks
-        const newTasksRecord = Object.fromEntries(
-          serverTasks.map((task) => [task.handler_id, task])
-        );
-        set({ tasks: newTasksRecord });
+        set((state) => {
+          const normalizedTasks = serverTasks.map((task) => ({
+            ...task,
+            workflowName: task.workflowName ?? workflowName,
+          }));
+
+          const retainedTasks = Object.fromEntries(
+            Object.entries(state.tasks).filter(
+              ([, existingTask]) => existingTask.workflowName !== workflowName
+            )
+          );
+
+          const mergedTasks = normalizedTasks.reduce<
+            Record<string, WorkflowHandlerSummary>
+          >((acc, task) => {
+            acc[task.handler_id] = task;
+            return acc;
+          }, { ...retainedTasks });
+
+          return { tasks: mergedTasks };
+        });
 
         // 3. Auto-subscribe to running tasks
         serverTasks.forEach((task) => {

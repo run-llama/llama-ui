@@ -55,7 +55,9 @@ describe("useWorkflowTaskList", () => {
 
   describe("H3: Initial render reads persisted tasks", () => {
     it("should return empty tasks initially", () => {
-      const { result } = renderHookWithProvider(() => useWorkflowTaskList());
+      const { result } = renderHookWithProvider(() =>
+        useWorkflowTaskList("test-workflow")
+      );
 
       expect(result.current.tasks).toEqual([]);
       expect(typeof result.current.clearCompleted).toBe("function");
@@ -64,7 +66,9 @@ describe("useWorkflowTaskList", () => {
 
   describe("H4: Auto-stream for running tasks", () => {
     it("should have auto-stream functionality", () => {
-      const { result } = renderHookWithProvider(() => useWorkflowTaskList());
+      const { result } = renderHookWithProvider(() =>
+        useWorkflowTaskList("test-workflow")
+      );
 
       // Test basic functionality - tasks should be empty initially
       expect(result.current.tasks).toEqual([]);
@@ -73,7 +77,9 @@ describe("useWorkflowTaskList", () => {
 
   describe("H5: clearCompleted removes only complete/error tasks", () => {
     it("should have clearCompleted function", () => {
-      const { result } = renderHookWithProvider(() => useWorkflowTaskList());
+      const { result } = renderHookWithProvider(() =>
+        useWorkflowTaskList("test-workflow")
+      );
 
       expect(typeof result.current.clearCompleted).toBe("function");
 

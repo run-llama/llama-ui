@@ -7,7 +7,7 @@ import { useMemo, useEffect } from "react";
 import { useTaskStore } from "./use-task-store";
 import type { WorkflowProgressState, RunStatus } from "../types";
 
-export function useWorkflowProgress(): WorkflowProgressState {
+export function useWorkflowProgress(workflowName: string): WorkflowProgressState {
   const store = useTaskStore();
   const tasks = store.tasks;
   const sync = store.sync;
@@ -15,7 +15,7 @@ export function useWorkflowProgress(): WorkflowProgressState {
   useEffect(() => {
     async function syncWithServer() {
       try {
-        await sync();
+        await sync(workflowName);
       } catch (error) {
         // eslint-disable-next-line no-console -- needed
         console.error("Failed to sync with server for progress:", error);
@@ -23,12 +23,12 @@ export function useWorkflowProgress(): WorkflowProgressState {
     }
 
     syncWithServer();
-  }, [sync]);
+  }, [sync, workflowName]);
 
   // Memoize the calculation based on tasks object
   return useMemo(() => {
     const taskArray = Object.values(tasks).filter(
-      (task) => task.status === "running"
+      (task) => task.workflowName === workflowName
     );
     const total = taskArray.length;
 
@@ -71,5 +71,5 @@ export function useWorkflowProgress(): WorkflowProgressState {
       total,
       status,
     };
-  }, [tasks]); // Only recalculate when tasks object reference changes
+  }, [tasks, workflowName]); // Only recalculate when tasks object reference changes
 }

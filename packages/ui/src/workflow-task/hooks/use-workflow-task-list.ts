@@ -3,7 +3,7 @@
  * Based on workflow-task-suite.md specifications
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTaskStore } from "./use-task-store";
 import type { WorkflowHandlerSummary } from "../types";
 
@@ -14,7 +14,9 @@ interface UseWorkflowTaskListResult {
   error: string | null;
 }
 
-export function useWorkflowTaskList(): UseWorkflowTaskListResult {
+export function useWorkflowTaskList(
+  workflowName: string
+): UseWorkflowTaskListResult {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,7 +32,7 @@ export function useWorkflowTaskList(): UseWorkflowTaskListResult {
       setError(null);
 
       try {
-        await sync();
+        await sync(workflowName);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to sync with server"
@@ -41,17 +43,21 @@ export function useWorkflowTaskList(): UseWorkflowTaskListResult {
     }
 
     syncWithServer();
-  }, [sync]);
+  }, [sync, workflowName]);
 
   // Memoize tasks array and filtering based on tasksRecord
   const filteredTasks = useMemo(() => {
     const allTasks = Object.values(tasksRecord);
-    return allTasks;
-  }, [tasksRecord]);
+    return allTasks.filter((task) => task.workflowName === workflowName);
+  }, [tasksRecord, workflowName]);
+
+  const handleClearCompleted = useCallback(() => {
+    clearCompleted(workflowName);
+  }, [clearCompleted, workflowName]);
 
   return {
     tasks: filteredTasks,
-    clearCompleted,
+    clearCompleted: handleClearCompleted,
     loading,
     error,
   };

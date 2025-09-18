@@ -53,8 +53,8 @@ describe("Helper Functions Tests", () => {
       const result = await getRunningHandlers({ client: mockClient });
       expect(getHandlers).toHaveBeenCalledWith({ client: mockClient });
       expect(result).toEqual([
-        { handler_id: "h-1", status: "running" },
-        { handler_id: "h-3", status: "running" },
+        { handler_id: "h-1", status: "running", workflowName: "" },
+        { handler_id: "h-3", status: "running", workflowName: "" },
       ]);
     });
 
@@ -78,7 +78,13 @@ describe("Helper Functions Tests", () => {
         client: mockClient,
         handlerId: "h-2",
       });
-      expect(result).toEqual({ handler_id: "h-2" });
+      expect(result).toEqual({
+        handler_id: "h-2",
+        status: undefined,
+        result: undefined,
+        error: undefined,
+        workflowName: "",
+      });
     });
 
     it("throws when not found", async () => {
@@ -107,7 +113,11 @@ describe("Helper Functions Tests", () => {
         eventData: { test: "data" },
       });
 
-      expect(result).toEqual({ handler_id: "h-1", status: "running" });
+      expect(result).toEqual({
+        handler_id: "h-1",
+        status: "running",
+        workflowName: "test-workflow",
+      });
       expect(postWorkflowsByNameRunNowait).toHaveBeenCalledWith({
         client: mockClient,
         path: { name: "test-workflow" },

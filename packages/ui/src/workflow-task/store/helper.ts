@@ -20,10 +20,14 @@ import {
 
 export async function getRunningHandlers(params: {
   client: Client;
+  workflowName?: string;
 }): Promise<WorkflowHandlerSummary[]> {
   const resp = await getHandlers({
     client: params.client,
-  });
+    ...(params.workflowName
+      ? { query: { workflow_name: params.workflowName } }
+      : {}),
+  } as unknown as Parameters<typeof getHandlers>[0]);
   const allHandlers = resp.data?.handlers ?? [];
 
   // Now the API will only return running tasks because there is no persistent layer for tasks.
@@ -32,6 +36,11 @@ export async function getRunningHandlers(params: {
     .map((handler) => ({
       handler_id: handler.handler_id ?? "",
       status: handler.status as RunStatus,
+      workflowName:
+        (handler as { workflow_name?: string; workflowName?: string })
+          .workflowName ??
+        (handler as { workflow_name?: string }).workflow_name ??
+        params.workflowName ?? "",
     }));
 }
 
@@ -49,7 +58,17 @@ export async function getExistingHandler(params: {
     throw new Error(`Handler ${params.handlerId} not found`);
   }
 
-  return handler as WorkflowHandlerSummary;
+  return {
+    handler_id: handler.handler_id ?? "",
+    status: handler.status as RunStatus,
+    result: handler.result,
+    error: handler.error,
+    workflowName:
+      (handler as { workflow_name?: string; workflowName?: string })
+        .workflowName ??
+      (handler as { workflow_name?: string }).workflow_name ??
+      "",
+  };
 }
 
 export async function createTask<E extends WorkflowEvent>(params: {
@@ -72,6 +91,7 @@ export async function createTask<E extends WorkflowEvent>(params: {
   return {
     handler_id: data.data.handler_id ?? "",
     status: "running",
+    workflowName: params.workflowName,
   };
 }
 

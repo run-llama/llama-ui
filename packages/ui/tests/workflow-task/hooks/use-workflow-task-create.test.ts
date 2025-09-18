@@ -49,6 +49,7 @@ describe("useWorkflowTaskCreate", () => {
   const mockTask: WorkflowHandlerSummary = {
     handler_id: "test-task-1",
     status: "running",
+    workflowName: "test-workflow",
   };
 
   beforeEach(() => {

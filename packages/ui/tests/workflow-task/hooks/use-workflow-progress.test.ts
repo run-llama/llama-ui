@@ -55,7 +55,9 @@ describe("useWorkflowProgress", () => {
 
   describe("H9: Basic functionality", () => {
     it("should start with default values", () => {
-      const { result } = renderHookWithProvider(() => useWorkflowProgress());
+      const { result } = renderHookWithProvider(() =>
+        useWorkflowProgress("test-workflow")
+      );
 
       expect(result.current.current).toBe(0);
       expect(result.current.total).toBe(0);
@@ -63,7 +65,9 @@ describe("useWorkflowProgress", () => {
     });
 
     it("should have progress properties", () => {
-      const { result } = renderHookWithProvider(() => useWorkflowProgress());
+      const { result } = renderHookWithProvider(() =>
+        useWorkflowProgress("test-workflow")
+      );
 
       expect(typeof result.current.current).toBe("number");
       expect(typeof result.current.total).toBe("number");
@@ -71,7 +75,9 @@ describe("useWorkflowProgress", () => {
     });
 
     it("should be accessible from ApiProvider context", () => {
-      const { result } = renderHookWithProvider(() => useWorkflowProgress());
+      const { result } = renderHookWithProvider(() =>
+        useWorkflowProgress("test-workflow")
+      );
 
       // Should not throw an error when called within ApiProvider
       expect(() => {
@@ -85,7 +91,9 @@ describe("useWorkflowProgress", () => {
 
   describe("H9: Hook behavior and calculations", () => {
     it("should handle empty task store efficiently", () => {
-      const { result } = renderHookWithProvider(() => useWorkflowProgress());
+      const { result } = renderHookWithProvider(() =>
+        useWorkflowProgress("test-workflow")
+      );
 
       expect(result.current.current).toBe(0);
       expect(result.current.total).toBe(0);
@@ -94,7 +102,7 @@ describe("useWorkflowProgress", () => {
 
     it("should memoize results correctly", () => {
       const { result, rerender } = renderHookWithProvider(() =>
-        useWorkflowProgress()
+        useWorkflowProgress("test-workflow")
       );
 
       const firstResult = result.current;
@@ -106,7 +114,9 @@ describe("useWorkflowProgress", () => {
     });
 
     it("should return correct structure and types", () => {
-      const { result } = renderHookWithProvider(() => useWorkflowProgress());
+      const { result } = renderHookWithProvider(() =>
+        useWorkflowProgress("test-workflow")
+      );
 
       // Verify structure
       expect(result.current).toHaveProperty("current");
@@ -127,9 +137,9 @@ describe("useWorkflowProgress", () => {
     it("should handle the useMemo dependency correctly", () => {
       // Test that the hook implementation uses useMemo correctly
       const { result } = renderHookWithProvider(() => {
-        const progress = useWorkflowProgress();
+        const progress = useWorkflowProgress("test-workflow");
         // Call multiple times to test memoization
-        const progress2 = useWorkflowProgress();
+        const progress2 = useWorkflowProgress("test-workflow");
         return { progress, progress2 };
       });
 
