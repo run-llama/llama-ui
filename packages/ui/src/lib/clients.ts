@@ -6,7 +6,7 @@ import { client as workflowsClient } from "@llamaindex/workflows-client";
 export {
   createClient as createWorkflowsClient,
   createConfig as createWorkflowsConfig,
-  type Client as WorkflowClient,
+  type Client as WorkflowsClient,
 } from "@llamaindex/workflows-client";
 
 export { workflowsClient };

@@ -16,7 +16,7 @@ export {
   createCloudAgentClient,
   workflowsClient,
   cloudApiClient,
-  type WorkflowClient,
+  type WorkflowsClient,
   type CloudAgentClient,
   type CloudApiClient,
 } from "./clients";
