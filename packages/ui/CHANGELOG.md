@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 2.0.0
+
+### Major Changes
+
+- f92ac01: Update terminology from tasks to handlers
+
 ## 1.0.3
 
 ### Patch Changes
