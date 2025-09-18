@@ -1,15 +1,10 @@
-/**
- * Test cases for useWorkflowTask hook (H6-H8)
- * Based on workflow-task-suite-test-cases.md
- */
-
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { act } from "@testing-library/react";
-import { useWorkflowTask } from "../../../src/workflow-task/hooks/use-workflow-task";
+import { useWorkflowHandler } from "../../../src/workflows/hooks/use-workflow-handler";
 import { renderHookWithProvider } from "../../test-utils";
 
 // Mock the helper functions to prevent real HTTP calls
-vi.mock("../../../src/workflow-task/store/helper", () => ({
+vi.mock("../../../src/workflows/store/helper", () => ({
   getRunningHandlers: vi.fn().mockResolvedValue([]),
   getExistingHandler: vi.fn(),
   createTask: vi.fn(),
@@ -56,11 +51,11 @@ describe("useWorkflowTask", () => {
   describe("H6: Mount subscribes and accumulates events", () => {
     it("should work with task ID", () => {
       const { result } = renderHookWithProvider(() =>
-        useWorkflowTask("task-123")
+        useWorkflowHandler("task-123")
       );
 
       // The hook should work without errors
-      expect(result.current.task).toBe(null); // Initially no task
+      expect(result.current.handler).toBe(null); // Initially no task
       expect(result.current.events).toHaveLength(0);
       expect(result.current.isStreaming).toBe(false);
     });
@@ -69,7 +64,7 @@ describe("useWorkflowTask", () => {
   describe("H7: clearEvents empties events array", () => {
     it("should have clearEvents function", () => {
       const { result } = renderHookWithProvider(() =>
-        useWorkflowTask("task-123")
+        useWorkflowHandler("task-123")
       );
 
       expect(typeof result.current.clearEvents).toBe("function");
@@ -86,7 +81,7 @@ describe("useWorkflowTask", () => {
   describe("H8: stopStreaming ends stream and updates isStreaming", () => {
     it("should have stopStreaming function", () => {
       const { result } = renderHookWithProvider(() =>
-        useWorkflowTask("task-123")
+        useWorkflowHandler("task-123")
       );
 
       expect(typeof result.current.stopStreaming).toBe("function");
@@ -97,6 +92,32 @@ describe("useWorkflowTask", () => {
 
       // Should not throw error
       expect(result.current.isStreaming).toBe(false);
+    });
+  });
+
+  describe("H9: sendEvent calls helper with handlerId and event", () => {
+    it("should call sendEventToHandler when sendEvent is invoked", async () => {
+      const { sendEventToHandler } = await import(
+        "../../../src/workflows/store/helper"
+      );
+
+      const { result } = renderHookWithProvider(() =>
+        useWorkflowHandler("task-123")
+      );
+
+      const event = { type: "test.event", data: { foo: "bar" } };
+
+      await act(async () => {
+        await result.current.sendEvent(event);
+      });
+
+      expect(sendEventToHandler).toHaveBeenCalledTimes(1);
+      expect(sendEventToHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          handlerId: "task-123",
+          event,
+        })
+      );
     });
   });
 });

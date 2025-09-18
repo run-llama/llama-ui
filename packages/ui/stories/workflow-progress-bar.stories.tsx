@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import React from "react";
-import { WorkflowProgressBar } from "../src/workflow-task";
+import { WorkflowProgressBar } from "../src/workflows";
 import { ApiProvider, createMockClients } from "../src/lib";
 
 const meta: Meta<typeof WorkflowProgressBar> = {

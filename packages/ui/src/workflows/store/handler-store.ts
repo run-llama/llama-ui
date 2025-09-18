@@ -1,6 +1,6 @@
 /**
- * Task Store Implementation
- * Based on workflow-task-suite.md specifications
+ * Handler Store Implementation
+ * Based on workflow-handler-suite.md specifications
  * Uses Zustand best practices with constructor pattern for client injection
  */
 
@@ -8,7 +8,7 @@ import { create } from "zustand";
 import { Client } from "@llamaindex/workflows-client";
 import { workflowStreamingManager } from "../../lib/shared-streaming";
 import {
-  createTask as createTaskAPI,
+  createHandler as createHandlerAPI,
   fetchHandlerEvents,
   getRunningHandlers,
 } from "./helper";
@@ -19,101 +19,101 @@ import type {
   JSONValue,
 } from "../types";
 
-export interface TaskStoreState {
+export interface HandlerStoreState {
   // State
-  tasks: Record<string, WorkflowHandlerSummary>;
+  handlers: Record<string, WorkflowHandlerSummary>;
   events: Record<string, WorkflowEvent[]>;
 
   // Basic operations
   clearCompleted(): void;
-  createTask(
+  createHandler(
     workflowName: string,
     input: JSONValue
   ): Promise<WorkflowHandlerSummary>;
-  clearEvents(taskId: string): void;
+  clearEvents(handlerId: string): void;
 
   // Server synchronization
   sync(): Promise<void>;
 
   // Stream subscription management
-  subscribe(taskId: string): void;
-  unsubscribe(taskId: string): void;
-  isSubscribed(taskId: string): boolean;
+  subscribe(handlerId: string): void;
+  unsubscribe(handlerId: string): void;
+  isSubscribed(handlerId: string): boolean;
 }
 
-export const createTaskStore = (client: Client) =>
-  create<TaskStoreState>()((set, get) => ({
+export const createHandlerStore = (client: Client) =>
+  create<HandlerStoreState>()((set, get) => ({
     // Initial state
-    tasks: {},
+    handlers: {},
     events: {},
 
     // Basic operations
     clearCompleted: () =>
       set({
-        tasks: Object.fromEntries(
-          Object.entries(get().tasks).filter(
+        handlers: Object.fromEntries(
+          Object.entries(get().handlers).filter(
             ([, t]) => t.status !== "complete" && t.status !== "failed"
           )
         ),
       }),
 
-    createTask: async (workflowName: string, input: JSONValue) => {
-      // Call API to create task
-      const workflowHandler = await createTaskAPI({
+    createHandler: async (workflowName: string, input: JSONValue) => {
+      // Call API to create handler
+      const workflowHandler = await createHandlerAPI({
         client,
         eventData: input,
         workflowName,
       });
 
-      const task: WorkflowHandlerSummary = {
+      const handler: WorkflowHandlerSummary = {
         handler_id: workflowHandler.handler_id ?? "",
         status: "running",
       };
 
-      // Internal method to set task
+      // Internal method to set handler
       set((state) => ({
-        tasks: { ...state.tasks, [task.handler_id]: task },
-        events: { ...state.events, [task.handler_id]: [] },
+        handlers: { ...state.handlers, [handler.handler_id]: handler },
+        events: { ...state.events, [handler.handler_id]: [] },
       }));
 
-      // Automatically subscribe to task events after creation
+      // Automatically subscribe to handler events after creation
       try {
-        get().subscribe(task.handler_id);
+        get().subscribe(handler.handler_id);
       } catch (error) {
         // eslint-disable-next-line no-console -- needed
         console.error(
-          `Failed to auto-subscribe to task ${task.handler_id}:`,
+          `Failed to auto-subscribe to handler ${handler.handler_id}:`,
           error
         );
         // Continue execution, subscription can be retried later
       }
 
-      return task;
+      return handler;
     },
 
-    clearEvents: (taskId: string) =>
+    clearEvents: (handlerId: string) =>
       set((state) => ({
-        events: { ...state.events, [taskId]: [] },
+        events: { ...state.events, [handlerId]: [] },
       })),
 
     // Server synchronization
     sync: async () => {
       try {
-        // 1. Get running tasks from server
-        const serverTasks = await getRunningHandlers({
+        // 1. Get running handlers from server
+        const serverHandlers = await getRunningHandlers({
           client,
         });
 
-        // 2. Update store with server tasks
-        const newTasksRecord = Object.fromEntries(
-          serverTasks.map((task) => [task.handler_id, task])
+        // 2. Update store with server handlers
+        const newHandlersRecord = Object.fromEntries(
+          serverHandlers.map((handler) => [handler.handler_id, handler])
         );
-        set({ tasks: newTasksRecord });
+        set({ handlers: newHandlersRecord });
 
-        // 3. Auto-subscribe to running tasks
-        serverTasks.forEach((task) => {
-          if (!get().isSubscribed(task.handler_id)) {
-            get().subscribe(task.handler_id);
+        // 3. Auto-subscribe to running handlers
+        serverHandlers.forEach((handler) => {
+          if (!get().isSubscribed(handler.handler_id)) {
+            get().subscribe(handler.handler_id);
           }
         });
       } catch (error) {
@@ -124,16 +124,16 @@ export const createTaskStore = (client: Client) =>
     },
 
     // Stream subscription management
-    subscribe: (taskId: string) => {
-      const task = get().tasks[taskId];
-      if (!task) {
+    subscribe: (handlerId: string) => {
+      const handler = get().handlers[handlerId];
+      if (!handler) {
         // eslint-disable-next-line no-console -- needed
-        console.warn(`Task ${taskId} not found for subscription`);
+        console.warn(`Handler ${handlerId} not found for subscription`);
         return;
       }
 
       // Check if already subscribed to prevent duplicate subscriptions
-      if (get().isSubscribed(taskId)) {
+      if (get().isSubscribed(handlerId)) {
         return;
       }
 
@@ -144,17 +144,17 @@ export const createTaskStore = (client: Client) =>
           set((state) => ({
             events: {
               ...state.events,
-              [taskId]: [...(state.events[taskId] || []), event],
+              [handlerId]: [...(state.events[handlerId] || []), event],
             },
           }));
         },
         onFinish: () => {
-          // Update task status to complete
+          // Update handler status to complete
           set((state) => ({
-            tasks: {
-              ...state.tasks,
-              [taskId]: {
-                ...state.tasks[taskId],
+            handlers: {
+              ...state.handlers,
+              [handlerId]: {
+                ...state.handlers[handlerId],
                 status: "complete",
                 updatedAt: new Date(),
               },
@@ -170,12 +170,12 @@ export const createTaskStore = (client: Client) =>
           ) {
             return;
           }
-          // Update task status to error
+          // Update handler status to error
           set((state) => ({
-            tasks: {
-              ...state.tasks,
-              [taskId]: {
-                ...state.tasks[taskId],
+            handlers: {
+              ...state.handlers,
+              [handlerId]: {
+                ...state.handlers[handlerId],
                 status: "failed",
                 updatedAt: new Date(),
               },
@@ -186,7 +186,7 @@ export const createTaskStore = (client: Client) =>
 
       // Use handler-based streaming
       fetchHandlerEvents(
-        { client, handlerId: task.handler_id },
+        { client, handlerId: handler.handler_id },
         callback
       ).catch((error) => {
         // Ignore network errors caused by page refresh/unload
@@ -197,12 +197,12 @@ export const createTaskStore = (client: Client) =>
         ) {
           return;
         }
-        // Update task status to error
+        // Update handler status to error
         set((state) => ({
-          tasks: {
-            ...state.tasks,
-            [taskId]: {
-              ...state.tasks[taskId],
+          handlers: {
+            ...state.handlers,
+            [handlerId]: {
+              ...state.handlers[handlerId],
               status: "failed",
               updatedAt: new Date(),
             },
@@ -211,19 +211,19 @@ export const createTaskStore = (client: Client) =>
       });
     },
 
-    unsubscribe: (taskId: string) => {
-      const task = get().tasks[taskId];
-      if (!task) return;
+    unsubscribe: (handlerId: string) => {
+      const handler = get().handlers[handlerId];
+      if (!handler) return;
 
-      const streamKey = `handler:${taskId}`;
+      const streamKey = `handler:${handlerId}`;
       workflowStreamingManager.closeStream(streamKey);
     },
 
-    isSubscribed: (taskId: string): boolean => {
-      const task = get().tasks[taskId];
-      if (!task) return false;
+    isSubscribed: (handlerId: string): boolean => {
+      const handler = get().handlers[handlerId];
+      if (!handler) return false;
 
-      const streamKey = `handler:${taskId}`;
+      const streamKey = `handler:${handlerId}`;
       return workflowStreamingManager.isStreamActive(streamKey);
     },
   }));

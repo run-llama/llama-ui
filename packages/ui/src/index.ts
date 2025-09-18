@@ -3,7 +3,7 @@ export * from "./file-uploader";
 export * from "./extracted-data";
 export * from "./file-preview";
 export * from "./item-grid";
-export * from "./workflow-task";
+export * from "./workflows";
 export * from "./item-count";
 export * from "./lib";
 

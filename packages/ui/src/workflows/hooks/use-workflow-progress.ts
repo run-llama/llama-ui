@@ -1,15 +1,10 @@
-/**
- * useWorkflowProgress Hook
- * Based on workflow-task-suite.md specifications
- */
-
 import { useMemo, useEffect } from "react";
-import { useTaskStore } from "./use-task-store";
+import { useHandlerStore } from "./use-handler-store";
 import type { WorkflowProgressState, RunStatus } from "../types";
 
 export function useWorkflowProgress(): WorkflowProgressState {
-  const store = useTaskStore();
-  const tasks = store.tasks;
+  const store = useHandlerStore();
+  const handlers = store.handlers;
   const sync = store.sync;
 
   useEffect(() => {
@@ -25,12 +20,12 @@ export function useWorkflowProgress(): WorkflowProgressState {
     syncWithServer();
   }, [sync]);
 
-  // Memoize the calculation based on tasks object
+  // Memoize the calculation based on handlers object
   return useMemo(() => {
-    const taskArray = Object.values(tasks).filter(
-      (task) => task.status === "running"
+    const handlerArray = Object.values(handlers).filter(
+      (handler) => handler.status === "running"
     );
-    const total = taskArray.length;
+    const total = handlerArray.length;
 
     if (total === 0) {
       return {
@@ -40,28 +35,28 @@ export function useWorkflowProgress(): WorkflowProgressState {
       };
     }
 
-    // Count completed tasks
-    const completedTasks = taskArray.filter(
-      (task) => task.status === "complete"
+    // Count completed handlers
+    const completedHandlers = handlerArray.filter(
+      (handler) => handler.status === "complete"
     );
-    const current = completedTasks.length;
+    const current = completedHandlers.length;
 
     // Determine overall status
     let status: RunStatus;
 
-    // Check for error tasks first
-    if (taskArray.some((task) => task.status === "failed")) {
+    // Check for error handlers first
+    if (handlerArray.some((handler) => handler.status === "failed")) {
       status = "failed";
     }
-    // Check if all tasks are complete
+    // Check if all handlers are complete
     else if (current === total) {
       status = "complete";
     }
-    // Check if any tasks are running
-    else if (taskArray.some((task) => task.status === "running")) {
+    // Check if any handlers are running
+    else if (handlerArray.some((handler) => handler.status === "running")) {
       status = "running";
     }
-    // Otherwise, tasks are idle
+    // Otherwise, handlers are idle
     else {
       status = "idle";
     }
@@ -71,5 +66,5 @@ export function useWorkflowProgress(): WorkflowProgressState {
       total,
       status,
     };
-  }, [tasks]); // Only recalculate when tasks object reference changes
+  }, [handlers]); // Only recalculate when handlers object reference changes
 }

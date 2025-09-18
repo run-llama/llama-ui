@@ -1,25 +1,25 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import React, { useState } from "react";
 import {
-  useWorkflowTaskList,
-  useWorkflowTask,
+  useWorkflowHandlerList,
+  useWorkflowHandler,
   WorkflowTrigger,
   WorkflowProgressBar,
-  useTaskStore,
-} from "../src/workflow-task";
-import { AgentStreamDisplay } from "../src/workflow-task/components/agent-stream-display";
+  useHandlerStore,
+} from "../src/workflows";
+import { AgentStreamDisplay } from "../src/workflows/components/agent-stream-display";
 import { ApiProvider, createMockClients } from "../src/lib";
 
 // Task Trigger & Progress Component
 function TaskTriggerSection({
-  onTaskClick,
-  selectedTaskId,
+  onHandlerClick,
+  selectedHandlerId,
 }: {
-  onTaskClick: (taskId: string) => void;
-  selectedTaskId: string | null;
+  onHandlerClick: (handlerId: string) => void;
+  selectedHandlerId: string | null;
 }) {
-  const { tasks, clearCompleted } = useWorkflowTaskList();
-  const { createTask } = useTaskStore();
+  const { handlers, clearCompleted } = useWorkflowHandlerList();
+  const { createHandler } = useHandlerStore();
   const [batchSize, setBatchSize] = useState(3);
   const [isCreatingBatch, setIsCreatingBatch] = useState(false);
 
@@ -61,7 +61,7 @@ function TaskTriggerSection({
 
         // Stagger the creation slightly to see the effect
         await new Promise((resolve) => setTimeout(resolve, index * 100));
-        return createTask("test-workflow", input);
+        return createHandler("test-workflow", input);
       });
 
       await Promise.all(promises);
@@ -103,7 +103,7 @@ function TaskTriggerSection({
             >
               {isCreatingBatch ? "Creating..." : `Create ${batchSize} Tasks`}
             </button>
-            {tasks.length > 0 && (
+            {handlers.length > 0 && (
               <button
                 onClick={clearCompleted}
                 className="px-4 py-2 text-sm font-medium rounded bg-gray-600 text-white hover:bg-gray-700"
@@ -127,10 +127,10 @@ function TaskTriggerSection({
       </div>
 
       {/* Progress Section with WorkflowProgressBar */}
-      {tasks.length > 0 && (
+      {handlers.length > 0 && (
         <div>
           <h3 className="text-lg font-medium mb-3">
-            Overall Progress ({tasks.length} tasks)
+            Overall Progress ({handlers.length} tasks)
           </h3>
           <WorkflowProgressBar />
 
@@ -141,14 +141,15 @@ function TaskTriggerSection({
                 Task List (click to view details):
               </h4>
               <div className="text-xs text-gray-500">
-                Running: {tasks.filter((t) => t.status === "running").length} |
-                Complete: {tasks.filter((t) => t.status === "complete").length}{" "}
-                | Error: {tasks.filter((t) => t.status === "failed").length}
+                Running: {handlers.filter((t) => t.status === "running").length}{" "}
+                | Complete:{" "}
+                {handlers.filter((t) => t.status === "complete").length} |
+                Error: {handlers.filter((t) => t.status === "failed").length}
               </div>
             </div>
             <div className="max-h-48 overflow-y-auto space-y-1 border rounded-lg">
-              {tasks.map((task, index) => {
-                const isSelected = selectedTaskId === task.handler_id;
+              {handlers.map((task, index) => {
+                const isSelected = selectedHandlerId === task.handler_id;
                 return (
                   <div
                     key={task.handler_id}
@@ -157,7 +158,7 @@ function TaskTriggerSection({
                         ? "bg-blue-50 border-l-4 border-l-blue-500"
                         : "hover:bg-gray-50"
                     }`}
-                    onClick={() => onTaskClick(task.handler_id)}
+                    onClick={() => onHandlerClick(task.handler_id)}
                   >
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       <span className="text-xs text-gray-500 flex-shrink-0">
@@ -199,7 +200,7 @@ function TaskTriggerSection({
 // Task Detail Component with AgentStreamDisplay
 function TaskDetailSection({ taskId }: { taskId: string | null }) {
   // Always call hooks at the top level
-  const taskDetail = useWorkflowTask(taskId || "");
+  const taskDetail = useWorkflowHandler(taskId || "");
 
   if (!taskId) {
     return (
@@ -211,7 +212,7 @@ function TaskDetailSection({ taskId }: { taskId: string | null }) {
 
   // Task detail information available in taskDetail object
 
-  if (!taskDetail.task) {
+  if (!taskDetail.handler) {
     return (
       <div className="p-6 w-1/2 flex items-center justify-center text-gray-500">
         Loading task details...
@@ -243,22 +244,22 @@ function TaskDetailSection({ taskId }: { taskId: string | null }) {
         <div className="bg-gray-50 rounded-lg p-4 space-y-3">
           <div>
             <span className="font-medium">Task ID:</span>{" "}
-            {taskDetail.task.handler_id}
+            {taskDetail.handler.handler_id}
           </div>
           <div>
             <span className="font-medium">Status:</span>
             <span
               className={`ml-2 px-2 py-1 rounded text-sm ${
-                taskDetail.task.status === "complete"
+                taskDetail.handler.status === "complete"
                   ? "bg-green-100 text-green-800"
-                  : taskDetail.task.status === "failed"
+                  : taskDetail.handler.status === "failed"
                     ? "bg-red-100 text-red-800"
-                    : taskDetail.task.status === "running"
+                    : taskDetail.handler.status === "running"
                       ? "bg-blue-100 text-blue-800"
                       : "bg-gray-100 text-gray-800"
               }`}
             >
-              {taskDetail.task.status}
+              {taskDetail.handler.status}
             </span>
           </div>
           <div>
@@ -284,7 +285,7 @@ function TaskDetailSection({ taskId }: { taskId: string | null }) {
 
       {/* Agent Stream - use taskId instead of events */}
       <AgentStreamDisplay
-        taskId={taskDetail.task.handler_id}
+        taskId={taskDetail.handler.handler_id}
         title="Processing Steps"
         className="mb-4"
       />
@@ -294,7 +295,7 @@ function TaskDetailSection({ taskId }: { taskId: string | null }) {
 
 // Internal Suite Component (uses hooks inside Provider)
 function WorkflowTaskSuiteInternal() {
-  const { tasks } = useWorkflowTaskList();
+  const { handlers: tasks } = useWorkflowHandlerList();
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   // Get the selected task or the most recent task for details
@@ -318,8 +319,8 @@ function WorkflowTaskSuiteInternal() {
       {/* Main Content */}
       <div className="flex h-[800px] border rounded-lg">
         <TaskTriggerSection
-          onTaskClick={setSelectedTaskId}
-          selectedTaskId={selectedTaskId}
+          onHandlerClick={setSelectedTaskId}
+          selectedHandlerId={selectedTaskId}
         />
         <TaskDetailSection taskId={selectedTask?.handler_id || null} />
       </div>

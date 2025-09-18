@@ -13,8 +13,6 @@ export {
 } from "./api-provider";
 
 export {
-  createWorkflowClient,
-  createWorkflowConfig,
   createCloudAgentClient,
   workflowsClient,
   cloudApiClient,

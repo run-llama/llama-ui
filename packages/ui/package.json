@@ -70,10 +70,10 @@
       "import": "./dist/item-count.mjs",
       "require": "./dist/item-count.cjs"
     },
-    "./workflow-task": {
-      "types": "./dist/workflow-task.d.ts",
-      "import": "./dist/workflow-task.mjs",
-      "require": "./dist/workflow-task.cjs"
+    "./workflows": {
+      "types": "./dist/workflows.d.ts",
+      "import": "./dist/workflows.mjs",
+      "require": "./dist/workflows.cjs"
     },
     "./accordion": {
       "types": "./dist/ui/accordion.d.ts",

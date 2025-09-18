@@ -1,13 +1,12 @@
 /**
  * WorkflowTrigger Component
- * Based on workflow-task-suite.md specifications
  * A wrapper around FileUploader that creates workflow tasks after file upload
  */
 
 import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
 import { FileUploader, type FileUploaderProps } from "../../file-uploader";
-import { useWorkflowTaskCreate } from "../hooks/use-workflow-task-create";
+import { useWorkflowRun } from "../hooks/use-workflow-run";
 import type { FileUploadData } from "../../file-uploader/use-file-upload";
 import { JSONValue, WorkflowHandlerSummary } from "../types";
 
@@ -22,7 +21,7 @@ export interface WorkflowTriggerProps
   ) => JSONValue;
 
   // Override onSuccess to provide workflow task result
-  onSuccess?: (task: WorkflowHandlerSummary) => void;
+  onSuccess?: (handler: WorkflowHandlerSummary) => void;
   onError?: (error: Error) => void;
 }
 
@@ -35,11 +34,11 @@ export function WorkflowTrigger({
   description = "Upload files to start workflow processing",
   ...fileUploaderProps
 }: WorkflowTriggerProps) {
-  const { createTask, isCreating, error } = useWorkflowTaskCreate();
+  const { runWorkflow: createRun, isCreating, error } = useWorkflowRun();
 
   useEffect(() => {
     if (error) {
-      toast.error(`Failed to create workflow task: ${error.message}`);
+      toast.error(`Failed to create workflow handler: ${error.message}`);
     }
   }, [error]);
 
@@ -49,7 +48,7 @@ export function WorkflowTrigger({
         // If customWorkflowInput is provided, use it to create the workflow input
         if (customWorkflowInput) {
           const workflowInput = customWorkflowInput(data, fieldValues);
-          const task = await createTask(workflowName, workflowInput);
+          const task = await createRun(workflowName, workflowInput);
           toast.success("Workflow task created successfully!");
           onSuccess?.(task);
           return;
@@ -67,7 +66,7 @@ export function WorkflowTrigger({
         } as JSONValue;
 
         // Create workflow task
-        const task = await createTask(workflowName, workflowInput);
+        const task = await createRun(workflowName, workflowInput);
 
         toast.success("Workflow task created successfully!");
         onSuccess?.(task);
@@ -78,7 +77,7 @@ export function WorkflowTrigger({
         throw error; // Re-throw to let FileUploader handle UI state
       }
     },
-    [workflowName, createTask, onSuccess, onError, customWorkflowInput]
+    [workflowName, createRun, onSuccess, onError, customWorkflowInput]
   );
 
   return (

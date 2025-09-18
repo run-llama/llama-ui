@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { WorkflowTrigger } from "../src/workflow-task";
+import { WorkflowTrigger } from "../src/workflows";
 import { ApiProvider, createMockClients } from "../src/lib";
 
 function WorkflowTriggerDemo() {

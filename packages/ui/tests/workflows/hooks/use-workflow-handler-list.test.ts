@@ -1,15 +1,10 @@
-/**
- * Test cases for useWorkflowTaskList hook (H3-H5)
- * Based on workflow-task-suite-test-cases.md
- */
-
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { act } from "@testing-library/react";
-import { useWorkflowTaskList } from "../../../src/workflow-task/hooks/use-workflow-task-list";
+import { useWorkflowHandlerList } from "../../../src/workflows/hooks/use-workflow-handler-list";
 import { renderHookWithProvider } from "../../test-utils";
 
 // Mock the helper functions to prevent real HTTP calls
-vi.mock("../../../src/workflow-task/store/helper", () => ({
+vi.mock("../../../src/workflows/store/helper", () => ({
   getRunningHandlers: vi.fn().mockResolvedValue([]),
   getExistingHandler: vi.fn(),
   createTask: vi.fn(),
@@ -55,25 +50,25 @@ describe("useWorkflowTaskList", () => {
 
   describe("H3: Initial render reads persisted tasks", () => {
     it("should return empty tasks initially", () => {
-      const { result } = renderHookWithProvider(() => useWorkflowTaskList());
+      const { result } = renderHookWithProvider(() => useWorkflowHandlerList());
 
-      expect(result.current.tasks).toEqual([]);
+      expect(result.current.handlers).toEqual([]);
       expect(typeof result.current.clearCompleted).toBe("function");
     });
   });
 
   describe("H4: Auto-stream for running tasks", () => {
     it("should have auto-stream functionality", () => {
-      const { result } = renderHookWithProvider(() => useWorkflowTaskList());
+      const { result } = renderHookWithProvider(() => useWorkflowHandlerList());
 
       // Test basic functionality - tasks should be empty initially
-      expect(result.current.tasks).toEqual([]);
+      expect(result.current.handlers).toEqual([]);
     });
   });
 
   describe("H5: clearCompleted removes only complete/error tasks", () => {
     it("should have clearCompleted function", () => {
-      const { result } = renderHookWithProvider(() => useWorkflowTaskList());
+      const { result } = renderHookWithProvider(() => useWorkflowHandlerList());
 
       expect(typeof result.current.clearCompleted).toBe("function");
 
@@ -82,7 +77,7 @@ describe("useWorkflowTaskList", () => {
       });
 
       // Should not throw error
-      expect(result.current.tasks).toEqual([]);
+      expect(result.current.handlers).toEqual([]);
     });
   });
 });

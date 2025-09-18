@@ -1,14 +1,9 @@
-/**
- * useWorkflowTaskCreate Hook
- * Based on workflow-task-suite.md specifications
- */
-
 import { useState, useCallback } from "react";
-import { useTaskStore } from "./use-task-store";
+import { useHandlerStore } from "./use-handler-store";
 import type { JSONValue, WorkflowHandlerSummary } from "../types";
 
-interface UseWorkflowTaskCreateResult {
-  createTask: (
+interface UseWorkflowRunResult {
+  runWorkflow: (
     workflowName: string,
     input: JSONValue
   ) => Promise<WorkflowHandlerSummary>;
@@ -16,12 +11,12 @@ interface UseWorkflowTaskCreateResult {
   error: Error | null;
 }
 
-export function useWorkflowTaskCreate(): UseWorkflowTaskCreateResult {
+export function useWorkflowRun(): UseWorkflowRunResult {
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const storeCreateTask = useTaskStore((state) => state.createTask);
+  const storeCreateHandler = useHandlerStore((state) => state.createHandler);
 
-  const createTask = useCallback(
+  const runWorkflow = useCallback(
     async (
       workflowName: string,
       input: JSONValue
@@ -30,11 +25,11 @@ export function useWorkflowTaskCreate(): UseWorkflowTaskCreateResult {
       setError(null);
 
       try {
-        // Call store method to create task (handles API call and store update)
-        const task = await storeCreateTask(workflowName, input);
+        // Call store method to create handler (handles API call and store update)
+        const handler = await storeCreateHandler(workflowName, input);
 
         setIsCreating(false);
-        return task;
+        return handler;
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
         setError(error);
@@ -42,11 +37,11 @@ export function useWorkflowTaskCreate(): UseWorkflowTaskCreateResult {
         throw error;
       }
     },
-    [storeCreateTask]
+    [storeCreateHandler]
   );
 
   return {
-    createTask,
+    runWorkflow,
     isCreating,
     error,
   };

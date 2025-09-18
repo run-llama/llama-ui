@@ -5,23 +5,25 @@
 
 import { useMemo } from "react";
 import { useWorkflowsClient } from "../../lib/api-provider";
-import { createTaskStore } from "../store/task-store";
-import type { TaskStoreState } from "../store/task-store";
+import { createHandlerStore } from "../store/handler-store";
+import type { HandlerStoreState } from "../store/handler-store";
 
 // Simple global store instance
-let globalStore: ReturnType<typeof createTaskStore> | null = null;
+let globalStore: ReturnType<typeof createHandlerStore> | null = null;
 
 // Overloaded function signatures for different use cases
-export function useTaskStore(): TaskStoreState;
-export function useTaskStore<T>(selector: (state: TaskStoreState) => T): T;
+export function useHandlerStore(): HandlerStoreState;
+export function useHandlerStore<T>(
+  selector: (state: HandlerStoreState) => T
+): T;
 
-export function useTaskStore<T>(selector?: (state: TaskStoreState) => T) {
+export function useHandlerStore<T>(selector?: (state: HandlerStoreState) => T) {
   const client = useWorkflowsClient();
 
   // Create store instance once and reuse
   const store = useMemo(() => {
     if (!globalStore) {
-      globalStore = createTaskStore(client);
+      globalStore = createHandlerStore(client);
     }
     return globalStore;
   }, [client]);

@@ -1,6 +1,6 @@
 /**
  * AgentStreamDisplay Component
- * Displays real-time agent processing events from workflow tasks
+ * Displays real-time agent processing events from workflow handlers
  */
 
 import { useMemo } from "react";
@@ -15,7 +15,7 @@ import {
   Download,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../base/card";
-import { useWorkflowTask } from "../hooks/use-workflow-task";
+import { useWorkflowHandler } from "../hooks/use-workflow-handler";
 import type { WorkflowEvent } from "../types";
 
 const iconPool = [
@@ -34,19 +34,19 @@ const getRandomIcon = (index: number) => {
 };
 
 interface AgentStreamDisplayProps {
-  taskId: string;
+  handlerId: string;
   title?: string;
   maxEvents?: number;
   className?: string;
 }
 
 export function AgentStreamDisplay({
-  taskId,
+  handlerId,
   title = "Agent Processing",
   maxEvents = 20,
   className,
 }: AgentStreamDisplayProps) {
-  const { task, events } = useWorkflowTask(taskId, true);
+  const { handler, events } = useWorkflowHandler(handlerId, true);
 
   // Filter and limit events to show only AgentStream events
   const agentEvents = useMemo(() => {
@@ -62,8 +62,8 @@ export function AgentStreamDisplay({
       .slice(-maxEvents); // Show only the latest events
   }, [events, maxEvents]);
 
-  // Don't render if no task or no events
-  if (!task || agentEvents.length === 0) {
+  // Don't render if no handler or no events
+  if (!handler || agentEvents.length === 0) {
     return null;
   }
 
@@ -73,11 +73,11 @@ export function AgentStreamDisplay({
         <CardTitle className="text-sm font-medium flex items-center gap-2">
           <div
             className={`h-2 w-2 rounded-full ${
-              task.status === "running"
+              handler.status === "running"
                 ? "bg-blue-500 animate-pulse"
-                : task.status === "complete"
+                : handler.status === "complete"
                   ? "bg-green-500"
-                  : task.status === "failed"
+                  : handler.status === "failed"
                     ? "bg-red-500"
                     : "bg-gray-400"
             }`}
@@ -92,7 +92,7 @@ export function AgentStreamDisplay({
 
             return (
               <div
-                key={`agent-stream-${taskId}-${index}`}
+                key={`agent-stream-${handlerId}-${index}`}
                 className="flex items-center gap-3 animate-in fade-in duration-300"
               >
                 <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-blue-600 flex-shrink-0">

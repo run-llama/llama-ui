@@ -1,16 +1,11 @@
-/**
- * Test cases for task store functionality
- * Based on workflow-task-suite-test-cases.md
- */
-
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import { createTaskStore } from "../../../src/workflow-task/store/task-store";
+import { createHandlerStore } from "../../../src/workflows/store/handler-store";
 /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any */
 import {
-  createTask as createTaskAPI,
+  createHandler,
   fetchHandlerEvents,
   getRunningHandlers,
-} from "../../../src/workflow-task/store/helper";
+} from "../../../src/workflows/store/helper";
 import { workflowStreamingManager } from "../../../src/lib/shared-streaming";
 import {
   createClient,
@@ -20,10 +15,10 @@ import {
 import type {
   WorkflowHandlerSummary,
   WorkflowEvent,
-} from "../../../src/workflow-task/types";
+} from "../../../src/workflows/types";
 
 // Mock the helper functions
-vi.mock("../../../src/workflow-task/store/helper");
+vi.mock("../../../src/workflows/store/helper");
 vi.mock("../../../src/lib/shared-streaming", () => ({
   workflowStreamingManager: {
     subscribe: vi.fn(),
@@ -70,15 +65,15 @@ describe("Complete Task Store Tests", () => {
       baseUrl: "http://localhost:8000" as unknown as `${string}://${string}`,
     })
   );
-  let testStore: ReturnType<typeof createTaskStore>;
+  let testStore: ReturnType<typeof createHandlerStore>;
 
   beforeEach(() => {
     vi.clearAllMocks();
 
     // Create fresh store for each test
-    testStore = createTaskStore(mockClient);
+    testStore = createHandlerStore(mockClient);
     testStore.setState({
-      tasks: {},
+      handlers: {},
       events: {},
     });
 
@@ -86,12 +81,12 @@ describe("Complete Task Store Tests", () => {
     localStorageMock.clear();
 
     // Setup default mock implementations
-    const mockedCreateTaskAPI = vi.mocked(createTaskAPI);
+    const mockedCreateHandler = vi.mocked(createHandler);
     const mockedFetchHandlerEvents = vi.mocked(fetchHandlerEvents);
     const mockedGetRunningHandlers = vi.mocked(getRunningHandlers);
     const mockedStreaming = vi.mocked(workflowStreamingManager);
 
-    mockedCreateTaskAPI.mockResolvedValue(mockTaskSummary);
+    mockedCreateHandler.mockResolvedValue(mockTaskSummary);
     mockedFetchHandlerEvents.mockResolvedValue([]);
     mockedGetRunningHandlers.mockResolvedValue([]);
     mockedStreaming.isStreamActive.mockReturnValue(false);
@@ -105,18 +100,18 @@ describe("Complete Task Store Tests", () => {
     it("should create task and add to store", async () => {
       const result = await testStore
         .getState()
-        .createTask("test-workflow", "test input");
+        .createHandler("test-workflow", "test input");
 
       expect(result.handler_id).toBe("task-123");
       expect(result.status).toBe("running");
-      expect(testStore.getState().tasks["task-123"]).toBeDefined();
+      expect(testStore.getState().handlers["task-123"]).toBeDefined();
       expect(testStore.getState().events["task-123"]).toEqual([]);
     });
 
     it("should call createTaskAPI with correct parameters", async () => {
-      await testStore.getState().createTask("test-workflow", "test input");
+      await testStore.getState().createHandler("test-workflow", "test input");
 
-      expect(createTaskAPI).toHaveBeenCalledWith({
+      expect(createHandler).toHaveBeenCalledWith({
         client: mockClient,
         workflowName: "test-workflow",
         eventData: "test input",
@@ -124,7 +119,7 @@ describe("Complete Task Store Tests", () => {
     });
 
     it("should automatically call fetchTaskEvents for subscription", async () => {
-      await testStore.getState().createTask("test-workflow", "test input");
+      await testStore.getState().createHandler("test-workflow", "test input");
 
       // Should call subscribe which internally calls fetchTaskEvents
       expect(vi.mocked(fetchHandlerEvents)).toHaveBeenCalled();
@@ -150,7 +145,7 @@ describe("Complete Task Store Tests", () => {
       };
 
       testStore.setState({
-        tasks: {
+        handlers: {
           completed: completedTask,
           error: errorTask,
           running: runningTask,
@@ -160,7 +155,7 @@ describe("Complete Task Store Tests", () => {
 
       testStore.getState().clearCompleted();
 
-      expect(testStore.getState().tasks).toEqual({
+      expect(testStore.getState().handlers).toEqual({
         running: runningTask,
       });
     });
@@ -169,7 +164,7 @@ describe("Complete Task Store Tests", () => {
   describe("clearEvents", () => {
     it("should clear events for specific task", () => {
       testStore.setState({
-        tasks: {},
+        handlers: {},
         events: {
           "task-123": [mockEvent],
           "task-456": [mockEvent],
@@ -192,7 +187,7 @@ describe("Complete Task Store Tests", () => {
 
     it("should subscribe to existing task", () => {
       testStore.setState({
-        tasks: { "task-123": mockTaskSummary },
+        handlers: { "task-123": mockTaskSummary },
         events: {},
       });
 
@@ -206,7 +201,7 @@ describe("Complete Task Store Tests", () => {
   describe("unsubscribe", () => {
     it("should call workflowStreamingManager.closeStream", () => {
       testStore.setState({
-        tasks: { "task-123": mockTaskSummary },
+        handlers: { "task-123": mockTaskSummary },
         events: {},
       });
 
@@ -220,7 +215,7 @@ describe("Complete Task Store Tests", () => {
   describe("isSubscribed", () => {
     it("should return streaming manager status for existing task", () => {
       testStore.setState({
-        tasks: { "task-123": mockTaskSummary },
+        handlers: { "task-123": mockTaskSummary },
         events: {},
       });
 
@@ -265,8 +260,8 @@ describe("Complete Task Store Tests", () => {
 
       // Check if tasks were added to store
       const state = testStore.getState();
-      expect(state.tasks["server-task-1"]).toEqual(mockServerTasks[0]);
-      expect(state.tasks["server-task-2"]).toEqual(mockServerTasks[1]);
+      expect(state.handlers["server-task-1"]).toEqual(mockServerTasks[0]);
+      expect(state.handlers["server-task-2"]).toEqual(mockServerTasks[1]);
     });
 
     it("should auto-subscribe to synced running tasks", async () => {
@@ -326,7 +321,7 @@ describe("Complete Task Store Tests", () => {
       };
 
       testStore.setState({
-        tasks: { "local-task": localTask },
+        handlers: { "local-task": localTask },
         events: {},
       });
 
@@ -338,9 +333,9 @@ describe("Complete Task Store Tests", () => {
       const state = testStore.getState();
 
       // Local task should be replaced by server tasks
-      expect(state.tasks["local-task"]).toBeUndefined();
-      expect(state.tasks["server-task-1"]).toBeDefined();
-      expect(state.tasks["server-task-2"]).toBeDefined();
+      expect(state.handlers["local-task"]).toBeUndefined();
+      expect(state.handlers["server-task-1"]).toBeDefined();
+      expect(state.handlers["server-task-2"]).toBeDefined();
     });
   });
 });
