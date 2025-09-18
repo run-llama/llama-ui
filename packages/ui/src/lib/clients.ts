@@ -6,14 +6,9 @@ import { client as workflowsClient } from "@llamaindex/workflows-client";
 export {
   createClient as createWorkflowsClient,
   createConfig as createWorkflowsConfig,
+  type Client as WorkflowClient,
 } from "@llamaindex/workflows-client";
 
-// Backward-compatible aliases expected by existing stories/exports
-export {
-  createClient as createWorkflowClient,
-  createConfig as createWorkflowConfig,
-  type Client as WorkflowsClient,
-} from "@llamaindex/workflows-client";
 export { workflowsClient };
 
 export {

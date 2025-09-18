@@ -94,4 +94,30 @@ describe("useWorkflowTask", () => {
       expect(result.current.isStreaming).toBe(false);
     });
   });
+
+  describe("H9: sendEvent calls helper with handlerId and event", () => {
+    it("should call sendEventToHandler when sendEvent is invoked", async () => {
+      const { sendEventToHandler } = await import(
+        "../../../src/workflows/store/helper"
+      );
+
+      const { result } = renderHookWithProvider(() =>
+        useWorkflowHandler("task-123")
+      );
+
+      const event = { type: "test.event", data: { foo: "bar" } };
+
+      await act(async () => {
+        await result.current.sendEvent(event);
+      });
+
+      expect(sendEventToHandler).toHaveBeenCalledTimes(1);
+      expect(sendEventToHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          handlerId: "task-123",
+          event,
+        })
+      );
+    });
+  });
 });
