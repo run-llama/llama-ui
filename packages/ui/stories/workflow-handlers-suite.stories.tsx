@@ -296,7 +296,9 @@ function HandlerDetailSection({ handlerId }: { handlerId: string | null }) {
 // Internal Suite Component (uses hooks inside Provider)
 function WorkflowHandlerSuiteInternal() {
   const { handlers } = useWorkflowHandlerList();
-  const [selectedHandlerId, setSelectedHandlerId] = useState<string | null>(null);
+  const [selectedHandlerId, setSelectedHandlerId] = useState<string | null>(
+    null
+  );
 
   // Get the selected handler or the most recent handler for details
   const selectedHandler = selectedHandlerId
