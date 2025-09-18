@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { act } from "@testing-library/react";
-import { useWorkflowCreate } from "../../../src/workflows/hooks/use-workflow-create";
+import { useWorkflowRun } from "../../../src/workflows/hooks/use-workflow-run";
 import { renderHookWithProvider } from "../../test-utils";
 import type { WorkflowHandlerSummary } from "../../../src/workflows/types";
 
@@ -40,7 +40,7 @@ Object.defineProperty(window, "localStorage", {
   value: localStorageMock,
 });
 
-describe("useWorkflowCreate", () => {
+describe("useWorkflowRun", () => {
   const mockHandler: WorkflowHandlerSummary = {
     handler_id: "test-task-1",
     status: "running",
@@ -60,7 +60,7 @@ describe("useWorkflowCreate", () => {
       );
       vi.mocked(createHandler).mockResolvedValue(mockHandler);
 
-      const { result } = renderHookWithProvider(() => useWorkflowCreate());
+      const { result } = renderHookWithProvider(() => useWorkflowRun());
 
       // Initial state
       expect(result.current.isCreating).toBe(false);
@@ -109,7 +109,7 @@ describe("useWorkflowCreate", () => {
       const testError = new Error("API Error");
       vi.mocked(createHandler).mockRejectedValue(testError);
 
-      const { result } = renderHookWithProvider(() => useWorkflowCreate());
+      const { result } = renderHookWithProvider(() => useWorkflowRun());
 
       // Initial state
       expect(result.current.error).toBe(null);

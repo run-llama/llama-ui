@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useHandlerStore } from "./use-handler-store";
 import type { JSONValue, WorkflowHandlerSummary } from "../types";
 
-interface UseWorkflowCreateResult {
+interface UseWorkflowRunResult {
   runWorkflow: (
     workflowName: string,
     input: JSONValue
@@ -11,7 +11,7 @@ interface UseWorkflowCreateResult {
   error: Error | null;
 }
 
-export function useWorkflowCreate(): UseWorkflowCreateResult {
+export function useWorkflowRun(): UseWorkflowRunResult {
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const storeCreateHandler = useHandlerStore((state) => state.createHandler);
