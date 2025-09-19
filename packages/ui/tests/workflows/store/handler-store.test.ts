@@ -97,7 +97,7 @@ describe("Complete Task Store Tests", () => {
     vi.clearAllMocks();
   });
 
-  describe("createTask", () => {
+  describe("createHandler", () => {
     it("should create task and add to store", async () => {
       const result = await testStore
         .getState()
@@ -110,7 +110,7 @@ describe("Complete Task Store Tests", () => {
       expect(testStore.getState().events["task-123"]).toEqual([]);
     });
 
-    it("should call createTaskAPI with correct parameters", async () => {
+    it("should call createHandler API with correct parameters", async () => {
       await testStore.getState().createHandler("test-workflow", "test input");
 
       expect(createHandler).toHaveBeenCalledWith({
@@ -244,17 +244,10 @@ describe("Complete Task Store Tests", () => {
       {
         handler_id: "server-task-1",
         status: "running",
-        workflowName: "test-workflow",
       },
       {
         handler_id: "server-task-2",
-        status: "complete",
-        workflowName: "test-workflow",
-      },
-      {
-        handler_id: "server-task-3",
-        status: "failed",
-        workflowName: "other-workflow",
+        status: "running",
       },
     ];
 
@@ -271,7 +264,6 @@ describe("Complete Task Store Tests", () => {
       const state = testStore.getState();
       expect(state.handlers["server-task-1"]).toEqual(mockServerTasks[0]);
       expect(state.handlers["server-task-2"]).toEqual(mockServerTasks[1]);
-      expect(state.handlers["server-task-3"]).toEqual(mockServerTasks[2]);
     });
 
     it("should auto-subscribe only to running tasks", async () => {
@@ -280,14 +272,21 @@ describe("Complete Task Store Tests", () => {
 
       await testStore.getState().sync();
 
-      // Should call fetchTaskEvents only for running tasks
-      expect(fetchHandlerEvents).toHaveBeenCalledTimes(1);
+      // Should call fetchTaskEvents for each running task
+      expect(fetchHandlerEvents).toHaveBeenCalledTimes(2);
 
       // Check if subscription calls were made correctly
       expect(fetchHandlerEvents).toHaveBeenCalledWith(
         expect.objectContaining({
           client: mockClient,
           handlerId: "server-task-1",
+        }),
+        expect.any(Object)
+      );
+      expect(fetchHandlerEvents).toHaveBeenCalledWith(
+        expect.objectContaining({
+          client: mockClient,
+          handlerId: "server-task-2",
         }),
         expect.any(Object)
       );

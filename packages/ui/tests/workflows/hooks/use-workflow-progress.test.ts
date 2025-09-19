@@ -1,7 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
+import { act } from "@testing-library/react";
 import { useWorkflowProgress } from "../../../src/workflows/hooks/use-workflow-progress";
 import { renderHookWithProvider } from "../../test-utils";
-import { __resetHandlerStore } from "../../../src/workflows/hooks/use-handler-store";
+import {
+  __resetHandlerStore,
+  __setHandlerStoreState,
+} from "../../../src/workflows/hooks/use-handler-store";
 
 // Mock the helper functions to prevent real HTTP calls
 const getRunningHandlersMock = vi.fn().mockResolvedValue([]);
@@ -9,7 +13,7 @@ const getRunningHandlersMock = vi.fn().mockResolvedValue([]);
 vi.mock("../../../src/workflows/store/helper", () => ({
   getRunningHandlers: getRunningHandlersMock,
   getExistingHandler: vi.fn(),
-  createTask: vi.fn(),
+  createHandler: vi.fn(),
   fetchHandlerEvents: vi.fn().mockResolvedValue([]),
   sendEventToHandler: vi.fn(),
 }));
@@ -158,11 +162,9 @@ describe("useWorkflowProgress", () => {
       );
     });
 
-    it("reflects running and completed handlers", async () => {
+    it("reflects running and completed handlers when metadata is available", async () => {
       getRunningHandlersMock.mockResolvedValueOnce([
-        { handler_id: "alpha-1", status: "running", workflowName: "alpha" },
-        { handler_id: "alpha-2", status: "complete", workflowName: "alpha" },
-        { handler_id: "beta-1", status: "running", workflowName: "beta" },
+        { handler_id: "alpha-1", status: "running" },
       ]);
 
       const { result, waitFor } = renderHookWithProvider(() =>
@@ -170,7 +172,25 @@ describe("useWorkflowProgress", () => {
       );
 
       await waitFor(() => {
-        expect(result.current.total).toBe(2);
+        expect(result.current.status).toBe("running");
+      });
+
+      act(() => {
+        __setHandlerStoreState((state) => ({
+          handlers: {
+            ...state.handlers,
+            "alpha-1": {
+              handler_id: "alpha-1",
+              status: "running",
+              workflowName: "alpha",
+            },
+            "alpha-2": {
+              handler_id: "alpha-2",
+              status: "complete",
+              workflowName: "alpha",
+            },
+          },
+        }));
       });
 
       expect(result.current).toEqual({
@@ -180,11 +200,9 @@ describe("useWorkflowProgress", () => {
       });
     });
 
-    it("prioritizes failed status when any handler fails", async () => {
+    it("prioritizes failed status when metadata is available", async () => {
       getRunningHandlersMock.mockResolvedValueOnce([
-        { handler_id: "alpha-1", status: "complete", workflowName: "alpha" },
-        { handler_id: "alpha-2", status: "failed", workflowName: "alpha" },
-        { handler_id: "alpha-3", status: "running", workflowName: "alpha" },
+        { handler_id: "alpha-1", status: "running" },
       ]);
 
       const { result, waitFor } = renderHookWithProvider(() =>
@@ -192,12 +210,25 @@ describe("useWorkflowProgress", () => {
       );
 
       await waitFor(() => {
-        expect(result.current.total).toBe(3);
+        expect(result.current.status).toBe("running");
+      });
+
+      act(() => {
+        __setHandlerStoreState((state) => ({
+          handlers: {
+            ...state.handlers,
+            "alpha-1": {
+              handler_id: "alpha-1",
+              status: "failed",
+              workflowName: "alpha",
+            },
+          },
+        }));
       });
 
       expect(result.current).toEqual({
-        current: 1,
-        total: 3,
+        current: 0,
+        total: 1,
         status: "failed",
       });
     });

@@ -42,9 +42,18 @@ export function useWorkflowHandlerList(
 
   // Memoize tasks array and filtering based on tasksRecord
   const filteredHandlers = useMemo(() => {
-    return Object.values(handlersRecord).filter(
-      (handler) => handler.workflowName === workflowName
-    );
+    return Object.values(handlersRecord).filter((handler) => {
+      if (handler.workflowName) {
+        return handler.workflowName === workflowName;
+      }
+
+      if (handler.status !== "running") {
+        return false;
+      }
+
+      // TODO: Filter by workflowName once handler summaries persist workflow metadata.
+      return true;
+    });
   }, [handlersRecord, workflowName]);
 
   return {

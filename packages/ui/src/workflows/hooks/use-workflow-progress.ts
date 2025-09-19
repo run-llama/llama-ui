@@ -24,9 +24,18 @@ export function useWorkflowProgress(
 
   // Memoize the calculation based on handlers object
   return useMemo(() => {
-    const handlerArray = Object.values(handlers).filter(
-      (handler) => handler.workflowName === workflowName
-    );
+    const handlerArray = Object.values(handlers).filter((handler) => {
+      if (handler.workflowName) {
+        return handler.workflowName === workflowName;
+      }
+
+      if (handler.status !== "running") {
+        return false;
+      }
+
+      // TODO: Filter by workflowName once handler summaries persist workflow metadata.
+      return true;
+    });
     const total = handlerArray.length;
 
     if (total === 0) {

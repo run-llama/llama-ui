@@ -10,7 +10,7 @@ const getRunningHandlersMock = vi.fn().mockResolvedValue([]);
 vi.mock("../../../src/workflows/store/helper", () => ({
   getRunningHandlers: getRunningHandlersMock,
   getExistingHandler: vi.fn(),
-  createTask: vi.fn(),
+  createHandler: vi.fn(),
   fetchHandlerEvents: vi.fn().mockResolvedValue([]),
   sendEventToHandler: vi.fn(),
 }));
@@ -93,11 +93,11 @@ describe("useWorkflowTaskList", () => {
   });
 
   describe("workflowName filtering", () => {
-    it("returns only handlers for the requested workflow", async () => {
+    it("falls back to running handlers when workflow metadata is unavailable", async () => {
       getRunningHandlersMock.mockResolvedValueOnce([
-        { handler_id: "alpha-1", status: "running", workflowName: "alpha" },
-        { handler_id: "alpha-2", status: "complete", workflowName: "alpha" },
-        { handler_id: "beta-1", status: "running", workflowName: "beta" },
+        { handler_id: "alpha-1", status: "running" },
+        { handler_id: "beta-1", status: "running" },
+        { handler_id: "gamma-1", status: "failed" },
       ]);
 
       const { result, waitFor } = renderHookWithProvider(() =>
@@ -109,8 +109,8 @@ describe("useWorkflowTaskList", () => {
       });
 
       expect(result.current.handlers).toEqual([
-        { handler_id: "alpha-1", status: "running", workflowName: "alpha" },
-        { handler_id: "alpha-2", status: "complete", workflowName: "alpha" },
+        { handler_id: "alpha-1", status: "running" },
+        { handler_id: "beta-1", status: "running" },
       ]);
     });
   });

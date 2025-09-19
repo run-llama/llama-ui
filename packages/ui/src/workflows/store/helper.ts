@@ -26,14 +26,12 @@ export async function getRunningHandlers(params: {
   });
   const allHandlers = resp.data?.handlers ?? [];
 
-  return allHandlers.map((handler) => ({
-    handler_id: handler.handler_id ?? "",
-    status: (handler.status as RunStatus) ?? "running",
-    workflowName:
-      (handler as { workflowName?: string }).workflowName ??
-      (handler as { workflow_name?: string }).workflow_name ??
-      "",
-  }));
+  return allHandlers
+    .filter((handler) => handler.status === "running")
+    .map((handler) => ({
+      handler_id: handler.handler_id ?? "",
+      status: handler.status as RunStatus,
+    }));
 }
 
 export async function getExistingHandler(params: {
@@ -50,13 +48,12 @@ export async function getExistingHandler(params: {
     throw new Error(`Handler ${params.handlerId} not found`);
   }
 
+  const workflowName = (handler as { workflowName?: string }).workflowName;
+
   return {
     handler_id: handler.handler_id ?? "",
     status: (handler.status as RunStatus) ?? "running",
-    workflowName:
-      (handler as { workflowName?: string }).workflowName ??
-      (handler as { workflow_name?: string }).workflow_name ??
-      "",
+    ...(workflowName ? { workflowName } : {}),
   };
 }
 

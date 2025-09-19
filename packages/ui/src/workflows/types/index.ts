@@ -13,7 +13,7 @@ export type RunStatus = "idle" | "running" | "complete" | "failed";
 export interface WorkflowHandlerSummary {
   handler_id: string;
   status: RunStatus;
-  workflowName: string;
+  workflowName?: string;
   result?: unknown;
   error?: unknown;
 }

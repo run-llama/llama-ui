@@ -38,7 +38,7 @@ describe("Helper Functions Tests", () => {
   });
 
   describe("getRunningHandlers", () => {
-    it("returns handlers from server with workflow names", async () => {
+    it("returns running handlers from server", async () => {
       const { getHandlers } = await import("@llamaindex/workflows-client");
       vi.mocked(getHandlers as any).mockResolvedValue({
         data: {
@@ -64,11 +64,8 @@ describe("Helper Functions Tests", () => {
 
       const result = await getRunningHandlers({ client: mockClient });
       expect(getHandlers).toHaveBeenCalledWith({ client: mockClient });
-      expect(result).toEqual([
-        { handler_id: "h-1", status: "running", workflowName: "alpha" },
-        { handler_id: "h-2", status: "complete", workflowName: "beta" },
-        { handler_id: "h-3", status: "failed", workflowName: "alpha" },
-      ]);
+      expect(result).toEqual([{ handler_id: "h-1", status: "running" }]);
+      expect(result[0]?.workflowName).toBeUndefined();
     });
 
     it("returns empty when no handlers", async () => {
@@ -104,11 +101,7 @@ describe("Helper Functions Tests", () => {
         client: mockClient,
         handlerId: "h-2",
       });
-      expect(result).toEqual({
-        handler_id: "h-2",
-        status: "complete",
-        workflowName: "beta",
-      });
+      expect(result).toEqual({ handler_id: "h-2", status: "complete" });
     });
 
     it("throws when not found", async () => {
@@ -122,7 +115,7 @@ describe("Helper Functions Tests", () => {
     });
   });
 
-  describe("createTask", () => {
+  describe("createHandler", () => {
     it("creates a handler via nowait endpoint", async () => {
       const { postWorkflowsByNameRunNowait } = await import(
         "@llamaindex/workflows-client"
