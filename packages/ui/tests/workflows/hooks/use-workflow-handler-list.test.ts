@@ -1,13 +1,18 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { act } from "@testing-library/react";
+import { act, waitFor } from "@testing-library/react";
 import { useWorkflowHandlerList } from "../../../src/workflows/hooks/use-workflow-handler-list";
+import { __resetHandlerStore } from "../../../src/workflows/hooks/use-handler-store";
 import { renderHookWithProvider } from "../../test-utils";
 
-// Mock the helper functions to prevent real HTTP calls
+// Mock the helper functions to prevent real HTTP calls (use hoisted refs)
+const hoisted = vi.hoisted(() => ({
+  getRunningHandlersMock: vi.fn().mockResolvedValue([]),
+}));
+
 vi.mock("../../../src/workflows/store/helper", () => ({
-  getRunningHandlers: vi.fn().mockResolvedValue([]),
+  getRunningHandlers: hoisted.getRunningHandlersMock,
   getExistingHandler: vi.fn(),
-  createTask: vi.fn(),
+  createHandler: vi.fn(),
   fetchHandlerEvents: vi.fn().mockResolvedValue([]),
   sendEventToHandler: vi.fn(),
 }));
@@ -46,11 +51,15 @@ describe("useWorkflowTaskList", () => {
   beforeEach(() => {
     localStorageMock.clear();
     vi.clearAllMocks();
+    hoisted.getRunningHandlersMock.mockResolvedValue([]);
+    __resetHandlerStore();
   });
 
   describe("H3: Initial render reads persisted tasks", () => {
     it("should return empty tasks initially", () => {
-      const { result } = renderHookWithProvider(() => useWorkflowHandlerList());
+      const { result } = renderHookWithProvider(() =>
+        useWorkflowHandlerList("alpha")
+      );
 
       expect(result.current.handlers).toEqual([]);
       expect(typeof result.current.clearCompleted).toBe("function");
@@ -59,7 +68,9 @@ describe("useWorkflowTaskList", () => {
 
   describe("H4: Auto-stream for running tasks", () => {
     it("should have auto-stream functionality", () => {
-      const { result } = renderHookWithProvider(() => useWorkflowHandlerList());
+      const { result } = renderHookWithProvider(() =>
+        useWorkflowHandlerList("alpha")
+      );
 
       // Test basic functionality - tasks should be empty initially
       expect(result.current.handlers).toEqual([]);
@@ -68,7 +79,9 @@ describe("useWorkflowTaskList", () => {
 
   describe("H5: clearCompleted removes only complete/error tasks", () => {
     it("should have clearCompleted function", () => {
-      const { result } = renderHookWithProvider(() => useWorkflowHandlerList());
+      const { result } = renderHookWithProvider(() =>
+        useWorkflowHandlerList("alpha")
+      );
 
       expect(typeof result.current.clearCompleted).toBe("function");
 
@@ -78,6 +91,29 @@ describe("useWorkflowTaskList", () => {
 
       // Should not throw error
       expect(result.current.handlers).toEqual([]);
+    });
+  });
+
+  describe("workflowName filtering", () => {
+    it("falls back to running handlers when workflow metadata is unavailable", async () => {
+      hoisted.getRunningHandlersMock.mockResolvedValueOnce([
+        { handler_id: "alpha-1", status: "running" },
+        { handler_id: "beta-1", status: "running" },
+        { handler_id: "gamma-1", status: "failed" },
+      ]);
+
+      const { result } = renderHookWithProvider(() =>
+        useWorkflowHandlerList("alpha")
+      );
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.handlers).toEqual([
+        { handler_id: "alpha-1", status: "running" },
+        { handler_id: "beta-1", status: "running" },
+      ]);
     });
   });
 });

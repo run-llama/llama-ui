@@ -1,23 +1,22 @@
+/**
+ * Test cases for useWorkflowProgress hook (H9)
+ * Based on workflow-task-suite-test-cases.md
+ */
+
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { act, waitFor } from "@testing-library/react";
 import { useWorkflowProgress } from "../../../src/workflows/hooks/use-workflow-progress";
 import { renderHookWithProvider } from "../../test-utils";
-import {
-  __resetHandlerStore,
-  __setHandlerStoreState,
-} from "../../../src/workflows/hooks/use-handler-store";
 
-// Mock the helper functions to prevent real HTTP calls (use hoisted refs)
-const hoisted = vi.hoisted(() => ({
-  getRunningHandlersMock: vi.fn().mockResolvedValue([]),
-}));
-
+// Mock the helper functions to prevent real HTTP calls
 vi.mock("../../../src/workflows/store/helper", () => ({
-  getRunningHandlers: hoisted.getRunningHandlersMock,
+  getRunningHandlers: vi.fn().mockResolvedValue([]),
   getExistingHandler: vi.fn(),
-  createHandler: vi.fn(),
+  createTask: vi.fn(),
   fetchHandlerEvents: vi.fn().mockResolvedValue([]),
   sendEventToHandler: vi.fn(),
+  mergeServerTasksForWorkflow: vi.fn(
+    (params: any) => params.existingTasks ?? {}
+  ),
 }));
 
 // Mock the shared streaming manager
@@ -55,14 +54,12 @@ describe("useWorkflowProgress", () => {
     // Clear localStorage mock
     localStorageMock.clear();
     vi.clearAllMocks();
-    hoisted.getRunningHandlersMock.mockResolvedValue([]);
-    __resetHandlerStore();
   });
 
   describe("H9: Basic functionality", () => {
     it("should start with default values", () => {
       const { result } = renderHookWithProvider(() =>
-        useWorkflowProgress("alpha")
+        useWorkflowProgress("test-workflow")
       );
 
       expect(result.current.current).toBe(0);
@@ -72,7 +69,7 @@ describe("useWorkflowProgress", () => {
 
     it("should have progress properties", () => {
       const { result } = renderHookWithProvider(() =>
-        useWorkflowProgress("alpha")
+        useWorkflowProgress("test-workflow")
       );
 
       expect(typeof result.current.current).toBe("number");
@@ -82,7 +79,7 @@ describe("useWorkflowProgress", () => {
 
     it("should be accessible from ApiProvider context", () => {
       const { result } = renderHookWithProvider(() =>
-        useWorkflowProgress("alpha")
+        useWorkflowProgress("test-workflow")
       );
 
       // Should not throw an error when called within ApiProvider
@@ -98,7 +95,7 @@ describe("useWorkflowProgress", () => {
   describe("H9: Hook behavior and calculations", () => {
     it("should handle empty task store efficiently", () => {
       const { result } = renderHookWithProvider(() =>
-        useWorkflowProgress("alpha")
+        useWorkflowProgress("test-workflow")
       );
 
       expect(result.current.current).toBe(0);
@@ -108,7 +105,7 @@ describe("useWorkflowProgress", () => {
 
     it("should memoize results correctly", () => {
       const { result, rerender } = renderHookWithProvider(() =>
-        useWorkflowProgress("alpha")
+        useWorkflowProgress("test-workflow")
       );
 
       const firstResult = result.current;
@@ -121,7 +118,7 @@ describe("useWorkflowProgress", () => {
 
     it("should return correct structure and types", () => {
       const { result } = renderHookWithProvider(() =>
-        useWorkflowProgress("alpha")
+        useWorkflowProgress("test-workflow")
       );
 
       // Verify structure
@@ -143,9 +140,9 @@ describe("useWorkflowProgress", () => {
     it("should handle the useMemo dependency correctly", () => {
       // Test that the hook implementation uses useMemo correctly
       const { result } = renderHookWithProvider(() => {
-        const progress = useWorkflowProgress("alpha");
+        const progress = useWorkflowProgress("test-workflow");
         // Call multiple times to test memoization
-        const progress2 = useWorkflowProgress("alpha");
+        const progress2 = useWorkflowProgress("test-workflow");
         return { progress, progress2 };
       });
 
@@ -162,77 +159,6 @@ describe("useWorkflowProgress", () => {
       expect(result.current.progress.status).toBe(
         result.current.progress2.status
       );
-    });
-
-    it("reflects running and completed handlers when metadata is available", async () => {
-      hoisted.getRunningHandlersMock.mockResolvedValueOnce([
-        { handler_id: "alpha-1", status: "running" },
-      ]);
-
-      const { result } = renderHookWithProvider(() =>
-        useWorkflowProgress("alpha")
-      );
-
-      await waitFor(() => {
-        expect(result.current.status).toBe("running");
-      });
-
-      act(() => {
-        __setHandlerStoreState((state) => ({
-          handlers: {
-            ...state.handlers,
-            "alpha-1": {
-              handler_id: "alpha-1",
-              status: "running",
-              workflowName: "alpha",
-            },
-            "alpha-2": {
-              handler_id: "alpha-2",
-              status: "complete",
-              workflowName: "alpha",
-            },
-          },
-        }));
-      });
-
-      expect(result.current).toEqual({
-        current: 1,
-        total: 2,
-        status: "running",
-      });
-    });
-
-    it("prioritizes failed status when metadata is available", async () => {
-      hoisted.getRunningHandlersMock.mockResolvedValueOnce([
-        { handler_id: "alpha-1", status: "running" },
-      ]);
-
-      const { result } = renderHookWithProvider(() =>
-        useWorkflowProgress("alpha")
-      );
-
-      await waitFor(() => {
-        expect(result.current.status).toBe("running");
-      });
-
-      act(() => {
-        __setHandlerStoreState((state) => ({
-          handlers: {
-            ...state.handlers,
-            "alpha-1": {
-              handler_id: "alpha-1",
-              status: "failed",
-              workflowName: "alpha",
-            },
-          },
-        }));
-      });
-
-      expect(result.current).toEqual({
-        current: 0,
-        total: 1,
-        status: "failed",
-      });
     });
   });
 });

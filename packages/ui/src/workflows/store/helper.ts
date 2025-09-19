@@ -48,7 +48,10 @@ export async function getExistingHandler(params: {
     throw new Error(`Handler ${params.handlerId} not found`);
   }
 
-  return handler as WorkflowHandlerSummary;
+  return {
+    handler_id: handler.handler_id ?? "",
+    status: (handler.status as RunStatus) ?? "running",
+  };
 }
 
 export async function createHandler<E extends WorkflowEvent>(params: {
@@ -71,6 +74,7 @@ export async function createHandler<E extends WorkflowEvent>(params: {
   return {
     handler_id: data.data.handler_id ?? "",
     status: "running",
+    workflowName: params.workflowName,
   };
 }
 

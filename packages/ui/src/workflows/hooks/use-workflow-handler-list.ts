@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useHandlerStore } from "./use-handler-store";
+import { filterHandlersByWorkflow } from "./utils";
 import type { WorkflowHandlerSummary } from "../types";
 
 interface UseWorkflowHandlerListResult {
@@ -9,7 +10,9 @@ interface UseWorkflowHandlerListResult {
   error: string | null;
 }
 
-export function useWorkflowHandlerList(): UseWorkflowHandlerListResult {
+export function useWorkflowHandlerList(
+  workflowName: string
+): UseWorkflowHandlerListResult {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,9 +43,11 @@ export function useWorkflowHandlerList(): UseWorkflowHandlerListResult {
 
   // Memoize tasks array and filtering based on tasksRecord
   const filteredHandlers = useMemo(() => {
-    const allHandlers = Object.values(handlersRecord);
-    return allHandlers;
-  }, [handlersRecord]);
+    return filterHandlersByWorkflow(
+      Object.values(handlersRecord),
+      workflowName
+    );
+  }, [handlersRecord, workflowName]);
 
   return {
     handlers: filteredHandlers,

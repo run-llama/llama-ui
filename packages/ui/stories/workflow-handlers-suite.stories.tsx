@@ -10,15 +10,19 @@ import {
 import { AgentStreamDisplay } from "../src/workflows/components/agent-stream-display";
 import { ApiProvider, createMockClients } from "../src/lib";
 
+const STORY_WORKFLOW_NAME = "test-workflow";
+
 // Handler Trigger & Progress Component
 function HandlerTriggerSection({
   onHandlerClick,
   selectedHandlerId,
+  workflowName,
 }: {
   onHandlerClick: (handlerId: string) => void;
   selectedHandlerId: string | null;
+  workflowName: string;
 }) {
-  const { handlers, clearCompleted } = useWorkflowHandlerList();
+  const { handlers, clearCompleted } = useWorkflowHandlerList(workflowName);
   const { createHandler } = useHandlerStore();
   const [batchSize, setBatchSize] = useState(3);
   const [isCreatingBatch, setIsCreatingBatch] = useState(false);
@@ -61,7 +65,7 @@ function HandlerTriggerSection({
 
         // Stagger the creation slightly to see the effect
         await new Promise((resolve) => setTimeout(resolve, index * 100));
-        return createHandler("test-workflow", input);
+        return createHandler(workflowName, input);
       });
 
       await Promise.all(promises);
@@ -119,7 +123,7 @@ function HandlerTriggerSection({
       <div>
         <h3 className="text-lg font-medium mb-3">Or Create Single Handler</h3>
         <WorkflowTrigger
-          workflowName="test-workflow"
+          workflowName={workflowName}
           onSuccess={() => {
             // Handler completed successfully
           }}
@@ -132,7 +136,7 @@ function HandlerTriggerSection({
           <h3 className="text-lg font-medium mb-3">
             Overall Progress ({handlers.length} handlers)
           </h3>
-          <WorkflowProgressBar />
+          <WorkflowProgressBar workflowName={workflowName} />
 
           {/* Enhanced Handler List */}
           <div className="mt-4 space-y-2">
@@ -295,7 +299,7 @@ function HandlerDetailSection({ handlerId }: { handlerId: string | null }) {
 
 // Internal Suite Component (uses hooks inside Provider)
 function WorkflowHandlerSuiteInternal() {
-  const { handlers } = useWorkflowHandlerList();
+  const { handlers } = useWorkflowHandlerList(STORY_WORKFLOW_NAME);
   const [selectedHandlerId, setSelectedHandlerId] = useState<string | null>(
     null
   );
@@ -323,6 +327,7 @@ function WorkflowHandlerSuiteInternal() {
         <HandlerTriggerSection
           onHandlerClick={setSelectedHandlerId}
           selectedHandlerId={selectedHandlerId}
+          workflowName={STORY_WORKFLOW_NAME}
         />
         <HandlerDetailSection handlerId={selectedHandler?.handler_id || null} />
       </div>

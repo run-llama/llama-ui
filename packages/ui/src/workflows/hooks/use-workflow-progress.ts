@@ -1,8 +1,11 @@
 import { useMemo, useEffect } from "react";
 import { useHandlerStore } from "./use-handler-store";
+import { filterHandlersByWorkflow } from "./utils";
 import type { WorkflowProgressState, RunStatus } from "../types";
 
-export function useWorkflowProgress(): WorkflowProgressState {
+export function useWorkflowProgress(
+  workflowName: string
+): WorkflowProgressState {
   const store = useHandlerStore();
   const handlers = store.handlers;
   const sync = store.sync;
@@ -22,8 +25,9 @@ export function useWorkflowProgress(): WorkflowProgressState {
 
   // Memoize the calculation based on handlers object
   return useMemo(() => {
-    const handlerArray = Object.values(handlers).filter(
-      (handler) => handler.status === "running"
+    const handlerArray = filterHandlersByWorkflow(
+      Object.values(handlers),
+      workflowName
     );
     const total = handlerArray.length;
 
@@ -35,36 +39,27 @@ export function useWorkflowProgress(): WorkflowProgressState {
       };
     }
 
-    // Count completed handlers
-    const completedHandlers = handlerArray.filter(
+    const completedCount = handlerArray.filter(
       (handler) => handler.status === "complete"
-    );
-    const current = completedHandlers.length;
+    ).length;
 
     // Determine overall status
     let status: RunStatus;
 
-    // Check for error handlers first
     if (handlerArray.some((handler) => handler.status === "failed")) {
       status = "failed";
-    }
-    // Check if all handlers are complete
-    else if (current === total) {
+    } else if (completedCount === total) {
       status = "complete";
-    }
-    // Check if any handlers are running
-    else if (handlerArray.some((handler) => handler.status === "running")) {
+    } else if (handlerArray.some((handler) => handler.status === "running")) {
       status = "running";
-    }
-    // Otherwise, handlers are idle
-    else {
+    } else {
       status = "idle";
     }
 
     return {
-      current,
+      current: completedCount,
       total,
       status,
     };
-  }, [handlers]); // Only recalculate when handlers object reference changes
+  }, [handlers, workflowName]);
 }
