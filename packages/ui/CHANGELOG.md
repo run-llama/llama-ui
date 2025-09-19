@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 2.1.1
+
+### Patch Changes
+
+- 7be71a2: Export createWorkflowsClient
+
 ## 2.1.0
 
 ### Minor Changes
