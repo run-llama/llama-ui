@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 2.1.0
+
+### Minor Changes
+
+- 8962c8f: Add option to filter useWorkflowHandlerList by workflow name
+
 ## 2.0.0
 
 ### Major Changes
