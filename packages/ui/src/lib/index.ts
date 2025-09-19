@@ -16,6 +16,8 @@ export {
   createCloudAgentClient,
   workflowsClient,
   cloudApiClient,
+  createWorkflowsClient,
+  createWorkflowsConfig,
   type WorkflowsClient,
   type CloudAgentClient,
   type CloudApiClient,
