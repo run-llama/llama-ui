@@ -68,6 +68,7 @@ export const createHandlerStore = (client: Client) =>
       const handler: WorkflowHandlerSummary = {
         handler_id: workflowHandler.handler_id ?? "",
         status: "running",
+        workflowName,
       };
 
       // Internal method to set handler
@@ -112,7 +113,10 @@ export const createHandlerStore = (client: Client) =>
 
         // 3. Auto-subscribe to running handlers
         serverHandlers.forEach((handler) => {
-          if (!get().isSubscribed(handler.handler_id)) {
+          if (
+            handler.status === "running" &&
+            !get().isSubscribed(handler.handler_id)
+          ) {
             get().subscribe(handler.handler_id);
           }
         });

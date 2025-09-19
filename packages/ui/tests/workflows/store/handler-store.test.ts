@@ -52,6 +52,7 @@ describe("Complete Task Store Tests", () => {
   const mockTaskSummary: WorkflowHandlerSummary = {
     handler_id: "task-123",
     status: "running",
+    workflowName: "test-workflow",
   };
 
   const mockEvent: WorkflowEvent = {
@@ -104,6 +105,7 @@ describe("Complete Task Store Tests", () => {
 
       expect(result.handler_id).toBe("task-123");
       expect(result.status).toBe("running");
+      expect(result.workflowName).toBe("test-workflow");
       expect(testStore.getState().handlers["task-123"]).toBeDefined();
       expect(testStore.getState().events["task-123"]).toEqual([]);
     });
@@ -242,10 +244,17 @@ describe("Complete Task Store Tests", () => {
       {
         handler_id: "server-task-1",
         status: "running",
+        workflowName: "test-workflow",
       },
       {
         handler_id: "server-task-2",
-        status: "running",
+        status: "complete",
+        workflowName: "test-workflow",
+      },
+      {
+        handler_id: "server-task-3",
+        status: "failed",
+        workflowName: "other-workflow",
       },
     ];
 
@@ -262,16 +271,17 @@ describe("Complete Task Store Tests", () => {
       const state = testStore.getState();
       expect(state.handlers["server-task-1"]).toEqual(mockServerTasks[0]);
       expect(state.handlers["server-task-2"]).toEqual(mockServerTasks[1]);
+      expect(state.handlers["server-task-3"]).toEqual(mockServerTasks[2]);
     });
 
-    it("should auto-subscribe to synced running tasks", async () => {
+    it("should auto-subscribe only to running tasks", async () => {
       (getRunningHandlers as any).mockResolvedValue(mockServerTasks);
       (workflowStreamingManager.isStreamActive as any).mockReturnValue(false);
 
       await testStore.getState().sync();
 
-      // Should call fetchTaskEvents for each task
-      expect(fetchHandlerEvents).toHaveBeenCalledTimes(2);
+      // Should call fetchTaskEvents only for running tasks
+      expect(fetchHandlerEvents).toHaveBeenCalledTimes(1);
 
       // Check if subscription calls were made correctly
       expect(fetchHandlerEvents).toHaveBeenCalledWith(

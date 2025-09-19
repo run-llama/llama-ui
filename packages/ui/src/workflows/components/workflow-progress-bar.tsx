@@ -11,13 +11,15 @@ interface WorkflowProgressBarProps {
    * - 'always': Always show the component
    */
   mode?: "auto" | "always";
+  workflowName: string;
 }
 
 export function WorkflowProgressBar({
   className,
   mode = "auto",
+  workflowName,
 }: WorkflowProgressBarProps) {
-  const { current, total, status } = useWorkflowProgress();
+  const { current, total, status } = useWorkflowProgress(workflowName);
 
   const percentage = total > 0 ? (current / total) * 100 : 0;
 
