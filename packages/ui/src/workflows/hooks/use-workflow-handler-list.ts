@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useHandlerStore } from "./use-handler-store";
+import { filterHandlersByWorkflow } from "./utils";
 import type { WorkflowHandlerSummary } from "../types";
 
 interface UseWorkflowHandlerListResult {
@@ -42,18 +43,10 @@ export function useWorkflowHandlerList(
 
   // Memoize tasks array and filtering based on tasksRecord
   const filteredHandlers = useMemo(() => {
-    return Object.values(handlersRecord).filter((handler) => {
-      if (handler.workflowName) {
-        return handler.workflowName === workflowName;
-      }
-
-      if (handler.status !== "running") {
-        return false;
-      }
-
-      // TODO: Filter by workflowName once handler summaries persist workflow metadata.
-      return true;
-    });
+    return filterHandlersByWorkflow(
+      Object.values(handlersRecord),
+      workflowName
+    );
   }, [handlersRecord, workflowName]);
 
   return {

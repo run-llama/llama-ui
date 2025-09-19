@@ -48,12 +48,9 @@ export async function getExistingHandler(params: {
     throw new Error(`Handler ${params.handlerId} not found`);
   }
 
-  const workflowName = (handler as { workflowName?: string }).workflowName;
-
   return {
     handler_id: handler.handler_id ?? "",
     status: (handler.status as RunStatus) ?? "running",
-    ...(workflowName ? { workflowName } : {}),
   };
 }
 

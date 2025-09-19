@@ -1,5 +1,6 @@
 import { useMemo, useEffect } from "react";
 import { useHandlerStore } from "./use-handler-store";
+import { filterHandlersByWorkflow } from "./utils";
 import type { WorkflowProgressState, RunStatus } from "../types";
 
 export function useWorkflowProgress(
@@ -24,18 +25,10 @@ export function useWorkflowProgress(
 
   // Memoize the calculation based on handlers object
   return useMemo(() => {
-    const handlerArray = Object.values(handlers).filter((handler) => {
-      if (handler.workflowName) {
-        return handler.workflowName === workflowName;
-      }
-
-      if (handler.status !== "running") {
-        return false;
-      }
-
-      // TODO: Filter by workflowName once handler summaries persist workflow metadata.
-      return true;
-    });
+    const handlerArray = filterHandlersByWorkflow(
+      Object.values(handlers),
+      workflowName
+    );
     const total = handlerArray.length;
 
     if (total === 0) {
