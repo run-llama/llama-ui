@@ -1,14 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { act } from "@testing-library/react";
+import { act, waitFor } from "@testing-library/react";
 import { useWorkflowHandlerList } from "../../../src/workflows/hooks/use-workflow-handler-list";
 import { __resetHandlerStore } from "../../../src/workflows/hooks/use-handler-store";
 import { renderHookWithProvider } from "../../test-utils";
 
-// Mock the helper functions to prevent real HTTP calls
-const getRunningHandlersMock = vi.fn().mockResolvedValue([]);
+// Mock the helper functions to prevent real HTTP calls (use hoisted refs)
+const hoisted = vi.hoisted(() => ({
+  getRunningHandlersMock: vi.fn().mockResolvedValue([]),
+}));
 
 vi.mock("../../../src/workflows/store/helper", () => ({
-  getRunningHandlers: getRunningHandlersMock,
+  getRunningHandlers: hoisted.getRunningHandlersMock,
   getExistingHandler: vi.fn(),
   createHandler: vi.fn(),
   fetchHandlerEvents: vi.fn().mockResolvedValue([]),
@@ -49,7 +51,7 @@ describe("useWorkflowTaskList", () => {
   beforeEach(() => {
     localStorageMock.clear();
     vi.clearAllMocks();
-    getRunningHandlersMock.mockResolvedValue([]);
+    hoisted.getRunningHandlersMock.mockResolvedValue([]);
     __resetHandlerStore();
   });
 
@@ -94,13 +96,13 @@ describe("useWorkflowTaskList", () => {
 
   describe("workflowName filtering", () => {
     it("falls back to running handlers when workflow metadata is unavailable", async () => {
-      getRunningHandlersMock.mockResolvedValueOnce([
+      hoisted.getRunningHandlersMock.mockResolvedValueOnce([
         { handler_id: "alpha-1", status: "running" },
         { handler_id: "beta-1", status: "running" },
         { handler_id: "gamma-1", status: "failed" },
       ]);
 
-      const { result, waitFor } = renderHookWithProvider(() =>
+      const { result } = renderHookWithProvider(() =>
         useWorkflowHandlerList("alpha")
       );
 
