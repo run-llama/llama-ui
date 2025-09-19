@@ -14,7 +14,9 @@ vi.mock("../../../src/workflows/store/helper", () => ({
   createTask: vi.fn(),
   fetchHandlerEvents: vi.fn().mockResolvedValue([]),
   sendEventToHandler: vi.fn(),
-  mergeServerTasksForWorkflow: vi.fn((params: any) => params.existingTasks ?? {}),
+  mergeServerTasksForWorkflow: vi.fn(
+    (params: any) => params.existingTasks ?? {}
+  ),
 }));
 
 // Mock the shared streaming manager
