@@ -6,6 +6,7 @@ export {
   ApiProvider,
   useWorkflowsClient,
   useCloudApiClient,
+  useAgentDataClient,
   useApiClients,
   createMockClients,
   type ApiClients,

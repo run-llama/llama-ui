@@ -7,6 +7,7 @@ import {
 import { getMockItemResponse } from "./mock-item-response";
 import { JSONSchema } from "zod/v4/core";
 import { JsonShape } from "./types";
+import { useAgentDataClient } from "../lib/api-provider";
 // Remove reconciliation imports since ExtractedDataDisplay handles it internally
 
 export interface ItemHookData<T extends JsonShape<T>> {
@@ -32,15 +33,14 @@ export interface UseItemDataOptions<T extends JsonShape<T>> {
   jsonSchema: JSONSchema.ObjectSchema;
   itemId: string;
   isMock: boolean;
-  client: AgentClient<ExtractedData<T>>;
 }
 
 export function useItemData<T extends JsonShape<T>>({
   jsonSchema,
   itemId,
   isMock,
-  client,
 }: UseItemDataOptions<T>): ItemHookData<T> {
+  const client = useAgentDataClient() as AgentClient<ExtractedData<T>>;
   // Single source of truth - contains both original predictions and user corrections
   const [item, setItem] = useState<TypedAgentData<ExtractedData<T>> | null>(
     null
