@@ -18,6 +18,14 @@ import {
   type StreamSubscriber,
 } from "../../lib/shared-streaming";
 
+type SseGet = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  options: any
+) => Promise<{
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  stream: AsyncGenerator<unknown, any, unknown>;
+}>;
+
 export async function getRunningHandlers(params: {
   client: Client;
 }): Promise<WorkflowHandlerSummary[]> {
@@ -100,11 +108,16 @@ export async function fetchHandlerEvents<E extends WorkflowEvent>(
     const sseClient: unknown = (params.client as unknown as { sse?: unknown })
       ?.sse;
 
-    if (sseClient && typeof (sseClient as { get: unknown }).get === "function") {
+    if (
+      sseClient &&
+      typeof (sseClient as { get: unknown }).get === "function"
+    ) {
       // Prefer SSE when supported by client
-      const { stream } = await (params.client as unknown as {
-        sse: { get: Function };
-      }).sse.get({
+      const { stream } = await (
+        params.client as unknown as {
+          sse: { get: SseGet };
+        }
+      ).sse.get({
         url: "/events/{handler_id}",
         path: { handler_id: params.handlerId },
         query: { sse: true },
