@@ -165,7 +165,7 @@ export const handlers = {
       }
     ),
 
-    // Mock handler events streaming
+    // Mock handler events streaming (SSE)
     http.get("*/events/:handler_id", async (info) => {
       const { handler_id: handlerId } = info.params;
       console.log("MSW: Intercepted handler events request", {
@@ -225,7 +225,7 @@ export const handlers = {
 
           // Add a StopEvent at the end to signal workflow completion
           events.push({
-            type: "workflows.events.StopEvent",
+            type: "workflow.events.StopEvent",
             data: { message: "Workflow completed successfully" },
           });
 
@@ -252,9 +252,9 @@ export const handlers = {
               `MSW: Sending event ${eventsSent + 1}/${events.length}:`,
               rawEvent
             );
-            controller.enqueue(
-              new TextEncoder().encode(JSON.stringify(rawEvent) + "\n")
-            );
+            // Send as SSE frame
+            const sseFrame = `data: ${JSON.stringify(rawEvent)}\n\n`;
+            controller.enqueue(new TextEncoder().encode(sseFrame));
 
             eventsSent++;
             setTimeout(sendNextEvent, 1000); // Send next event after 1000ms
@@ -267,7 +267,7 @@ export const handlers = {
 
       return new Response(stream, {
         headers: {
-          "Content-Type": "text/plain",
+          "Content-Type": "text/event-stream",
           "Cache-Control": "no-cache",
           Connection: "keep-alive",
         },

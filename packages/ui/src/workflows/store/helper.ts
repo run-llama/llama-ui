@@ -3,7 +3,6 @@ import {
   postWorkflowsByNameRunNowait,
   getHandlers,
   postEventsByHandlerId,
-  getEventsByHandlerId,
 } from "@llamaindex/workflows-client";
 import {
   RawEvent,
@@ -27,8 +26,8 @@ export async function getRunningHandlers(params: {
   const allHandlers = resp.data?.handlers ?? [];
 
   return allHandlers
-    .filter((handler) => handler.status === "running")
-    .map((handler) => ({
+    .filter((handler: { status?: string }) => handler.status === "running")
+    .map((handler: { handler_id?: string; status?: string }) => ({
       handler_id: handler.handler_id ?? "",
       status: handler.status as RunStatus,
     }));
@@ -42,7 +41,9 @@ export async function getExistingHandler(params: {
     client: params.client,
   });
   const allHandlers = resp.data?.handlers ?? [];
-  const handler = allHandlers.find((h) => h.handler_id === params.handlerId);
+  const handler = allHandlers.find(
+    (h: { handler_id?: string }) => h.handler_id === params.handlerId
+  );
 
   if (!handler) {
     throw new Error(`Handler ${params.handlerId} not found`);
@@ -93,76 +94,45 @@ export async function fetchHandlerEvents<E extends WorkflowEvent>(
     subscriber: StreamSubscriber<E>,
     signal: AbortSignal
   ): Promise<E[]> => {
-    const resp = await getEventsByHandlerId({
-      client: params.client,
+    const { stream } = await params.client.sse.get({
+      url: "/events/{handler_id}",
       path: { handler_id: params.handlerId },
-      // NDJSON stream
-      query: { sse: false },
-      // Ensure we get a ReadableStream without auto-parsing
-      parseAs: "stream",
+      query: { sse: true },
+      signal,
+      // Ensure JSON payloads are passed through unchanged
+      responseStyle: "data",
     });
-    const response = resp.response;
 
-    if (!response.ok) {
-      const error = new Error(`HTTP error! status: ${response.status}`);
-      throw error;
-    }
-
-    const reader = response.body?.getReader();
-    if (!reader) {
-      throw new Error("No reader available");
-    }
-
-    const decoder = new TextDecoder();
     const accumulatedEvents: E[] = [];
-    let retryParsedLines: string[] = [];
 
-    try {
-      while (true) {
-        if (signal.aborted) {
-          throw new Error("Stream aborted");
-        }
-
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        let chunk = decoder.decode(value, { stream: true });
-
-        if (retryParsedLines.length > 0) {
-          // if there are lines that failed to parse, append them to the current chunk
-          chunk = `${retryParsedLines.join("")}${chunk}`;
-          retryParsedLines = []; // reset for next iteration
-        }
-
-        const { events, failedLines } = toWorkflowEvents<E>(chunk);
-        retryParsedLines.push(...failedLines);
-
-        if (!events.length) continue;
-
-        accumulatedEvents.push(...events);
-
-        // Send events to SharedStreamingManager subscriber
-        events.forEach((event) => subscriber.onData?.(event));
-
-        const stopEvent = events.find(
-          (event) => event.type === WorkflowEventType.StopEvent.toString()
-        );
-        if (stopEvent) {
-          // For compatibility with existing callback interface
-          if (callback?.onStopEvent) {
-            callback.onStopEvent(stopEvent);
-          }
-          break; // Stop event received, end the stream
-        }
+    for await (const data of stream as AsyncGenerator<unknown>) {
+      if (signal.aborted) {
+        throw new Error("Stream aborted");
       }
 
-      // Notify completion
-      subscriber.onFinish?.(accumulatedEvents);
+      // Each `data` is expected to be a RawEvent JSON object
+      if (!isRawEvent(data as object)) {
+        // eslint-disable-next-line no-console -- useful during development
+        console.warn("Received non-RawEvent SSE payload", data);
+        continue;
+      }
 
-      return accumulatedEvents;
-    } finally {
-      reader.releaseLock();
+      const raw = data as RawEvent;
+      const event = { type: raw.qualified_name, data: raw.value } as E;
+
+      accumulatedEvents.push(event);
+      subscriber.onData?.(event);
+
+      if (event.type === WorkflowEventType.StopEvent.toString()) {
+        if (callback?.onStopEvent) {
+          callback.onStopEvent(event);
+        }
+        break;
+      }
     }
+
+    subscriber.onFinish?.(accumulatedEvents);
+    return accumulatedEvents;
   };
 
   // Convert callback to SharedStreamingManager subscriber
@@ -201,67 +171,6 @@ export async function sendEventToHandler<E extends WorkflowEvent>(params: {
   });
 
   return data.data;
-}
-
-function toWorkflowEvents<E extends WorkflowEvent>(
-  chunk: string
-): {
-  events: E[];
-  failedLines: string[];
-} {
-  if (typeof chunk !== "string") {
-    return { events: [], failedLines: [] };
-  }
-
-  // One chunk can contain multiple events, so we need to parse each line
-  const lines = chunk
-    .trim()
-    .split("\n")
-    .filter((line) => line.trim() !== "");
-
-  const parsedLines = lines
-    .map((line) => parseChunkLine<E>(line))
-    .filter(Boolean);
-
-  // successfully parsed events
-  const events = parsedLines.map((line) => line?.event).filter(Boolean) as E[];
-
-  // failed lines that could not be parsed into events
-  // will be merged into next chunk to re-try parsing
-  const failedLines = parsedLines
-    .filter((l) => !l?.event)
-    .map((line) => line?.line || "")
-    .filter(Boolean);
-
-  return {
-    events,
-    failedLines,
-  };
-}
-
-function parseChunkLine<E extends WorkflowEvent>(
-  line: string
-): {
-  line: string;
-  event?: E | null;
-} | null {
-  try {
-    const event = JSON.parse(line) as RawEvent;
-    if (!isRawEvent(event)) {
-      return null;
-    }
-    return {
-      line,
-      event: { type: event.qualified_name, data: event.value } as E,
-    };
-  } catch (error: unknown) {
-    // eslint-disable-next-line no-console -- needed
-    console.error(`Failed to parse chunk in line: ${line}`, error);
-    return {
-      line,
-      event: null,
-    };
-  }
 }
 
 function toRawEvent(event: WorkflowEvent): RawEvent {
