@@ -64,11 +64,10 @@ CI will run these as well.
 
 ## Best practices
 
-- DRY principle: extract shared utilities into `src/lib/` when used in multiple places.
+- DRY principle: extract shared utilities when used in multiple places.
 - Easy-to-test code: prefer small, composable functions; keep side-effects minimal and localized.
-- Unit tests for pure functions: place in `src/**/*.test.{ts,tsx}`; focus on deterministic inputs/outputs.
+- Unit tests for pure functions: place in `tests/**/*.test.ts`; focus on deterministic inputs/outputs.
 - Storybook interaction tests for UI components: add stories under `packages/ui/stories/**`, using `play` functions and Testing Library via `@storybook/test`.
-- Context over prop drilling: components should consume API clients via `ApiProvider` hooks in `src/lib/api-provider.tsx` rather than explicit `client` props.
 - Type safety: use explicit types for exported APIs; avoid `any`.
 - Formatting and linting: keep code formatted; fix lint warnings proactively.
 

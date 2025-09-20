@@ -34,31 +34,6 @@ client.setConfig({
 // List available workflows
 const { data: workflows } = await client.GET("/workflows");
 
-// Run workflow synchronously
-const runRes = await client.POST("/workflows/{name}/run", {
-  params: { path: { name: "my-workflow" } },
-  body: {
-    // optional start event, context, kwargs
-    context: { foo: "bar" },
-    kwargs: { n: 1 },
-  },
-});
-
-// Start workflow asynchronously (returns handler_id)
-const nowait = await client.POST("/workflows/{name}/run-nowait", {
-  params: { path: { name: "my-workflow" } },
-  body: { context: {} },
-});
-
-// Fetch final result later
-const result = await client.GET("/results/{handler_id}", {
-  params: { path: { handler_id: nowait.data?.handler_id! } },
-});
-
-// Stream events (SSE or ndjson)
-const events = await client.GET("/events/{handler_id}", {
-  params: { path: { handler_id: nowait.data?.handler_id! }, query: { sse: true } },
-});
 ```
 
 ### Helper API (typed wrappers)
@@ -92,19 +67,8 @@ See `src/generated/sdk.gen.ts` for the full set of exported functions.
 ## Regenerating the SDK
 
 This package is generated from the OpenAPI schema in `workflows-py`.
+OpenAPI schema will be downloaded automatically so please do not change it.
 
-Prerequisites: have the upstream repository and OpenAPI schema available.
-
-```bash
-# In this package directory
-pnpm install
-
-# Update OpenAPI schema (from workflows-py)
-# Place or fetch the schema into openapi.json, then run:
-pnpm build
-```
-
-The generation pipeline uses `@hey-api/openapi-ts` via local scripts defined in `package.json`. The `build` step compiles the generated sources.
 
 ## License
 

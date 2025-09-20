@@ -67,7 +67,11 @@ export const WithVariants: Story = {
     <ApiProvider clients={createStubbedClients()}>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
         <ItemCount title="Total" variant="total" subtitle="All items" />
-        <ItemCount title="Awaiting" variant="awaiting" subtitle="Needs review" />
+        <ItemCount
+          title="Awaiting"
+          variant="awaiting"
+          subtitle="Needs review"
+        />
         <ItemCount title="Approved" variant="approved" subtitle="Validated" />
         <ItemCount title="Rejected" variant="rejected" subtitle="Flagged" />
       </div>

@@ -24,38 +24,11 @@ Peer dependencies you should already have in your app:
 
 ### Tailwind v4 styles
 
-Import the library stylesheet and Tailwind in your global CSS (order matters: UI styles first):
+Import the library stylesheet:
 
 ```css
 /* e.g. src/index.css, app/globals.css */
 @import "@llamaindex/ui/styles.css";
-@import "tailwindcss";
-```
-
-If you use PostCSS, ensure `@tailwindcss/postcss` is enabled. If you use Vite, enable `@tailwindcss/vite`.
-
-Example PostCSS config:
-
-```js
-// postcss.config.mjs
-export default {
-  plugins: {
-    "@tailwindcss/postcss": {},
-  },
-};
-```
-
-Example Vite config:
-
-```ts
-// vite.config.ts
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
-
-export default defineConfig({
-  plugins: [react(), tailwindcss()],
-});
 ```
 
 ## Usage
@@ -105,17 +78,6 @@ export function App() {
 }
 ```
 
-### Individual component install (shadcn-style)
-
-You can pull specific components via shadcn registry commands:
-
-```bash
-npx shadcn@latest add github:llamaindex/ui/file-uploader
-npx shadcn@latest add github:llamaindex/ui/extracted-data
-npx shadcn@latest add github:llamaindex/ui/pdf-viewer
-```
-
 ## Contributing
 
 Please read the contribution guide: [CONTRIBUTING.md](https://github.com/run-llama/llama-ui/blob/main/CONTRIBUTING.md)
-
