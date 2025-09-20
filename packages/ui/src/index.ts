@@ -4,6 +4,7 @@ export * from "./extracted-data";
 export * from "./file-preview";
 export * from "./item-grid";
 export * from "./workflows";
+export * from "./indexes";
 export * from "./item-count";
 export * from "./lib";
 

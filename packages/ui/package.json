@@ -75,6 +75,11 @@
       "import": "./dist/workflows.mjs",
       "require": "./dist/workflows.cjs"
     },
+    "./indexes": {
+      "types": "./dist/indexes.d.ts",
+      "import": "./dist/indexes.mjs",
+      "require": "./dist/indexes.cjs"
+    },
     "./accordion": {
       "types": "./dist/ui/accordion.d.ts",
       "import": "./dist/ui/accordion.mjs",
