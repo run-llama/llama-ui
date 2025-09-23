@@ -7,13 +7,13 @@ import {
   type SearchAgentDataOptions,
   AgentClient,
 } from "llama-cloud-services/beta/agent";
+import { useAgentDataClient } from "../lib/api-provider";
 
 export interface ItemCountProps {
   title: string;
   filter?: SearchAgentDataOptions["filter"];
   variant?: "total" | "awaiting" | "approved" | "rejected";
   subtitle?: string;
-  client: AgentClient;
 }
 
 const variantStyles = {
@@ -50,8 +50,8 @@ export function ItemCount({
   filter = {},
   variant = "total",
   subtitle,
-  client,
 }: ItemCountProps) {
+  const client = useAgentDataClient() as AgentClient;
   const [count, setCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

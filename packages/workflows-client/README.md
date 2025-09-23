@@ -2,81 +2,75 @@
 
 TypeScript client for LlamaIndex Workflows server.
 
+This package is an auto-generated SDK targeting the Workflows HTTP API provided by the Python server at `run-llama/workflows-py`.
+
+Repository: `https://github.com/run-llama/workflows-py`
+
 ## Installation
 
 ```bash
 pnpm add @llamaindex/workflows-client
 # or
 npm install @llamaindex/workflows-client
+# or
+yarn add @llamaindex/workflows-client
 ```
 
-## Usage
+Peer requirements: a modern runtime (Node 18+/Browser) and Fetch-compatible environment.
 
-```typescript
-import { client } from '@llamaindex/workflows-client';
+## Quick Start
 
-// Initialize the client
+```ts
+import { client } from "@llamaindex/workflows-client";
+
+// Configure base URL and optional headers (e.g., auth)
 client.setConfig({
-  baseUrl: 'http://localhost:8000'
+  baseUrl: "http://localhost:8000",
+  headers: {
+    // Authorization: `Bearer <token>`
+  },
 });
 
 // List available workflows
-const { data: workflows } = await client.GET('/workflows');
+const { data: workflows } = await client.GET("/workflows");
 
-// Run a workflow synchronously
-const { data: result } = await client.POST('/workflows/{name}/run', {
-  params: {
-    path: { name: 'my-workflow' }
-  },
-  body: {
-    context: {
-      // Your context data
-    },
-    kwargs: {
-      // Additional arguments
-    }
-  }
-});
-
-// Run a workflow asynchronously
-const { data: async_result } = await client.POST('/workflows/{name}/run-nowait', {
-  params: {
-    path: { name: 'my-workflow' }
-  },
-  body: {
-    // Same as above
-  }
-});
-
-// Get result later
-const { data: final_result } = await client.GET('/results/{handler_id}', {
-  params: {
-    path: { handler_id: async_result.handler_id }
-  }
-});
-
-// Stream events
-const { data: events } = await client.GET('/events/{handler_id}', {
-  params: {
-    path: { handler_id: async_result.handler_id },
-    query: { sse: true }
-  }
-});
 ```
 
-## Development
+### Helper API (typed wrappers)
 
-This client is auto-generated from the OpenAPI schema. To regenerate:
+Besides the generic `client.GET/POST` interface, typed convenience wrappers are exported under `sdk`:
 
-```bash
-# From the root of the workflows-py repository
-python scripts/generate_sdk.py
+```ts
+import {
+  createClient,
+  createConfig,
+  getWorkflows,
+  postWorkflowsByNameRun,
+  postWorkflowsByNameRunNowait,
+  getResultsByHandlerId,
+  getEventsByHandlerId,
+  getHealth,
+} from "@llamaindex/workflows-client";
 
-# Or using pnpm scripts from this directory
-pnpm run generate
-pnpm run build
+const wfClient = createClient(createConfig({ baseUrl: "http://localhost:8000" }));
+const { data: names } = await getWorkflows({ client: wfClient });
 ```
+
+## API Surface
+
+- Low-level typed REST methods via `client.GET/POST` (path templating supported)
+- Generated helper functions in `sdk` for common endpoints
+- Server-Sent Events utilities for streaming
+
+See `src/generated/sdk.gen.ts` for the full set of exported functions.
+
+## Regenerating the SDK
+
+This package is generated from the OpenAPI schema in `workflows-py`.
+OpenAPI schema will be downloaded automatically so please do not change it.
+
 
 ## License
 
 MIT
+
