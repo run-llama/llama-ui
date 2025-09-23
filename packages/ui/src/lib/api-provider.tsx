@@ -22,10 +22,16 @@ export interface ApiClients {
 export interface ApiProviderProps {
   children: ReactNode;
   clients: ApiClients;
+  project?: {
+    id?: string | null;
+  };
 }
 
 interface ApiContextValue {
   clients: ApiClients;
+  project?: {
+    id?: string | null;
+  };
 }
 
 // ===== Context =====
@@ -34,12 +40,13 @@ const ApiContext = createContext<ApiContextValue | null>(null);
 
 // ===== Provider =====
 
-export function ApiProvider({ children, clients }: ApiProviderProps) {
+export function ApiProvider({ children, clients, project }: ApiProviderProps) {
   const contextValue = useMemo(
     () => ({
       clients,
+      project,
     }),
-    [clients]
+    [clients, project]
   );
 
   return (
@@ -56,6 +63,54 @@ export function createMockClients(): ApiClients {
     agentDataClient: createCloudAgentClient({
       agentUrlId: "your-agent-url-id",
       collection: "your-collection",
+    }),
+  };
+}
+
+// ===== Real Clients Factory (env-based) =====
+
+/**
+ * Create real clients using API key from env and agent options from params.
+ * - API key expected in one of: LLAMA_CLOUD_API_KEY or VITE_LLAMA_CLOUD_API_KEY
+ * - Agent client options are required via function params
+ */
+export function createRealClientsForTests(params: {
+  apiKey: string;
+  baseUrl?: string;
+  agent?: {
+    agentUrlId: string;
+    collection: string;
+  };
+}): ApiClients {
+  const apiKey = params.apiKey;
+
+  // Note: current SDK clients read API key from env/runtime; callers should ensure
+  // the key is available to the SDK (e.g., via env or client config). For now we
+  // return bound instances and rely on SDK's internal auth handling.
+  if (!apiKey) {
+    throw new Error("API key is required");
+  }
+  workflowsClient.setConfig({
+    baseUrl: params.baseUrl,
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+    },
+  });
+  cloudApiClient.setConfig({
+    baseUrl: params.baseUrl,
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+    },
+  });
+  return {
+    workflowsClient,
+    cloudApiClient,
+    agentDataClient: createCloudAgentClient({
+      client: cloudApiClient,
+      agentUrlId: params.agent?.agentUrlId,
+      windowUrl:
+        typeof window !== "undefined" ? window.location.href : undefined,
+      collection: params.agent?.collection,
     }),
   };
 }
@@ -117,4 +172,11 @@ export function useAgentDataClient(): CloudAgentClient {
 export function useApiClients(): ApiClients {
   const { clients } = useApiContext();
   return clients;
+}
+
+export function useProject(): {
+  id?: string | null;
+} {
+  const { project } = useApiContext();
+  return project ?? {};
 }

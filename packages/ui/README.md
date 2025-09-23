@@ -2,8 +2,6 @@
 
 [![codecov](https://codecov.io/gh/run-llama/llama-ui/branch/main/graph/badge.svg)](https://codecov.io/gh/run-llama/llama-ui)
 
-## Overview
-
 React component library for LlamaIndex applications. Built with TypeScript, Vite, Tailwind CSS v4, Radix UI, and Storybook. Ships as a shadcn/ui-style library with both full-package and individual component consumption.
 
 ## Installation
