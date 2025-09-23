@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Workflows API",
-    "version": "2.2.2"
+    "version": "2.3.0"
   },
   "paths": {
     "/workflows": {
@@ -301,25 +301,33 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "default": false
+              "default": true
             },
-            "description": "If true, stream as text/event-stream instead of NDJSON."
+            "description": "If false, as NDJSON instead of Server-Sent Events."
           }
         ],
         "responses": {
           "200": {
             "description": "Streaming started",
             "content": {
-              "application/x-ndjson": {
-                "schema": {
-                  "type": "string",
-                  "description": "Newline-delimited JSON stream of events."
-                }
-              },
               "text/event-stream": {
                 "schema": {
-                  "type": "string",
-                  "description": "Server-Sent Events stream of event data."
+                  "type": "object",
+                  "description": "Server-Sent Events stream of event data.",
+                  "properties": {
+                    "value": {
+                      "type": "object",
+                      "description": "The event value."
+                    },
+                    "qualified_name": {
+                      "type": "string",
+                      "description": "The qualified name of the event."
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "qualified_name"
+                  ]
                 }
               }
             }
@@ -471,6 +479,52 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/workflows/{name}/representation": {
+      "get": {
+        "summary": "Get the representation of the workflow",
+        "description": "Get the representation of the workflow as a directed graph in JSON format\n",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Registered workflow name."
+          }
+        ],
+        "requestBody": {
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "JSON representation successfully retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "graph": {
+                      "description": "the elements of the JSON representation of the workflow"
+                    }
+                  },
+                  "required": [
+                    "graph"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Workflow not found"
+          },
+          "500": {
+            "description": "Error while getting JSON workflow representation"
           }
         }
       }
