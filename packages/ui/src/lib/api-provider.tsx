@@ -61,7 +61,7 @@ export function createMockClients(): ApiClients {
     workflowsClient: workflowsClient,
     cloudApiClient: cloudApiClient,
     agentDataClient: createCloudAgentClient({
-      deploymentName: "your-agent-url-id",
+      agentUrlId: "your-agent-url-id",
       collection: "your-collection",
     }),
   };
