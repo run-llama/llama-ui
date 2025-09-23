@@ -2,7 +2,75 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Workflows API",
-    "version": "2.3.0"
+    "version": "2.4.0"
+  },
+  "components": {
+    "schemas": {
+      "Handler": {
+        "type": "object",
+        "properties": {
+          "handler_id": {
+            "type": "string"
+          },
+          "workflow_name": {
+            "type": "string"
+          },
+          "run_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "running",
+              "completed",
+              "failed"
+            ]
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          },
+          "result": {
+            "description": "Workflow result value"
+          }
+        },
+        "required": [
+          "handler_id",
+          "workflow_name",
+          "status",
+          "started_at"
+        ]
+      },
+      "HandlersList": {
+        "type": "object",
+        "properties": {
+          "handlers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Handler"
+            }
+          }
+        },
+        "required": [
+          "handlers"
+        ]
+      }
+    }
   },
   "paths": {
     "/workflows": {
@@ -79,15 +147,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "result": {
-                      "description": "Workflow result value"
-                    }
-                  },
-                  "required": [
-                    "result"
-                  ]
+                  "$ref": "#/components/schemas/Handler"
                 }
               }
             }
@@ -149,22 +209,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "handler_id": {
-                      "type": "string"
-                    },
-                    "status": {
-                      "type": "string",
-                      "enum": [
-                        "started"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "handler_id",
-                    "status"
-                  ]
+                  "$ref": "#/components/schemas/Handler"
                 }
               }
             }
@@ -249,15 +294,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "result": {
-                      "description": "Workflow result value"
-                    }
-                  },
-                  "required": [
-                    "result"
-                  ]
+                  "$ref": "#/components/schemas/Handler"
                 }
               }
             }
@@ -267,7 +304,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/Handler"
                 }
               }
             }
@@ -276,7 +313,14 @@
             "description": "Handler not found"
           },
           "500": {
-            "description": "Error computing result"
+            "description": "Error computing result",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       }
@@ -445,37 +489,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "handlers": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "handler_id": {
-                            "type": "string"
-                          },
-                          "result": {
-                            "type": "object"
-                          },
-                          "error": {
-                            "type": "object"
-                          },
-                          "status": {
-                            "type": "string",
-                            "enum": [
-                              "running",
-                              "completed",
-                              "failed"
-                            ]
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "required": [
-                    "handlers"
-                  ]
+                  "$ref": "#/components/schemas/HandlersList"
                 }
               }
             }

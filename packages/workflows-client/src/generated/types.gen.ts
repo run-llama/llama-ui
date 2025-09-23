@@ -4,6 +4,25 @@ export type ClientOptions = {
     baseUrl: `${string}://${string}` | (string & {});
 };
 
+export type Handler = {
+    handler_id: string;
+    workflow_name: string;
+    run_id?: string | null;
+    status: 'running' | 'completed' | 'failed';
+    started_at: string;
+    updated_at?: string | null;
+    completed_at?: string | null;
+    error?: string | null;
+    /**
+     * Workflow result value
+     */
+    result?: unknown;
+};
+
+export type HandlersList = {
+    handlers: Array<Handler>;
+};
+
 export type GetWorkflowsData = {
     body?: never;
     path?: never;
@@ -72,12 +91,7 @@ export type PostWorkflowsByNameRunResponses = {
     /**
      * Workflow completed successfully
      */
-    200: {
-        /**
-         * Workflow result value
-         */
-        result: unknown;
-    };
+    200: Handler;
 };
 
 export type PostWorkflowsByNameRunResponse = PostWorkflowsByNameRunResponses[keyof PostWorkflowsByNameRunResponses];
@@ -128,10 +142,7 @@ export type PostWorkflowsByNameRunNowaitResponses = {
     /**
      * Workflow started
      */
-    200: {
-        handler_id: string;
-        status: 'started';
-    };
+    200: Handler;
 };
 
 export type PostWorkflowsByNameRunNowaitResponse = PostWorkflowsByNameRunNowaitResponses[keyof PostWorkflowsByNameRunNowaitResponses];
@@ -197,25 +208,20 @@ export type GetResultsByHandlerIdErrors = {
     /**
      * Error computing result
      */
-    500: unknown;
+    500: string;
 };
+
+export type GetResultsByHandlerIdError = GetResultsByHandlerIdErrors[keyof GetResultsByHandlerIdErrors];
 
 export type GetResultsByHandlerIdResponses = {
     /**
      * Result is available
      */
-    200: {
-        /**
-         * Workflow result value
-         */
-        result: unknown;
-    };
+    200: Handler;
     /**
      * Result not ready yet
      */
-    202: {
-        [key: string]: unknown;
-    };
+    202: Handler;
 };
 
 export type GetResultsByHandlerIdResponse = GetResultsByHandlerIdResponses[keyof GetResultsByHandlerIdResponses];
@@ -340,18 +346,7 @@ export type GetHandlersResponses = {
     /**
      * List of handlers
      */
-    200: {
-        handlers: Array<{
-            handler_id?: string;
-            result?: {
-                [key: string]: unknown;
-            };
-            error?: {
-                [key: string]: unknown;
-            };
-            status?: 'running' | 'completed' | 'failed';
-        }>;
-    };
+    200: HandlersList;
 };
 
 export type GetHandlersResponse = GetHandlersResponses[keyof GetHandlersResponses];
