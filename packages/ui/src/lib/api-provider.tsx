@@ -80,7 +80,6 @@ export function createRealClientsForTests(params: {
   agent?: {
     agentUrlId: string;
     collection: string;
-    baseUrl: string;
   };
 }): ApiClients {
   const apiKey = params.apiKey;
@@ -107,10 +106,11 @@ export function createRealClientsForTests(params: {
     workflowsClient,
     cloudApiClient,
     agentDataClient: createCloudAgentClient({
-      apiKey,
+      client: cloudApiClient,
       agentUrlId: params.agent?.agentUrlId,
+      windowUrl:
+        typeof window !== "undefined" ? window.location.href : undefined,
       collection: params.agent?.collection,
-      baseUrl: params.agent?.baseUrl,
     }),
   };
 }
