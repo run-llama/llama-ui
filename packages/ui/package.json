@@ -275,7 +275,7 @@
     "format-check": "prettier --check .",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
-    "storybook": "storybook dev -p 6006",
+    "storybook": "storybook dev -p 4501",
     "build-storybook": "storybook build"
   },
   "dependencies": {
