@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { ApiProvider } from "../../src/lib";
 import { useIndexList, useIndex } from "../../src/indexes";
 import { createRealClientsForTests } from "@/src/lib/api-provider";
-import { ProjectId } from "../configs/constant";
+import { API_KEY, ProjectId } from "../configs/constant";
 
 function IndexListDemo() {
   const { indexes, loading, error, sync } = useIndexList();
@@ -67,11 +67,7 @@ const meta: Meta = {
       <ApiProvider
         clients={createRealClientsForTests({
           baseUrl: "https://api.cloud.llamaindex.ai",
-          apiKey: (
-            import.meta as unknown as {
-              env?: Record<string, string | undefined>;
-            }
-          ).env?.STORYBOOK_LLAMA_CLOUD_API_KEY!,
+          apiKey: API_KEY,
         })}
         project={{ id: ProjectId }}
       >
@@ -87,72 +83,10 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const List: Story = {
-  parameters: {
-    // msw: {
-    //   handlers: [
-    //     http.get("https://api.cloud.llamaindex.ai/api/v1/pipelines", ({ request }) => {
-    //       const url = new URL(request.url);
-    //       // Optional: inspect org/project
-    //       const organizationId = url.searchParams.get("organization_id");
-    //       const projectId = url.searchParams.get("project_id");
-    //       void organizationId;
-    //       void projectId;
-    //       return HttpResponse.json([
-    //         {
-    //           id: "pipe_1",
-    //           name: "Demo Pipeline 1",
-    //           project_id: "proj_story",
-    //           embedding_config: { type: "OPENAI_EMBEDDING" },
-    //           created_at: new Date().toISOString(),
-    //           updated_at: new Date().toISOString(),
-    //         },
-    //         {
-    //           id: "pipe_2",
-    //           name: "Demo Pipeline 2",
-    //           project_id: "proj_story",
-    //           embedding_config: { type: "OPENAI_EMBEDDING" },
-    //           created_at: new Date().toISOString(),
-    //           updated_at: new Date().toISOString(),
-    //         },
-    //       ]);
-    //     }),
-    //   ],
-    // },
-  },
   render: () => <IndexListDemo />,
 };
 
 export const Detail: Story = {
   args: { id: "9a5118f8-7598-479f-94b4-2ba9689b73d3" },
-  parameters: {
-    // msw: {
-    //   handlers: [
-    //     http.get("https://api.cloud.llamaindex.ai/api/v1/pipelines", () => {
-    //       return HttpResponse.json([
-    //         {
-    //           id: "pipe_1",
-    //           name: "Demo Pipeline 1",
-    //           project_id: "proj_story",
-    //           embedding_config: { type: "OPENAI_EMBEDDING" },
-    //         },
-    //       ]);
-    //     }),
-    //     http.get(
-    //       "https://api.cloud.llamaindex.ai/api/v1/pipelines/:pipeline_id",
-    //       ({ params }) => {
-    //         const { pipeline_id } = params as { pipeline_id: string };
-    //         return HttpResponse.json({
-    //           id: pipeline_id,
-    //           name: `Pipeline ${pipeline_id}`,
-    //           project_id: "proj_story",
-    //           embedding_config: { type: "OPENAI_EMBEDDING" },
-    //           created_at: new Date().toISOString(),
-    //           updated_at: new Date().toISOString(),
-    //         });
-    //       }
-    //     ),
-    //   ],
-    // },
-  },
   render: (args) => <IndexDetailDemo id={args.id as string} />,
 };
