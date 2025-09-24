@@ -9,17 +9,26 @@
     "test": "pnpm --filter @llamaindex/ui test",
     "coverage": "pnpm --filter @llamaindex/ui coverage",
     "storybook": "pnpm --filter @llamaindex/ui storybook",
+    "typecheck": "pnpm -r --if-present run typecheck",
     "build:all": "pnpm --filter @llamaindex/ui build",
-    "lint": "pnpm --filter @llamaindex/ui lint",
-    "format": "pnpm --filter @llamaindex/ui format",
-    "format-check": "pnpm --filter @llamaindex/ui format-check",
+    "lint": "pnpm -r --if-present run lint",
+    "format": "pnpm -r --if-present run format",
+    "format-check": "pnpm -r --if-present run format-check",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.5",
-    "typescript": "~5.8.3"
+    "@eslint/js": "^9.36.0",
+    "@next/eslint-plugin-next": "^15.5.4",
+    "eslint": "^9.36.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.21",
+    "eslint-plugin-storybook": "^9.1.8",
+    "globals": "^16.4.0",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.44.1"
   },
   "packageManager": "pnpm@10.11.1+sha512.e519b9f7639869dc8d5c3c5dfef73b3f091094b0a006d7317353c72b124e80e1afd429732e28705ad6bfa1ee879c1fce46c128ccebd3192101f43dd67c667912"
 }

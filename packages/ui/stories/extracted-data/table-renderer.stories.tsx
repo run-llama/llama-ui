@@ -3,7 +3,7 @@ import { expect } from "@storybook/test";
 import { within, userEvent, screen } from "@storybook/test";
 import { useState } from "react";
 import { TableRenderer } from "../../src/extracted-data/table-renderer";
-import { JSONObject } from "../../src/extracted-data/types";
+import { type JsonObject } from "../../src/extracted-data/types";
 
 const meta: Meta<typeof TableRenderer> = {
   title: "Components/ExtractedData/TableRenderer",
@@ -112,7 +112,7 @@ export const BasicTable: Story = {
       const newData = [...data];
       newData[index] = { ...newData[index], [key]: value } as Record<
         string,
-        JSONObject
+        JsonObject
       >;
       setData(newData);
 
@@ -128,7 +128,7 @@ export const BasicTable: Story = {
 
     const handleAddRow = (newRow: Record<string, unknown>) => {
       // noop for test
-      const newData = [...data, newRow] as Record<string, JSONObject>[];
+      const newData = [...data, newRow] as Record<string, JsonObject>[];
       setData(newData);
 
       // Add the new row path to changed paths
@@ -253,14 +253,14 @@ export const InconsistentKeys: Story = {
       const newData = [...data];
       newData[index] = { ...newData[index], [key]: value } as Record<
         string,
-        JSONObject
+        JsonObject
       >;
       setData(newData);
     };
 
     const handleAddRow = (newRow: Record<string, unknown>) => {
       // noop for test
-      const newData = [...data, newRow] as Record<string, JSONObject>[];
+      const newData = [...data, newRow] as Record<string, JsonObject>[];
       setData(newData);
     };
 
@@ -418,12 +418,12 @@ export const DeepNestedTable: Story = {
       if (typeof value === "object" && value !== null) {
         newData[index] = { ...newData[index], [key]: value } as Record<
           string,
-          JSONObject
+          JsonObject
         >;
       } else {
         newData[index] = { ...newData[index], [key]: value } as Record<
           string,
-          JSONObject
+          JsonObject
         >;
       }
       setData(newData);
@@ -440,7 +440,7 @@ export const DeepNestedTable: Story = {
 
     const handleAddRow = (newRow: Record<string, unknown>) => {
       // noop for test
-      const newData = [...data, newRow] as Record<string, JSONObject>[];
+      const newData = [...data, newRow] as Record<string, JsonObject>[];
       setData(newData);
 
       const rowPath = `${data.length}`;
@@ -566,14 +566,14 @@ export const EmptyTable: Story = {
       const newData = [...data];
       newData[index] = { ...newData[index], [key]: value } as Record<
         string,
-        JSONObject
+        JsonObject
       >;
       setData(newData);
     };
 
     const handleAddRow = (newRow: Record<string, unknown>) => {
       // noop for test
-      const newData = [...data, newRow] as Record<string, JSONObject>[];
+      const newData = [...data, newRow] as Record<string, JsonObject>[];
       setData(newData);
     };
 
@@ -644,10 +644,10 @@ export const ReadOnlyTable: Story = {
 
     const handleUpdate = (index: number, key: string, value: unknown) => {
       // noop for test
-      const newData = [...data] as Record<string, JSONObject>[];
+      const newData = [...data] as Record<string, JsonObject>[];
       newData[index] = { ...newData[index], [key]: value } as Record<
         string,
-        JSONObject
+        JsonObject
       >;
       setData(newData);
     };

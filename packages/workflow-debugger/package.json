@@ -1,0 +1,51 @@
+{
+  "name": "@llamaindex/workflow-debugger",
+  "version": "0.0.1-a",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -p tsconfig.build.json --noEmit && vite build",
+    "typecheck": "tsc -p tsconfig.build.json --noEmit",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "format": "prettier --write .",
+    "format-check": "prettier --check .",
+    "prepublishOnly": "pnpm --filter @llamaindex/workflow-debugger build"
+  },
+  "files": [
+    "dist/*"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@llamaindex/ui": "workspace:*",
+    "@llamaindex/workflows-client": "workspace:*",
+    "@types/react-syntax-highlighter": "^15.5.13",
+    "@xyflow/react": "^12.8.5",
+    "lucide-react": "^0.514.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-syntax-highlighter": "^15.6.6"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.36.0",
+    "@llamaindex/ui": "workspace:*",
+    "@llamaindex/workflows-client": "workspace:*",
+    "@tailwindcss/postcss": "^4.1.13",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react-swc": "^4.1.0",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9.36.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.4.0",
+    "postcss": "^8.5.6",
+    "prettier": "^3.6.2",
+    "tailwindcss": "^4.1.13",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.44.0",
+    "vite": "^7.1.7"
+  }
+}

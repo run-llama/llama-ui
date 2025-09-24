@@ -1,9 +1,9 @@
+import { type WorkflowEvent } from "@/src";
 import { describe, it, expect } from "vitest";
-import type { AgentStreamEvent } from "../../src/agent-stream-display/types";
 
 describe("AgentStreamDisplay Types", () => {
-  it("should have correct AgentStreamEvent structure", () => {
-    const mockEvent: AgentStreamEvent = {
+  it("should have correct WorkflowEvent structure", () => {
+    const mockEvent: WorkflowEvent = {
       type: "AgentStream",
       data: {
         message: "Starting file analysis...",
@@ -11,12 +11,14 @@ describe("AgentStreamDisplay Types", () => {
     };
 
     expect(mockEvent.type).toBe("AgentStream");
-    expect(mockEvent.data.message).toBe("Starting file analysis...");
-    expect(typeof mockEvent.data.message).toBe("string");
+    expect((mockEvent.data as any)["message"]).toBe(
+      "Starting file analysis..."
+    );
+    expect(typeof (mockEvent.data as any)["message"]).toBe("string");
   });
 
   it("should support different message types", () => {
-    const events: AgentStreamEvent[] = [
+    const events: WorkflowEvent[] = [
       {
         type: "AgentStream",
         data: {
@@ -40,7 +42,9 @@ describe("AgentStreamDisplay Types", () => {
     expect(events).toHaveLength(3);
     expect(events.every((event) => event.type === "AgentStream")).toBe(true);
     expect(
-      events.every((event) => typeof event.data.message === "string")
+      events.every(
+        (event) => typeof (event.data as any)["message"] === "string"
+      )
     ).toBe(true);
   });
 });

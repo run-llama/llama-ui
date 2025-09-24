@@ -48,6 +48,12 @@ jobs:
       - name: Check code formatting
         run: pnpm run format-check
 
+      - name: Build packages
+        run: pnpm run build:all
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
       - name: Run tests with coverage
         run: pnpm run coverage
 
@@ -60,9 +66,6 @@ jobs:
           name: codecov-ui
           fail_ci_if_error: true
           verbose: true
-
-      - name: Build packages
-        run: pnpm run build:all
 
       - name: Check for changeset
         if: github.event_name == 'pull_request'

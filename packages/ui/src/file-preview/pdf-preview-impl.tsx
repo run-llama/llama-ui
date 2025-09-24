@@ -3,6 +3,7 @@ import { Document, Page, pdfjs } from "react-pdf";
 import { PdfNavigator } from "./pdf-navigator";
 import { BoundingBoxOverlay } from "./bounding-box-overlay";
 import { BoundingBox, Highlight } from "./types";
+// @ts-expect-error react-pdf types have no declarations
 import { PageCallback } from "react-pdf/dist/shared/types";
 
 // Configure worker path for PDF.js
