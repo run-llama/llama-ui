@@ -24,13 +24,7 @@ export function DataPagination({
   const totalPages = Math.ceil(totalItems / perPage);
   const shouldShowPagination = totalItems > perPage;
 
-  if (!shouldShowPagination) {
-    return (
-      <div className="text-sm text-gray-500">
-        Showing all {totalItems} items
-      </div>
-    );
-  }
+  if (!shouldShowPagination) return null;
 
   return (
     <Pagination className={cn("justify-end p-2", className)}>
