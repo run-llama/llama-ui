@@ -3,7 +3,6 @@ import {
   postWorkflowsByNameRunNowait,
   getHandlers,
   postEventsByHandlerId,
-  getEventsByHandlerId,
 } from "@llamaindex/workflows-client";
 import {
   RawEvent,
@@ -119,29 +118,15 @@ export async function fetchHandlerEvents<E extends WorkflowEvent>(
       return false;
     };
 
-    if ("EventSource" in globalThis) {
-      const baseUrl = (params.client.getConfig().baseUrl ?? "").replace(
-        /\/$/,
-        ""
-      );
-      const eventSource = new EventSource(
-        `${baseUrl}/events/${encodeURIComponent(params.handlerId)}?sse=true`
-      );
+    const baseUrl = (params.client.getConfig().baseUrl ?? "").replace(
+      /\/$/,
+      ""
+    );
+    const eventSource = new EventSource(
+      `${baseUrl}/events/${encodeURIComponent(params.handlerId)}?sse=true`
+    );
 
-      await processUntilClosed(eventSource, onMessage, signal);
-    } else {
-      const response = await getEventsByHandlerId({
-        client: params.client,
-        path: { handler_id: params.handlerId },
-        query: { sse: true },
-        signal: signal,
-      });
-
-      for await (const event of response.stream) {
-        const rawEvent = event as RawEvent;
-        onMessage(rawEvent);
-      }
-    }
+    await processUntilClosed(eventSource, onMessage, signal);
     subscriber.onFinish?.(accumulatedEvents);
     return accumulatedEvents;
   };
