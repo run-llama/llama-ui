@@ -348,6 +348,7 @@
     "eslint-plugin-react-hooks": "^5",
     "glob": "^11.0.3",
     "jsdom": "^26.1.0",
+    "@llamaindex/workflows-client": "workspace:*",
     "llama-cloud-services": "^0.3.6",
     "msw": "^2.10.2",
     "msw-storybook-addon": "^2.0.5",
