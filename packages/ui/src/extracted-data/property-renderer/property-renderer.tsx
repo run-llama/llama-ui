@@ -47,6 +47,8 @@ interface PropertyRendererProps<S extends JsonShape<S>> {
     path: string[];
   }) => void;
   editable?: boolean;
+  tableRowsPerPage?: number;
+  listItemsPerPage?: number;
 }
 
 export function PropertyRenderer<S extends JsonShape<S>>({
@@ -58,6 +60,8 @@ export function PropertyRenderer<S extends JsonShape<S>>({
   validationErrors = [],
   onClickField,
   editable = true,
+  tableRowsPerPage = 10,
+  listItemsPerPage = 10,
 }: PropertyRendererProps<S>) {
   const pathString = keyPath.join(".");
   const isChanged = isPropertyChanged(changedPaths, keyPath);
@@ -148,6 +152,7 @@ export function PropertyRenderer<S extends JsonShape<S>>({
           keyPath={keyPath}
           metadata={{ schema: effectiveMetadata.schema, extracted: {} }}
           editable={editable}
+          listItemsPerPage={listItemsPerPage}
         />
       );
     }
@@ -205,6 +210,7 @@ export function PropertyRenderer<S extends JsonShape<S>>({
           validationErrors={validationErrors}
           onClickField={onClickField}
           editable={editable}
+          tableRowsPerPage={tableRowsPerPage}
         />
       );
     } else {
@@ -241,6 +247,7 @@ export function PropertyRenderer<S extends JsonShape<S>>({
           }}
           onClickField={onClickField}
           editable={editable}
+          listItemsPerPage={listItemsPerPage}
         />
       );
     }
@@ -266,6 +273,7 @@ export function PropertyRenderer<S extends JsonShape<S>>({
                       validationErrors={validationErrors}
                       onClickField={onClickField}
                       editable={editable}
+                      listItemsPerPage={listItemsPerPage}
                     />
                   </div>
                 </div>
@@ -290,6 +298,7 @@ export function PropertyRenderer<S extends JsonShape<S>>({
                         validationErrors={validationErrors}
                         onClickField={onClickField}
                         editable={editable}
+                        listItemsPerPage={listItemsPerPage}
                       />
                     </div>
                   </div>

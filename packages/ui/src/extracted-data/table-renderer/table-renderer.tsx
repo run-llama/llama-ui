@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { EditableField } from "../editable-field";
 import { Button } from "@/base/button";
 import {
@@ -32,6 +32,7 @@ import { findExtractedFieldMetadata } from "../metadata-lookup";
 import { Plus, Trash2 } from "lucide-react";
 import { PrimitiveType, toPrimitiveType } from "../primitive-validation";
 import type { PrimitiveValue, JsonValue, JsonObject } from "../types";
+import { DataPagination } from "../data-pagination";
 
 export interface TableRendererProps<Row extends JsonObject> {
   data: Row[];
@@ -56,6 +57,7 @@ export interface TableRendererProps<Row extends JsonObject> {
     path: string[];
   }) => void;
   editable?: boolean;
+  tableRowsPerPage?: number;
 }
 
 export function TableRenderer<Row extends JsonObject>({
@@ -69,7 +71,9 @@ export function TableRenderer<Row extends JsonObject>({
   validationErrors = [],
   onClickField,
   editable = true,
+  tableRowsPerPage = 10,
 }: TableRendererProps<Row>) {
+  const [currentPage, setCurrentPage] = useState(1);
   const effectiveMetadata: RendererMetadata = {
     schema: metadata?.schema ?? ({} as Record<string, FieldSchemaMetadata>),
     extracted: metadata?.extracted ?? {},
@@ -337,12 +341,23 @@ export function TableRenderer<Row extends JsonObject>({
     return rows;
   };
 
+  const visibleData = data.slice(
+    (currentPage - 1) * tableRowsPerPage,
+    currentPage * tableRowsPerPage
+  );
+
   return (
     <div className="border border-b-0 rounded-md bg-white">
+      <DataPagination
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        totalItems={data.length}
+        perPage={tableRowsPerPage}
+      />
       <Table className="table-auto">
         <TableHeader>{generateHeaderRows()}</TableHeader>
         <TableBody>
-          {data.map((item, rowIndex) => (
+          {visibleData.map((item, rowIndex) => (
             <TableRow key={rowIndex} className="hover:bg-gray-50 border-0">
               {columns.map((column, colIndex) => {
                 const value = getValue(item, column) as

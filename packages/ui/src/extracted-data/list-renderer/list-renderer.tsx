@@ -12,6 +12,8 @@ import type { PrimitiveValue, RendererMetadata } from "../types";
 import type { ExtractedFieldMetadata } from "llama-cloud-services/beta/agent";
 import { findFieldSchemaMetadata } from "../metadata-path-utils";
 import { findExtractedFieldMetadata } from "../metadata-lookup";
+import { DataPagination } from "../data-pagination";
+import { useState } from "react";
 
 interface ListRendererProps<S extends PrimitiveValue> {
   data: S[];
@@ -30,6 +32,7 @@ interface ListRendererProps<S extends PrimitiveValue> {
     path: string[];
   }) => void;
   editable?: boolean;
+  listItemsPerPage?: number;
 }
 
 export function ListRenderer<S extends PrimitiveValue>({
@@ -42,7 +45,9 @@ export function ListRenderer<S extends PrimitiveValue>({
   metadata,
   onClickField,
   editable = true,
+  listItemsPerPage = 10,
 }: ListRendererProps<S>) {
+  const [currentPage, setCurrentPage] = useState(1);
   const effectiveSchema: Record<string, FieldSchemaMetadata> =
     metadata?.schema ?? {};
   const effectiveExtracted = metadata?.extracted ?? {};
@@ -107,11 +112,22 @@ export function ListRenderer<S extends PrimitiveValue>({
     );
   }
 
+  const visibleData = data.slice(
+    (currentPage - 1) * listItemsPerPage,
+    currentPage * listItemsPerPage
+  );
+
   return (
     <div className="border rounded-md bg-white overflow-auto">
+      <DataPagination
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        totalItems={data.length}
+        perPage={listItemsPerPage}
+      />
       <Table className="table-auto">
         <TableBody>
-          {data.map((item, index) => {
+          {visibleData.map((item, index) => {
             // Check if this specific array item has been changed
             const isChanged = isArrayItemChanged(changedPaths, keyPath, index);
 
