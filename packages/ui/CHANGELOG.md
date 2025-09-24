@@ -1,5 +1,12 @@
 # @llamaindex/ui
 
+## 2.1.2
+
+### Patch Changes
+
+- 3572aa1: Use SSE for streaming handler events
+- e8b30a3: feat: implement pagination for table and list rendering
+
 ## 2.1.1
 
 ### Patch Changes
