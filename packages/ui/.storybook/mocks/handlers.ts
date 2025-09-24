@@ -14,6 +14,32 @@ const createdHandlers = new Map<
   }
 >();
 
+// Track completed SSE streams to prevent infinite reconnections
+const completedStreams = new Set<string>();
+
+// Helper function to mark a handler as completed
+function completeHandler(handlerId: string) {
+  const handler = createdHandlers.get(handlerId);
+  if (handler && handler.status === "running") {
+    handler.status = "completed";
+    handler.result = {
+      message: "Workflow completed successfully",
+      processed_files: Math.floor(Math.random() * 5) + 1,
+      extracted_data: {
+        total_items: Math.floor(Math.random() * 100) + 10,
+        high_confidence: Math.floor(Math.random() * 80) + 10,
+        low_confidence: Math.floor(Math.random() * 20),
+      },
+    };
+    // Also mark stream as completed to prevent reconnections
+    completedStreams.add(handlerId);
+    console.log(
+      `MSW: Handler ${handlerId} completed with result:`,
+      handler.result
+    );
+  }
+}
+
 // Mock agent data for item grid
 const mockAgentData = Array.from({ length: 50 }, (_, index) => ({
   id: `item-${index + 1}`,
@@ -142,14 +168,13 @@ export const handlers = {
           error: null,
         });
 
+        // Remove from completed streams if it was previously completed (for retriggers)
+        completedStreams.delete(handlerId);
+
         // Simulate completion after some time
         setTimeout(() => {
-          const handler = createdHandlers.get(handlerId);
-          if (handler && handler.status === "running") {
-            handler.status = "completed";
-            handler.result = { message: "Workflow completed successfully" };
-          }
-        }, 10000); // Complete after 10 seconds
+          completeHandler(handlerId);
+        }, 10000); // Complete after 10 seconds, whether or not the events are subscribed to
 
         // Return the response format matching Python server
         const response = {
@@ -165,14 +190,32 @@ export const handlers = {
       }
     ),
 
-    // Mock handler events streaming
+    // Mock handler events streaming for EventSource (SSE)
     http.get("*/events/:handler_id", async (info) => {
       const { handler_id: handlerId } = info.params;
+      const url = new URL(info.request.url);
+      const isSSE = url.searchParams.get("sse") === "true";
+
       console.log("MSW: Intercepted handler events request", {
         params: info.params,
         handlerId,
         url: info.request.url,
+        isSSE,
       });
+
+      if (!isSSE) {
+        // Non-SSE request, return empty for now
+        return HttpResponse.json([]);
+      }
+
+      const handlerIdString = (handlerId ?? "") as string;
+      // Check if this stream has already completed - return 204 to stop reconnections
+      if (completedStreams.has(handlerIdString)) {
+        console.log(
+          `MSW: Stream for handler ${handlerId} already completed, returning 204 to stop reconnection`
+        );
+        return new HttpResponse(null, { status: 204 });
+      }
 
       // Create a readable stream for Server-Sent Events
       const stream = new ReadableStream({
@@ -237,6 +280,11 @@ export const handlers = {
 
           const sendNextEvent = () => {
             if (eventsSent >= events.length) {
+              console.log(
+                `MSW: All events sent for handler ${handlerId}, completing handler and closing stream`
+              );
+              // Complete the handler (sets status, result, and marks stream as completed)
+              completeHandler(handlerIdString);
               setTimeout(() => controller.close(), 100);
               return;
             }
@@ -252,9 +300,10 @@ export const handlers = {
               `MSW: Sending event ${eventsSent + 1}/${events.length}:`,
               rawEvent
             );
-            controller.enqueue(
-              new TextEncoder().encode(JSON.stringify(rawEvent) + "\n")
-            );
+
+            // Proper SSE format: "data: " + JSON + "\n\n"
+            const sseMessage = `data: ${JSON.stringify(rawEvent)}\n\n`;
+            controller.enqueue(new TextEncoder().encode(sseMessage));
 
             eventsSent++;
             setTimeout(sendNextEvent, 1000); // Send next event after 1000ms
@@ -267,7 +316,7 @@ export const handlers = {
 
       return new Response(stream, {
         headers: {
-          "Content-Type": "text/plain",
+          "Content-Type": "text/event-stream",
           "Cache-Control": "no-cache",
           Connection: "keep-alive",
         },
@@ -295,6 +344,35 @@ export const handlers = {
 
       console.log("MSW: Returning handlers list:", { handlers: allHandlers });
       return HttpResponse.json({ handlers: allHandlers });
+    }),
+
+    // Mock get results by handler ID
+    http.get("*/results/:handler_id", async ({ params }) => {
+      const { handler_id: handlerId } = params;
+      console.log(
+        "MSW: Intercepted get results request for handler:",
+        handlerId
+      );
+
+      const handler = createdHandlers.get(handlerId as string);
+
+      if (!handler) {
+        console.log(`MSW: Handler ${handlerId} not found`);
+        return new HttpResponse("Handler not found", { status: 404 });
+      }
+
+      if (handler.status === "completed" && handler.result !== null) {
+        console.log(
+          `MSW: Returning result for completed handler ${handlerId}:`,
+          handler.result
+        );
+        return HttpResponse.json({ result: handler.result });
+      } else {
+        console.log(
+          `MSW: Result not ready yet for handler ${handlerId} (status: ${handler.status})`
+        );
+        return HttpResponse.json({}, { status: 202 });
+      }
     }),
 
     // Mock post event to handler
@@ -463,3 +541,11 @@ export const handlers = {
     ),
   ],
 };
+
+// Export a function to reset mock state (useful for story switching)
+export function resetMockState() {
+  createdHandlers.clear();
+  completedStreams.clear();
+  taskCounter = 1;
+  console.log("MSW: Mock state reset");
+}

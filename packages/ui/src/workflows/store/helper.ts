@@ -3,6 +3,7 @@ import {
   postWorkflowsByNameRunNowait,
   getHandlers,
   postEventsByHandlerId,
+  getResultsByHandlerId,
 } from "@llamaindex/workflows-client";
 import {
   RawEvent,
@@ -123,10 +124,19 @@ export async function fetchHandlerEvents<E extends WorkflowEvent>(
       ""
     );
     const eventSource = new EventSource(
-      `${baseUrl}/events/${encodeURIComponent(params.handlerId)}?sse=true`
+      `${baseUrl}/events/${encodeURIComponent(params.handlerId)}?sse=true`,
+      {
+        withCredentials: true,
+      }
     );
 
-    await processUntilClosed(eventSource, onMessage, signal);
+    await processUntilClosed(eventSource, onMessage, signal, () =>
+      // EventSource does not complete until the backoff reconnect gets a 204. Proactively check for completion.
+      getResultsByHandlerId({
+        client: params.client,
+        path: { handler_id: params.handlerId },
+      }).then((res) => (res.data?.result ?? null) !== null)
+    );
     subscriber.onFinish?.(accumulatedEvents);
     return accumulatedEvents;
   };
@@ -180,7 +190,8 @@ function toRawEvent(event: WorkflowEvent): RawEvent {
 function processUntilClosed(
   eventSource: EventSource,
   callback: (event: RawEvent) => boolean,
-  abortSignal: AbortSignal
+  abortSignal: AbortSignal,
+  checkComplete?: () => Promise<boolean>
 ): Promise<void> {
   let resolve: () => void = () => {};
   const onAbort = () => {
@@ -205,10 +216,26 @@ function processUntilClosed(
   eventSource.addEventListener("message", onMessage);
   // this error event is really noisy. Fires during reconnects, which is up to the browser, and pretty frequent.
   // Will reconnect until it gets a 204 response or manually closed.
+  let checkCompletePromise: Promise<boolean> | null = null;
+  let lastCheckTime = 0;
   const onError = (_: Event) => {
     if (eventSource.readyState == EventSource.CLOSED) {
       resolve();
     }
+    // only check up to every 10 seconds
+    const now = Date.now();
+    if (!checkCompletePromise && checkComplete && now - lastCheckTime > 10000) {
+      lastCheckTime = now;
+      checkCompletePromise = checkComplete();
+    }
+    checkCompletePromise?.then((complete) => {
+      if (complete) {
+        eventSource.close();
+        resolve();
+      } else {
+        checkCompletePromise = null;
+      }
+    });
   };
   eventSource.addEventListener("error", onError);
 
