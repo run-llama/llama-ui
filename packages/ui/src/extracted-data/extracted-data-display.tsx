@@ -20,6 +20,8 @@ export function ExtractedDataDisplay<S extends JsonShape<S>>({
   editable = true,
   jsonSchema,
   onClickField,
+  tableRowsPerPage = 10,
+  listItemsPerPage = 10,
 }: ExtractedDataDisplayProps<S>) {
   const [changedPaths, setChangedPaths] = useState<Set<string>>(new Set());
 
@@ -121,6 +123,8 @@ export function ExtractedDataDisplay<S extends JsonShape<S>>({
                   validationErrors={validationErrors}
                   onClickField={onClickField}
                   editable={editable}
+                  tableRowsPerPage={tableRowsPerPage}
+                  listItemsPerPage={listItemsPerPage}
                 />
               </div>
             </div>
@@ -143,6 +147,8 @@ export function ExtractedDataDisplay<S extends JsonShape<S>>({
                 validationErrors={validationErrors}
                 onClickField={onClickField}
                 editable={editable}
+                tableRowsPerPage={tableRowsPerPage}
+                listItemsPerPage={listItemsPerPage}
               />
             </div>
           );
@@ -165,6 +171,8 @@ export function ExtractedDataDisplay<S extends JsonShape<S>>({
                     validationErrors={validationErrors}
                     onClickField={onClickField}
                     editable={editable}
+                    tableRowsPerPage={tableRowsPerPage}
+                    listItemsPerPage={listItemsPerPage}
                   />
                 </div>
               </div>

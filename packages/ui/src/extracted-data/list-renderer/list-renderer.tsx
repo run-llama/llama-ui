@@ -15,8 +15,6 @@ import { findExtractedFieldMetadata } from "../metadata-lookup";
 import { DataPagination } from "../data-pagination";
 import { useState } from "react";
 
-const MAX_ITEMS_PER_PAGE = 10;
-
 interface ListRendererProps<S extends PrimitiveValue> {
   data: S[];
   onUpdate: (index: number, value: S) => void;
@@ -34,6 +32,7 @@ interface ListRendererProps<S extends PrimitiveValue> {
     path: string[];
   }) => void;
   editable?: boolean;
+  listItemsPerPage?: number;
 }
 
 export function ListRenderer<S extends PrimitiveValue>({
@@ -46,6 +45,7 @@ export function ListRenderer<S extends PrimitiveValue>({
   metadata,
   onClickField,
   editable = true,
+  listItemsPerPage = 10,
 }: ListRendererProps<S>) {
   const [currentPage, setCurrentPage] = useState(1);
   const effectiveSchema: Record<string, FieldSchemaMetadata> =
@@ -113,8 +113,8 @@ export function ListRenderer<S extends PrimitiveValue>({
   }
 
   const visibleData = data.slice(
-    (currentPage - 1) * MAX_ITEMS_PER_PAGE,
-    currentPage * MAX_ITEMS_PER_PAGE
+    (currentPage - 1) * listItemsPerPage,
+    currentPage * listItemsPerPage
   );
 
   return (
@@ -123,7 +123,7 @@ export function ListRenderer<S extends PrimitiveValue>({
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         totalItems={data.length}
-        perPage={MAX_ITEMS_PER_PAGE}
+        perPage={listItemsPerPage}
       />
       <Table className="table-auto">
         <TableBody>

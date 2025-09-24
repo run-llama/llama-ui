@@ -20,6 +20,8 @@ export interface ExtractedDataDisplayProps<S extends JsonShape<S>> {
     metadata?: ExtractedFieldMetadata;
     path: string[];
   }) => void;
+  tableRowsPerPage?: number;
+  listItemsPerPage?: number;
 }
 
 // Convenience type used by renderers to carry both schema metadata and extracted metadata

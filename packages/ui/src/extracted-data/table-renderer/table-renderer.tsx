@@ -34,8 +34,6 @@ import { PrimitiveType, toPrimitiveType } from "../primitive-validation";
 import type { PrimitiveValue, JsonValue, JsonObject } from "../types";
 import { DataPagination } from "../data-pagination";
 
-const MAX_ITEMS_PER_PAGE = 10;
-
 export interface TableRendererProps<Row extends JsonObject> {
   data: Row[];
   onUpdate: (
@@ -59,6 +57,7 @@ export interface TableRendererProps<Row extends JsonObject> {
     path: string[];
   }) => void;
   editable?: boolean;
+  tableRowsPerPage?: number;
 }
 
 export function TableRenderer<Row extends JsonObject>({
@@ -72,6 +71,7 @@ export function TableRenderer<Row extends JsonObject>({
   validationErrors = [],
   onClickField,
   editable = true,
+  tableRowsPerPage = 10,
 }: TableRendererProps<Row>) {
   const [currentPage, setCurrentPage] = useState(1);
   const effectiveMetadata: RendererMetadata = {
@@ -342,8 +342,8 @@ export function TableRenderer<Row extends JsonObject>({
   };
 
   const visibleData = data.slice(
-    (currentPage - 1) * MAX_ITEMS_PER_PAGE,
-    currentPage * MAX_ITEMS_PER_PAGE
+    (currentPage - 1) * tableRowsPerPage,
+    currentPage * tableRowsPerPage
   );
 
   return (
@@ -352,7 +352,7 @@ export function TableRenderer<Row extends JsonObject>({
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         totalItems={data.length}
-        perPage={MAX_ITEMS_PER_PAGE}
+        perPage={tableRowsPerPage}
       />
       <Table className="table-auto">
         <TableHeader>{generateHeaderRows()}</TableHeader>
