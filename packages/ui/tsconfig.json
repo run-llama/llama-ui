@@ -18,7 +18,8 @@
     "baseUrl": ".",
     "outDir": "./dist",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@llamaindex/workflows-client": ["../workflows-client/src"]
     }
   },
   "include": [

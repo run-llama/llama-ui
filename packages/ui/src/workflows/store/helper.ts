@@ -1,9 +1,9 @@
 import {
-  Client,
+  type Client,
   postWorkflowsByNameRunNowait,
   getHandlers,
   postEventsByHandlerId,
-  getEventsByHandlerId,
+  getResultsByHandlerId,
 } from "@llamaindex/workflows-client";
 import {
   RawEvent,
@@ -93,76 +93,52 @@ export async function fetchHandlerEvents<E extends WorkflowEvent>(
     subscriber: StreamSubscriber<E>,
     signal: AbortSignal
   ): Promise<E[]> => {
-    const resp = await getEventsByHandlerId({
-      client: params.client,
-      path: { handler_id: params.handlerId },
-      // NDJSON stream
-      query: { sse: false },
-      // Ensure we get a ReadableStream without auto-parsing
-      parseAs: "stream",
-    });
-    const response = resp.response;
-
-    if (!response.ok) {
-      const error = new Error(`HTTP error! status: ${response.status}`);
-      throw error;
-    }
-
-    const reader = response.body?.getReader();
-    if (!reader) {
-      throw new Error("No reader available");
-    }
-
-    const decoder = new TextDecoder();
+    subscriber.onStart?.();
     const accumulatedEvents: E[] = [];
-    let retryParsedLines: string[] = [];
-
-    try {
-      while (true) {
-        if (signal.aborted) {
-          throw new Error("Stream aborted");
-        }
-
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        let chunk = decoder.decode(value, { stream: true });
-
-        if (retryParsedLines.length > 0) {
-          // if there are lines that failed to parse, append them to the current chunk
-          chunk = `${retryParsedLines.join("")}${chunk}`;
-          retryParsedLines = []; // reset for next iteration
-        }
-
-        const { events, failedLines } = toWorkflowEvents<E>(chunk);
-        retryParsedLines.push(...failedLines);
-
-        if (!events.length) continue;
-
-        accumulatedEvents.push(...events);
-
-        // Send events to SharedStreamingManager subscriber
-        events.forEach((event) => subscriber.onData?.(event));
-
-        const stopEvent = events.find(
-          (event) => event.type === WorkflowEventType.StopEvent.toString()
-        );
-        if (stopEvent) {
-          // For compatibility with existing callback interface
-          if (callback?.onStopEvent) {
-            callback.onStopEvent(stopEvent);
-          }
-          break; // Stop event received, end the stream
-        }
+    const onMessage = (event: RawEvent): boolean => {
+      const workflowEvent = {
+        type: event.qualified_name,
+        data: event.value,
+      } as E;
+      accumulatedEvents.push(workflowEvent);
+      try {
+        subscriber.onData?.(workflowEvent);
+      } catch (error) {
+        console.error("Error in subscriber onData:", error); // eslint-disable-line no-console
       }
+      const stopEvent = [workflowEvent].find(
+        (event) => event.type === WorkflowEventType.StopEvent.toString()
+      );
+      if (stopEvent) {
+        // For compatibility with existing callback interface
+        if (callback?.onStopEvent) {
+          callback.onStopEvent(stopEvent);
+        }
+        return true; // Stop event received, end the stream
+      }
+      return false;
+    };
 
-      // Notify completion
-      subscriber.onFinish?.(accumulatedEvents);
+    const baseUrl = (params.client.getConfig().baseUrl ?? "").replace(
+      /\/$/,
+      ""
+    );
+    const eventSource = new EventSource(
+      `${baseUrl}/events/${encodeURIComponent(params.handlerId)}?sse=true`,
+      {
+        withCredentials: true,
+      }
+    );
 
-      return accumulatedEvents;
-    } finally {
-      reader.releaseLock();
-    }
+    await processUntilClosed(eventSource, onMessage, signal, () =>
+      // EventSource does not complete until the backoff reconnect gets a 204. Proactively check for completion.
+      getResultsByHandlerId({
+        client: params.client,
+        path: { handler_id: params.handlerId },
+      }).then((res) => (res.data?.result ?? null) !== null)
+    );
+    subscriber.onFinish?.(accumulatedEvents);
+    return accumulatedEvents;
   };
 
   // Convert callback to SharedStreamingManager subscriber
@@ -203,67 +179,6 @@ export async function sendEventToHandler<E extends WorkflowEvent>(params: {
   return data.data;
 }
 
-function toWorkflowEvents<E extends WorkflowEvent>(
-  chunk: string
-): {
-  events: E[];
-  failedLines: string[];
-} {
-  if (typeof chunk !== "string") {
-    return { events: [], failedLines: [] };
-  }
-
-  // One chunk can contain multiple events, so we need to parse each line
-  const lines = chunk
-    .trim()
-    .split("\n")
-    .filter((line) => line.trim() !== "");
-
-  const parsedLines = lines
-    .map((line) => parseChunkLine<E>(line))
-    .filter(Boolean);
-
-  // successfully parsed events
-  const events = parsedLines.map((line) => line?.event).filter(Boolean) as E[];
-
-  // failed lines that could not be parsed into events
-  // will be merged into next chunk to re-try parsing
-  const failedLines = parsedLines
-    .filter((l) => !l?.event)
-    .map((line) => line?.line || "")
-    .filter(Boolean);
-
-  return {
-    events,
-    failedLines,
-  };
-}
-
-function parseChunkLine<E extends WorkflowEvent>(
-  line: string
-): {
-  line: string;
-  event?: E | null;
-} | null {
-  try {
-    const event = JSON.parse(line) as RawEvent;
-    if (!isRawEvent(event)) {
-      return null;
-    }
-    return {
-      line,
-      event: { type: event.qualified_name, data: event.value } as E,
-    };
-  } catch (error: unknown) {
-    // eslint-disable-next-line no-console -- needed
-    console.error(`Failed to parse chunk in line: ${line}`, error);
-    return {
-      line,
-      event: null,
-    };
-  }
-}
-
 function toRawEvent(event: WorkflowEvent): RawEvent {
   return {
     __is_pydantic: true,
@@ -272,13 +187,61 @@ function toRawEvent(event: WorkflowEvent): RawEvent {
   };
 }
 
-function isRawEvent(event: object): event is RawEvent {
-  return (
-    event &&
-    typeof event === "object" &&
-    "__is_pydantic" in event &&
-    "value" in event &&
-    "qualified_name" in event &&
-    typeof event.qualified_name === "string"
-  );
+function processUntilClosed(
+  eventSource: EventSource,
+  callback: (event: RawEvent) => boolean,
+  abortSignal: AbortSignal,
+  checkComplete?: () => Promise<boolean>
+): Promise<void> {
+  let resolve: () => void = () => {};
+  const onAbort = () => {
+    eventSource.close();
+    resolve();
+  };
+  const promise = new Promise<void>((_resolve) => {
+    resolve = _resolve;
+  });
+
+  abortSignal.addEventListener("abort", onAbort);
+  const onMessage = (event: MessageEvent) => {
+    try {
+      if (callback(JSON.parse(event.data) as RawEvent)) {
+        eventSource.close();
+        resolve();
+      }
+    } catch (error) {
+      console.error("Unexpected error in processUntilClosed callback:", error); // eslint-disable-line no-console
+    }
+  };
+  eventSource.addEventListener("message", onMessage);
+  // this error event is really noisy. Fires during reconnects, which is up to the browser, and pretty frequent.
+  // Will reconnect until it gets a 204 response or manually closed.
+  let checkCompletePromise: Promise<boolean> | null = null;
+  let lastCheckTime = 0;
+  const onError = (_: Event) => {
+    if (eventSource.readyState == EventSource.CLOSED) {
+      resolve();
+    }
+    // only check up to every 10 seconds
+    const now = Date.now();
+    if (!checkCompletePromise && checkComplete && now - lastCheckTime > 10000) {
+      lastCheckTime = now;
+      checkCompletePromise = checkComplete();
+    }
+    checkCompletePromise?.then((complete) => {
+      if (complete) {
+        eventSource.close();
+        resolve();
+      } else {
+        checkCompletePromise = null;
+      }
+    });
+  };
+  eventSource.addEventListener("error", onError);
+
+  return promise.then(() => {
+    eventSource.removeEventListener("message", onMessage);
+    eventSource.removeEventListener("error", onError);
+    abortSignal.removeEventListener("abort", onAbort);
+  });
 }

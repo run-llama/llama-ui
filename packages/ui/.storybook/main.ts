@@ -20,6 +20,10 @@ const config: StorybookConfig = {
     config.resolve.alias = {
       ...config.resolve.alias,
       "@": resolve(__dirname, "../"),
+      "@llamaindex/workflows-client": resolve(
+        __dirname,
+        "../../workflows-client/src"
+      ),
       // Fix react-pdf compatibility with React 19
       react: resolve(__dirname, "../node_modules/react"),
       "react-dom": resolve(__dirname, "../node_modules/react-dom"),

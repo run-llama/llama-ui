@@ -1,10 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import React from "react";
+import React, { useEffect } from "react";
 import { within, waitFor, expect } from "@storybook/test";
 import { WorkflowProgressBar } from "../src/workflows";
 import { ApiProvider, createMockClients } from "../src/lib";
-import { __setHandlerStoreState } from "../src/workflows/hooks/use-handler-store";
-
+import {
+  __setHandlerStoreState,
+  useHandlerStore,
+} from "../src/workflows/hooks/use-handler-store";
+import { resetMockState } from "../.storybook/mocks/handlers";
 const meta: Meta<typeof WorkflowProgressBar> = {
   title: "Components/WorkflowProgressBar",
   component: WorkflowProgressBar,
@@ -12,15 +15,29 @@ const meta: Meta<typeof WorkflowProgressBar> = {
     layout: "fullscreen",
   },
   decorators: [
-    (Story) => (
-      <ApiProvider clients={createMockClients()}>
-        <div style={{ padding: "16px", width: "100%" }}>
-          <Story />
-        </div>
-      </ApiProvider>
-    ),
+    (Story) => {
+      return (
+        <ApiProvider clients={createMockClients()}>
+          <Resetter />
+          <div style={{ padding: "16px", width: "100%" }}>
+            <Story />
+          </div>
+        </ApiProvider>
+      );
+    },
   ],
   tags: ["autodocs"],
+};
+/**
+ * Resets global/mock state between stories
+ */
+const Resetter = () => {
+  resetMockState();
+  const clear = useHandlerStore((x) => x.clearCompleted);
+  useEffect(() => {
+    clear();
+  }, []);
+  return null;
 };
 
 export default meta;

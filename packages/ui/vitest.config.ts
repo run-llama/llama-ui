@@ -43,6 +43,10 @@ export default defineConfig({
         resolve: {
           alias: {
             "@": path.resolve(__dirname, "."),
+            "@llamaindex/workflows-client": path.resolve(
+              __dirname,
+              "../workflows-client/src"
+            ),
           },
         },
         test: {
@@ -82,6 +86,10 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "."),
+      "@llamaindex/workflows-client": path.resolve(
+        __dirname,
+        "../workflows-client/src"
+      ),
     },
   },
   define: {

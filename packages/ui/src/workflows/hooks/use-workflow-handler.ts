@@ -62,7 +62,7 @@ export function useWorkflowHandler(
         event,
       });
     },
-    [handlerId, client, sendEventToHandler]
+    [handlerId, client]
   );
 
   return {

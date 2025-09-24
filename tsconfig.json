@@ -1,6 +1,7 @@
 {
   "files": [],
   "references": [
-    { "path": "./packages/ui" }
+    { "path": "./packages/ui" },
+    { "path": "./packages/workflows-client" }
   ]
 }
