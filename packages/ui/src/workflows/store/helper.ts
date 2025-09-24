@@ -103,7 +103,7 @@ export async function fetchHandlerEvents<E extends WorkflowEvent>(
       try {
         subscriber.onData?.(workflowEvent);
       } catch (error) {
-        console.error("Error in subscriber onData:", error);
+        console.error("Error in subscriber onData:", error); // eslint-disable-line no-console
       }
       const stopEvent = [workflowEvent].find(
         (event) => event.type === WorkflowEventType.StopEvent.toString()
@@ -195,31 +195,18 @@ function toRawEvent(event: WorkflowEvent): RawEvent {
   };
 }
 
-function isRawEvent(event: object): event is RawEvent {
-  return (
-    event &&
-    typeof event === "object" &&
-    "__is_pydantic" in event &&
-    "value" in event &&
-    "qualified_name" in event &&
-    typeof event.qualified_name === "string"
-  );
-}
-
 function processUntilClosed(
   eventSource: EventSource,
   callback: (event: RawEvent) => boolean,
   abortSignal: AbortSignal
 ): Promise<void> {
   let resolve: () => void = () => {};
-  let reject: (error: Error) => void = () => {};
   const onAbort = () => {
     eventSource.close();
     resolve();
   };
-  const promise = new Promise<void>((_resolve, _reject) => {
+  const promise = new Promise<void>((_resolve) => {
     resolve = _resolve;
-    reject = _reject;
   });
 
   abortSignal.addEventListener("abort", onAbort);
@@ -230,11 +217,13 @@ function processUntilClosed(
         resolve();
       }
     } catch (error) {
-      console.error("Error in processUntilClosed callback:", error);
+      console.error("Unexpected error in processUntilClosed callback:", error); // eslint-disable-line no-console
     }
   };
   eventSource.addEventListener("message", onMessage);
-  const onError = (event: Event) => {
+  // this error event is really noisy. Fires during reconnects, which is up to the browser, and pretty frequent.
+  // Will reconnect until it gets a 204 response or manually closed.
+  const onError = (_: Event) => {
     if (eventSource.readyState == EventSource.CLOSED) {
       resolve();
     }

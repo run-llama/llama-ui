@@ -282,7 +282,10 @@ describe("Helper Functions Tests", () => {
             executor: any,
             signal?: AbortSignal
           ) => {
-            const promise = executor({}, signal ?? new AbortController().signal);
+            const promise = executor(
+              {},
+              signal ?? new AbortController().signal
+            );
             return { promise, unsubscribe: vi.fn() } as any;
           }
         );
@@ -364,21 +367,30 @@ describe("Helper Functions Tests", () => {
         // Emit messages from EventSource
         const es: MockEventSource = (MockEventSource as any).last;
         const mk = (obj: any) => JSON.stringify(obj);
-        es.emit("message", mk({
-          __is_pydantic: true,
-          value: { step: "a" },
-          qualified_name: "workflow.step.start",
-        }));
-        es.emit("message", mk({
-          __is_pydantic: true,
-          value: { step: "a", done: true },
-          qualified_name: "workflow.step.complete",
-        }));
-        es.emit("message", mk({
-          __is_pydantic: true,
-          value: {},
-          qualified_name: "workflow.events.StopEvent",
-        }));
+        es.emit(
+          "message",
+          mk({
+            __is_pydantic: true,
+            value: { step: "a" },
+            qualified_name: "workflow.step.start",
+          })
+        );
+        es.emit(
+          "message",
+          mk({
+            __is_pydantic: true,
+            value: { step: "a", done: true },
+            qualified_name: "workflow.step.complete",
+          })
+        );
+        es.emit(
+          "message",
+          mk({
+            __is_pydantic: true,
+            value: {},
+            qualified_name: "workflow.events.StopEvent",
+          })
+        );
 
         const result = await promise;
 
