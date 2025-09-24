@@ -221,7 +221,7 @@ describe("Helper Functions Tests", () => {
 
         expect(mockCallback.onData).toHaveBeenCalledTimes(3);
         expect(mockCallback.onStopEvent).toHaveBeenCalledTimes(1);
-        // Do not assert onFinish here; current streaming manager may not call it
+        expect(mockCallback.onFinish).toHaveBeenCalledTimes(1);
         expect(result).toHaveLength(3);
       });
 

@@ -93,6 +93,7 @@ export async function fetchHandlerEvents<E extends WorkflowEvent>(
     subscriber: StreamSubscriber<E>,
     signal: AbortSignal
   ): Promise<E[]> => {
+    subscriber.onStart?.();
     const accumulatedEvents: E[] = [];
     const onMessage = (event: RawEvent): boolean => {
       const workflowEvent = {
@@ -127,11 +128,7 @@ export async function fetchHandlerEvents<E extends WorkflowEvent>(
         `${baseUrl}/events/${encodeURIComponent(params.handlerId)}?sse=true`
       );
 
-      const accumulatedEvents: E[] = [];
-
-      return processUntilClosed(eventSource, onMessage, signal).then(
-        () => accumulatedEvents
-      );
+      await processUntilClosed(eventSource, onMessage, signal);
     } else {
       const response = await getEventsByHandlerId({
         client: params.client,
@@ -144,9 +141,9 @@ export async function fetchHandlerEvents<E extends WorkflowEvent>(
         const rawEvent = event as RawEvent;
         onMessage(rawEvent);
       }
-
-      return accumulatedEvents;
     }
+    subscriber.onFinish?.(accumulatedEvents);
+    return accumulatedEvents;
   };
 
   // Convert callback to SharedStreamingManager subscriber
