@@ -1,5 +1,4 @@
 ---
-"@llamaindex/workflows-client": minor
 "@llamaindex/ui": patch
 ---
 
