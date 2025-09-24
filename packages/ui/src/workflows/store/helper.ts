@@ -1,5 +1,5 @@
 import {
-  Client,
+  type Client,
   postWorkflowsByNameRunNowait,
   getHandlers,
   postEventsByHandlerId,

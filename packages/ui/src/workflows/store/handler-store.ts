@@ -5,7 +5,7 @@
  */
 
 import { create } from "zustand";
-import { Client } from "@llamaindex/workflows-client";
+import type { Client } from "@llamaindex/workflows-client";
 import { workflowStreamingManager } from "../../lib/shared-streaming";
 import {
   createHandler as createHandlerAPI,
