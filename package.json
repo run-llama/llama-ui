@@ -10,7 +10,7 @@
     "coverage": "pnpm --filter @llamaindex/ui coverage",
     "storybook": "pnpm --filter @llamaindex/ui storybook",
     "typecheck": "pnpm -r --if-present run typecheck",
-    "build:all": "pnpm --filter @llamaindex/ui build",
+    "build:all": "pnpm --if-present run build",
     "lint": "pnpm -r --if-present run lint",
     "format": "pnpm -r --if-present run format",
     "format-check": "pnpm -r --if-present run format-check",
