@@ -11,10 +11,12 @@ if (typeof window !== "undefined") {
   pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 }
 
-// Side-effect CSS imports – ignore TypeScript complaints
-// @ts-expect-error react-pdf CSS import has no types
+// Side-effect CSS imports – ignore TypeScript complaints. Also inconsistent checking between projects. Whatever
+// eslint-disable-next-line
+// @ts-ignore react-pdf CSS import has no types
 import("react-pdf/dist/Page/AnnotationLayer.css");
-// @ts-expect-error react-pdf CSS import has no types
+// eslint-disable-next-line
+// @ts-ignore react-pdf CSS import has no types
 import("react-pdf/dist/Page/TextLayer.css");
 
 interface PdfPreviewImplProps {
