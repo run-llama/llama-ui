@@ -85,4 +85,5 @@ export const WithVariants: Story = {
     const numbers = canvas.getAllByText(/123/);
     expect(numbers.length).toBeGreaterThanOrEqual(1);
   },
+  args: {} as any,
 };

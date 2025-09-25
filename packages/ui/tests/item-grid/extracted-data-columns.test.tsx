@@ -8,7 +8,7 @@ import type {
   ExtractedData,
   TypedAgentData,
 } from "llama-cloud-services/beta/agent";
-import { JSONObject } from "@/src";
+import { type JsonObject } from "@/src";
 
 // Mock the components
 vi.mock("../../src/item-grid/components/status-components", () => ({
@@ -189,7 +189,7 @@ describe("extracted-data-columns", () => {
     });
 
     it("counts only leaf confidence values below threshold", () => {
-      const item: TypedAgentData<ExtractedData<JSONObject>> = {
+      const item: TypedAgentData<ExtractedData<JsonObject>> = {
         id: "test-id",
         deploymentName: "test-agent",
         createdAt: new Date("2024-01-01T00:00:00Z"),

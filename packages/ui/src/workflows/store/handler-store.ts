@@ -67,8 +67,8 @@ export const createHandlerStore = (client: Client) =>
 
       const handler: WorkflowHandlerSummary = {
         handler_id: workflowHandler.handler_id ?? "",
-        status: "running",
-        workflowName,
+        status: workflowHandler.status,
+        workflowName: workflowHandler.workflowName,
       };
 
       // Internal method to set handler
