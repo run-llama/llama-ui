@@ -18,6 +18,7 @@
 
     "baseUrl": ".",
     "paths": {
+      "@/*": ["../ui/*"],
       "@llamaindex/ui": ["../ui/src"],
       "@llamaindex/workflows-client": ["../workflows-client/src"]
     }

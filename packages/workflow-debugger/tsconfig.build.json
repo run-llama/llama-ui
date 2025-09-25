@@ -1,11 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "paths": {
-      "@/*": ["../ui/*"],
-      "@llamaindex/ui": ["../ui/src"],
-      "@llamaindex/workflows-client": ["../workflows-client/src"]
-    }
+    "paths": {}
   },
   "include": ["src"]
 }
