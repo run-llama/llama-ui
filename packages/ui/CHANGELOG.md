@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 2.1.3
+
+### Patch Changes
+
+- 2e17c68: Add workflow debugger, and fix minor bugs in workflow hooks
+
 ## 2.1.2
 
 ### Patch Changes
