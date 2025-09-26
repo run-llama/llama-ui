@@ -1,5 +1,6 @@
 import type { StorybookConfig } from "@storybook/react-vite";
 import { resolve } from "path";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 const config: StorybookConfig = {
   stories: ["../stories/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
@@ -16,6 +17,8 @@ const config: StorybookConfig = {
   },
   staticDirs: ["./static"],
   viteFinal: async (config) => {
+    // Enable TS path mapping
+    config.plugins = [...(config.plugins || []), tsconfigPaths()];
     config.resolve = config.resolve || {};
     config.resolve.alias = {
       ...config.resolve.alias,
