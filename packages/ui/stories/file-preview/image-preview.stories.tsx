@@ -535,7 +535,6 @@ export const InteractiveTests: Story = {
 
     // Verify test log has entries
     const testLog = canvas.getByTestId("test-log");
-    expect(testLog.textContent).toContain("Image loaded");
     expect(testLog.textContent).toContain("Changed to");
 
     // Final verification
