@@ -14,11 +14,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@llamaindex/ui";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import {
-  oneDark,
-  oneLight,
-} from "react-syntax-highlighter/dist/esm/styles/prism";
+import { CodeBlock } from "./code-block";
 import { WorkflowVisualization } from "./workflow-visualization";
 
 interface RunDetailsPanelProps {
@@ -35,7 +31,7 @@ export function RunDetailsPanel({
   onTabChange,
 }: RunDetailsPanelProps) {
   const { handler, events } = useWorkflowHandler(handlerId ?? "", !!handlerId);
-  const [compactJson, setCompactJson] = useState(true);
+  const [compactJson, setCompactJson] = useState(false);
   const [internalTab, setInternalTab] = useState<"visualization" | "events">(
     "visualization",
   );
@@ -190,25 +186,12 @@ export function RunDetailsPanel({
                                   {event.type}
                                 </code>
                               </div>
-                              <div className="rounded border max-h-64 overflow-auto">
-                                <SyntaxHighlighter
-                                  language="json"
-                                  style={isDark ? oneDark : oneLight}
-                                  customStyle={{
-                                    margin: 0,
-                                    fontSize: "12px",
-                                    padding: "12px",
-                                    borderRadius: "6px",
-                                    background: "transparent",
-                                    maxHeight: "none",
-                                    overflow: "visible",
-                                  }}
-                                  wrapLongLines={compactJson}
-                                  showLineNumbers={false}
-                                >
-                                  {formatJsonData(event.data)}
-                                </SyntaxHighlighter>
-                              </div>
+                              <CodeBlock
+                                language="json"
+                                value={formatJsonData(event.data)}
+                                wrapLongLines={compactJson}
+                                className="rounded border max-h-64 overflow-auto"
+                              />
                             </div>
                           </TableCell>
                         </TableRow>
