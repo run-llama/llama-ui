@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 2.1.4
+
+### Patch Changes
+
+- 5f61fdf: feat: update toolbar UI for PDF Preview
+
 ## 2.1.3
 
 ### Patch Changes
