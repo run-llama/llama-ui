@@ -2,4 +2,4 @@
 "@llamaindex/ui": patch
 ---
 
-feat: enhance file preview with toolbar
+feat: update toolbar UI for PDF Preview
