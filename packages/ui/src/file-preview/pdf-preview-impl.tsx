@@ -20,6 +20,7 @@ import("react-pdf/dist/Page/AnnotationLayer.css");
 import("react-pdf/dist/Page/TextLayer.css");
 
 interface PdfPreviewImplProps {
+  fileName?: string;
   url: string;
   onDownload?: () => void;
   highlight?: Highlight;
@@ -37,8 +38,10 @@ const pdfOptions = {
 
 // show rendering progress bar for files larger than this
 const FILE_SIZE_THRESHOLD = 10 * 1024 * 1024; // 10MB
+const DEFAULT_FILE_NAME = "document.pdf";
 
 export const PdfPreviewImpl = ({
+  fileName,
   url,
   onDownload,
   highlight,
@@ -174,7 +177,7 @@ export const PdfPreviewImpl = ({
       setIsLoading(true);
       const response = await fetch(url);
       const blob = await response.blob();
-      setFile(new File([blob], "document.pdf", { type: "application/pdf" }));
+      setFile(new File([blob], DEFAULT_FILE_NAME, { type: "application/pdf" }));
       setIsLoading(false);
     };
     fetchFile();
@@ -286,7 +289,7 @@ export const PdfPreviewImpl = ({
       {numPages && (
         <>
           <PdfNavigator
-            fileName={file?.name}
+            fileName={fileName ?? file?.name ?? DEFAULT_FILE_NAME}
             currentPage={currentPage}
             totalPages={numPages}
             scale={scale}
@@ -299,7 +302,10 @@ export const PdfPreviewImpl = ({
         </>
       )}
 
-      <div ref={containerRef} className="overflow-auto h-full bg-[#F3F3F3] rounded-lg">
+      <div
+        ref={containerRef}
+        className="overflow-auto h-full bg-[#F3F3F3] rounded-lg"
+      >
         <Document
           file={file}
           onLoadSuccess={onDocumentLoadSuccess}

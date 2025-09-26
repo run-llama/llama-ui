@@ -12,7 +12,7 @@ import { Button } from "@/base/button";
 import { Input } from "@/base/input";
 
 interface PdfNavigatorProps {
-  fileName?: string;
+  fileName: string;
   currentPage: number;
   totalPages: number;
   scale: number;
@@ -97,9 +97,7 @@ export const PdfNavigator = ({
       <div className="bg-white border px-4 flex items-center justify-between gap-3 h-8">
         <div className="flex items-center gap-2">
           <File className="size-3" />
-          <span className="text-xs text-muted-foreground">
-            {fileName ?? "document.pdf"}
-          </span>
+          <span className="text-xs text-muted-foreground">{fileName}</span>
         </div>
         <div className="flex items-center gap-3">
           {/* Page Navigation */}
@@ -114,7 +112,7 @@ export const PdfNavigator = ({
               <ChevronLeft className="size-3" />
             </Button>
 
-            <div className="flex items-center justify-center gap-1">
+            <div className="flex items-center justify-center gap-0.5">
               <Input
                 type="number"
                 value={pageInput}
@@ -122,12 +120,12 @@ export const PdfNavigator = ({
                 onFocus={handlePageInputFocus}
                 onBlur={handlePageInputSubmit}
                 onKeyDown={handlePageInputKeyDown}
-                className="size-6 px-1 text-center text-sm rounded-sm [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:m-0 [&::-webkit-outer-spin-button]:m-0 [-moz-appearance:textfield]"
+                className="size-6 px-1 text-center text-xs! rounded-sm [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:m-0 [&::-webkit-outer-spin-button]:m-0 [-moz-appearance:textfield] shadow-none border border-transparent hover:border-gray-300 focus:border-gray-500 focus:outline-none"
                 min={1}
                 max={totalPages}
               />
               <span className="text-xs text-muted-foreground">/</span>
-              <span className="flex items-center text-xs text-muted-foreground h-7">
+              <span className="flex items-center text-xs text-muted-foreground h-7 ml-1">
                 {totalPages}
               </span>
             </div>
