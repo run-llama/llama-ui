@@ -57,11 +57,10 @@ export const WithFileName: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    // Wait for PDF to load
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-
-    // Check that custom filename is displayed in toolbar
-    expect(canvas.getByText("TraceMonkey Research Paper")).toBeInTheDocument();
+    await waitFor(() => {
+      const filename = canvas.getByText("TraceMonkey Research Paper");
+      expect(filename).toBeInTheDocument();
+    });
   },
 };
 
@@ -79,17 +78,13 @@ export const CustomToolbar: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    // Wait for PDF to load
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-
-    // Check that custom filename is displayed
-    expect(canvas.getByText("Styled Toolbar PDF")).toBeInTheDocument();
-
-    // Check that toolbar has custom styling applied
-    const toolbar = canvas
-      .getByText("Styled Toolbar PDF")
-      .closest("div.sticky");
-    expect(toolbar).toHaveClass("text-gray-500");
+    await waitFor(() => {
+      // Check that toolbar has custom styling applied
+      const toolbar = canvas
+        .getByText("Styled Toolbar PDF")
+        .closest("div.sticky");
+      expect(toolbar).toHaveClass("text-gray-500");
+    });
   },
 };
 
