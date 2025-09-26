@@ -10,12 +10,10 @@ import {
 } from "react";
 import {
   Artifact,
-  CodeArtifact,
   extractArtifactsFromMessage,
-  CodeArtifactError,
   extractArtifactsFromAllMessages,
   isEqualArtifact,
-  DocumentArtifact,
+  ArtifactType,
 } from "./artifacts";
 import { Message } from "../chat.interface";
 import { useChatUI } from "../chat.context";
@@ -28,16 +26,15 @@ interface ChatCanvasContextType {
   isCanvasOpen: boolean;
   openArtifactInCanvas: (artifact: Artifact) => void;
   closeCanvas: () => void;
-  appendErrors: (artifact: CodeArtifact, errors: string[]) => void;
-  clearCodeErrors: (artifact: CodeArtifact) => void;
-  getCodeErrors: (artifact: CodeArtifact) => string[];
-  fixCodeErrors: (artifact: CodeArtifact) => void;
   getArtifactVersion: (artifact: Artifact) => {
     versionNumber: number;
     isLatest: boolean;
   };
   restoreArtifact: (artifact: Artifact) => void;
-  updateArtifact: (artifact: Artifact, content: string) => void;
+  updateArtifact<T extends ArtifactType, D>(
+    artifact: Artifact<D, T>,
+    data: D
+  ): void;
 }
 
 const ChatCanvasContext = createContext<ChatCanvasContextType | undefined>(
@@ -51,12 +48,10 @@ export function ChatCanvasProvider({
   children: ReactNode;
   autoOpenCanvas?: boolean;
 }) {
-  const { messages, isLoading, sendMessage, requestData, setMessages } =
-    useChatUI();
+  const { messages, isLoading, setMessages } = useChatUI();
 
   const [isCanvasOpen, setIsCanvasOpen] = useState(false); // whether the canvas is open
   const [displayedArtifact, setDisplayedArtifact] = useState<Artifact>(); // the artifact currently displayed in the canvas
-  const [codeErrors, setCodeErrors] = useState<CodeArtifactError[]>([]); // contain all errors when compiling with Babel and runtime
 
   const allArtifacts = useMemo(
     () => extractArtifactsFromAllMessages(messages),
@@ -142,35 +137,17 @@ export function ChatCanvasProvider({
     openArtifactInCanvas(newArtifact);
   };
 
-  const updateArtifact = (artifact: Artifact, content: string) => {
+  const updateArtifact = <T extends ArtifactType, D>(
+    artifact: Artifact<D, T>,
+    data: D
+  ) => {
     if (!setMessages) return;
 
-    let newArtifact: Artifact | undefined;
-
-    if (artifact.type === "code") {
-      const codeArtifact = artifact as CodeArtifact;
-      newArtifact = {
-        created_at: Date.now(),
-        type: "code",
-        data: {
-          code: content,
-          file_name: codeArtifact.data.file_name,
-          language: codeArtifact.data.language,
-        },
-      };
-    } else if (artifact.type === "document") {
-      const documentArtifact = artifact as DocumentArtifact;
-      newArtifact = {
-        created_at: Date.now(),
-        type: "document",
-        data: {
-          content,
-          title: documentArtifact.data.title,
-          type: documentArtifact.data.type,
-          sources: documentArtifact.data.sources,
-        },
-      };
-    }
+    const newArtifact: Artifact<D, T> = {
+      created_at: Date.now(),
+      type: artifact.type,
+      data,
+    };
 
     if (!newArtifact) return;
 
@@ -211,43 +188,6 @@ export function ChatCanvasProvider({
     setDisplayedArtifact(undefined);
   };
 
-  const appendErrors = (artifact: CodeArtifact, errors: string[]) => {
-    setIsCanvasOpen(true);
-    setCodeErrors((prev) => [...prev, { artifact, errors }]);
-  };
-
-  const clearCodeErrors = (artifact: CodeArtifact) => {
-    setCodeErrors((prev) =>
-      prev.filter((error) => !isEqualArtifact(error.artifact, artifact))
-    );
-  };
-
-  const getCodeErrors = (artifact: CodeArtifact): string[] => {
-    const artifactErrors = codeErrors.find((error) =>
-      isEqualArtifact(error.artifact, artifact)
-    );
-    const uniqueErrors = Array.from(new Set(artifactErrors?.errors ?? []));
-    return uniqueErrors;
-  };
-
-  const fixCodeErrors = (artifact: CodeArtifact) => {
-    const errors = getCodeErrors(artifact);
-    if (errors.length === 0) return;
-    sendMessage(
-      {
-        id: uuid(),
-        role: "user",
-        parts: [
-          {
-            type: "text",
-            text: `Please fix the following errors: ${errors.join("\n")} happened when running the code.`,
-          },
-        ],
-      },
-      { body: requestData }
-    );
-  };
-
   return (
     <ChatCanvasContext.Provider
       value={{
@@ -257,10 +197,6 @@ export function ChatCanvasProvider({
         isCanvasOpen,
         openArtifactInCanvas,
         closeCanvas,
-        appendErrors,
-        clearCodeErrors,
-        getCodeErrors,
-        fixCodeErrors,
         getArtifactVersion,
         restoreArtifact,
         updateArtifact,

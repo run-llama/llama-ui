@@ -19,34 +19,26 @@ export function extractArtifactsFromMessage(message: Message): Artifact[] {
   return getParts(message, ArtifactPartType).map((part) => part.data);
 }
 
-export type CodeArtifactError = {
-  artifact: CodeArtifact;
-  errors: string[];
-};
+export enum ArtifactType {
+  Document = "document",
+}
 
 /**
  * Generic artifact type definition
  * @typeParam T - The type of the data payload (e.g., \{ imageUrl: string, caption: string \})
  * @typeParam K - The artifact type identifier string (e.g., 'image', 'code', 'document')
  */
-export type Artifact<D = unknown, T = string> = {
+export type Artifact<D = unknown, T = ArtifactType> = {
   created_at: number;
   data: D;
   type: T;
 };
-export type CodeArtifact = Artifact<
-  {
-    file_name: string;
-    code: string;
-    language: string;
-  },
-  "code"
->;
 
 export type DocumentArtifact = Artifact<
   {
     url: string;
+    title?: string;
     highlight?: Highlight;
   },
-  "document"
+  ArtifactType.Document
 >;

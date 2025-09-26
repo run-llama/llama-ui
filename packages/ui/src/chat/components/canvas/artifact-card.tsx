@@ -1,17 +1,16 @@
-import { FileCode, FileText, LucideIcon, Paperclip } from "lucide-react";
+import { FileText, LucideIcon, Paperclip } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/base/badge";
 import { Button } from "@/base/button";
 import {
   DocumentArtifact,
-  CodeArtifact,
   isEqualArtifact,
   Artifact,
+  ArtifactType,
 } from "./artifacts";
 import { useChatCanvas } from "./context";
 
 const IconMap: Record<Artifact["type"], LucideIcon> = {
-  code: FileCode,
   document: FileText,
 };
 
@@ -77,13 +76,9 @@ export function ArtifactCard({
 }
 
 const getCardTitle = (artifact: Artifact) => {
-  if (artifact.type === "code") {
-    const { file_name } = artifact.data as CodeArtifact["data"];
-    return file_name;
-  }
-  if (artifact.type === "document") {
+  if (artifact.type === ArtifactType.Document) {
     const { title } = artifact.data as DocumentArtifact["data"];
-    return title;
+    return title || "Document";
   }
   return "Generated Artifact";
 };
