@@ -13,11 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@llamaindex/ui";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import {
-  oneDark,
-  oneLight,
-} from "react-syntax-highlighter/dist/esm/styles/prism";
+import { CodeBlock } from "./code-block";
 import {
   getResultsByHandlerId,
   getWorkflowsByNameSchema,
@@ -60,30 +56,6 @@ export function WorkflowConfigPanel({
   const [finalResultError, setFinalResultError] = useState<string | null>(null);
   const [rawInput, setRawInput] = useState<string>("");
   const [rawInputError, setRawInputError] = useState<string | null>(null);
-  const [isDark, setIsDark] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    try {
-      if (document.documentElement.classList.contains("dark")) return true;
-      return (
-        window.matchMedia &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches
-      );
-    } catch {
-      return false;
-    }
-  });
-
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return;
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = (e: MediaQueryListEvent) => setIsDark(e.matches);
-    if (mq.addEventListener) mq.addEventListener("change", handler);
-    else mq.addListener(handler);
-    return () => {
-      if (mq.removeEventListener) mq.removeEventListener("change", handler);
-      else mq.removeListener(handler);
-    };
-  }, []);
 
   const workflowsClient = useWorkflowsClient();
   const { runWorkflow, isCreating, error: runError } = useWorkflowRun();
@@ -469,22 +441,11 @@ export function WorkflowConfigPanel({
               Failed to load final result: {finalResultError}
             </div>
           ) : (
-            <div className="rounded border overflow-hidden">
-              <SyntaxHighlighter
-                language="json"
-                style={isDark ? oneDark : oneLight}
-                customStyle={{
-                  margin: 0,
-                  fontSize: "12px",
-                  padding: "12px",
-                  borderRadius: "6px",
-                  background: "transparent",
-                }}
-                showLineNumbers={false}
-              >
-                {JSON.stringify(finalResult, null, 2)}
-              </SyntaxHighlighter>
-            </div>
+            <CodeBlock
+              language="json"
+              value={JSON.stringify(finalResult, null, 2)}
+              className="rounded border overflow-hidden"
+            />
           )}
         </div>
       )}

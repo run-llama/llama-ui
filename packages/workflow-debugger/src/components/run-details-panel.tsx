@@ -14,11 +14,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@llamaindex/ui";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import {
-  oneDark,
-  oneLight,
-} from "react-syntax-highlighter/dist/esm/styles/prism";
+import { CodeBlock } from "./code-block";
 import { WorkflowVisualization } from "./workflow-visualization";
 
 interface RunDetailsPanelProps {
@@ -35,34 +31,11 @@ export function RunDetailsPanel({
   onTabChange,
 }: RunDetailsPanelProps) {
   const { handler, events } = useWorkflowHandler(handlerId ?? "", !!handlerId);
-  const [compactJson, setCompactJson] = useState(true);
+  const [compactJson, setCompactJson] = useState(false);
   const [internalTab, setInternalTab] = useState<"visualization" | "events">(
     "visualization",
   );
-  const [isDark, setIsDark] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    try {
-      if (document.documentElement.classList.contains("dark")) return true;
-      return (
-        window.matchMedia &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches
-      );
-    } catch {
-      return false;
-    }
-  });
-
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return;
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = (e: MediaQueryListEvent) => setIsDark(e.matches);
-    if (mq.addEventListener) mq.addEventListener("change", handler);
-    else mq.addListener(handler);
-    return () => {
-      if (mq.removeEventListener) mq.removeEventListener("change", handler);
-      else mq.removeListener(handler);
-    };
-  }, []);
+  const [eventTimestamps, setEventTimestamps] = useState<number[]>([]);
 
   const formatJsonData = (data: unknown) => {
     if (!data || typeof data !== "object") {
@@ -70,6 +43,43 @@ export function RunDetailsPanel({
     }
     return JSON.stringify(data, null, compactJson ? 0 : 2);
   };
+
+  const formatTime = (epochMs?: number): string => {
+    if (!epochMs) return "";
+    const d = new Date(epochMs);
+    const base = d.toLocaleTimeString([], {
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+    const ms = String(d.getMilliseconds()).padStart(3, "0");
+    return `${base}.${ms}`;
+  };
+
+  // Reset timestamps when switching handlers
+  useEffect(() => {
+    setEventTimestamps([]);
+  }, [handlerId]);
+
+  // Append timestamps as new events arrive; trim if events are cleared
+  useEffect(() => {
+    setEventTimestamps((prev) => {
+      if (events.length < prev.length) {
+        return prev.slice(0, events.length);
+      }
+      if (events.length > prev.length) {
+        const additions = Array.from(
+          { length: events.length - prev.length },
+          () => Date.now(),
+        );
+        return [...prev, ...additions];
+      }
+      return prev;
+    });
+    // Only depend on length to avoid re-stamping on identity changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [events.length]);
 
   const currentTab: "visualization" | "events" = tab ?? internalTab;
   const handleTabChange = (value: string) => {
@@ -185,30 +195,22 @@ export function RunDetailsPanel({
                           </TableCell>
                           <TableCell className="py-3">
                             <div className="space-y-2">
-                              <div>
+                              <div className="flex items-baseline justify-between">
                                 <code className="text-sm font-mono">
                                   {event.type}
                                 </code>
+                                {eventTimestamps[index] !== undefined ? (
+                                  <span className="text-[10px] text-muted-foreground font-mono ml-2 whitespace-nowrap">
+                                    {formatTime(eventTimestamps[index])}
+                                  </span>
+                                ) : null}
                               </div>
-                              <div className="rounded border max-h-64 overflow-auto">
-                                <SyntaxHighlighter
-                                  language="json"
-                                  style={isDark ? oneDark : oneLight}
-                                  customStyle={{
-                                    margin: 0,
-                                    fontSize: "12px",
-                                    padding: "12px",
-                                    borderRadius: "6px",
-                                    background: "transparent",
-                                    maxHeight: "none",
-                                    overflow: "visible",
-                                  }}
-                                  wrapLongLines={compactJson}
-                                  showLineNumbers={false}
-                                >
-                                  {formatJsonData(event.data)}
-                                </SyntaxHighlighter>
-                              </div>
+                              <CodeBlock
+                                language="json"
+                                value={formatJsonData(event.data)}
+                                wrapLongLines={compactJson}
+                                className="rounded border max-h-64 overflow-auto"
+                              />
                             </div>
                           </TableCell>
                         </TableRow>

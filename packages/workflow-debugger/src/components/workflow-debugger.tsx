@@ -13,7 +13,7 @@ import {
   Skeleton,
 } from "@llamaindex/ui";
 import { useState, useEffect, useCallback, useRef } from "react";
-import { getWorkflows } from "@llamaindex/workflows-client";
+import { getWorkflows, getHealth } from "@llamaindex/workflows-client";
 import { WorkflowConfigPanel } from "./workflow-config-panel";
 import { RunListPanel, RunListPanelHandle } from "./run-list-panel";
 import { RunDetailsPanel } from "./run-details-panel";
@@ -41,18 +41,41 @@ export function WorkflowDebugger() {
   >("visualization");
   const [workflows, setWorkflows] = useState<string[]>([]);
   const [workflowsLoading, setWorkflowsLoading] = useState(true);
-  const [leftPanelWidth, setLeftPanelWidth] = useState(50); // percentage
+  // Default to a 3/5 ratio (left/right) => 37.5% / 62.5%
+  const [leftPanelWidth, setLeftPanelWidth] = useState(37.5); // percentage
   const [isDragging, setIsDragging] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isServerHealthy, setIsServerHealthy] = useState<boolean | null>(null);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
 
   const workflowsClient = useWorkflowsClient();
   const runListRef = useRef<RunListPanelHandle | null>(null);
 
+  const checkHealth = useCallback(async (): Promise<void> => {
+    try {
+      setConnectionError(null);
+      const { data, error } = await getHealth({ client: workflowsClient });
+      if (error) {
+        throw new Error(String(error));
+      }
+      if (data && (data as { status?: string }).status) {
+        setIsServerHealthy(true);
+      } else {
+        setIsServerHealthy(false);
+        setConnectionError("Workflow server is unreachable");
+      }
+    } catch {
+      setIsServerHealthy(false);
+      setConnectionError("Workflow server is unreachable");
+    }
+  }, [workflowsClient]);
+
   // Update client config when baseUrl changes
   useEffect(() => {
     workflowsClient.setConfig({ baseUrl });
+    void checkHealth();
     fetchWorkflows();
-  }, [baseUrl, workflowsClient]);
+  }, [baseUrl, workflowsClient, checkHealth]);
 
   const fetchWorkflows = async () => {
     try {
@@ -191,51 +214,67 @@ export function WorkflowDebugger() {
           </Select>
         </div>
 
-        <div></div>
-
-        {/* Settings Gear */}
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="ghost" size="sm">
-              <Settings className="h-4 w-4" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-80">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <h4 className="font-medium text-sm">API Configuration</h4>
-                <Input
-                  value={editingUrl}
-                  onChange={(e) => setEditingUrl(e.target.value)}
-                  placeholder="http://localhost:8000"
-                />
-                <div className="flex gap-2">
-                  <Button
-                    onClick={handleUrlSave}
-                    variant="outline"
-                    size="sm"
-                    disabled={editingUrl === baseUrl}
-                  >
-                    Save
-                  </Button>
-                  <Button onClick={handleUrlReset} variant="outline" size="sm">
-                    Reset
-                  </Button>
+        {/* Connection + Settings */}
+        <div className="flex items-center gap-2">
+          {isServerHealthy !== null && (
+            <span
+              className={`${
+                isServerHealthy ? "bg-green-500" : "bg-red-500"
+              } h-2 w-2 rounded-full`}
+            />
+          )}
+          {isServerHealthy === false && (
+            <span className="text-destructive text-xs">
+              {connectionError || "Workflow server is unreachable"}
+            </span>
+          )}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="sm">
+                <Settings className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <h4 className="font-medium text-sm">API Configuration</h4>
+                  <Input
+                    value={editingUrl}
+                    onChange={(e) => setEditingUrl(e.target.value)}
+                    placeholder="http://localhost:8000"
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleUrlSave}
+                      variant="outline"
+                      size="sm"
+                      disabled={editingUrl === baseUrl}
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      onClick={handleUrlReset}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Reset
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Current: {baseUrl}
+                  </p>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Current: {baseUrl}
-                </p>
               </div>
-            </div>
-          </PopoverContent>
-        </Popover>
+            </PopoverContent>
+          </Popover>
+        </div>
       </div>
 
       {/* Main Layout */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar - Recent Runs */}
         {!sidebarCollapsed && (
-          <div className="w-80 border-r border-border bg-card overflow-hidden transition-all duration-200">
+          <div className="w-48 border-r border-border bg-card overflow-hidden transition-all duration-200">
             <RunListPanel
               ref={runListRef}
               activeHandlerId={activeHandlerId}
