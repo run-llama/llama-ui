@@ -20,9 +20,11 @@ import("react-pdf/dist/Page/AnnotationLayer.css");
 import("react-pdf/dist/Page/TextLayer.css");
 
 interface PdfPreviewImplProps {
+  fileName?: string;
   url: string;
   onDownload?: () => void;
   highlight?: Highlight;
+  toolbarClassName?: string;
 }
 
 // map of page number to page viewport dimensions
@@ -37,11 +39,14 @@ const pdfOptions = {
 
 // show rendering progress bar for files larger than this
 const FILE_SIZE_THRESHOLD = 10 * 1024 * 1024; // 10MB
+const DEFAULT_FILE_NAME = "document.pdf";
 
 export const PdfPreviewImpl = ({
+  fileName,
   url,
   onDownload,
   highlight,
+  toolbarClassName,
 }: PdfPreviewImplProps) => {
   const [numPages, setNumPages] = useState<number>();
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -113,8 +118,9 @@ export const PdfPreviewImpl = ({
       page.pageNumber === 1 &&
       containerRef.current
     ) {
-      const containerWidth = containerRef.current.clientWidth;
-      const newScale = containerWidth / viewport.width;
+      // scale to fit the container height
+      const containerHeight = containerRef.current.clientHeight;
+      const newScale = containerHeight / viewport.height;
       setScale(newScale);
       isInitialScaleSet.current = true; // prevent further auto-scaling
     }
@@ -173,7 +179,7 @@ export const PdfPreviewImpl = ({
       setIsLoading(true);
       const response = await fetch(url);
       const blob = await response.blob();
-      setFile(new File([blob], "document.pdf", { type: "application/pdf" }));
+      setFile(new File([blob], DEFAULT_FILE_NAME, { type: "application/pdf" }));
       setIsLoading(false);
     };
     fetchFile();
@@ -260,6 +266,14 @@ export const PdfPreviewImpl = ({
     goToPage(1);
   };
 
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      containerRef.current?.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="relative h-full flex items-center justify-center bg-gray-50">
@@ -272,7 +286,7 @@ export const PdfPreviewImpl = ({
   }
 
   return (
-    <div className="relative h-full">
+    <div className="relative h-full flex flex-col">
       {/* Only show rendering progress bar for large files */}
       {isRendering && file && file.size > FILE_SIZE_THRESHOLD && (
         <PdfRenderingProgress
@@ -281,7 +295,29 @@ export const PdfPreviewImpl = ({
         />
       )}
 
-      <div ref={containerRef} className="overflow-auto h-full">
+      {/* Navigation Component */}
+      {numPages && (
+        <>
+          <PdfNavigator
+            fileName={fileName ?? file?.name ?? DEFAULT_FILE_NAME}
+            currentPage={currentPage}
+            totalPages={numPages}
+            scale={scale}
+            onPageChange={goToPage}
+            onScaleChange={setScale}
+            onDownload={handleDownload}
+            onReset={handleReset}
+            onFullscreen={toggleFullscreen}
+            className={toolbarClassName}
+          />
+          <div className="h-3 bg-[#F3F3F3]"></div>
+        </>
+      )}
+
+      <div
+        ref={containerRef}
+        className="overflow-auto h-full bg-[#F3F3F3] rounded-lg flex-1 min-h-0"
+      >
         <Document
           file={file}
           onLoadSuccess={onDocumentLoadSuccess}
@@ -322,19 +358,6 @@ export const PdfPreviewImpl = ({
           ))}
         </Document>
       </div>
-
-      {/* Navigation Component */}
-      {numPages && (
-        <PdfNavigator
-          currentPage={currentPage}
-          totalPages={numPages}
-          scale={scale}
-          onPageChange={goToPage}
-          onScaleChange={setScale}
-          onDownload={handleDownload}
-          onReset={handleReset}
-        />
-      )}
     </div>
   );
 };

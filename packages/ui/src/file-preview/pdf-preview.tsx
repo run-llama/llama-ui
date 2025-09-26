@@ -5,7 +5,17 @@ import { lazy, memo, Suspense } from "react";
 import { Highlight } from "./types";
 
 const PdfPreview = memo(
-  ({ url, highlight }: { url: string; highlight?: Highlight }) => {
+  ({
+    url,
+    highlight,
+    fileName,
+    toolbarClassName,
+  }: {
+    url: string;
+    highlight?: Highlight;
+    fileName?: string;
+    toolbarClassName?: string;
+  }) => {
     if (typeof window === "undefined") {
       return null;
     }
@@ -23,7 +33,12 @@ const PdfPreview = memo(
           </div>
         }
       >
-        <PdfPreviewLazy url={url} highlight={highlight} />
+        <PdfPreviewLazy
+          url={url}
+          highlight={highlight}
+          fileName={fileName}
+          toolbarClassName={toolbarClassName}
+        />
       </Suspense>
     );
   }
