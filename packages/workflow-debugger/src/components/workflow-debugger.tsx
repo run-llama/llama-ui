@@ -64,7 +64,7 @@ export function WorkflowDebugger() {
         setIsServerHealthy(false);
         setConnectionError("Workflow server is unreachable");
       }
-    } catch (err) {
+    } catch {
       setIsServerHealthy(false);
       setConnectionError("Workflow server is unreachable");
     }
@@ -252,7 +252,11 @@ export function WorkflowDebugger() {
                     >
                       Save
                     </Button>
-                    <Button onClick={handleUrlReset} variant="outline" size="sm">
+                    <Button
+                      onClick={handleUrlReset}
+                      variant="outline"
+                      size="sm"
+                    >
                       Reset
                     </Button>
                   </div>
@@ -265,8 +269,6 @@ export function WorkflowDebugger() {
           </Popover>
         </div>
       </div>
-
-      
 
       {/* Main Layout */}
       <div className="flex flex-1 overflow-hidden">

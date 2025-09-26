@@ -18,7 +18,8 @@ export function CodeBlock({
   wrapLongLines = false,
   className,
 }: CodeBlockProps) {
-  const isDark = typeof document !== "undefined" &&
+  const isDark =
+    typeof document !== "undefined" &&
     document.documentElement.classList.contains("dark");
 
   const customStyle: CSSProperties = {
@@ -46,5 +47,3 @@ export function CodeBlock({
     </div>
   );
 }
-
-

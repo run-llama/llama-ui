@@ -36,30 +36,6 @@ export function RunDetailsPanel({
     "visualization",
   );
   const [eventTimestamps, setEventTimestamps] = useState<number[]>([]);
-  const [isDark, setIsDark] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    try {
-      if (document.documentElement.classList.contains("dark")) return true;
-      return (
-        window.matchMedia &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches
-      );
-    } catch {
-      return false;
-    }
-  });
-
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return;
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = (e: MediaQueryListEvent) => setIsDark(e.matches);
-    if (mq.addEventListener) mq.addEventListener("change", handler);
-    else mq.addListener(handler);
-    return () => {
-      if (mq.removeEventListener) mq.removeEventListener("change", handler);
-      else mq.removeListener(handler);
-    };
-  }, []);
 
   const formatJsonData = (data: unknown) => {
     if (!data || typeof data !== "object") {
@@ -220,7 +196,9 @@ export function RunDetailsPanel({
                           <TableCell className="py-3">
                             <div className="space-y-2">
                               <div className="flex items-baseline justify-between">
-                                <code className="text-sm font-mono">{event.type}</code>
+                                <code className="text-sm font-mono">
+                                  {event.type}
+                                </code>
                                 {eventTimestamps[index] !== undefined ? (
                                   <span className="text-[10px] text-muted-foreground font-mono ml-2 whitespace-nowrap">
                                     {formatTime(eventTimestamps[index])}
