@@ -41,7 +41,8 @@ export function WorkflowDebugger() {
   >("visualization");
   const [workflows, setWorkflows] = useState<string[]>([]);
   const [workflowsLoading, setWorkflowsLoading] = useState(true);
-  const [leftPanelWidth, setLeftPanelWidth] = useState(50); // percentage
+  // Default to a 3/5 ratio (left/right) => 37.5% / 62.5%
+  const [leftPanelWidth, setLeftPanelWidth] = useState(37.5); // percentage
   const [isDragging, setIsDragging] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -235,7 +236,7 @@ export function WorkflowDebugger() {
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar - Recent Runs */}
         {!sidebarCollapsed && (
-          <div className="w-80 border-r border-border bg-card overflow-hidden transition-all duration-200">
+          <div className="w-48 border-r border-border bg-card overflow-hidden transition-all duration-200">
             <RunListPanel
               ref={runListRef}
               activeHandlerId={activeHandlerId}

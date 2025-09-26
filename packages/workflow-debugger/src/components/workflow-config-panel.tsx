@@ -13,11 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@llamaindex/ui";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import {
-  oneDark,
-  oneLight,
-} from "react-syntax-highlighter/dist/esm/styles/prism";
+import { CodeBlock } from "./code-block";
 import {
   getResultsByHandlerId,
   getWorkflowsByNameSchema,
@@ -469,22 +465,11 @@ export function WorkflowConfigPanel({
               Failed to load final result: {finalResultError}
             </div>
           ) : (
-            <div className="rounded border overflow-hidden">
-              <SyntaxHighlighter
-                language="json"
-                style={isDark ? oneDark : oneLight}
-                customStyle={{
-                  margin: 0,
-                  fontSize: "12px",
-                  padding: "12px",
-                  borderRadius: "6px",
-                  background: "transparent",
-                }}
-                showLineNumbers={false}
-              >
-                {JSON.stringify(finalResult, null, 2)}
-              </SyntaxHighlighter>
-            </div>
+            <CodeBlock
+              language="json"
+              value={JSON.stringify(finalResult, null, 2)}
+              className="rounded border overflow-hidden"
+            />
           )}
         </div>
       )}
