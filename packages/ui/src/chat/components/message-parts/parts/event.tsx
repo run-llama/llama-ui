@@ -1,10 +1,10 @@
-import { ChatEvent } from '../../../widgets'
-import { usePart } from '../context'
-import { EventPartType } from '../types'
+import { ChatEvent } from "../../../widgets";
+import { usePart } from "../context";
+import { EventPartType } from "../types";
 
 export interface EventPartProps {
-  className?: string
-  renderData?: (data: ChatEvent['data']) => React.ReactNode
+  className?: string;
+  renderData?: (data: ChatEvent["data"]) => React.ReactNode;
 }
 
 /**
@@ -14,13 +14,13 @@ export interface EventPartProps {
  * @param className - custom styles for the event
  */
 export function EventPartUI({ className, renderData }: EventPartProps) {
-  const part = usePart(EventPartType)
-  if (!part) return null
+  const part = usePart(EventPartType);
+  if (!part) return null;
   return (
     <ChatEvent
       event={part.data}
       className={className}
       renderData={renderData}
     />
-  )
+  );
 }

@@ -4,58 +4,58 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
-} from 'lucide-react'
-import { useState } from 'react'
-import { Button } from '@/base/button'
+} from "lucide-react";
+import { useState } from "react";
+import { Button } from "@/base/button";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '@/base/collapsible'
-import { cn } from '@/lib/utils'
+} from "@/base/collapsible";
+import { cn } from "@/lib/utils";
 
 export type ChatEvent = {
-  title: string
-  description?: string
-  status: 'pending' | 'success' | 'error'
-  data?: any
-}
+  title: string;
+  description?: string;
+  status: "pending" | "success" | "error";
+  data?: any;
+};
 
 export function ChatEvent({
   event,
   className,
   renderData,
 }: {
-  event: ChatEvent
-  className?: string
-  renderData?: (data: ChatEvent['data']) => React.ReactNode
+  event: ChatEvent;
+  className?: string;
+  renderData?: (data: ChatEvent["data"]) => React.ReactNode;
 }) {
-  const [isDataOpen, setIsDataOpen] = useState(false)
+  const [isDataOpen, setIsDataOpen] = useState(false);
 
   const getStatusIcon = () => {
     switch (event.status) {
-      case 'pending':
-        return <Loader2 className="h-4 w-4 animate-spin text-yellow-500" />
-      case 'success':
-        return <CheckCircle className="h-4 w-4 text-green-500" />
-      case 'error':
-        return <XCircle className="h-4 w-4 text-red-500" />
+      case "pending":
+        return <Loader2 className="h-4 w-4 animate-spin text-yellow-500" />;
+      case "success":
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case "error":
+        return <XCircle className="h-4 w-4 text-red-500" />;
     }
-  }
+  };
 
   const getStatusColor = () => {
     switch (event.status) {
-      case 'pending':
-        return 'border-yellow-400'
-      case 'success':
-        return 'border-green-400'
-      case 'error':
-        return 'border-red-400'
+      case "pending":
+        return "border-yellow-400";
+      case "success":
+        return "border-green-400";
+      case "error":
+        return "border-red-400";
     }
-  }
+  };
 
   return (
-    <div className={cn('border-l-2 py-2 pl-4', getStatusColor(), className)}>
+    <div className={cn("border-l-2 py-2 pl-4", getStatusColor(), className)}>
       {/* Header with title and status */}
       <div className="chat-event-header flex items-start justify-between">
         <div className="flex-1">
@@ -83,7 +83,7 @@ export function ChatEvent({
                 ) : (
                   <ChevronRight className="mr-1 h-3 w-3" />
                 )}
-                {isDataOpen ? 'Hide data' : 'Show data'}
+                {isDataOpen ? "Hide data" : "Show data"}
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent>
@@ -99,5 +99,5 @@ export function ChatEvent({
         </div>
       )}
     </div>
-  )
+  );
 }

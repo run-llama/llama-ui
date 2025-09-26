@@ -1,19 +1,19 @@
-import { FileCode, FileText, LucideIcon, Paperclip } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { Badge } from '@/base/badge'
-import { Button } from '@/base/button'
+import { FileCode, FileText, LucideIcon, Paperclip } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/base/badge";
+import { Button } from "@/base/button";
 import {
   DocumentArtifact,
   CodeArtifact,
   isEqualArtifact,
   Artifact,
-} from './artifacts'
-import { useChatCanvas } from './context'
+} from "./artifacts";
+import { useChatCanvas } from "./context";
 
-const IconMap: Record<Artifact['type'], LucideIcon> = {
+const IconMap: Record<Artifact["type"], LucideIcon> = {
   code: FileCode,
   document: FileText,
-}
+};
 
 export function ArtifactCard({
   data,
@@ -21,29 +21,29 @@ export function ArtifactCard({
   iconMap = IconMap,
   className,
 }: {
-  data: Artifact
-  getTitle?: (data: Artifact) => string
-  iconMap?: Record<Artifact['type'], LucideIcon>
-  className?: string
+  data: Artifact;
+  getTitle?: (data: Artifact) => string;
+  iconMap?: Record<Artifact["type"], LucideIcon>;
+  className?: string;
 }) {
   const {
     openArtifactInCanvas,
     getArtifactVersion,
     restoreArtifact,
     displayedArtifact,
-  } = useChatCanvas()
-  const { versionNumber, isLatest } = getArtifactVersion(data)
+  } = useChatCanvas();
+  const { versionNumber, isLatest } = getArtifactVersion(data);
 
-  const Icon = iconMap[data.type] || Paperclip
-  const title = getTitle(data)
+  const Icon = iconMap[data.type] || Paperclip;
+  const title = getTitle(data);
   const isDisplayed =
-    displayedArtifact && isEqualArtifact(data, displayedArtifact)
+    displayedArtifact && isEqualArtifact(data, displayedArtifact);
 
   return (
     <div
       className={cn(
-        'border-border hover:border-primary flex w-full max-w-72 cursor-pointer items-center justify-between gap-2 rounded-lg border-2 p-2',
-        isDisplayed && 'border-primary',
+        "border-border hover:border-primary flex w-full max-w-72 cursor-pointer items-center justify-between gap-2 rounded-lg border-2 p-2",
+        isDisplayed && "border-primary",
         className
       )}
       onClick={() => openArtifactInCanvas(data)}
@@ -64,26 +64,26 @@ export function ArtifactCard({
           variant="ghost"
           size="sm"
           className="h-8 shrink-0 cursor-pointer text-xs"
-          onClick={e => {
-            e.stopPropagation()
-            restoreArtifact(data)
+          onClick={(e) => {
+            e.stopPropagation();
+            restoreArtifact(data);
           }}
         >
           Restore
         </Button>
       )}
     </div>
-  )
+  );
 }
 
 const getCardTitle = (artifact: Artifact) => {
-  if (artifact.type === 'code') {
-    const { file_name } = artifact.data as CodeArtifact['data']
-    return file_name
+  if (artifact.type === "code") {
+    const { file_name } = artifact.data as CodeArtifact["data"];
+    return file_name;
   }
-  if (artifact.type === 'document') {
-    const { title } = artifact.data as DocumentArtifact['data']
-    return title
+  if (artifact.type === "document") {
+    const { title } = artifact.data as DocumentArtifact["data"];
+    return title;
   }
-  return 'Generated Artifact'
-}
+  return "Generated Artifact";
+};

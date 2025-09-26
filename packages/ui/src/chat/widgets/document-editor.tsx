@@ -13,7 +13,7 @@ import {
   thematicBreakPlugin,
   quotePlugin,
   imagePlugin,
-} from '@mdxeditor/editor'
+} from "@mdxeditor/editor";
 
 export function DocumentEditor({
   content,
@@ -21,10 +21,10 @@ export function DocumentEditor({
   className,
   showToolbar = true,
 }: {
-  content: string
-  onChange?: (markdown: string) => void
-  className?: string
-  showToolbar?: boolean
+  content: string;
+  onChange?: (markdown: string) => void;
+  className?: string;
+  showToolbar?: boolean;
 }) {
   const plugins = [
     headingsPlugin(),
@@ -36,7 +36,7 @@ export function DocumentEditor({
     thematicBreakPlugin(),
     quotePlugin(),
     imagePlugin(),
-  ]
+  ];
 
   if (showToolbar) {
     plugins.push(
@@ -49,7 +49,7 @@ export function DocumentEditor({
           </>
         ),
       })
-    )
+    );
   }
 
   return (
@@ -60,12 +60,12 @@ export function DocumentEditor({
       plugins={plugins}
       contentEditableClassName="custom-markdown"
       suppressHtmlProcessing
-      onError={error => {
+      onError={(error) => {
         console.warn(
-          '[Chat-UI] Error while parsing markdown in DocumentEditor',
+          "[Chat-UI] Error while parsing markdown in DocumentEditor",
           error
-        )
+        );
       }}
     />
-  )
+  );
 }

@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'react'
+import { createContext, useContext } from "react";
 import {
   ArtifactPart,
   ArtifactPartType,
@@ -13,24 +13,24 @@ import {
   SuggestionPartType,
   TextPart,
   TextPartType,
-} from './types'
+} from "./types";
 
 export interface ChatPartContext {
-  part: MessagePart
+  part: MessagePart;
 }
 
-export const chatPartContext = createContext<ChatPartContext | null>(null)
+export const chatPartContext = createContext<ChatPartContext | null>(null);
 
-export const ChatPartProvider = chatPartContext.Provider
+export const ChatPartProvider = chatPartContext.Provider;
 
 // Function overloads for automatic type inference
-export function usePart(type: typeof TextPartType): TextPart | null
-export function usePart(type: typeof FilePartType): FilePart | null
-export function usePart(type: typeof ArtifactPartType): ArtifactPart | null
-export function usePart(type: typeof EventPartType): EventPart | null
-export function usePart(type: typeof SourcesPartType): SourcesPart | null
-export function usePart(type: typeof SuggestionPartType): SuggestionPart | null
-export function usePart<T = MessagePart>(type: string): T | null
+export function usePart(type: typeof TextPartType): TextPart | null;
+export function usePart(type: typeof FilePartType): FilePart | null;
+export function usePart(type: typeof ArtifactPartType): ArtifactPart | null;
+export function usePart(type: typeof EventPartType): EventPart | null;
+export function usePart(type: typeof SourcesPartType): SourcesPart | null;
+export function usePart(type: typeof SuggestionPartType): SuggestionPart | null;
+export function usePart<T = MessagePart>(type: string): T | null;
 
 /**
  * Get the current part. Return null if the input type is not matched with current part type.
@@ -49,11 +49,11 @@ export function usePart<T = MessagePart>(type: string): T | null
  * const customPart = usePart<CustomPart>('custom-type')
  */
 export function usePart<T = MessagePart>(type: string): T | null {
-  const context = useContext(chatPartContext)
+  const context = useContext(chatPartContext);
   if (!context) {
-    throw new Error('usePart must be used within a ChatPartProvider')
+    throw new Error("usePart must be used within a ChatPartProvider");
   }
 
-  if (context.part.type !== type) return null // part type not matched
-  return context.part as T // return current part
+  if (context.part.type !== type) return null; // part type not matched
+  return context.part as T; // return current part
 }

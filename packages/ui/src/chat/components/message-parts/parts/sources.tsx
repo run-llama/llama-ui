@@ -1,6 +1,6 @@
-import { ChatSources, preprocessSourceNodes } from '../../../widgets/index'
-import { usePart } from '../context'
-import { SourcesPartType } from '../types'
+import { ChatSources, preprocessSourceNodes } from "../../../widgets/index";
+import { usePart } from "../context";
+import { SourcesPartType } from "../types";
 
 /**
  * Render a list of sources inside a ChatMessage, return null if current part is not sources type
@@ -8,9 +8,9 @@ import { SourcesPartType } from '../types'
  * @param className - custom styles for the sources
  */
 export function SourcesPartUI({ className }: { className?: string }) {
-  const sources = usePart(SourcesPartType)?.data
-  const nodes = preprocessSourceNodes(sources?.nodes ?? [])
+  const sources = usePart(SourcesPartType)?.data;
+  const nodes = preprocessSourceNodes(sources?.nodes ?? []);
 
-  if (nodes.length === 0) return null
-  return <ChatSources data={{ nodes }} className={className} />
+  if (nodes.length === 0) return null;
+  return <ChatSources data={{ nodes }} className={className} />;
 }

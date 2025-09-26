@@ -1,19 +1,15 @@
-'use client'
+"use client";
 
-import { Check, Copy, Download, X } from 'lucide-react'
-import { useCopyToClipboard } from '../../hooks/use-copy-to-clipboard'
-import { cn } from '@/lib/utils'
-import { Button } from '@/base/button'
-import { useChatCanvas } from './context'
-import {
-  Artifact,
-  DocumentArtifact,
-  CodeArtifact,
-} from './artifacts'
+import { Check, Copy, Download, X } from "lucide-react";
+import { useCopyToClipboard } from "../../hooks/use-copy-to-clipboard";
+import { cn } from "@/lib/utils";
+import { Button } from "@/base/button";
+import { useChatCanvas } from "./context";
+import { Artifact, DocumentArtifact, CodeArtifact } from "./artifacts";
 
 interface ChatCanvasActionsProps {
-  children?: React.ReactNode
-  className?: string
+  children?: React.ReactNode;
+  className?: string;
 }
 
 function ChatCanvasActions(props: ChatCanvasActionsProps) {
@@ -23,28 +19,28 @@ function ChatCanvasActions(props: ChatCanvasActionsProps) {
       <ArtifactDownloadButton />
       <CanvasCloseButton />
     </>
-  )
+  );
 
   return (
-    <div className={cn('flex items-center gap-1', props.className)}>
+    <div className={cn("flex items-center gap-1", props.className)}>
       {children}
     </div>
-  )
+  );
 }
 
 function ArtifactContentCopy() {
-  const { isCopied, copyToClipboard } = useCopyToClipboard({ timeout: 1000 })
+  const { isCopied, copyToClipboard } = useCopyToClipboard({ timeout: 1000 });
 
-  const { displayedArtifact } = useChatCanvas()
-  if (!displayedArtifact) return null
+  const { displayedArtifact } = useChatCanvas();
+  if (!displayedArtifact) return null;
 
-  const content = getArtifactContent(displayedArtifact)
-  if (!content) return null
+  const content = getArtifactContent(displayedArtifact);
+  if (!content) return null;
 
   const handleCopy = () => {
-    if (isCopied) return
-    copyToClipboard(content)
-  }
+    if (isCopied) return;
+    copyToClipboard(content);
+  };
 
   return (
     <Button
@@ -55,46 +51,46 @@ function ArtifactContentCopy() {
     >
       {isCopied ? <Check className="size-4" /> : <Copy className="size-4" />}
     </Button>
-  )
+  );
 }
 
 function getArtifactContent(artifact: Artifact) {
-  if (artifact.type === 'code') {
-    return (artifact as CodeArtifact).data.code
+  if (artifact.type === "code") {
+    return (artifact as CodeArtifact).data.code;
   }
 
-  if (artifact.type === 'document') {
-    return (artifact as DocumentArtifact).data.content
+  if (artifact.type === "document") {
+    return (artifact as DocumentArtifact).data.content;
   }
 
-  return null
+  return null;
 }
 
 function ArtifactDownloadButton() {
-  const { displayedArtifact } = useChatCanvas()
+  const { displayedArtifact } = useChatCanvas();
 
-  if (!displayedArtifact) return null
+  if (!displayedArtifact) return null;
 
-  const content = getArtifactContent(displayedArtifact)
-  const fileName = getArtifactDownloadFileName(displayedArtifact)
+  const content = getArtifactContent(displayedArtifact);
+  const fileName = getArtifactDownloadFileName(displayedArtifact);
 
-  if (!content || !fileName) return null
+  if (!content || !fileName) return null;
 
   const handleDownload = () => {
-    const blob = new Blob([content], { type: 'text/plain' })
+    const blob = new Blob([content], { type: "text/plain" });
 
-    const url = URL.createObjectURL(blob)
+    const url = URL.createObjectURL(blob);
 
-    const link = document.createElement('a')
-    link.href = url
-    link.download = fileName
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
 
-    document.body.appendChild(link)
-    link.click()
+    document.body.appendChild(link);
+    link.click();
 
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
-  }
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <Button
@@ -105,23 +101,23 @@ function ArtifactDownloadButton() {
     >
       <Download className="size-4" />
     </Button>
-  )
+  );
 }
 
 function getArtifactDownloadFileName(artifact: Artifact) {
-  if (artifact.type === 'code') {
-    return (artifact as CodeArtifact).data.file_name
+  if (artifact.type === "code") {
+    return (artifact as CodeArtifact).data.file_name;
   }
 
-  if (artifact.type === 'document') {
-    return (artifact as DocumentArtifact).data.title
+  if (artifact.type === "document") {
+    return (artifact as DocumentArtifact).data.title;
   }
 
-  return null
+  return null;
 }
 
 function CanvasCloseButton() {
-  const { closeCanvas } = useChatCanvas()
+  const { closeCanvas } = useChatCanvas();
   return (
     <Button
       variant="ghost"
@@ -131,11 +127,11 @@ function CanvasCloseButton() {
     >
       <X className="size-4" />
     </Button>
-  )
+  );
 }
 
-ChatCanvasActions.Copy = ArtifactContentCopy
-ChatCanvasActions.Download = ArtifactDownloadButton
-ChatCanvasActions.Close = CanvasCloseButton
+ChatCanvasActions.Copy = ArtifactContentCopy;
+ChatCanvasActions.Download = ArtifactDownloadButton;
+ChatCanvasActions.Close = CanvasCloseButton;
 
-export { ChatCanvasActions }
+export { ChatCanvasActions };

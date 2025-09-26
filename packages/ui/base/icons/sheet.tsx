@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 
 export const SheetIcon: React.FC = () => (
   <svg
@@ -131,4 +131,4 @@ export const SheetIcon: React.FC = () => (
       </g>
     </g>
   </svg>
-)
+);

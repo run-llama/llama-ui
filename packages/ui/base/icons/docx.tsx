@@ -1,9 +1,9 @@
-import React from 'react'
+import React from "react";
 
 interface DocxIconProps {
-  width?: number | string
-  height?: number | string
-  className?: string
+  width?: number | string;
+  height?: number | string;
+  className?: string;
 }
 
 export const DocxIcon: React.FC<DocxIconProps> = ({
@@ -39,5 +39,5 @@ export const DocxIcon: React.FC<DocxIconProps> = ({
         fill="#ffffff"
       />
     </svg>
-  )
-}
+  );
+};

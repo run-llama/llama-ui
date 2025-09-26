@@ -3,7 +3,10 @@ import { useEffect } from "react";
 import ChatInput from "@/src/chat/components/chat-input";
 import ChatCanvas from "@/src/chat/components/canvas";
 import { useChatUI } from "@/src/chat/components/chat.context";
-import { TextPartType, SuggestionPartType } from "@/src/chat/components/message-parts/types";
+import {
+  TextPartType,
+  SuggestionPartType,
+} from "@/src/chat/components/message-parts/types";
 import ChatMessages from "@/src/chat/components/chat-messages";
 import { WithBasicHandler } from "../decorators/chat-decorators";
 
@@ -36,7 +39,11 @@ function InteractiveThread() {
             { type: TextPartType, text: "Hi! How can I help?" },
             {
               type: SuggestionPartType,
-              data: ["Summarize the document", "Find key risks", "List next steps"],
+              data: [
+                "Summarize the document",
+                "Find key risks",
+                "List next steps",
+              ],
             },
           ],
         },
@@ -52,7 +59,10 @@ function InteractiveThread() {
 
   return (
     <div className="flex">
-      <div style={{ maxWidth: 720 }} className="flex min-h-0 flex-1 h-screen flex-col overflow-hidden">
+      <div
+        style={{ maxWidth: 720 }}
+        className="flex min-h-0 flex-1 h-screen flex-col overflow-hidden"
+      >
         <ChatMessages />
         <div className="shrink-0">
           <ChatInput />
@@ -66,9 +76,5 @@ function InteractiveThread() {
 }
 
 export const Interactive: Story = {
-  render: () => (
-    <InteractiveThread />
-  ),
+  render: () => <InteractiveThread />,
 };
-
-

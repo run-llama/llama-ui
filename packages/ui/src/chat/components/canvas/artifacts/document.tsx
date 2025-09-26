@@ -1,32 +1,32 @@
-'use client'
+"use client";
 
-import { FileText } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { PdfPreview } from '../../../../file-preview/pdf-preview'
-import { DocumentArtifact } from '../artifacts'
-import { ChatCanvasActions } from '../actions'
-import { useChatCanvas } from '../context'
+import { FileText } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { PdfPreview } from "../../../../file-preview/pdf-preview";
+import { DocumentArtifact } from "../artifacts";
+import { ChatCanvasActions } from "../actions";
+import { useChatCanvas } from "../context";
 
 interface DocumentArtifactViewerProps {
-  className?: string
-  children?: React.ReactNode
+  className?: string;
+  children?: React.ReactNode;
 }
 
 export function DocumentArtifactViewer({
   className,
   children,
 }: DocumentArtifactViewerProps) {
-  const { displayedArtifact } = useChatCanvas()
+  const { displayedArtifact } = useChatCanvas();
 
-  if (displayedArtifact?.type !== 'document') return null
+  if (displayedArtifact?.type !== "document") return null;
 
-  const documentArtifact = displayedArtifact as DocumentArtifact
+  const documentArtifact = displayedArtifact as DocumentArtifact;
   const {
     data: { url, highlight },
-  } = documentArtifact
+  } = documentArtifact;
 
   return (
-    <div className={cn('flex min-h-0 flex-1 flex-col', className)}>
+    <div className={cn("flex min-h-0 flex-1 flex-col", className)}>
       <div className="flex items-center justify-between border-b px-4 py-2">
         <h3 className="flex items-center gap-4 text-gray-600">
           <FileText className="text-primary size-5" />
@@ -41,5 +41,5 @@ export function DocumentArtifactViewer({
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -1,8 +1,8 @@
-import { SuggestedQuestions } from '../../../widgets/index'
-import { useChatMessage } from '../../chat-message.context'
-import { useChatUI } from '../../chat.context'
-import { usePart } from '../context'
-import { SuggestionPartType } from '../types'
+import { SuggestedQuestions } from "../../../widgets/index";
+import { useChatMessage } from "../../chat-message.context";
+import { useChatUI } from "../../chat.context";
+import { usePart } from "../context";
+import { SuggestionPartType } from "../types";
 
 /**
  * Render a suggested questions part inside a ChatMessage, return null if current part is not suggested questions type
@@ -10,11 +10,11 @@ import { SuggestionPartType } from '../types'
  * @param className - custom styles for the suggested questions
  */
 export function SuggestionPartUI({ className }: { className?: string }) {
-  const { sendMessage, requestData } = useChatUI()
-  const { isLast } = useChatMessage()
-  const suggestedQuestions = usePart(SuggestionPartType)?.data
+  const { sendMessage, requestData } = useChatUI();
+  const { isLast } = useChatMessage();
+  const suggestedQuestions = usePart(SuggestionPartType)?.data;
 
-  if (!isLast || !sendMessage || !suggestedQuestions) return null
+  if (!isLast || !sendMessage || !suggestedQuestions) return null;
 
   return (
     <SuggestedQuestions
@@ -23,5 +23,5 @@ export function SuggestionPartUI({ className }: { className?: string }) {
       requestData={requestData}
       className={className}
     />
-  )
+  );
 }

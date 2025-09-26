@@ -1,9 +1,9 @@
-import React from 'react'
+import React from "react";
 
 interface PDFIconProps {
-  className?: string
-  width?: number | string
-  height?: number | string
+  className?: string;
+  width?: number | string;
+  height?: number | string;
 }
 
 export const PDFIcon: React.FC<PDFIconProps> = ({
@@ -24,16 +24,16 @@ export const PDFIcon: React.FC<PDFIconProps> = ({
     >
       <g>
         <path
-          style={{ fill: '#E2574C' }}
+          style={{ fill: "#E2574C" }}
           d="M38.658,0h164.23l87.049,86.711v203.227c0,10.679-8.659,19.329-19.329,19.329H38.658
             c-10.67,0-19.329-8.65-19.329-19.329V19.329C19.329,8.65,27.989,0,38.658,0z"
         />
         <path
-          style={{ fill: '#B53629' }}
+          style={{ fill: "#B53629" }}
           d="M289.658,86.981h-67.372c-10.67,0-19.329-8.659-19.329-19.329V0.193L289.658,86.981z"
         />
         <path
-          style={{ fill: '#FFFFFF' }}
+          style={{ fill: "#FFFFFF" }}
           d="M217.434,146.544c3.238,0,4.823-2.822,4.823-5.557c0-2.832-1.653-5.567-4.823-5.567h-18.44
             c-3.605,0-5.615,2.986-5.615,6.282v45.317c0,4.04,2.3,6.282,5.412,6.282c3.093,0,5.403-2.242,5.403-6.282v-12.438h11.153
             c3.46,0,5.19-2.832,5.19-5.644c0-2.754-1.73-5.49-5.19-5.49h-11.153v-16.903C204.194,146.544,217.434,146.544,217.434,146.544z
@@ -46,5 +46,5 @@ export const PDFIcon: React.FC<PDFIconProps> = ({
         />
       </g>
     </svg>
-  )
-}
+  );
+};

@@ -1,17 +1,17 @@
-import { ChatContext } from '../components/chat.interface'
-import { cn } from '@/lib/utils'
-import { Button } from '@/base/button'
-import { v4 as uuidv4 } from 'uuid'
+import { ChatContext } from "../components/chat.interface";
+import { cn } from "@/lib/utils";
+import { Button } from "@/base/button";
+import { v4 as uuidv4 } from "uuid";
 
 interface StarterQuestionsProps {
-  questions: string[]
-  sendMessage: ChatContext['sendMessage']
-  className?: string
+  questions: string[];
+  sendMessage: ChatContext["sendMessage"];
+  className?: string;
 }
 
 export function StarterQuestions(props: StarterQuestionsProps) {
   return (
-    <div className={cn('w-full', props.className)}>
+    <div className={cn("w-full", props.className)}>
       <div className="grid grid-cols-2 gap-3">
         {props.questions.map((question, i) => (
           <Button
@@ -20,8 +20,8 @@ export function StarterQuestions(props: StarterQuestionsProps) {
             onClick={() =>
               props.sendMessage({
                 id: uuidv4(),
-                role: 'user',
-                parts: [{ type: 'text', text: question }],
+                role: "user",
+                parts: [{ type: "text", text: question }],
               })
             }
             className="h-auto whitespace-break-spaces"
@@ -31,5 +31,5 @@ export function StarterQuestions(props: StarterQuestionsProps) {
         ))}
       </div>
     </div>
-  )
+  );
 }

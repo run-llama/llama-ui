@@ -2,7 +2,10 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import ChatMessage from "@/src/chat/components/chat-message";
 import { WithBasicHandler } from "../decorators/chat-decorators";
 import { sampleSources } from "../fixtures";
-import { TextPartType, SourcesPartType } from "@/src/chat/components/message-parts/types";
+import {
+  TextPartType,
+  SourcesPartType,
+} from "@/src/chat/components/message-parts/types";
 import { buildComprehensiveMarkdown } from "../fixtures/markdown-samples";
 import ChatMessages from "@/src/chat/components/chat-messages";
 import ChatCanvas from "@/src/chat/components/canvas";
@@ -19,7 +22,10 @@ const meta: Meta<typeof ChatMessage> = {
     (Story) => (
       <WithBasicHandler>
         <div className="flex">
-          <div style={{ maxWidth: 720 }} className="flex min-h-0 flex-1 h-screen flex-col overflow-hidden">
+          <div
+            style={{ maxWidth: 720 }}
+            className="flex min-h-0 flex-1 h-screen flex-col overflow-hidden"
+          >
             <ChatMessages>
               <div className="flex flex-col gap-4">
                 <Story />
@@ -75,8 +81,7 @@ export const MessageWithCitations: Story = {
       parts: [
         {
           type: TextPartType,
-          text:
-            "This statement references a source [citation:node-1]. Another [citation:node-2].",
+          text: "This statement references a source [citation:node-1]. Another [citation:node-2].",
         },
         { type: SourcesPartType, data: sampleSources },
       ],
@@ -92,7 +97,11 @@ export const MessageWithSuggestions: Story = {
         <div className="flex flex-col gap-4">
           <ChatMessage {...args} isLast={messages.length === 0} />
           {messages.map((m, idx) => (
-            <ChatMessage key={m.id} message={m} isLast={idx === messages.length - 1} />
+            <ChatMessage
+              key={m.id}
+              message={m}
+              isLast={idx === messages.length - 1}
+            />
           ))}
           <ChatInput />
         </div>
@@ -107,11 +116,10 @@ export const MessageWithSuggestions: Story = {
       role: "assistant",
       parts: [
         { type: TextPartType, text: "You can try any of these suggestions:" },
-        { type: "data-suggested_questions", data: [
-          "Summarize the document",
-          "Find key risks",
-          "List next steps"
-        ] },
+        {
+          type: "data-suggested_questions",
+          data: ["Summarize the document", "Find key risks", "List next steps"],
+        },
       ],
     },
   },
@@ -124,12 +132,12 @@ export const MessageWithEvents: Story = {
       id: "m-6",
       role: "assistant",
       parts: [
-        { type: "data-event", data: { title: "Fetching data", status: "pending" } },
+        {
+          type: "data-event",
+          data: { title: "Fetching data", status: "pending" },
+        },
         { type: "data-event", data: { title: "Processed", status: "success" } },
       ],
     },
   },
 };
-
-
-

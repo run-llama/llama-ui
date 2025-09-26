@@ -1,5 +1,8 @@
 import type { Message } from "@/src/chat/components/chat.interface";
-import { TextPartType, SourcesPartType } from "@/src/chat/components/message-parts/types";
+import {
+  TextPartType,
+  SourcesPartType,
+} from "@/src/chat/components/message-parts/types";
 import type { SourceData } from "@/src/chat/widgets/chat-sources";
 
 export const sampleQuestions = [
@@ -42,7 +45,10 @@ export const sampleAssistantMessage: Message = {
   id: "m-assistant-1",
   role: "assistant",
   parts: [
-    { type: TextPartType, text: "Here is a short response with sources: [citation:node-1]." },
+    {
+      type: TextPartType,
+      text: "Here is a short response with sources: [citation:node-1].",
+    },
     { type: SourcesPartType, data: sampleSources },
   ],
 };
@@ -52,5 +58,3 @@ export const sampleUserMessage: Message = {
   role: "user",
   parts: [{ type: TextPartType, text: "Please summarize the document." }],
 };
-
-

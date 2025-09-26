@@ -1,4 +1,4 @@
-import { Message } from '../chat.interface'
+import { Message } from "../chat.interface";
 import {
   ArtifactPart,
   ArtifactPartType,
@@ -13,37 +13,37 @@ import {
   SuggestionPartType,
   TextPart,
   TextPartType,
-} from './types'
+} from "./types";
 
 // Function overloads for automatic type inference
 export function getParts(
   message: Message,
   type: typeof TextPartType
-): TextPart[]
+): TextPart[];
 export function getParts(
   message: Message,
   type: typeof FilePartType
-): FilePart[]
+): FilePart[];
 export function getParts(
   message: Message,
   type: typeof ArtifactPartType
-): ArtifactPart[]
+): ArtifactPart[];
 export function getParts(
   message: Message,
   type: typeof EventPartType
-): EventPart[]
+): EventPart[];
 export function getParts(
   message: Message,
   type: typeof SourcesPartType
-): SourcesPart[]
+): SourcesPart[];
 export function getParts(
   message: Message,
   type: typeof SuggestionPartType
-): SuggestionPart[]
+): SuggestionPart[];
 export function getParts<T extends MessagePart>(
   message: Message,
   type: string
-): T[]
+): T[];
 
 /**
  * Get all parts of a specific type from a message.
@@ -63,5 +63,5 @@ export function getParts<T extends MessagePart>(
  * const customParts = getParts<CustomPart>(message, 'custom-type')
  */
 export function getParts<T = MessagePart>(message: Message, type: string): T[] {
-  return message.parts.filter(part => part.type === type) as T[]
+  return message.parts.filter((part) => part.type === type) as T[];
 }

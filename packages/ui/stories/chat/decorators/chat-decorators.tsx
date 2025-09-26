@@ -1,9 +1,22 @@
 import React, { useMemo, useRef, useState } from "react";
 import { ChatProvider } from "@/src/chat/components/chat.context";
 import ChatSection from "@/src/chat/components/chat-section";
-import type { ChatContext, ChatHandler, ChatRequestOptions, Message } from "@/src/chat/components/chat.interface";
-import { TextPartType, SourcesPartType, SuggestionPartType, EventPartType } from "@/src/chat/components/message-parts/types";
-import type { MessagePart, TextPart } from "@/src/chat/components/message-parts/types";
+import type {
+  ChatContext,
+  ChatHandler,
+  ChatRequestOptions,
+  Message,
+} from "@/src/chat/components/chat.interface";
+import {
+  TextPartType,
+  SourcesPartType,
+  SuggestionPartType,
+  EventPartType,
+} from "@/src/chat/components/message-parts/types";
+import type {
+  MessagePart,
+  TextPart,
+} from "@/src/chat/components/message-parts/types";
 import { sampleSources } from "../fixtures";
 
 export function BasicChatProvider(props: React.PropsWithChildren) {
@@ -15,11 +28,12 @@ export function BasicChatProvider(props: React.PropsWithChildren) {
   const value = useMemo<ChatContext>(() => {
     const sendMessage = async (msg: Message, _opts?: ChatRequestOptions) => {
       setStatus("submitted");
-      setMessages(prev => [...prev, msg]);
+      setMessages((prev) => [...prev, msg]);
       setStatus("ready");
     };
 
-    const setRequestDataAny: ChatContext["setRequestData"] = (data) => setRequestData(data);
+    const setRequestDataAny: ChatContext["setRequestData"] = (data) =>
+      setRequestData(data);
 
     return {
       // chat handler
@@ -53,7 +67,7 @@ export function useBasicHandler(): ChatHandler {
   const stoppedRef = useRef<boolean>(false);
 
   const clearTimers = () => {
-    timeoutsRef.current.forEach(t => clearTimeout(t));
+    timeoutsRef.current.forEach((t) => clearTimeout(t));
     timeoutsRef.current = [];
   };
 
@@ -61,7 +75,7 @@ export function useBasicHandler(): ChatHandler {
     const sendMessage = async (msg: Message, _opts?: ChatRequestOptions) => {
       // append user message
       setStatus("submitted");
-      setMessages(prev => [...prev, msg]);
+      setMessages((prev) => [...prev, msg]);
 
       // start streaming
       setStatus("streaming");
@@ -71,7 +85,7 @@ export function useBasicHandler(): ChatHandler {
       const assistantId = `assistant-${Date.now()}`;
 
       // placeholder assistant message
-      setMessages(prev => [
+      setMessages((prev) => [
         ...prev,
         {
           id: assistantId,
@@ -88,12 +102,13 @@ export function useBasicHandler(): ChatHandler {
 
       // progressively append text
       let delay = 300;
-      textChunks.forEach(chunk => {
+      textChunks.forEach((chunk) => {
         const tid = window.setTimeout(() => {
           if (stoppedRef.current) return;
-          setMessages(prev => {
-            const isTextPart = (p: MessagePart): p is TextPart => p.type === TextPartType;
-            return prev.map(m => {
+          setMessages((prev) => {
+            const isTextPart = (p: MessagePart): p is TextPart =>
+              p.type === TextPartType;
+            return prev.map((m) => {
               if (m.id !== assistantId) return m;
               const first = m.parts[0];
               if (first && isTextPart(first)) {
@@ -120,10 +135,16 @@ export function useBasicHandler(): ChatHandler {
       // add sources after text
       const addSourcesTid = window.setTimeout(() => {
         if (stoppedRef.current) return;
-        setMessages(prev =>
-          prev.map(m =>
+        setMessages((prev) =>
+          prev.map((m) =>
             m.id === assistantId
-              ? { ...m, parts: [...m.parts, { type: SourcesPartType, data: sampleSources }] }
+              ? {
+                  ...m,
+                  parts: [
+                    ...m.parts,
+                    { type: SourcesPartType, data: sampleSources },
+                  ],
+                }
               : m
           )
         );
@@ -134,8 +155,8 @@ export function useBasicHandler(): ChatHandler {
       // add suggestions
       const addSuggestionsTid = window.setTimeout(() => {
         if (stoppedRef.current) return;
-        setMessages(prev =>
-          prev.map(m =>
+        setMessages((prev) =>
+          prev.map((m) =>
             m.id === assistantId
               ? {
                   ...m,
@@ -161,14 +182,17 @@ export function useBasicHandler(): ChatHandler {
       // finish event and mark ready
       const finishTid = window.setTimeout(() => {
         if (stoppedRef.current) return;
-        setMessages(prev =>
-          prev.map(m =>
+        setMessages((prev) =>
+          prev.map((m) =>
             m.id === assistantId
               ? {
                   ...m,
                   parts: [
                     ...m.parts,
-                    { type: EventPartType, data: { title: "Processed", status: "success" } },
+                    {
+                      type: EventPartType,
+                      data: { title: "Processed", status: "success" },
+                    },
                   ],
                 }
               : m
@@ -189,7 +213,7 @@ export function useBasicHandler(): ChatHandler {
         clearTimers();
         setStatus("ready");
         // finalize current assistant placeholder if exists
-        setMessages(prev => prev);
+        setMessages((prev) => prev);
       },
       regenerate: undefined,
       setMessages,
@@ -201,5 +225,3 @@ export function WithBasicHandler(props: React.PropsWithChildren) {
   const handler = useBasicHandler();
   return <ChatSection handler={handler}>{props.children}</ChatSection>;
 }
-
-

@@ -1,4 +1,4 @@
-import { Button } from '@/base/button'
+import { Button } from "@/base/button";
 import {
   Drawer,
   DrawerClose,
@@ -7,13 +7,13 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from '@/base/drawer'
-import { PdfPreview } from '../../file-preview/pdf-preview'
+} from "@/base/drawer";
+import { PdfPreview } from "../../file-preview/pdf-preview";
 
 export interface PdfDialogProps {
-  documentId: string
-  url: string
-  trigger: React.ReactNode
+  documentId: string;
+  url: string;
+  trigger: React.ReactNode;
 }
 
 export function PdfDialog(props: PdfDialogProps) {
@@ -25,7 +25,7 @@ export function PdfDialog(props: PdfDialogProps) {
           <div className="space-y-2">
             <DrawerTitle>PDF Content</DrawerTitle>
             <DrawerDescription className="break-all">
-              File URL:{' '}
+              File URL:{" "}
               <a
                 className="hover:text-primary"
                 href={props.url}
@@ -47,5 +47,5 @@ export function PdfDialog(props: PdfDialogProps) {
         </div>
       </DrawerContent>
     </Drawer>
-  )
+  );
 }
