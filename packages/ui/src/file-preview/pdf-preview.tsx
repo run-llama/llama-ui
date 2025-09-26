@@ -9,10 +9,12 @@ const PdfPreview = memo(
     url,
     highlight,
     fileName,
+    toolbarClassName,
   }: {
     url: string;
     highlight?: Highlight;
     fileName?: string;
+    toolbarClassName?: string;
   }) => {
     if (typeof window === "undefined") {
       return null;
@@ -31,7 +33,12 @@ const PdfPreview = memo(
           </div>
         }
       >
-        <PdfPreviewLazy url={url} highlight={highlight} fileName={fileName} />
+        <PdfPreviewLazy
+          url={url}
+          highlight={highlight}
+          fileName={fileName}
+          toolbarClassName={toolbarClassName}
+        />
       </Suspense>
     );
   }

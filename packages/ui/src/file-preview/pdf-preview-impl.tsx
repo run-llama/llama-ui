@@ -24,6 +24,7 @@ interface PdfPreviewImplProps {
   url: string;
   onDownload?: () => void;
   highlight?: Highlight;
+  toolbarClassName?: string;
 }
 
 // map of page number to page viewport dimensions
@@ -45,6 +46,7 @@ export const PdfPreviewImpl = ({
   url,
   onDownload,
   highlight,
+  toolbarClassName,
 }: PdfPreviewImplProps) => {
   const [numPages, setNumPages] = useState<number>();
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -306,6 +308,7 @@ export const PdfPreviewImpl = ({
             onDownload={handleDownload}
             onReset={handleReset}
             onFullscreen={toggleFullscreen}
+            className={toolbarClassName}
           />
           <div className="h-3 bg-[#F3F3F3]"></div>
         </>
