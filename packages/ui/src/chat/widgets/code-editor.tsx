@@ -4,7 +4,7 @@ import { python } from '@codemirror/lang-python'
 import { html } from '@codemirror/lang-html'
 import { css } from '@codemirror/lang-css'
 import { githubLight } from '@uiw/codemirror-theme-github'
-import { cn } from '../lib/utils'
+import { cn } from '@/lib/utils'
 
 type CodeEditorLanguage = 'javascript' | 'python' | 'html' | 'css'
 

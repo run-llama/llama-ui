@@ -1,9 +1,10 @@
 import { Send, Square } from 'lucide-react'
 import { createContext, useContext, useRef, useState } from 'react'
-import { cn } from '../lib/utils'
-import { Button } from '../ui/button'
-import { Textarea } from '../ui/textarea'
-import { FileUploader } from '../widgets/index.js' // this import needs the file extension as it's importing the widget bundle
+import { cn } from '@/lib/utils'
+import { Button } from '@/base/button'
+import { Textarea } from '@/base/textarea'
+import { FileUploader } from '../../file-uploader'
+import { FileType } from '../../file-uploader/file-utils'
 import { useChatUI } from './chat.context'
 import { Message } from './chat.interface'
 import { v4 as uuidv4 } from 'uuid'
@@ -26,8 +27,9 @@ interface ChatInputFieldProps {
 
 interface ChatInputUploadProps {
   className?: string
-  onUpload?: (file: File) => Promise<void> | undefined
-  allowedExtensions?: string[]
+  onSuccess?: (files: File[]) => Promise<void> | void
+  allowedFileTypes?: FileType[]
+  maxFileSizeMB?: number
   multiple?: boolean
 }
 
@@ -62,7 +64,7 @@ function ChatInput(props: ChatInputProps) {
   const [isComposing, setIsComposing] = useState(false)
 
   const submit = async () => {
-    const newMessage: Message = {
+    const userMessage: Message = {
       id: uuidv4(),
       role: 'user',
       parts: [{ type: 'text', text: input }, ...(props.attachments ?? [])],
@@ -71,7 +73,8 @@ function ChatInput(props: ChatInputProps) {
     setInput('') // Clear the input
     props.resetUploadedFiles?.() // Reset the uploaded files
 
-    await sendMessage(newMessage, { body: requestData })
+    // Trigger sendMessage with the user message only
+    await sendMessage(userMessage, { body: requestData })
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -172,26 +175,32 @@ function ChatInputField(props: ChatInputFieldProps) {
 function ChatInputUpload(props: ChatInputUploadProps) {
   const { requestData, setRequestData, isLoading } = useChatUI()
 
-  const onFileUpload = async (file: File) => {
-    if (props.onUpload) {
-      await props.onUpload(file)
-    } else {
-      setRequestData({ ...(requestData || {}), file })
-    }
-  }
-
   return (
     <FileUploader
-      onFileUpload={onFileUpload}
-      config={{
-        disabled: isLoading,
-        multiple: props.multiple ?? true,
-        allowedExtensions: props.allowedExtensions,
+      title={props.multiple ? 'Upload Files' : 'Upload File'}
+      description={props.multiple ? 'Attach multiple files' : 'Attach a file'}
+      multiple={props.multiple ?? true}
+      allowedFileTypes={props.allowedFileTypes}
+      maxFileSizeBytes={(props.maxFileSizeMB ?? 50) * 1024 * 1024}
+      onSuccess={async uploaded => {
+        // update chat requestData for downstream handlers
+        const lastFile = uploaded[uploaded.length - 1]?.file
+        if (lastFile) {
+          setRequestData({ ...(requestData || {}), file: lastFile })
+        }
+        await props.onSuccess?.(uploaded.map(u => u.file))
       }}
-      className={cn(
-        'hover:bg-primary absolute bottom-2 left-2 rounded-full',
-        props.className
-      )}
+      isProcessing={isLoading}
+      trigger={
+        <Button
+          type="button"
+          variant="secondary"
+          size="icon"
+          className={cn('absolute bottom-2 left-2 rounded-full', props.className)}
+        >
+          +
+        </Button>
+      }
     />
   )
 }

@@ -1,12 +1,8 @@
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from '@radix-ui/react-hover-card'
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/base/hover-card'
 import { Check, Copy, FileIcon, XCircleIcon } from 'lucide-react'
 import { useCopyToClipboard } from '../hooks/use-copy-to-clipboard'
 import { Button } from '@/base/button'
-import { PdfDialog } from './pdf-dialog'
+import { useChatCanvas } from '../components/canvas/context'
 import { SourceNumberButton } from './source-number-button'
 
 import { cn } from '@/lib/utils'
@@ -49,6 +45,7 @@ export function DocumentInfo({
   onRemove?: () => void
   startIndex?: number
 }) {
+  const { openArtifactInCanvas } = useChatCanvas()
   const { url, sources } = document
   const urlParts = url.split('/')
   const fileName = urlParts.length > 0 ? urlParts[urlParts.length - 1] : url
@@ -77,8 +74,26 @@ export function DocumentInfo({
   )
 
   if (url.endsWith('.pdf')) {
-    // open internal pdf dialog for pdf files when click document card
-    return <PdfDialog documentId={url} url={url} trigger={DocumentDetail} />
+    // Open PDF preview inside Canvas shell
+    return (
+      <div
+        onClick={e => {
+          e.preventDefault()
+          e.stopPropagation()
+          openArtifactInCanvas(
+            {
+              type: 'document',
+              created_at: Date.now(),
+              data: {
+                url,
+              },
+            }
+          )
+        }}
+      >
+        {DocumentDetail}
+      </div>
+    )
   }
   // open external link when click document card for other file types
   return <div onClick={() => window.open(url, '_blank')}>{DocumentDetail}</div>
@@ -87,7 +102,7 @@ export function DocumentInfo({
 function SourceInfo({ node, index }: { node?: SourceNode; index: number }) {
   if (!node) return <SourceNumberButton index={index} />
   return (
-    <HoverCard>
+    <HoverCard openDelay={100} closeDelay={100}>
       <HoverCardTrigger
         className="cursor-default"
         onClick={e => {
@@ -100,7 +115,7 @@ function SourceInfo({ node, index }: { node?: SourceNode; index: number }) {
           className="hover:bg-primary hover:text-white"
         />
       </HoverCardTrigger>
-      <HoverCardContent className="w-[400px] bg-white p-4">
+      <HoverCardContent className="w-[400px]" onClick={e => e.stopPropagation()}>
         <NodeInfo nodeInfo={node} />
       </HoverCardContent>
     </HoverCard>
@@ -117,7 +132,7 @@ function NodeInfo({ nodeInfo }: { nodeInfo: SourceNode }) {
     null
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
         <span className="font-semibold">
           {pageNumber ? `On page ${pageNumber}:` : 'Node content:'}
@@ -130,7 +145,7 @@ function NodeInfo({ nodeInfo }: { nodeInfo: SourceNode }) {
             }}
             size="icon"
             variant="ghost"
-            className="h-12 w-12 shrink-0"
+            className="h-3 w-3 shrink-0"
           >
             {isCopied ? (
               <Check className="h-4 w-4" />

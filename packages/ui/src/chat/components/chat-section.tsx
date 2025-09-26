@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { ChatCanvasProvider } from './canvas/context'
 import ChatInput from './chat-input'
@@ -19,6 +19,7 @@ export default function ChatSection(props: ChatSectionProps) {
   const { handler, className, autoOpenCanvas = true } = props
   const [input, setInput] = useState('')
   const [requestData, setRequestData] = useState<any>()
+  const rootRef = useRef<HTMLDivElement | null>(null)
 
   // show loading immediately after the user submits the request
   // then keep loading util streaming is finished
@@ -43,7 +44,7 @@ export default function ChatSection(props: ChatSectionProps) {
         isLoading,
       }}
     >
-      <div className={cn('flex h-full w-full flex-col gap-4 p-5', className)}>
+      <div ref={rootRef} className={cn('flex h-full w-full flex-col', className)}>
         <ChatCanvasProvider autoOpenCanvas={autoOpenCanvas}>
           {children}
         </ChatCanvasProvider>

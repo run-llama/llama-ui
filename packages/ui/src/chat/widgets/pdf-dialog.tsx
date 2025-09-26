@@ -1,4 +1,3 @@
-import { lazy } from 'react'
 import { Button } from '@/base/button'
 import {
   Drawer,
@@ -9,13 +8,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/base/drawer'
-
-const PDFViewer = lazy(() =>
-  import('@llamaindex/pdf-viewer').then(m => ({ default: m.PDFViewer }))
-)
-const PdfFocusProvider = lazy(() =>
-  import('@llamaindex/pdf-viewer').then(m => ({ default: m.PdfFocusProvider }))
-)
+import { PdfPreview } from '../../file-preview/pdf-preview'
 
 export interface PdfDialogProps {
   documentId: string
@@ -50,14 +43,7 @@ export function PdfDialog(props: PdfDialogProps) {
           </DrawerClose>
         </DrawerHeader>
         <div className="m-4">
-          <PdfFocusProvider>
-            <PDFViewer
-              file={{
-                id: props.documentId,
-                url: props.url,
-              }}
-            />
-          </PdfFocusProvider>
+          <PdfPreview url={props.url} />
         </div>
       </DrawerContent>
     </Drawer>

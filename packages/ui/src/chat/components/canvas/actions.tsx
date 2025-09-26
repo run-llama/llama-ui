@@ -1,18 +1,14 @@
 'use client'
 
-import { Check, Copy, Download, History, X } from 'lucide-react'
-import { useState } from 'react'
+import { Check, Copy, Download, X } from 'lucide-react'
 import { useCopyToClipboard } from '../../hooks/use-copy-to-clipboard'
 import { cn } from '@/lib/utils'
-import { Badge } from '@/base/badge'
 import { Button } from '@/base/button'
-import { Popover, PopoverContent, PopoverTrigger } from '@/base/popover'
 import { useChatCanvas } from './context'
 import {
   Artifact,
   DocumentArtifact,
   CodeArtifact,
-  isEqualArtifact,
 } from './artifacts'
 
 interface ChatCanvasActionsProps {
@@ -23,7 +19,6 @@ interface ChatCanvasActionsProps {
 function ChatCanvasActions(props: ChatCanvasActionsProps) {
   const children = props.children ?? (
     <>
-      <ArtifactVersionHistory />
       <ArtifactContentCopy />
       <ArtifactDownloadButton />
       <CanvasCloseButton />
@@ -34,77 +29,6 @@ function ChatCanvasActions(props: ChatCanvasActionsProps) {
     <div className={cn('flex items-center gap-1', props.className)}>
       {children}
     </div>
-  )
-}
-
-function ArtifactVersionHistory() {
-  const {
-    getArtifactsByType,
-    openArtifactInCanvas,
-    displayedArtifact,
-    getArtifactVersion,
-    restoreArtifact,
-  } = useChatCanvas()
-
-  const [isOpen, setIsOpen] = useState(false)
-
-  if (!displayedArtifact) return null
-
-  const allArtifactsByCurrentType = getArtifactsByType(displayedArtifact.type)
-
-  return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="secondary"
-          className="h-8 cursor-pointer rounded-full text-xs"
-        >
-          <History className="mr-1 size-4" />
-          Version {getArtifactVersion(displayedArtifact).versionNumber}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-48 p-0 text-xs" align="end">
-        <h4 className="border-b p-2 px-3 font-semibold">Version History</h4>
-        <div className="max-h-80 overflow-y-auto">
-          {allArtifactsByCurrentType.map((artifact, index) => {
-            const isCurrent = isEqualArtifact(artifact, displayedArtifact)
-            const { versionNumber, isLatest } = getArtifactVersion(artifact)
-            return (
-              <div
-                key={index}
-                className="text-muted-foreground flex cursor-pointer items-center justify-between px-3 py-2 hover:bg-gray-100"
-                onClick={() => {
-                  openArtifactInCanvas(artifact)
-                  setIsOpen(false)
-                }}
-              >
-                <span className={cn(isCurrent && 'text-primary')}>
-                  Version {versionNumber}
-                </span>
-                {isLatest ? (
-                  <Badge className="bg-primary text-primary-foreground hover:bg-primary/90 h-6 w-[70px] justify-center text-center">
-                    Latest
-                  </Badge>
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-6 w-[70px] shrink-0 cursor-pointer rounded-full text-xs"
-                    onClick={e => {
-                      e.stopPropagation()
-                      restoreArtifact(artifact)
-                      setIsOpen(false)
-                    }}
-                  >
-                    Restore
-                  </Button>
-                )}
-              </div>
-            )
-          })}
-        </div>
-      </PopoverContent>
-    </Popover>
   )
 }
 
@@ -210,7 +134,6 @@ function CanvasCloseButton() {
   )
 }
 
-ChatCanvasActions.History = ArtifactVersionHistory
 ChatCanvasActions.Copy = ArtifactContentCopy
 ChatCanvasActions.Download = ArtifactDownloadButton
 ChatCanvasActions.Close = CanvasCloseButton

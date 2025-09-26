@@ -1,5 +1,6 @@
 import { Loader2, PauseCircle, RefreshCw } from 'lucide-react'
 import { createContext, useContext, useEffect, useRef } from 'react'
+import type { RefObject } from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/base/button'
 import ChatMessage from './chat-message'
@@ -33,7 +34,8 @@ interface ChatMessagesContext {
   showReload?: boolean
   showStop?: boolean
   messageLength: number
-  lastMessage: Message
+  lastMessage: Message | undefined
+  chatMessagesRef: RefObject<HTMLDivElement>
 }
 
 const chatMessagesContext = createContext<ChatMessagesContext | null>(null)
@@ -52,6 +54,7 @@ export const useChatMessages = () => {
 
 function ChatMessages(props: ChatMessagesProps) {
   const { messages, regenerate, stop, isLoading } = useChatUI()
+  const chatMessagesRef = useRef<HTMLDivElement>(null)
 
   const messageLength = messages.length
   const lastMessage = messages[messageLength - 1]
@@ -69,9 +72,10 @@ function ChatMessages(props: ChatMessagesProps) {
 
   return (
     <ChatMessagesProvider
-      value={{ isPending, showReload, showStop, lastMessage, messageLength }}
+      value={{ isPending, showReload, showStop, lastMessage, messageLength, chatMessagesRef }}
     >
       <div
+        ref={chatMessagesRef}
         className={cn(
           'bg-background relative flex min-h-0 flex-1 flex-col space-y-6 p-4 pb-0',
           props.className
@@ -96,11 +100,15 @@ function ChatMessagesList(props: ChatMessagesListProps) {
   }
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messageLength, lastMessage])
+    if (lastMessage?.role === 'assistant') {
+      scrollToBottom()
+    }
+  // We only need to scroll to bottom once. Don't need to re-run this effect when lastMessage streaming.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messageLength])
 
   const children = props.children ?? (
-    <>
+    <div>
       {messages.map((message, index) => {
         return (
           <ChatMessage
@@ -112,7 +120,7 @@ function ChatMessagesList(props: ChatMessagesListProps) {
       })}
       <ChatMessagesEmpty />
       <ChatMessagesLoading />
-    </>
+    </div>
   )
 
   return (

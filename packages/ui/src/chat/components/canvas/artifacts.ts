@@ -1,6 +1,7 @@
 import { Message } from '../chat.interface'
 import { ArtifactPartType } from '../message-parts/types'
 import { getParts } from '../message-parts/utils'
+import { Highlight } from '../../../file-preview/types'
 
 // check if two artifacts are equal by comparing their type and created time
 export function isEqualArtifact(a: Artifact, b: Artifact) {
@@ -28,10 +29,10 @@ export type CodeArtifactError = {
  * @typeParam T - The type of the data payload (e.g., \{ imageUrl: string, caption: string \})
  * @typeParam K - The artifact type identifier string (e.g., 'image', 'code', 'document')
  */
-export type Artifact<T = unknown, K = string> = {
+export type Artifact<D = unknown, T = string> = {
   created_at: number
-  type: K
-  data: T
+  data: D
+  type: T
 }
 export type CodeArtifact = Artifact<
   {
@@ -44,10 +45,8 @@ export type CodeArtifact = Artifact<
 
 export type DocumentArtifact = Artifact<
   {
-    title: string
-    content: string
-    type: string
-    sources?: { id: string }[] // we can add more source info here if needed
+    url: string,
+    highlight?: Highlight;
   },
   'document'
 >

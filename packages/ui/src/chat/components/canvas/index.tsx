@@ -2,7 +2,6 @@
 
 import { cn } from '@/lib/utils'
 import { ChatCanvasActions } from './actions'
-import { CodeArtifactViewer } from './artifacts/code'
 import { useChatCanvas } from './context'
 import { DocumentArtifactViewer } from './artifacts/document'
 import { ArtifactCard } from './artifact-card'
@@ -20,7 +19,7 @@ function ChatCanvas({ children, className }: ChatCanvasProps) {
   return (
     <div
       className={cn(
-        'right-0 top-0 flex h-full w-3/5 shrink-0 flex-col border-l bg-white',
+        'right-0 top-0 flex h-full shrink-0 flex-col border-l bg-white',
         className
       )}
       style={{
@@ -31,7 +30,6 @@ function ChatCanvas({ children, className }: ChatCanvasProps) {
     >
       {children ?? (
         <>
-          <CodeArtifactViewer />
           <DocumentArtifactViewer />
         </>
       )}
@@ -39,7 +37,6 @@ function ChatCanvas({ children, className }: ChatCanvasProps) {
   )
 }
 
-ChatCanvas.CodeArtifact = CodeArtifactViewer
 ChatCanvas.DocumentArtifact = DocumentArtifactViewer
 ChatCanvas.Artifact = ArtifactCard
 ChatCanvas.Actions = ChatCanvasActions

@@ -1,5 +1,6 @@
 import { ComponentType, FC, memo } from 'react'
 import ReactMarkdown, { Components, Options } from 'react-markdown'
+import 'katex/dist/katex.min.css'
 import rehypeKatex from 'rehype-katex'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
@@ -36,13 +37,8 @@ const preprocessLaTeX = (content: string) => {
     return placeholder
   })
 
-  // Escape dollar signs to prevent them from being treated as LaTeX math delimiters
-  // For example, in "$10 million and $20 million", the content between the dollar signs might be incorrectly parsed as a math block
-  // Replacing $ with \$ avoids this issue
-  const escapedDollarSigns = processedContent.replace(/\$/g, '\\$')
-
   // Replace block-level LaTeX delimiters \[ \] with $$ $$
-  const blockProcessedContent = escapedDollarSigns.replace(
+  const blockProcessedContent = processedContent.replace(
     /\\\[([\s\S]*?)\\\]/g,
     (_, equation) => `$$${equation}$$`
   )
@@ -110,10 +106,12 @@ export interface LanguageRendererProps {
   className?: string
 }
 
+//
+
 type ReactStyleMarkdownComponents = {
   // Extract pulls out the ComponentType side of unions like ComponentType | string
   // react-markdown supports passing "h1" for example, which is difficult to
-  [K in keyof Components]?: Extract<Components[K], FC<any>>
+  [K in keyof Components]?: Extract<Components[K], FC<unknown>>
 }
 
 // Simple function to render a component if provided, otherwise use fallback
@@ -152,12 +150,83 @@ export function Markdown({
           customClassName
         )}
         remarkPlugins={[remarkGfm, remarkMath]}
-        rehypePlugins={[rehypeKatex as any]}
+        rehypePlugins={[rehypeKatex as unknown as never]}
         components={{
           ...components,
+          h1: combineComponent(components?.h1, ({ children }) => (
+            <h1 className="mt-0 mb-3 text-xl font-semibold">{children}</h1>
+          )),
+          h2: combineComponent(components?.h2, ({ children }) => (
+            <h2 className="mt-4 mb-2 text-lg font-semibold">{children}</h2>
+          )),
+          h3: combineComponent(components?.h3, ({ children }) => (
+            <h3 className="mt-3 mb-2 text-base font-semibold">{children}</h3>
+          )),
+          h4: combineComponent(components?.h4, ({ children }) => (
+            <h4 className="mt-3 mb-1 text-base font-medium">{children}</h4>
+          )),
+          h5: combineComponent(components?.h5, ({ children }) => (
+            <h5 className="mt-2 mb-1 text-sm font-medium">{children}</h5>
+          )),
+          h6: combineComponent(components?.h6, ({ children }) => (
+            <h6 className="mt-2 mb-1 text-sm">{children}</h6>
+          )),
           p: combineComponent(components?.p, ({ children }) => {
-            return <div className="mb-2 last:mb-0">{children}</div>
+            return <p className="mb-2 last:mb-0 leading-7">{children}</p>
           }),
+          ul: ({ children, className, ...rest }) => {
+            const isTaskList = className?.includes('contains-task-list')
+            return (
+              <ul
+                {...rest}
+                className={cn(
+                  'my-2 space-y-1',
+                  isTaskList ? 'ml-0 list-none' : 'ml-5 list-disc'
+                )}
+              >
+                {children}
+              </ul>
+            )
+          },
+          ol: ({ children, ...rest }) => (
+            <ol {...rest} className="my-2 ml-5 list-decimal space-y-1">
+              {children}
+            </ol>
+          ),
+          li: ({ children, className, ...rest }) => {
+            const isTaskItem = className?.includes('task-list-item')
+            return (
+              <li
+                {...rest}
+                className={cn('leading-7', isTaskItem && 'ml-0 list-none')}
+              >
+                {children}
+              </li>
+            )
+          },
+          input: props => (
+            <input
+              {...props}
+              className={cn('mr-2 align-middle', props.className ?? '')}
+            />
+          ),
+          blockquote: combineComponent(components?.blockquote, ({ children }) => (
+            <blockquote className="my-3 border-l-2 pl-3 text-sm text-muted-foreground">{children}</blockquote>
+          )),
+          hr: combineComponent(components?.hr, () => (
+            <hr className="my-4 border-border" />
+          )),
+          table: combineComponent(components?.table, ({ children }) => (
+            <div className="my-3 overflow-x-auto">
+              <table className="w-full border-collapse text-sm">{children}</table>
+            </div>
+          )),
+          th: combineComponent(components?.th, ({ children }) => (
+            <th className="border border-border bg-secondary px-2 py-1 text-left font-medium">{children}</th>
+          )),
+          td: combineComponent(components?.td, ({ children }) => (
+            <td className="border border-border px-2 py-1 align-top">{children}</td>
+          )),
           code: combineComponent(
             components?.code,
             ({ inline, className, children, ...props }) => {
@@ -177,7 +246,13 @@ export function Markdown({
 
               if (inline) {
                 return (
-                  <code className={className} {...props}>
+                  <code
+                    className={cn(
+                      'rounded bg-secondary px-1 py-0.5 font-mono text-[0.85em]',
+                      className
+                    )}
+                    {...props}
+                  >
                     {children}
                   </code>
                 )

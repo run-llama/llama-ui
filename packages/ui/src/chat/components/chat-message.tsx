@@ -4,10 +4,10 @@ import { useCopyToClipboard } from '../hooks/use-copy-to-clipboard'
 import { cn } from '@/lib/utils'
 import { Button } from '@/base/button'
 import { ChatMessageProvider, useChatMessage } from './chat-message.context'
+import { useChatMessages } from './chat-messages'
 import { useChatUI } from './chat.context'
 import { Message } from './chat.interface'
 import {
-  ArtifactPartUI,
   EventPartUI,
   FilePartUI,
   MarkdownPartUI,
@@ -37,6 +37,7 @@ interface ChatMessageActionsProps extends React.PropsWithChildren {
 }
 
 function ChatMessage(props: ChatMessageProps) {
+  const { chatMessagesRef } = useChatMessages()
   const children = props.children ?? (
     <>
       <ChatMessageAvatar />
@@ -45,6 +46,12 @@ function ChatMessage(props: ChatMessageProps) {
     </>
   )
 
+  // Apply min-height to the last assistant message using global config
+  const currentHeight = chatMessagesRef?.current?.clientHeight
+  const minHeight = currentHeight ? Math.max(200, Math.floor(currentHeight * 0.8)) : 300
+  const applyMinHeight = props.isLast && props.message.role === 'assistant'
+  const wrapperStyle = applyMinHeight ? { minHeight: `${minHeight}px` } : undefined
+
   return (
     <ChatMessageProvider
       value={{
@@ -52,7 +59,7 @@ function ChatMessage(props: ChatMessageProps) {
         isLast: props.isLast,
       }}
     >
-      <div className={cn('group flex gap-4 p-3', props.className)}>
+      <div className={cn('group flex gap-4 p-3', props.className)} style={wrapperStyle}>
         {children}
       </div>
     </ChatMessageProvider>
@@ -85,7 +92,6 @@ function ChatMessageContent(props: ChatMessageContentProps) {
       <FilePartUI />
       <EventPartUI />
       <MarkdownPartUI />
-      <ArtifactPartUI />
       <SourcesPartUI />
       <SuggestionPartUI />
     </>
@@ -159,7 +165,6 @@ type ComposibleChatMessagePart = typeof ChatMessageContent & {
   Markdown: typeof MarkdownPartUI
   Source: typeof SourcesPartUI
   Suggestion: typeof SuggestionPartUI
-  Artifact: typeof ArtifactPartUI
 }
 
 type ComposibleChatMessage = typeof ChatMessage & {
@@ -186,7 +191,6 @@ PrimiviteChatMessage.Part.File = FilePartUI
 PrimiviteChatMessage.Part.Markdown = MarkdownPartUI
 PrimiviteChatMessage.Part.Source = SourcesPartUI
 PrimiviteChatMessage.Part.Suggestion = SuggestionPartUI
-PrimiviteChatMessage.Part.Artifact = ArtifactPartUI
 
 PrimiviteChatMessage.Avatar = ChatMessageAvatar
 PrimiviteChatMessage.Actions = ChatMessageActions

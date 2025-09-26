@@ -1,4 +1,5 @@
 import hljs from 'highlight.js'
+import 'highlight.js/styles/github.min.css'
 import { Check, Copy, Download } from 'lucide-react'
 import { FC, memo, useEffect, useRef } from 'react'
 import { Button } from '@/base/button'
@@ -52,6 +53,18 @@ export const generateRandomString = (length: number, lowercase = false) => {
     result += chars.charAt(Math.floor(Math.random() * chars.length))
   }
   return lowercase ? result.toLowerCase() : result
+}
+
+const LANGUAGE_ALIASES: Record<string, string> = {
+  ts: 'typescript',
+  tsx: 'typescript',
+  js: 'javascript',
+  jsx: 'javascript',
+  py: 'python',
+  sh: 'shell',
+  bash: 'shell',
+  md: 'markdown',
+  yml: 'yaml',
 }
 
 const CodeBlock: FC<Props> = memo(props => {
@@ -108,14 +121,14 @@ const CodeBlock: FC<Props> = memo(props => {
   return (
     <div
       className={cn(
-        'codeblock border-border relative w-full rounded-lg border bg-[#fafafa] py-2',
+        'codeblock border-border relative w-full rounded-lg border bg-secondary pt-2',
         className
       )}
     >
       {showHeader && (
         <div
           className={cn(
-            'flex w-full items-center justify-between px-4',
+            'flex w-full items-center justify-between px-3',
             headerClassName
           )}
         >
@@ -146,11 +159,11 @@ const CodeBlock: FC<Props> = memo(props => {
           </div>
         </div>
       )}
-      <pre>
+      <pre className="m-0 max-w-full overflow-x-auto rounded-b-lg text-[13px] leading-6">
         <code
           ref={codeRef}
           className={cn(
-            `language-${language} rounded-lg border border-none font-mono`,
+            `language-${LANGUAGE_ALIASES[language] ?? language} font-mono`,
             codeClassName
           )}
         >

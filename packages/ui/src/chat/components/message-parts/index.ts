@@ -3,7 +3,6 @@ export * from './parts/file'
 export * from './parts/markdown'
 export * from './parts/sources'
 export * from './parts/suggestion'
-export * from './parts/artifact'
 
 export * from './context'
 export * from './types'
