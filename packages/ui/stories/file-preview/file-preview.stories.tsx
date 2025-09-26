@@ -9,12 +9,6 @@ const meta: Meta<typeof FilePreviewV2> = {
   parameters: {
     layout: "fullscreen",
   },
-  argTypes: {
-    fileData: {
-      control: "text",
-      description: "ID of the file to preview",
-    },
-  },
 };
 
 export default meta;
