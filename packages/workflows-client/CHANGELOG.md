@@ -1,5 +1,11 @@
 # @llamaindex/workflows-client
 
+## 1.4.0
+
+### Minor Changes
+
+- 90216b7:
+
 ## 1.3.0
 
 ### Minor Changes
