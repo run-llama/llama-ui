@@ -86,7 +86,9 @@ export const CustomToolbar: Story = {
     expect(canvas.getByText("Styled Toolbar PDF")).toBeInTheDocument();
 
     // Check that toolbar has custom styling applied
-    const toolbar = canvas.getByText("Styled Toolbar PDF").closest("div.sticky");
+    const toolbar = canvas
+      .getByText("Styled Toolbar PDF")
+      .closest("div.sticky");
     expect(toolbar).toHaveClass("text-gray-500");
   },
 };
