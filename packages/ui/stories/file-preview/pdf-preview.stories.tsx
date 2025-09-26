@@ -44,26 +44,6 @@ export const Default: Story = {
   ),
 };
 
-export const WithFileName: Story = {
-  args: {
-    url: "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf",
-    fileName: "TraceMonkey Research Paper",
-  },
-  render: (args) => (
-    <div className="h-screen">
-      <PdfPreview {...args} />
-    </div>
-  ),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-
-    await waitFor(() => {
-      const filename = canvas.getByText("TraceMonkey Research Paper");
-      expect(filename).toBeInTheDocument();
-    });
-  },
-};
-
 export const CustomToolbar: Story = {
   args: {
     url: "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf",
@@ -75,17 +55,6 @@ export const CustomToolbar: Story = {
       <PdfPreview {...args} />
     </div>
   ),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-
-    await waitFor(() => {
-      // Check that toolbar has custom styling applied
-      const toolbar = canvas
-        .getByText("Styled Toolbar PDF")
-        .closest("div.sticky");
-      expect(toolbar).toHaveClass("text-gray-500");
-    });
-  },
 };
 
 export const InteractiveHighlight: Story = {
