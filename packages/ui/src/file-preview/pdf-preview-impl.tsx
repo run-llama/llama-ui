@@ -113,8 +113,9 @@ export const PdfPreviewImpl = ({
       page.pageNumber === 1 &&
       containerRef.current
     ) {
-      const containerWidth = containerRef.current.clientWidth;
-      const newScale = containerWidth / viewport.width;
+      // scale to fit the container height
+      const containerHeight = containerRef.current.clientHeight;
+      const newScale = containerHeight / viewport.height;
       setScale(newScale);
       isInitialScaleSet.current = true; // prevent further auto-scaling
     }
@@ -281,7 +282,24 @@ export const PdfPreviewImpl = ({
         />
       )}
 
-      <div ref={containerRef} className="overflow-auto h-full">
+      {/* Navigation Component */}
+      {numPages && (
+        <>
+          <PdfNavigator
+            fileName={file?.name}
+            currentPage={currentPage}
+            totalPages={numPages}
+            scale={scale}
+            onPageChange={goToPage}
+            onScaleChange={setScale}
+            onDownload={handleDownload}
+            onReset={handleReset}
+          />
+          <div className="h-3 bg-[#F3F3F3]"></div>
+        </>
+      )}
+
+      <div ref={containerRef} className="overflow-auto h-full bg-[#F3F3F3] rounded-lg">
         <Document
           file={file}
           onLoadSuccess={onDocumentLoadSuccess}
@@ -322,19 +340,6 @@ export const PdfPreviewImpl = ({
           ))}
         </Document>
       </div>
-
-      {/* Navigation Component */}
-      {numPages && (
-        <PdfNavigator
-          currentPage={currentPage}
-          totalPages={numPages}
-          scale={scale}
-          onPageChange={goToPage}
-          onScaleChange={setScale}
-          onDownload={handleDownload}
-          onReset={handleReset}
-        />
-      )}
     </div>
   );
 };
