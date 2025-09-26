@@ -563,21 +563,27 @@ export const InteractiveTests: Story = {
     await userEvent.click(goToFirstButton);
 
     await waitForUpdate(1);
-    expect(canvas.getByTestId("current-state")).toHaveTextContent("Page: 1 / 15");
+    expect(canvas.getByTestId("current-state")).toHaveTextContent(
+      "Page: 1 / 15"
+    );
 
     // Test 2: Go to middle page
     const goToMiddleButton = canvas.getByTestId("go-to-middle-page");
     await userEvent.click(goToMiddleButton);
 
     await waitForUpdate(2);
-    expect(canvas.getByTestId("current-state")).toHaveTextContent("Page: 8 / 15");
+    expect(canvas.getByTestId("current-state")).toHaveTextContent(
+      "Page: 8 / 15"
+    );
 
     // Test 3: Go to last page
     const goToLastButton = canvas.getByTestId("go-to-last-page");
     await userEvent.click(goToLastButton);
 
     await waitForUpdate(3);
-    expect(canvas.getByTestId("current-state")).toHaveTextContent("Page: 15 / 15");
+    expect(canvas.getByTestId("current-state")).toHaveTextContent(
+      "Page: 15 / 15"
+    );
 
     // Test 4: Set min scale
     const setMinScaleButton = canvas.getByTestId("set-min-scale");
@@ -591,28 +597,36 @@ export const InteractiveTests: Story = {
     await userEvent.click(setMaxScaleButton);
 
     await waitForUpdate(5);
-    expect(canvas.getByTestId("current-state")).toHaveTextContent("Scale: 300%");
+    expect(canvas.getByTestId("current-state")).toHaveTextContent(
+      "Scale: 300%"
+    );
 
     // Test 6: Set normal scale
     const setNormalScaleButton = canvas.getByTestId("set-normal-scale");
     await userEvent.click(setNormalScaleButton);
 
     await waitForUpdate(6);
-    expect(canvas.getByTestId("current-state")).toHaveTextContent("Scale: 100%");
+    expect(canvas.getByTestId("current-state")).toHaveTextContent(
+      "Scale: 100%"
+    );
 
     // Test 7: Zoom in
     const zoomInButton = canvas.getByTestId("zoom-in");
     await userEvent.click(zoomInButton);
 
     await waitForUpdate(7);
-    expect(canvas.getByTestId("current-state")).toHaveTextContent("Scale: 125%");
+    expect(canvas.getByTestId("current-state")).toHaveTextContent(
+      "Scale: 125%"
+    );
 
     // Test 8: Zoom out
     const zoomOutButton = canvas.getByTestId("zoom-out");
     await userEvent.click(zoomOutButton);
 
     await waitForUpdate(8);
-    expect(canvas.getByTestId("current-state")).toHaveTextContent("Scale: 100%");
+    expect(canvas.getByTestId("current-state")).toHaveTextContent(
+      "Scale: 100%"
+    );
 
     // Verify test log has entries
     const testLog = canvas.getByTestId("test-log");
@@ -620,7 +634,9 @@ export const InteractiveTests: Story = {
     expect(testLog.textContent).toContain("Scale changed to");
 
     // Final verification
-    expect(canvas.getByTestId("update-counter")).toHaveTextContent("Updates: 8");
+    expect(canvas.getByTestId("update-counter")).toHaveTextContent(
+      "Updates: 8"
+    );
   },
 };
 
@@ -673,11 +689,19 @@ function DirectNavigatorTestsComponent() {
           overflowY: "auto",
         }}
       >
-        <h3 style={{ fontSize: "16px", fontWeight: "bold", margin: "0 0 16px 0" }}>
+        <h3
+          style={{ fontSize: "16px", fontWeight: "bold", margin: "0 0 16px 0" }}
+        >
           Direct Navigator Tests
         </h3>
         <div style={{ marginBottom: "16px" }}>
-          <div style={{ fontSize: "12px", fontWeight: "bold", marginBottom: "4px" }}>
+          <div
+            style={{
+              fontSize: "12px",
+              fontWeight: "bold",
+              marginBottom: "4px",
+            }}
+          >
             Current State:
           </div>
           <div
@@ -690,7 +714,13 @@ function DirectNavigatorTestsComponent() {
           </div>
         </div>
         <div>
-          <div style={{ fontSize: "12px", fontWeight: "bold", marginBottom: "4px" }}>
+          <div
+            style={{
+              fontSize: "12px",
+              fontWeight: "bold",
+              marginBottom: "4px",
+            }}
+          >
             Actions Log:
           </div>
           <div
@@ -757,7 +787,9 @@ export const DirectInteractionTests: Story = {
     await userEvent.keyboard("{Enter}");
 
     await waitFor(() => {
-      expect(canvas.getByTestId("direct-current-state")).toHaveTextContent("Page: 10 / 20");
+      expect(canvas.getByTestId("direct-current-state")).toHaveTextContent(
+        "Page: 10 / 20"
+      );
     });
 
     // Test zoom in button
@@ -765,7 +797,9 @@ export const DirectInteractionTests: Story = {
     await userEvent.click(zoomInButton);
 
     await waitFor(() => {
-      expect(canvas.getByTestId("direct-current-state")).toHaveTextContent("Scale: 175%");
+      expect(canvas.getByTestId("direct-current-state")).toHaveTextContent(
+        "Scale: 175%"
+      );
     });
 
     // Test zoom out button
@@ -773,7 +807,9 @@ export const DirectInteractionTests: Story = {
     await userEvent.click(zoomOutButton);
 
     await waitFor(() => {
-      expect(canvas.getByTestId("direct-current-state")).toHaveTextContent("Scale: 150%");
+      expect(canvas.getByTestId("direct-current-state")).toHaveTextContent(
+        "Scale: 150%"
+      );
     });
 
     // Test reset button
@@ -781,8 +817,12 @@ export const DirectInteractionTests: Story = {
     await userEvent.click(resetButton);
 
     await waitFor(() => {
-      expect(canvas.getByTestId("direct-current-state")).toHaveTextContent("Page: 1 / 20");
-      expect(canvas.getByTestId("direct-current-state")).toHaveTextContent("Scale: 100%");
+      expect(canvas.getByTestId("direct-current-state")).toHaveTextContent(
+        "Page: 1 / 20"
+      );
+      expect(canvas.getByTestId("direct-current-state")).toHaveTextContent(
+        "Scale: 100%"
+      );
     });
 
     // Test download button
@@ -790,7 +830,9 @@ export const DirectInteractionTests: Story = {
     await userEvent.click(downloadButton);
 
     await waitFor(() => {
-      expect(canvas.getByTestId("direct-test-log")).toHaveTextContent("Download clicked");
+      expect(canvas.getByTestId("direct-test-log")).toHaveTextContent(
+        "Download clicked"
+      );
     });
 
     // Test fullscreen button
@@ -798,7 +840,9 @@ export const DirectInteractionTests: Story = {
     await userEvent.click(fullscreenButton);
 
     await waitFor(() => {
-      expect(canvas.getByTestId("direct-test-log")).toHaveTextContent("Fullscreen clicked");
+      expect(canvas.getByTestId("direct-test-log")).toHaveTextContent(
+        "Fullscreen clicked"
+      );
     });
 
     // Note: Navigation button testing is covered in the InteractiveTests story
