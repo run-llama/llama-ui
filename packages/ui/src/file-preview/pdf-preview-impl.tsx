@@ -264,6 +264,14 @@ export const PdfPreviewImpl = ({
     goToPage(1);
   };
 
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      containerRef.current?.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="relative h-full flex items-center justify-center bg-gray-50">
@@ -297,6 +305,7 @@ export const PdfPreviewImpl = ({
             onScaleChange={setScale}
             onDownload={handleDownload}
             onReset={handleReset}
+            onFullscreen={toggleFullscreen}
           />
           <div className="h-3 bg-[#F3F3F3]"></div>
         </>

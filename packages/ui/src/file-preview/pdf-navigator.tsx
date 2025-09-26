@@ -7,6 +7,7 @@ import {
   RotateCcw,
   Plus,
   File,
+  Maximize,
 } from "lucide-react";
 import { Button } from "@/base/button";
 import { Input } from "@/base/input";
@@ -20,6 +21,7 @@ interface PdfNavigatorProps {
   onScaleChange: (scale: number) => void;
   onDownload?: () => void;
   onReset?: () => void;
+  onFullscreen: () => void;
 }
 
 export const PdfNavigator = ({
@@ -31,6 +33,7 @@ export const PdfNavigator = ({
   onScaleChange,
   onDownload,
   onReset,
+  onFullscreen,
 }: PdfNavigatorProps) => {
   const [pageInput, setPageInput] = useState<string>(currentPage.toString());
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -90,6 +93,10 @@ export const PdfNavigator = ({
   const handleReset = () => {
     onScaleChange(1.0);
     onReset?.();
+  };
+
+  const handleFullscreen = () => {
+    onFullscreen();
   };
 
   return (
@@ -198,6 +205,16 @@ export const PdfNavigator = ({
               <Download className="size-3" />
             </Button>
           )}
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleFullscreen}
+            className="size-6 p-0"
+            title="Fullscreen"
+          >
+            <Maximize className="size-3" />
+          </Button>
         </div>
       </div>
     </div>
