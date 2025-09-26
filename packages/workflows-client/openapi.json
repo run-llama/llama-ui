@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Workflows API",
-    "version": "2.4.0"
+    "version": "2.5.0"
   },
   "components": {
     "schemas": {
@@ -132,6 +132,10 @@
                     "type": "object",
                     "description": "Serialized workflow Context."
                   },
+                  "handler_id": {
+                    "type": "string",
+                    "description": "Workflow handler identifier to continue from a previous completed run."
+                  },
                   "kwargs": {
                     "type": "object",
                     "description": "Additional keyword arguments for the workflow."
@@ -156,7 +160,7 @@
             "description": "Invalid start_event payload"
           },
           "404": {
-            "description": "Workflow not found"
+            "description": "Workflow or handler identifier not found"
           },
           "500": {
             "description": "Error running workflow or invalid request body"
@@ -194,6 +198,10 @@
                     "type": "object",
                     "description": "Serialized workflow Context."
                   },
+                  "handler_id": {
+                    "type": "string",
+                    "description": "Workflow handler identifier to continue from a previous completed run."
+                  },
                   "kwargs": {
                     "type": "object",
                     "description": "Additional keyword arguments for the workflow."
@@ -218,7 +226,7 @@
             "description": "Invalid start_event payload"
           },
           "404": {
-            "description": "Workflow not found"
+            "description": "Workflow or handler identifier not found"
           }
         }
       }

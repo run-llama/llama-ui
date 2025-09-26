@@ -56,6 +56,10 @@ export type PostWorkflowsByNameRunData = {
             [key: string]: unknown;
         };
         /**
+         * Workflow handler identifier to continue from a previous completed run.
+         */
+        handler_id?: string;
+        /**
          * Additional keyword arguments for the workflow.
          */
         kwargs?: {
@@ -78,7 +82,7 @@ export type PostWorkflowsByNameRunErrors = {
      */
     400: unknown;
     /**
-     * Workflow not found
+     * Workflow or handler identifier not found
      */
     404: unknown;
     /**
@@ -111,6 +115,10 @@ export type PostWorkflowsByNameRunNowaitData = {
             [key: string]: unknown;
         };
         /**
+         * Workflow handler identifier to continue from a previous completed run.
+         */
+        handler_id?: string;
+        /**
          * Additional keyword arguments for the workflow.
          */
         kwargs?: {
@@ -133,7 +141,7 @@ export type PostWorkflowsByNameRunNowaitErrors = {
      */
     400: unknown;
     /**
-     * Workflow not found
+     * Workflow or handler identifier not found
      */
     404: unknown;
 };
