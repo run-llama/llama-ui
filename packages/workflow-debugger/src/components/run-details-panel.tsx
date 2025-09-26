@@ -35,6 +35,7 @@ export function RunDetailsPanel({
   const [internalTab, setInternalTab] = useState<"visualization" | "events">(
     "visualization",
   );
+  const [eventTimestamps, setEventTimestamps] = useState<number[]>([]);
   const [isDark, setIsDark] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     try {
@@ -66,6 +67,43 @@ export function RunDetailsPanel({
     }
     return JSON.stringify(data, null, compactJson ? 0 : 2);
   };
+
+  const formatTime = (epochMs?: number): string => {
+    if (!epochMs) return "";
+    const d = new Date(epochMs);
+    const base = d.toLocaleTimeString([], {
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+    const ms = String(d.getMilliseconds()).padStart(3, "0");
+    return `${base}.${ms}`;
+  };
+
+  // Reset timestamps when switching handlers
+  useEffect(() => {
+    setEventTimestamps([]);
+  }, [handlerId]);
+
+  // Append timestamps as new events arrive; trim if events are cleared
+  useEffect(() => {
+    setEventTimestamps((prev) => {
+      if (events.length < prev.length) {
+        return prev.slice(0, events.length);
+      }
+      if (events.length > prev.length) {
+        const additions = Array.from(
+          { length: events.length - prev.length },
+          () => Date.now(),
+        );
+        return [...prev, ...additions];
+      }
+      return prev;
+    });
+    // Only depend on length to avoid re-stamping on identity changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [events.length]);
 
   const currentTab: "visualization" | "events" = tab ?? internalTab;
   const handleTabChange = (value: string) => {
@@ -181,10 +219,13 @@ export function RunDetailsPanel({
                           </TableCell>
                           <TableCell className="py-3">
                             <div className="space-y-2">
-                              <div>
-                                <code className="text-sm font-mono">
-                                  {event.type}
-                                </code>
+                              <div className="flex items-baseline justify-between">
+                                <code className="text-sm font-mono">{event.type}</code>
+                                {eventTimestamps[index] !== undefined ? (
+                                  <span className="text-[10px] text-muted-foreground font-mono ml-2 whitespace-nowrap">
+                                    {formatTime(eventTimestamps[index])}
+                                  </span>
+                                ) : null}
                               </div>
                               <CodeBlock
                                 language="json"
