@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, userEvent, waitFor, within } from "@storybook/test";
 import { useState } from "react";
-import { expect, within, userEvent, waitFor } from "@storybook/test";
 import { PdfPreview } from "../../src/file-preview/pdf-preview";
 
 const meta: Meta<typeof PdfPreview> = {
@@ -19,6 +19,14 @@ const meta: Meta<typeof PdfPreview> = {
       description:
         "Optional highlight: { page, x, y, width, height } in PDF page coordinates",
     },
+    fileName: {
+      control: "text",
+      description: "Custom filename to display in the toolbar",
+    },
+    toolbarClassName: {
+      control: "text",
+      description: "Custom CSS classes for the toolbar styling",
+    },
   },
 };
 
@@ -34,6 +42,53 @@ export const Default: Story = {
       <PdfPreview {...args} />
     </div>
   ),
+};
+
+export const WithFileName: Story = {
+  args: {
+    url: "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf",
+    fileName: "TraceMonkey Research Paper",
+  },
+  render: (args) => (
+    <div className="h-screen">
+      <PdfPreview {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // Wait for PDF to load
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    // Check that custom filename is displayed in toolbar
+    expect(canvas.getByText("TraceMonkey Research Paper")).toBeInTheDocument();
+  },
+};
+
+export const CustomToolbar: Story = {
+  args: {
+    url: "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf",
+    fileName: "Styled Toolbar PDF",
+    toolbarClassName: "text-gray-500",
+  },
+  render: (args) => (
+    <div className="h-screen">
+      <PdfPreview {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // Wait for PDF to load
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    // Check that custom filename is displayed
+    expect(canvas.getByText("Styled Toolbar PDF")).toBeInTheDocument();
+
+    // Check that toolbar has custom styling applied
+    const toolbar = canvas.getByText("Styled Toolbar PDF").closest("div.sticky");
+    expect(toolbar).toHaveClass("text-gray-500");
+  },
 };
 
 export const InteractiveHighlight: Story = {

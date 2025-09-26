@@ -103,7 +103,7 @@ export const PdfNavigator = ({
   };
 
   return (
-    <div className={cn("sticky top-0 w-full z-50 h-8 text-xs", className)}>
+    <div className={cn("sticky top-0 w-full z-50 text-xs", className)}>
       <div className="bg-white border px-4 flex items-center justify-between gap-3 h-8">
         <div className="flex items-center gap-2">
           <File className="size-3" />
