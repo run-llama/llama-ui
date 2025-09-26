@@ -284,7 +284,7 @@ export const PdfPreviewImpl = ({
   }
 
   return (
-    <div className="relative h-full">
+    <div className="relative h-full flex flex-col">
       {/* Only show rendering progress bar for large files */}
       {isRendering && file && file.size > FILE_SIZE_THRESHOLD && (
         <PdfRenderingProgress
@@ -313,7 +313,7 @@ export const PdfPreviewImpl = ({
 
       <div
         ref={containerRef}
-        className="overflow-auto h-full bg-[#F3F3F3] rounded-lg"
+        className="overflow-auto h-full bg-[#F3F3F3] rounded-lg flex-1 min-h-0"
       >
         <Document
           file={file}
