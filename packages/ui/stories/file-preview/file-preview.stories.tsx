@@ -1,11 +1,11 @@
 import { Input } from "@/src";
-import { FilePreviewV2 } from "@/src/file-preview/file-preview-v2";
+import { URLFilePreview } from "@/src/file-preview/url-file-preview";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 
-const meta: Meta<typeof FilePreviewV2> = {
+const meta: Meta<typeof URLFilePreview> = {
   title: "Components/FilePreview/FilePreviewV2",
-  component: FilePreviewV2,
+  component: URLFilePreview,
   parameters: {
     layout: "fullscreen",
   },
@@ -23,7 +23,7 @@ export const Default: Story = {
   },
   render: (args) => (
     <div className="h-screen">
-      <FilePreviewV2 {...args} />
+      <URLFilePreview {...args} />
     </div>
   ),
 };
@@ -37,7 +37,7 @@ export const Image: Story = {
   },
   render: (args) => (
     <div className="h-screen">
-      <FilePreviewV2 {...args} />
+      <URLFilePreview {...args} />
     </div>
   ),
 };
@@ -69,7 +69,7 @@ function UploadExample() {
 
       {/* File Preview Section */}
       <div className="flex-1 min-h-0" data-testid="pdf-preview-container">
-        {file && <FilePreviewV2 fileData={file} />}
+        {file && <URLFilePreview fileData={file} />}
       </div>
     </div>
   );

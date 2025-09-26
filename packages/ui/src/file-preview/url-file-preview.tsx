@@ -4,7 +4,7 @@ import { FilePreviewToolbar } from "./file-preview-toolbar";
 import { useRef } from "react";
 import { cn } from "@/lib/utils";
 
-export interface FilePreviewV2Props {
+export interface URLFilePreviewProps {
   fileData: {
     url: string;
     name: string;
@@ -20,11 +20,11 @@ export interface FilePreviewV2Props {
   };
 }
 
-export function FilePreviewV2({
+export function URLFilePreview({
   fileData,
   fileOptions,
   style,
-}: FilePreviewV2Props) {
+}: URLFilePreviewProps) {
   const { name: fileName, url: fileUrl } = fileData;
   const containerRef = useRef<HTMLDivElement>(null);
 
