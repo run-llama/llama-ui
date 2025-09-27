@@ -35,6 +35,9 @@ interface SchemaProperty {
   type: string;
   title?: string;
   description?: string;
+  // Optional JSON Schema fields to better hint complex types
+  items?: { type?: string } | { type?: string }[];
+  properties?: Record<string, unknown>;
 }
 
 interface Schema {
@@ -49,6 +52,9 @@ export function WorkflowConfigPanel({
 }: WorkflowConfigPanelProps) {
   const [schema, setSchema] = useState<Schema | null>(null);
   const [formData, setFormData] = useState<{ [key: string]: JSONValue }>({});
+  // Keep raw text state per complex field to avoid re-stringify jitter
+  const [rawFieldInputs, setRawFieldInputs] = useState<Record<string, string>>({});
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string | null>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [finalResult, setFinalResult] = useState<JSONValue | null>(null);
@@ -87,6 +93,8 @@ export function WorkflowConfigPanel({
     } else {
       setSchema(null);
       setFormData({});
+      setRawFieldInputs({});
+      setFieldErrors({});
       setRawInput("");
       setRawInputError(null);
     }
@@ -205,6 +213,50 @@ export function WorkflowConfigPanel({
     }));
   };
 
+  const setRawFieldValue = (fieldName: string, raw: string) => {
+    setRawFieldInputs((prev) => ({ ...prev, [fieldName]: raw }));
+  };
+
+  const setFieldError = (fieldName: string, err: string | null) => {
+    setFieldErrors((prev) => ({ ...prev, [fieldName]: err }));
+  };
+
+  const getArrayItemType = (fieldSchema: SchemaProperty): string | undefined => {
+    if (!fieldSchema.items) return undefined;
+    if (Array.isArray(fieldSchema.items)) {
+      // tuple typing, display union
+      const types = fieldSchema.items
+        .map((it) => (typeof it === "object" ? it.type : undefined))
+        .filter(Boolean) as string[];
+      return types.length ? types.join(" | ") : undefined;
+    }
+    return typeof fieldSchema.items === "object" ? fieldSchema.items.type : undefined;
+  };
+
+  const getTypeHint = (fieldSchema: SchemaProperty): string => {
+    const base = fieldSchema.type || "string";
+    if (base === "array") {
+      const itemType = getArrayItemType(fieldSchema) || "unknown";
+      return `array<${itemType}>`;
+    }
+    if (base === "object") return "object";
+    return base;
+  };
+
+  const getExamplePlaceholder = (fieldSchema: SchemaProperty): string => {
+    const base = fieldSchema.type || "string";
+    if (base === "array") {
+      const itemType = getArrayItemType(fieldSchema) || "string";
+      if (itemType === "string") return '["item1", "item2"]';
+      if (itemType === "number" || itemType === "integer") return "[1, 2, 3]";
+      if (itemType === "boolean") return "[true, false]";
+      if (itemType === "object") return "[{\"key\": \"value\"}]";
+      return "[]";
+    }
+    if (base === "object") return "{\"key\": \"value\"}";
+    return "";
+  };
+
   const handleRunWorkflow = async () => {
     if (!selectedWorkflow) return;
 
@@ -295,27 +347,41 @@ export function WorkflowConfigPanel({
         </div>
       );
     } else {
-      // Default to textarea for complex types
+      // Default to textarea for complex types. Use raw state so we don't fight JSON.stringify while typing.
       return (
         <div key={fieldName} className="space-y-2">
           <label htmlFor={fieldId} className="text-sm font-medium">
-            {fieldTitle} (JSON)
+            {fieldTitle}
             {isRequired && <span className="text-destructive ml-1">*</span>}
           </label>
           <Textarea
             id={fieldId}
             value={
-              formData[fieldName]
+              rawFieldInputs[fieldName] !== undefined
+                ? rawFieldInputs[fieldName]
+                : formData[fieldName]
                 ? JSON.stringify(formData[fieldName], null, 2)
-                : ""
+                : getExamplePlaceholder(fieldSchema)
             }
             onChange={(e) => {
+              const raw = e.target.value;
+              setRawFieldValue(fieldName, raw);
+              if (raw.trim() === "") {
+                // Clear value if empty
+                setFieldError(fieldName, isRequired ? "Value required" : null);
+                setFormData((prev) => {
+                  const next = { ...prev };
+                  delete next[fieldName];
+                  return next;
+                });
+                return;
+              }
               try {
-                const parsed = JSON.parse(e.target.value);
+                const parsed = JSON.parse(raw);
                 handleFieldChange(fieldName, parsed);
+                setFieldError(fieldName, null);
               } catch {
-                // Keep the raw string for now
-                handleFieldChange(fieldName, e.target.value);
+                setFieldError(fieldName, "Invalid JSON");
               }
             }}
             placeholder={
@@ -325,8 +391,18 @@ export function WorkflowConfigPanel({
             className="font-mono"
             rows={3}
           />
-          {fieldDescription && (
-            <p className="text-xs text-muted-foreground">{fieldDescription}</p>
+          <div className="flex items-start justify-between gap-2">
+            {fieldDescription ? (
+              <p className="text-xs text-muted-foreground">{fieldDescription}</p>
+            ) : (
+              <span />
+            )}
+            <p className="text-[11px] text-muted-foreground font-mono">
+              Type: {getTypeHint(fieldSchema)}
+            </p>
+          </div>
+          {fieldErrors[fieldName] && (
+            <p className="text-xs text-destructive">{fieldErrors[fieldName]}</p>
           )}
         </div>
       );
