@@ -23,5 +23,4 @@ export {
   AgentStreamDisplay,
   WorkflowProgressBar,
   WorkflowTrigger,
-  JsonSchemaEditor,
 } from "./components";

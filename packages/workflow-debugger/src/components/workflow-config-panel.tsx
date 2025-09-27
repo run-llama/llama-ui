@@ -6,8 +6,8 @@ import {
   Button,
   Textarea,
   Skeleton,
-  JsonSchemaEditor,
 } from "@llamaindex/ui";
+import { JsonSchemaEditor } from "./json-schema-editor";
 import { CodeBlock } from "./code-block";
 import {
   getResultsByHandlerId,
@@ -51,7 +51,9 @@ export function WorkflowConfigPanel({
   const [finalResultError, setFinalResultError] = useState<string | null>(null);
   const [rawInput, setRawInput] = useState<string>("");
   const [rawInputError, setRawInputError] = useState<string | null>(null);
-  const [rawJsonErrors, setRawJsonErrors] = useState<Record<string, string | null>>({});
+  const [rawJsonErrors, setRawJsonErrors] = useState<
+    Record<string, string | null>
+  >({});
 
   const workflowsClient = useWorkflowsClient();
   const { runWorkflow, isCreating, error: runError } = useWorkflowRun();
@@ -196,13 +198,6 @@ export function WorkflowConfigPanel({
     void doFetchFinalResult();
   }, [activeHandlerId, workflowsClient]);
 
-  const handleFieldChange = (fieldName: string, value: JSONValue) => {
-    setFormData((prev) => ({
-      ...prev,
-      [fieldName]: value,
-    }));
-  };
-
   const handleRunWorkflow = async () => {
     if (!selectedWorkflow) return;
 
@@ -214,7 +209,9 @@ export function WorkflowConfigPanel({
     }
   };
 
-  const hasSchemaFields = Boolean(schema?.properties && Object.keys(schema.properties).length > 0);
+  const hasSchemaFields = Boolean(
+    schema?.properties && Object.keys(schema.properties).length > 0,
+  );
 
   if (!selectedWorkflow) {
     return (
@@ -338,7 +335,9 @@ export function WorkflowConfigPanel({
       {!loading && !error && (
         <div className="p-4 border-t border-border">
           {Object.values(rawJsonErrors).some((e) => e) && (
-            <p className="text-xs text-destructive mb-2">Fix invalid JSON fields before running.</p>
+            <p className="text-xs text-destructive mb-2">
+              Fix invalid JSON fields before running.
+            </p>
           )}
           <Button
             onClick={handleRunWorkflow}

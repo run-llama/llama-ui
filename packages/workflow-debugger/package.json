@@ -7,6 +7,8 @@
     "build": "tsc -p tsconfig.build.json --noEmit && vite build",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
+    "test": "vitest run -c vitest.config.ts",
+    "coverage": "vitest run -c vitest.config.ts --coverage",
     "preview": "vite preview",
     "format": "prettier --write .",
     "format-check": "prettier --check .",

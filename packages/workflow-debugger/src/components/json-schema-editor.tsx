@@ -1,8 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
-import { Input } from "@/base/input";
-import { Textarea } from "@/base/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/base/select";
-import type { JSONValue } from "../types";
+import {
+  Input,
+  Textarea,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@llamaindex/ui";
+import type { JSONValue } from "./workflow-config-panel";
 
 export interface SimpleSchemaProperty {
   type?: string;
@@ -35,25 +41,51 @@ function isComplexType(type?: string): boolean {
   );
 }
 
-function getTypeHintAndPlaceholder(type?: string): { hint: string; placeholder: string } {
+function getTypeHintAndPlaceholder(type?: string): {
+  hint: string;
+  placeholder: string;
+} {
   const lower = (type || "").toLowerCase();
-  const looksLikeArray = lower.includes("array") || lower.includes("list") || /\w+\s*\[.*\]/.test(type || "");
-  const looksLikeObject = lower.includes("object") || lower.includes("map") || lower.includes("dict");
+  const looksLikeArray =
+    lower.includes("array") ||
+    lower.includes("list") ||
+    /\w+\s*\[.*\]/.test(type || "");
+  const looksLikeObject =
+    lower.includes("object") || lower.includes("map") || lower.includes("dict");
   if (looksLikeArray) {
-    return { hint: 'Expected: JSON array (e.g., ["a", "b"])', placeholder: '["item1", "item2"]' };
+    return {
+      hint: 'Expected: JSON array (e.g., ["a", "b"])',
+      placeholder: '["item1", "item2"]',
+    };
   }
   if (looksLikeObject) {
-    return { hint: 'Expected: JSON object (e.g., {"key": "value"})', placeholder: '{"key": "value"}' };
+    return {
+      hint: 'Expected: JSON object (e.g., {"key": "value"})',
+      placeholder: '{"key": "value"}',
+    };
   }
-  return { hint: "Expected: valid JSON (object or array)", placeholder: "Enter value as JSON" };
+  return {
+    hint: "Expected: valid JSON (object or array)",
+    placeholder: "Enter value as JSON",
+  };
 }
 
-export function JsonSchemaEditor({ schema, values, onChange, onErrorsChange, className }: JsonSchemaEditorProps) {
+export function JsonSchemaEditor({
+  schema,
+  values,
+  onChange,
+  onErrorsChange,
+  className,
+}: JsonSchemaEditorProps) {
   const properties = schema?.properties || {};
   const required = new Set(schema?.required || []);
 
-  const [rawJsonValues, setRawJsonValues] = useState<Record<string, string>>({});
-  const [rawJsonErrors, setRawJsonErrors] = useState<Record<string, string | null>>({});
+  const [rawJsonValues, setRawJsonValues] = useState<Record<string, string>>(
+    {},
+  );
+  const [rawJsonErrors, setRawJsonErrors] = useState<
+    Record<string, string | null>
+  >({});
 
   useEffect(() => {
     onErrorsChange?.(rawJsonErrors);
@@ -93,17 +125,23 @@ export function JsonSchemaEditor({ schema, values, onChange, onErrorsChange, cla
             <div key={fieldName} className="space-y-2">
               <label htmlFor={fieldId} className="text-sm font-medium">
                 {fieldTitle}
-                {required.has(fieldName) && <span className="text-destructive ml-1">*</span>}
+                {required.has(fieldName) && (
+                  <span className="text-destructive ml-1">*</span>
+                )}
               </label>
               <Textarea
                 id={fieldId}
                 value={(values[fieldName] as string) || ""}
                 onChange={(e) => handleValueChange(fieldName, e.target.value)}
-                placeholder={fieldDescription || `Enter ${fieldTitle.toLowerCase()}`}
+                placeholder={
+                  fieldDescription || `Enter ${fieldTitle.toLowerCase()}`
+                }
                 rows={3}
               />
               {fieldDescription && (
-                <p className="text-xs text-muted-foreground">{fieldDescription}</p>
+                <p className="text-xs text-muted-foreground">
+                  {fieldDescription}
+                </p>
               )}
             </div>
           );
@@ -114,26 +152,42 @@ export function JsonSchemaEditor({ schema, values, onChange, onErrorsChange, cla
             <div key={fieldName} className="space-y-2">
               <label htmlFor={fieldId} className="text-sm font-medium">
                 {fieldTitle}
-                {required.has(fieldName) && <span className="text-destructive ml-1">*</span>}
+                {required.has(fieldName) && (
+                  <span className="text-destructive ml-1">*</span>
+                )}
               </label>
               <Input
                 id={fieldId}
                 type="number"
-                value={((values[fieldName] as number) ?? "") as unknown as string}
+                value={
+                  ((values[fieldName] as number) ?? "") as unknown as string
+                }
                 onChange={(e) => {
                   const val = e.target.value;
                   if (val === "") {
                     handleValueChange(fieldName, null);
                     return;
                   }
-                  const parsed = fieldType === "integer" ? parseInt(val, 10) : parseFloat(val);
-                  handleValueChange(fieldName, Number.isNaN(parsed) ? null : (parsed as unknown as JSONValue));
+                  const parsed =
+                    fieldType === "integer"
+                      ? parseInt(val, 10)
+                      : parseFloat(val);
+                  handleValueChange(
+                    fieldName,
+                    Number.isNaN(parsed)
+                      ? null
+                      : (parsed as unknown as JSONValue),
+                  );
                 }}
-                placeholder={fieldDescription || `Enter ${fieldTitle.toLowerCase()}`}
+                placeholder={
+                  fieldDescription || `Enter ${fieldTitle.toLowerCase()}`
+                }
                 step={fieldType === "integer" ? "1" : "any"}
               />
               {fieldDescription && (
-                <p className="text-xs text-muted-foreground">{fieldDescription}</p>
+                <p className="text-xs text-muted-foreground">
+                  {fieldDescription}
+                </p>
               )}
             </div>
           );
@@ -144,10 +198,14 @@ export function JsonSchemaEditor({ schema, values, onChange, onErrorsChange, cla
             <div key={fieldName} className="space-y-2">
               <label htmlFor={fieldId} className="text-sm font-medium">
                 {fieldTitle}
-                {required.has(fieldName) && <span className="text-destructive ml-1">*</span>}
+                {required.has(fieldName) && (
+                  <span className="text-destructive ml-1">*</span>
+                )}
               </label>
               <Select
-                onValueChange={(value) => handleValueChange(fieldName, value === "true")}
+                onValueChange={(value) =>
+                  handleValueChange(fieldName, value === "true")
+                }
                 value={String(Boolean(values[fieldName]))}
               >
                 <SelectTrigger>
@@ -159,7 +217,9 @@ export function JsonSchemaEditor({ schema, values, onChange, onErrorsChange, cla
                 </SelectContent>
               </Select>
               {fieldDescription && (
-                <p className="text-xs text-muted-foreground">{fieldDescription}</p>
+                <p className="text-xs text-muted-foreground">
+                  {fieldDescription}
+                </p>
               )}
             </div>
           );
@@ -167,14 +227,20 @@ export function JsonSchemaEditor({ schema, values, onChange, onErrorsChange, cla
 
         // Complex types: object / array / list[...] / map
         const { hint, placeholder } = getTypeHintAndPlaceholder(fieldType);
-        const raw = rawJsonValues[fieldName] ?? (values[fieldName] !== undefined ? JSON.stringify(values[fieldName], null, 2) : "");
+        const raw =
+          rawJsonValues[fieldName] ??
+          (values[fieldName] !== undefined
+            ? JSON.stringify(values[fieldName], null, 2)
+            : "");
         const hasError = Boolean(rawJsonErrors[fieldName]);
 
         return (
           <div key={fieldName} className="space-y-2">
             <label htmlFor={fieldId} className="text-sm font-medium">
               {fieldTitle} (JSON)
-              {required.has(fieldName) && <span className="text-destructive ml-1">*</span>}
+              {required.has(fieldName) && (
+                <span className="text-destructive ml-1">*</span>
+              )}
             </label>
             <Textarea
               id={fieldId}
@@ -195,7 +261,10 @@ export function JsonSchemaEditor({ schema, values, onChange, onErrorsChange, cla
                   setRawJsonErrors((prev) => ({ ...prev, [fieldName]: null }));
                   handleValueChange(fieldName, parsed);
                 } catch {
-                  setRawJsonErrors((prev) => ({ ...prev, [fieldName]: "Invalid JSON" }));
+                  setRawJsonErrors((prev) => ({
+                    ...prev,
+                    [fieldName]: "Invalid JSON",
+                  }));
                 }
               }}
               placeholder={fieldDescription || placeholder}
@@ -203,12 +272,16 @@ export function JsonSchemaEditor({ schema, values, onChange, onErrorsChange, cla
               rows={3}
             />
             {hasError ? (
-              <p className="text-xs text-destructive mt-1">{rawJsonErrors[fieldName]}</p>
+              <p className="text-xs text-destructive mt-1">
+                {rawJsonErrors[fieldName]}
+              </p>
             ) : (
               <p className="text-xs text-muted-foreground">{hint}</p>
             )}
             {fieldDescription && (
-              <p className="text-xs text-muted-foreground">{fieldDescription}</p>
+              <p className="text-xs text-muted-foreground">
+                {fieldDescription}
+              </p>
             )}
           </div>
         );
@@ -216,4 +289,3 @@ export function JsonSchemaEditor({ schema, values, onChange, onErrorsChange, cla
     </div>
   );
 }
-
