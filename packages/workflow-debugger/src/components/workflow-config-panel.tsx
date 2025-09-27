@@ -6,12 +6,7 @@ import {
   Button,
   Textarea,
   Skeleton,
-  Input,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  JsonSchemaEditor,
 } from "@llamaindex/ui";
 import { CodeBlock } from "./code-block";
 import {
@@ -56,7 +51,6 @@ export function WorkflowConfigPanel({
   const [finalResultError, setFinalResultError] = useState<string | null>(null);
   const [rawInput, setRawInput] = useState<string>("");
   const [rawInputError, setRawInputError] = useState<string | null>(null);
-  const [rawJsonValues, setRawJsonValues] = useState<Record<string, string>>({});
   const [rawJsonErrors, setRawJsonErrors] = useState<Record<string, string | null>>({});
 
   const workflowsClient = useWorkflowsClient();
@@ -91,7 +85,6 @@ export function WorkflowConfigPanel({
       setFormData({});
       setRawInput("");
       setRawInputError(null);
-      setRawJsonValues({});
       setRawJsonErrors({});
     }
   }, [selectedWorkflow, workflowsClient]);
@@ -145,7 +138,6 @@ export function WorkflowConfigPanel({
       setFormData({});
       setRawInput(JSON.stringify({}, null, 2));
       setRawInputError(null);
-      setRawJsonValues({});
       setRawJsonErrors({});
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch schema");
@@ -222,149 +214,7 @@ export function WorkflowConfigPanel({
     }
   };
 
-  const renderFormField = (fieldName: string, fieldSchema: SchemaProperty) => {
-    const isRequired = schema?.required?.includes(fieldName) || false;
-    const fieldTitle = fieldSchema.title || fieldName;
-    const fieldType = fieldSchema.type || "string";
-    const fieldDescription = fieldSchema.description || "";
-
-    const fieldId = `field-${fieldName}`;
-
-    if (fieldType === "string") {
-      return (
-        <div key={fieldName} className="space-y-2">
-          <label htmlFor={fieldId} className="text-sm font-medium">
-            {fieldTitle}
-            {isRequired && <span className="text-destructive ml-1">*</span>}
-          </label>
-          <Textarea
-            id={fieldId}
-            value={(formData[fieldName] as string) || ""}
-            onChange={(e) => handleFieldChange(fieldName, e.target.value)}
-            placeholder={
-              fieldDescription || `Enter ${fieldTitle.toLowerCase()}`
-            }
-            rows={3}
-          />
-          {fieldDescription && (
-            <p className="text-xs text-muted-foreground">{fieldDescription}</p>
-          )}
-        </div>
-      );
-    } else if (fieldType === "number" || fieldType === "integer") {
-      return (
-        <div key={fieldName} className="space-y-2">
-          <label htmlFor={fieldId} className="text-sm font-medium">
-            {fieldTitle}
-            {isRequired && <span className="text-destructive ml-1">*</span>}
-          </label>
-          <Input
-            id={fieldId}
-            type="number"
-            value={(formData[fieldName] as number) || 0}
-            onChange={(e) =>
-              handleFieldChange(fieldName, parseFloat(e.target.value) || "")
-            }
-            placeholder={
-              fieldDescription || `Enter ${fieldTitle.toLowerCase()}`
-            }
-            step={fieldType === "integer" ? "1" : "any"}
-          />
-          {fieldDescription && (
-            <p className="text-xs text-muted-foreground">{fieldDescription}</p>
-          )}
-        </div>
-      );
-    } else if (fieldType === "boolean") {
-      return (
-        <div key={fieldName} className="space-y-2">
-          <label htmlFor={fieldId} className="text-sm font-medium">
-            {fieldTitle}
-            {isRequired && <span className="text-destructive ml-1">*</span>}
-          </label>
-          <Select
-            onValueChange={(value) =>
-              handleFieldChange(fieldName, value === "true")
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="true">True</SelectItem>
-              <SelectItem value="false">False</SelectItem>
-            </SelectContent>
-          </Select>
-          {fieldDescription && (
-            <p className="text-xs text-muted-foreground">{fieldDescription}</p>
-          )}
-        </div>
-      );
-    } else {
-      // Default to textarea for complex types: maintain raw text independent of parsed value
-      const lowerType = (fieldType || "").toLowerCase();
-      const looksLikeArray =
-        lowerType.includes("array") || lowerType.includes("list") || /\w+\s*\[.*\]/.test(fieldType);
-      const looksLikeObject =
-        lowerType.includes("object") || lowerType.includes("map") || lowerType.includes("dict");
-      const typeHint = looksLikeArray
-        ? 'Expected: JSON array (e.g., ["a", "b"])'
-        : looksLikeObject
-        ? 'Expected: JSON object (e.g., {"key": "value"})'
-        : "Expected: valid JSON (object or array)";
-      const placeholder = looksLikeArray
-        ? '["item1", "item2"]'
-        : looksLikeObject
-        ? '{"key": "value"}'
-        : "Enter value as JSON";
-      const currentRaw =
-        rawJsonValues[fieldName] !== undefined
-          ? rawJsonValues[fieldName]
-          : formData[fieldName] !== undefined
-          ? JSON.stringify(formData[fieldName], null, 2)
-          : "";
-      return (
-        <div key={fieldName} className="space-y-2">
-          <label htmlFor={fieldId} className="text-sm font-medium">
-            {fieldTitle} (JSON)
-            {isRequired && <span className="text-destructive ml-1">*</span>}
-          </label>
-          <Textarea
-            id={fieldId}
-            value={currentRaw}
-            onChange={(e) => {
-              const text = e.target.value;
-              setRawJsonValues((prev: Record<string, string>) => ({ ...prev, [fieldName]: text }));
-              if (text.trim() === "") {
-                // Empty input clears value
-                setRawJsonErrors((prev: Record<string, string | null>) => ({ ...prev, [fieldName]: null }));
-                handleFieldChange(fieldName, null);
-                return;
-              }
-              try {
-                const parsed = JSON.parse(text);
-                setRawJsonErrors((prev: Record<string, string | null>) => ({ ...prev, [fieldName]: null }));
-                handleFieldChange(fieldName, parsed);
-              } catch {
-                setRawJsonErrors((prev: Record<string, string | null>) => ({ ...prev, [fieldName]: "Invalid JSON" }));
-              }
-            }}
-            placeholder={fieldDescription || placeholder}
-            className={`font-mono ${rawJsonErrors[fieldName] ? "border-destructive focus-visible:ring-destructive" : ""}`}
-            rows={3}
-          />
-          {rawJsonErrors[fieldName] ? (
-            <p className="text-xs text-destructive mt-1">{rawJsonErrors[fieldName]}</p>
-          ) : (
-            <p className="text-xs text-muted-foreground">{typeHint}</p>
-          )}
-          {fieldDescription && (
-            <p className="text-xs text-muted-foreground">{fieldDescription}</p>
-          )}
-        </div>
-      );
-    }
-  };
+  const hasSchemaFields = Boolean(schema?.properties && Object.keys(schema.properties).length > 0);
 
   if (!selectedWorkflow) {
     return (
@@ -418,12 +268,13 @@ export function WorkflowConfigPanel({
           <>
             {/* Form Fields */}
             <div className="space-y-4">
-              {schema?.properties &&
-              Object.keys(schema.properties).length > 0 ? (
-                Object.entries(schema.properties).map(
-                  ([fieldName, fieldSchema]) =>
-                    renderFormField(fieldName, fieldSchema),
-                )
+              {hasSchemaFields ? (
+                <JsonSchemaEditor
+                  schema={schema}
+                  values={formData}
+                  onChange={setFormData}
+                  onErrorsChange={setRawJsonErrors}
+                />
               ) : (
                 <div className="space-y-2">
                   <label htmlFor="raw-input" className="text-sm font-medium">
