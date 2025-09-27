@@ -56,6 +56,8 @@ export function WorkflowConfigPanel({
   const [finalResultError, setFinalResultError] = useState<string | null>(null);
   const [rawInput, setRawInput] = useState<string>("");
   const [rawInputError, setRawInputError] = useState<string | null>(null);
+  const [rawJsonValues, setRawJsonValues] = useState<Record<string, string>>({});
+  const [rawJsonErrors, setRawJsonErrors] = useState<Record<string, string | null>>({});
 
   const workflowsClient = useWorkflowsClient();
   const { runWorkflow, isCreating, error: runError } = useWorkflowRun();
@@ -89,6 +91,8 @@ export function WorkflowConfigPanel({
       setFormData({});
       setRawInput("");
       setRawInputError(null);
+      setRawJsonValues({});
+      setRawJsonErrors({});
     }
   }, [selectedWorkflow, workflowsClient]);
 
@@ -141,6 +145,8 @@ export function WorkflowConfigPanel({
       setFormData({});
       setRawInput(JSON.stringify({}, null, 2));
       setRawInputError(null);
+      setRawJsonValues({});
+      setRawJsonErrors({});
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch schema");
       setSchema(null);
@@ -295,7 +301,28 @@ export function WorkflowConfigPanel({
         </div>
       );
     } else {
-      // Default to textarea for complex types
+      // Default to textarea for complex types: maintain raw text independent of parsed value
+      const lowerType = (fieldType || "").toLowerCase();
+      const looksLikeArray =
+        lowerType.includes("array") || lowerType.includes("list") || /\w+\s*\[.*\]/.test(fieldType);
+      const looksLikeObject =
+        lowerType.includes("object") || lowerType.includes("map") || lowerType.includes("dict");
+      const typeHint = looksLikeArray
+        ? 'Expected: JSON array (e.g., ["a", "b"])'
+        : looksLikeObject
+        ? 'Expected: JSON object (e.g., {"key": "value"})'
+        : "Expected: valid JSON (object or array)";
+      const placeholder = looksLikeArray
+        ? '["item1", "item2"]'
+        : looksLikeObject
+        ? '{"key": "value"}'
+        : "Enter value as JSON";
+      const currentRaw =
+        rawJsonValues[fieldName] !== undefined
+          ? rawJsonValues[fieldName]
+          : formData[fieldName] !== undefined
+          ? JSON.stringify(formData[fieldName], null, 2)
+          : "";
       return (
         <div key={fieldName} className="space-y-2">
           <label htmlFor={fieldId} className="text-sm font-medium">
@@ -304,27 +331,33 @@ export function WorkflowConfigPanel({
           </label>
           <Textarea
             id={fieldId}
-            value={
-              formData[fieldName]
-                ? JSON.stringify(formData[fieldName], null, 2)
-                : ""
-            }
+            value={currentRaw}
             onChange={(e) => {
+              const text = e.target.value;
+              setRawJsonValues((prev: Record<string, string>) => ({ ...prev, [fieldName]: text }));
+              if (text.trim() === "") {
+                // Empty input clears value
+                setRawJsonErrors((prev: Record<string, string | null>) => ({ ...prev, [fieldName]: null }));
+                handleFieldChange(fieldName, null);
+                return;
+              }
               try {
-                const parsed = JSON.parse(e.target.value);
+                const parsed = JSON.parse(text);
+                setRawJsonErrors((prev: Record<string, string | null>) => ({ ...prev, [fieldName]: null }));
                 handleFieldChange(fieldName, parsed);
               } catch {
-                // Keep the raw string for now
-                handleFieldChange(fieldName, e.target.value);
+                setRawJsonErrors((prev: Record<string, string | null>) => ({ ...prev, [fieldName]: "Invalid JSON" }));
               }
             }}
-            placeholder={
-              fieldDescription ||
-              `Enter ${fieldTitle.toLowerCase()} (JSON format)`
-            }
-            className="font-mono"
+            placeholder={fieldDescription || placeholder}
+            className={`font-mono ${rawJsonErrors[fieldName] ? "border-destructive focus-visible:ring-destructive" : ""}`}
             rows={3}
           />
+          {rawJsonErrors[fieldName] ? (
+            <p className="text-xs text-destructive mt-1">{rawJsonErrors[fieldName]}</p>
+          ) : (
+            <p className="text-xs text-muted-foreground">{typeHint}</p>
+          )}
           {fieldDescription && (
             <p className="text-xs text-muted-foreground">{fieldDescription}</p>
           )}
@@ -453,9 +486,12 @@ export function WorkflowConfigPanel({
       {/* Footer with Run Button */}
       {!loading && !error && (
         <div className="p-4 border-t border-border">
+          {Object.values(rawJsonErrors).some((e) => e) && (
+            <p className="text-xs text-destructive mb-2">Fix invalid JSON fields before running.</p>
+          )}
           <Button
             onClick={handleRunWorkflow}
-            disabled={isCreating}
+            disabled={isCreating || Object.values(rawJsonErrors).some((e) => e)}
             className="w-full"
           >
             {isCreating ? "Starting..." : "Run Workflow"}
