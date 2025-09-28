@@ -116,7 +116,9 @@ export function RunDetailsPanel({
     useMemo(
       () =>
         hideInternal
-          ? indexedEvents.filter(({ event }) => !isInternalEventType(event.type))
+          ? indexedEvents.filter(
+              ({ event }) => !isInternalEventType(event.type),
+            )
           : indexedEvents,
       [indexedEvents, hideInternal],
     );
@@ -173,7 +175,10 @@ export function RunDetailsPanel({
             <div className="p-4 flex-1 flex flex-col">
               <WorkflowVisualization
                 workflowName={selectedWorkflow || null}
-                events={events.map((e: WorkflowEvent) => ({ type: e.type, data: e.data }))}
+                events={events.map((e: WorkflowEvent) => ({
+                  type: e.type,
+                  data: e.data,
+                }))}
                 className="w-full flex-1 min-h-[400px]"
               />
             </div>
@@ -197,7 +202,9 @@ export function RunDetailsPanel({
                     <Switch
                       id="hide-internal"
                       checked={hideInternal}
-                      onCheckedChange={(v: boolean) => setHideInternal(Boolean(v))}
+                      onCheckedChange={(v: boolean) =>
+                        setHideInternal(Boolean(v))
+                      }
                     />
                   </div>
                   <Button
@@ -244,35 +251,38 @@ export function RunDetailsPanel({
                           originalIndex: number;
                         };
                         return (
-                        <TableRow key={`${originalIndex}-${event.type}`}>
-                          <TableCell className="text-xs text-muted-foreground align-top">
-                            {index + 1}
-                          </TableCell>
-                          <TableCell className="py-3">
-                            <div className="space-y-2">
-                              <div className="flex items-baseline justify-between">
-                                <code className="text-sm font-mono">
-                                  {event.type}
-                                </code>
-                                {eventTimestamps[originalIndex] !== undefined ? (
-                                  <span className="text-[10px] text-muted-foreground font-mono ml-2 whitespace-nowrap">
-                                    {formatTime(eventTimestamps[originalIndex])}
-                                  </span>
-                                ) : null}
+                          <TableRow key={`${originalIndex}-${event.type}`}>
+                            <TableCell className="text-xs text-muted-foreground align-top">
+                              {index + 1}
+                            </TableCell>
+                            <TableCell className="py-3">
+                              <div className="space-y-2">
+                                <div className="flex items-baseline justify-between">
+                                  <code className="text-sm font-mono">
+                                    {event.type}
+                                  </code>
+                                  {eventTimestamps[originalIndex] !==
+                                  undefined ? (
+                                    <span className="text-[10px] text-muted-foreground font-mono ml-2 whitespace-nowrap">
+                                      {formatTime(
+                                        eventTimestamps[originalIndex],
+                                      )}
+                                    </span>
+                                  ) : null}
+                                </div>
+                                <CodeBlock
+                                  language={
+                                    typeof event.data === "string"
+                                      ? "text"
+                                      : "json"
+                                  }
+                                  value={formatJsonData(event.data)}
+                                  wrapLongLines={compactJson}
+                                  className="rounded border max-h-64 overflow-auto"
+                                />
                               </div>
-                              <CodeBlock
-                                language={
-                                  typeof event.data === "string"
-                                    ? "text"
-                                    : "json"
-                                }
-                                value={formatJsonData(event.data)}
-                                wrapLongLines={compactJson}
-                                className="rounded border max-h-64 overflow-auto"
-                              />
-                            </div>
-                          </TableCell>
-                        </TableRow>
+                            </TableCell>
+                          </TableRow>
                         );
                       })}
                     </TableBody>
