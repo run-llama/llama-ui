@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   useWorkflowHandler,
   Badge,
   Button,
+  Label,
   Table,
   TableBody,
   TableCell,
@@ -13,6 +14,7 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
+  Switch,
 } from "@llamaindex/ui";
 import { CodeBlock } from "./code-block";
 import { WorkflowVisualization } from "./workflow-visualization";
@@ -36,6 +38,17 @@ export function RunDetailsPanel({
     "visualization",
   );
   const [eventTimestamps, setEventTimestamps] = useState<number[]>([]);
+  const [hideInternal, setHideInternal] = useState(true);
+
+  const INTERNAL_EVENT_TYPES = useMemo(
+    () => new Set(["workflows.events.StepStateChanged", "workflows.events.EventsQueueChanged"]),
+    [],
+  );
+
+  const visibleEvents = useMemo(() => {
+    if (!hideInternal) return events;
+    return events.filter((e) => !INTERNAL_EVENT_TYPES.has(e.type));
+  }, [events, hideInternal, INTERNAL_EVENT_TYPES]);
 
   const formatJsonData = (data: unknown) => {
     if (!data || typeof data !== "object") {
@@ -64,22 +77,21 @@ export function RunDetailsPanel({
 
   // Append timestamps as new events arrive; trim if events are cleared
   useEffect(() => {
-    setEventTimestamps((prev) => {
-      if (events.length < prev.length) {
-        return prev.slice(0, events.length);
+    setEventTimestamps((prev: number[]) => {
+      // Work off of visibleEvents so timestamps align with rendered rows
+      const targetLen = visibleEvents.length;
+      if (targetLen < prev.length) {
+        return prev.slice(0, targetLen);
       }
-      if (events.length > prev.length) {
-        const additions = Array.from(
-          { length: events.length - prev.length },
-          () => Date.now(),
-        );
+      if (targetLen > prev.length) {
+        const additions = Array.from({ length: targetLen - prev.length }, () => Date.now());
         return [...prev, ...additions];
       }
       return prev;
     });
     // Only depend on length to avoid re-stamping on identity changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [events.length]);
+  }, [visibleEvents.length]);
 
   const currentTab: "visualization" | "events" = tab ?? internalTab;
   const handleTabChange = (value: string) => {
@@ -155,15 +167,27 @@ export function RunDetailsPanel({
             <div className="flex-1 flex flex-col overflow-hidden">
               <div className="px-4 pb-2 flex items-center justify-between">
                 <h4 className="font-medium text-sm">
-                  Event Stream ({events.length} events)
+                  Event Stream ({visibleEvents.length} events)
                 </h4>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setCompactJson(!compactJson)}
-                >
-                  {compactJson ? "Formatted" : "Compact"}
-                </Button>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id="hide-internal-events"
+                      checked={hideInternal}
+                      onCheckedChange={(v: boolean) => setHideInternal(Boolean(v))}
+                    />
+                    <Label htmlFor="hide-internal-events" className="text-xs">
+                      Hide internal events
+                    </Label>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setCompactJson(!compactJson)}
+                  >
+                    {compactJson ? "Formatted" : "Compact"}
+                  </Button>
+                </div>
               </div>
 
               <div className="flex-1 overflow-auto">
@@ -173,7 +197,7 @@ export function RunDetailsPanel({
                       Start a run to see events
                     </p>
                   </div>
-                ) : events.length === 0 ? (
+                ) : visibleEvents.length === 0 ? (
                   <div className="flex-1 flex items-center justify-center">
                     <p className="text-muted-foreground text-sm">
                       No events yet...
@@ -188,7 +212,7 @@ export function RunDetailsPanel({
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {events.map((event, index) => (
+                      {visibleEvents.map((event: { type: string; data: unknown }, index: number) => (
                         <TableRow key={index}>
                           <TableCell className="text-xs text-muted-foreground align-top">
                             {index + 1}
