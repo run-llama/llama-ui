@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import {
   useWorkflowHandler,
   Badge,
@@ -27,6 +27,11 @@ interface RunDetailsPanelProps {
   onTabChange?: (value: "visualization" | "events") => void;
 }
 
+const INTERNAL_EVENT_TYPES = new Set([
+  "workflows.events.StepStateChanged",
+  "workflows.events.EventsQueueChanged",
+]);
+
 export function RunDetailsPanel({
   handlerId,
   selectedWorkflow,
@@ -39,9 +44,11 @@ export function RunDetailsPanel({
     "visualization",
   );
   const [hideInternal, setHideInternal] = useState(true);
-  const isInternalEvent = (type: string) =>
-    type === "workflows.events.StepStateChanged" ||
-    type === "workflows.events.EventsQueueChanged";
+
+  const visibleEvents = useMemo<WorkflowEvent[]>(() => {
+    if (!hideInternal) return events;
+    return events.filter((e) => !INTERNAL_EVENT_TYPES.has(e.type));
+  }, [events, hideInternal]);
 
   const formatJsonData = (data: unknown) => {
     if (!data || typeof data !== "object") {
@@ -50,20 +57,7 @@ export function RunDetailsPanel({
     return JSON.stringify(data, null, compactJson ? 0 : 2);
   };
 
-  const formatTime = (epochMs?: number): string => {
-    if (!epochMs) return "";
-    const d = new Date(epochMs);
-    const base = d.toLocaleTimeString([], {
-      hour12: false,
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
-    const ms = String(d.getMilliseconds()).padStart(3, "0");
-    return `${base}.${ms}`;
-  };
-
-  // No parent-level timestamp management; handled in EventList
+  // No timestamp management; EventList is pure presentational
 
   const currentTab: "visualization" | "events" = tab ?? internalTab;
   const handleTabChange = (value: string) => {
@@ -138,9 +132,7 @@ export function RunDetailsPanel({
             {/* Event Stream Table */}
             <div className="flex-1 flex flex-col overflow-hidden">
               <div className="px-4 pb-2 flex items-center justify-between">
-                <h4 className="font-medium text-sm">
-                  Event Stream ({hideInternal ? events.filter((e) => !isInternalEvent(e.type)).length : events.length} events)
-                </h4>
+                <h4 className="font-medium text-sm">Event Stream ({visibleEvents.length} events)</h4>
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2">
                     <Switch
@@ -169,14 +161,43 @@ export function RunDetailsPanel({
                       Start a run to see events
                     </p>
                   </div>
-                ) : (hideInternal ? events.filter((e) => !isInternalEvent(e.type)).length === 0 : events.length === 0) ? (
+                ) : visibleEvents.length === 0 ? (
                   <div className="flex-1 flex items-center justify-center">
                     <p className="text-muted-foreground text-sm">
                       No events yet...
                     </p>
                   </div>
                 ) : (
-                  <EventList events={events} hideInternal={hideInternal} compactJson={compactJson} formatJsonData={formatJsonData} />
+                  <Table>
+                    <TableHeader className="sticky top-0 bg-background">
+                      <TableRow>
+                        <TableHead className="w-12">#</TableHead>
+                        <TableHead>Event</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {visibleEvents.map((event: WorkflowEvent, index: number) => (
+                        <TableRow key={index}>
+                          <TableCell className="text-xs text-muted-foreground align-top">
+                            {index + 1}
+                          </TableCell>
+                          <TableCell className="py-3">
+                            <div className="space-y-2">
+                              <div className="flex items-baseline justify-between">
+                                <code className="text-sm font-mono">{event.type}</code>
+                              </div>
+                              <CodeBlock
+                                language="json"
+                                value={formatJsonData(event.data)}
+                                wrapLongLines={compactJson}
+                                className="rounded border max-h-64 overflow-auto"
+                              />
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 )}
               </div>
             </div>
@@ -184,87 +205,5 @@ export function RunDetailsPanel({
         </Tabs>
       </div>
     </div>
-  );
-}
-
-function EventList({
-  events,
-  hideInternal,
-  compactJson,
-  formatJsonData,
-}: {
-  events: WorkflowEvent[];
-  hideInternal: boolean;
-  compactJson: boolean;
-  formatJsonData: (data: unknown | undefined) => string;
-}) {
-  const [timestamps, setTimestamps] = useState<number[]>([]);
-
-  const isInternalEvent = (type: string) =>
-    type === "workflows.events.StepStateChanged" ||
-    type === "workflows.events.EventsQueueChanged";
-
-  const rendered = hideInternal ? events.filter((e) => !isInternalEvent(e.type)) : events;
-
-  useEffect(() => {
-    setTimestamps((prev) => {
-      if (rendered.length < prev.length) return prev.slice(0, rendered.length);
-      if (rendered.length > prev.length) {
-        const additions = Array.from({ length: rendered.length - prev.length }, () => Date.now());
-        return [...prev, ...additions];
-      }
-      return prev;
-    });
-  }, [rendered.length]);
-
-  const formatTime = (epochMs?: number): string => {
-    if (!epochMs) return "";
-    const d = new Date(epochMs);
-    const base = d.toLocaleTimeString([], {
-      hour12: false,
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
-    const ms = String(d.getMilliseconds()).padStart(3, "0");
-    return `${base}.${ms}`;
-  };
-
-  return (
-    <Table>
-      <TableHeader className="sticky top-0 bg-background">
-        <TableRow>
-          <TableHead className="w-12">#</TableHead>
-          <TableHead>Event</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {rendered.map((event: WorkflowEvent, index: number) => (
-          <TableRow key={index}>
-            <TableCell className="text-xs text-muted-foreground align-top">
-              {index + 1}
-            </TableCell>
-            <TableCell className="py-3">
-              <div className="space-y-2">
-                <div className="flex items-baseline justify-between">
-                  <code className="text-sm font-mono">{event.type}</code>
-                  {timestamps[index] !== undefined ? (
-                    <span className="text-[10px] text-muted-foreground font-mono ml-2 whitespace-nowrap">
-                      {formatTime(timestamps[index])}
-                    </span>
-                  ) : null}
-                </div>
-                <CodeBlock
-                  language="json"
-                  value={formatJsonData(event.data)}
-                  wrapLongLines={compactJson}
-                  className="rounded border max-h-64 overflow-auto"
-                />
-              </div>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
   );
 }
