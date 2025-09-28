@@ -38,8 +38,11 @@ export function RunDetailsPanel({
   const [eventTimestamps, setEventTimestamps] = useState<number[]>([]);
 
   const formatJsonData = (data: unknown) => {
+    if (typeof data === "string") {
+      return data;
+    }
     if (!data || typeof data !== "object") {
-      return String(data || "");
+      return String(data ?? "");
     }
     return JSON.stringify(data, null, compactJson ? 0 : 2);
   };
@@ -206,7 +209,7 @@ export function RunDetailsPanel({
                                 ) : null}
                               </div>
                               <CodeBlock
-                                language="json"
+                                language={typeof event.data === "string" ? "text" : "json"}
                                 value={formatJsonData(event.data)}
                                 wrapLongLines={compactJson}
                                 className="rounded border max-h-64 overflow-auto"

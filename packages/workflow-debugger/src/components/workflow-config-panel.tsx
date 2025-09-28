@@ -323,8 +323,12 @@ export function WorkflowConfigPanel({
             </div>
           ) : (
             <CodeBlock
-              language="json"
-              value={JSON.stringify(finalResult, null, 2)}
+              language={typeof finalResult === "string" ? "text" : "json"}
+              value={
+                typeof finalResult === "string"
+                  ? (finalResult as string)
+                  : JSON.stringify(finalResult, null, 2)
+              }
               className="rounded border overflow-hidden"
             />
           )}
