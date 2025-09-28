@@ -6,13 +6,8 @@ import {
   Button,
   Textarea,
   Skeleton,
-  Input,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
 } from "@llamaindex/ui";
+import { JsonSchemaEditor } from "./json-schema-editor";
 import { CodeBlock } from "./code-block";
 import {
   getResultsByHandlerId,
@@ -56,6 +51,9 @@ export function WorkflowConfigPanel({
   const [finalResultError, setFinalResultError] = useState<string | null>(null);
   const [rawInput, setRawInput] = useState<string>("");
   const [rawInputError, setRawInputError] = useState<string | null>(null);
+  const [rawJsonErrors, setRawJsonErrors] = useState<
+    Record<string, string | null>
+  >({});
 
   const workflowsClient = useWorkflowsClient();
   const { runWorkflow, isCreating, error: runError } = useWorkflowRun();
@@ -89,6 +87,7 @@ export function WorkflowConfigPanel({
       setFormData({});
       setRawInput("");
       setRawInputError(null);
+      setRawJsonErrors({});
     }
   }, [selectedWorkflow, workflowsClient]);
 
@@ -141,6 +140,7 @@ export function WorkflowConfigPanel({
       setFormData({});
       setRawInput(JSON.stringify({}, null, 2));
       setRawInputError(null);
+      setRawJsonErrors({});
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch schema");
       setSchema(null);
@@ -198,13 +198,6 @@ export function WorkflowConfigPanel({
     void doFetchFinalResult();
   }, [activeHandlerId, workflowsClient]);
 
-  const handleFieldChange = (fieldName: string, value: JSONValue) => {
-    setFormData((prev) => ({
-      ...prev,
-      [fieldName]: value,
-    }));
-  };
-
   const handleRunWorkflow = async () => {
     if (!selectedWorkflow) return;
 
@@ -216,122 +209,9 @@ export function WorkflowConfigPanel({
     }
   };
 
-  const renderFormField = (fieldName: string, fieldSchema: SchemaProperty) => {
-    const isRequired = schema?.required?.includes(fieldName) || false;
-    const fieldTitle = fieldSchema.title || fieldName;
-    const fieldType = fieldSchema.type || "string";
-    const fieldDescription = fieldSchema.description || "";
-
-    const fieldId = `field-${fieldName}`;
-
-    if (fieldType === "string") {
-      return (
-        <div key={fieldName} className="space-y-2">
-          <label htmlFor={fieldId} className="text-sm font-medium">
-            {fieldTitle}
-            {isRequired && <span className="text-destructive ml-1">*</span>}
-          </label>
-          <Textarea
-            id={fieldId}
-            value={(formData[fieldName] as string) || ""}
-            onChange={(e) => handleFieldChange(fieldName, e.target.value)}
-            placeholder={
-              fieldDescription || `Enter ${fieldTitle.toLowerCase()}`
-            }
-            rows={3}
-          />
-          {fieldDescription && (
-            <p className="text-xs text-muted-foreground">{fieldDescription}</p>
-          )}
-        </div>
-      );
-    } else if (fieldType === "number" || fieldType === "integer") {
-      return (
-        <div key={fieldName} className="space-y-2">
-          <label htmlFor={fieldId} className="text-sm font-medium">
-            {fieldTitle}
-            {isRequired && <span className="text-destructive ml-1">*</span>}
-          </label>
-          <Input
-            id={fieldId}
-            type="number"
-            value={(formData[fieldName] as number) || 0}
-            onChange={(e) =>
-              handleFieldChange(fieldName, parseFloat(e.target.value) || "")
-            }
-            placeholder={
-              fieldDescription || `Enter ${fieldTitle.toLowerCase()}`
-            }
-            step={fieldType === "integer" ? "1" : "any"}
-          />
-          {fieldDescription && (
-            <p className="text-xs text-muted-foreground">{fieldDescription}</p>
-          )}
-        </div>
-      );
-    } else if (fieldType === "boolean") {
-      return (
-        <div key={fieldName} className="space-y-2">
-          <label htmlFor={fieldId} className="text-sm font-medium">
-            {fieldTitle}
-            {isRequired && <span className="text-destructive ml-1">*</span>}
-          </label>
-          <Select
-            onValueChange={(value) =>
-              handleFieldChange(fieldName, value === "true")
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="true">True</SelectItem>
-              <SelectItem value="false">False</SelectItem>
-            </SelectContent>
-          </Select>
-          {fieldDescription && (
-            <p className="text-xs text-muted-foreground">{fieldDescription}</p>
-          )}
-        </div>
-      );
-    } else {
-      // Default to textarea for complex types
-      return (
-        <div key={fieldName} className="space-y-2">
-          <label htmlFor={fieldId} className="text-sm font-medium">
-            {fieldTitle} (JSON)
-            {isRequired && <span className="text-destructive ml-1">*</span>}
-          </label>
-          <Textarea
-            id={fieldId}
-            value={
-              formData[fieldName]
-                ? JSON.stringify(formData[fieldName], null, 2)
-                : ""
-            }
-            onChange={(e) => {
-              try {
-                const parsed = JSON.parse(e.target.value);
-                handleFieldChange(fieldName, parsed);
-              } catch {
-                // Keep the raw string for now
-                handleFieldChange(fieldName, e.target.value);
-              }
-            }}
-            placeholder={
-              fieldDescription ||
-              `Enter ${fieldTitle.toLowerCase()} (JSON format)`
-            }
-            className="font-mono"
-            rows={3}
-          />
-          {fieldDescription && (
-            <p className="text-xs text-muted-foreground">{fieldDescription}</p>
-          )}
-        </div>
-      );
-    }
-  };
+  const hasSchemaFields = Boolean(
+    schema?.properties && Object.keys(schema.properties).length > 0,
+  );
 
   if (!selectedWorkflow) {
     return (
@@ -385,12 +265,13 @@ export function WorkflowConfigPanel({
           <>
             {/* Form Fields */}
             <div className="space-y-4">
-              {schema?.properties &&
-              Object.keys(schema.properties).length > 0 ? (
-                Object.entries(schema.properties).map(
-                  ([fieldName, fieldSchema]) =>
-                    renderFormField(fieldName, fieldSchema),
-                )
+              {hasSchemaFields ? (
+                <JsonSchemaEditor
+                  schema={schema}
+                  values={formData}
+                  onChange={setFormData}
+                  onErrorsChange={setRawJsonErrors}
+                />
               ) : (
                 <div className="space-y-2">
                   <label htmlFor="raw-input" className="text-sm font-medium">
@@ -453,9 +334,14 @@ export function WorkflowConfigPanel({
       {/* Footer with Run Button */}
       {!loading && !error && (
         <div className="p-4 border-t border-border">
+          {Object.values(rawJsonErrors).some((e) => e) && (
+            <p className="text-xs text-destructive mb-2">
+              Fix invalid JSON fields before running.
+            </p>
+          )}
           <Button
             onClick={handleRunWorkflow}
-            disabled={isCreating}
+            disabled={isCreating || Object.values(rawJsonErrors).some((e) => e)}
             className="w-full"
           >
             {isCreating ? "Starting..." : "Run Workflow"}
