@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   useWorkflowHandler,
   Badge,
   Button,
+  Label,
+  Switch,
   Table,
   TableBody,
   TableCell,
@@ -14,6 +16,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@llamaindex/ui";
+import type { WorkflowEvent } from "@llamaindex/ui";
 import { CodeBlock } from "./code-block";
 import { WorkflowVisualization } from "./workflow-visualization";
 
@@ -35,6 +38,7 @@ export function RunDetailsPanel({
   const [internalTab, setInternalTab] = useState<"visualization" | "events">(
     "visualization",
   );
+  const [hideInternal, setHideInternal] = useState(true);
   const [eventTimestamps, setEventTimestamps] = useState<number[]>([]);
 
   const formatJsonData = (data: unknown) => {
@@ -67,7 +71,7 @@ export function RunDetailsPanel({
 
   // Append timestamps as new events arrive; trim if events are cleared
   useEffect(() => {
-    setEventTimestamps((prev) => {
+    setEventTimestamps((prev: number[]) => {
       if (events.length < prev.length) {
         return prev.slice(0, events.length);
       }
@@ -91,6 +95,31 @@ export function RunDetailsPanel({
     if (onTabChange) onTabChange(nextValue);
     else setInternalTab(nextValue);
   };
+
+  // Determine which events are considered internal/noisy for display
+  const isInternalEventType = (type: string | undefined): boolean => {
+    if (!type) return false;
+    return (
+      type === "workflows.events.StepStateChanged" ||
+      type === "workflows.events.EventsQueueChanged"
+    );
+  };
+
+  // Preserve original indices to keep timestamp alignment when filtering
+  const indexedEvents: { event: WorkflowEvent; originalIndex: number }[] =
+    useMemo(
+      () => events.map((event, i) => ({ event, originalIndex: i })),
+      [events],
+    );
+
+  const displayedEvents: { event: WorkflowEvent; originalIndex: number }[] =
+    useMemo(
+      () =>
+        hideInternal
+          ? indexedEvents.filter(({ event }) => !isInternalEventType(event.type))
+          : indexedEvents,
+      [indexedEvents, hideInternal],
+    );
 
   return (
     <div className="h-full flex flex-col">
@@ -144,7 +173,7 @@ export function RunDetailsPanel({
             <div className="p-4 flex-1 flex flex-col">
               <WorkflowVisualization
                 workflowName={selectedWorkflow || null}
-                events={events.map((e) => ({ type: e.type, data: e.data }))}
+                events={events.map((e: WorkflowEvent) => ({ type: e.type, data: e.data }))}
                 className="w-full flex-1 min-h-[400px]"
               />
             </div>
@@ -158,15 +187,27 @@ export function RunDetailsPanel({
             <div className="flex-1 flex flex-col overflow-hidden">
               <div className="px-4 pb-2 flex items-center justify-between">
                 <h4 className="font-medium text-sm">
-                  Event Stream ({events.length} events)
+                  Event Stream ({displayedEvents.length} events)
                 </h4>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setCompactJson(!compactJson)}
-                >
-                  {compactJson ? "Formatted" : "Compact"}
-                </Button>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="hide-internal" className="text-xs">
+                      Hide internal
+                    </Label>
+                    <Switch
+                      id="hide-internal"
+                      checked={hideInternal}
+                      onCheckedChange={(v: boolean) => setHideInternal(Boolean(v))}
+                    />
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setCompactJson(!compactJson)}
+                  >
+                    {compactJson ? "Formatted" : "Compact"}
+                  </Button>
+                </div>
               </div>
 
               <div className="flex-1 overflow-auto">
@@ -182,6 +223,12 @@ export function RunDetailsPanel({
                       No events yet...
                     </p>
                   </div>
+                ) : displayedEvents.length === 0 ? (
+                  <div className="flex-1 flex items-center justify-center">
+                    <p className="text-muted-foreground text-sm">
+                      No visible events. Try disabling the filter.
+                    </p>
+                  </div>
                 ) : (
                   <Table>
                     <TableHeader className="sticky top-0 bg-background">
@@ -191,8 +238,13 @@ export function RunDetailsPanel({
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {events.map((event, index) => (
-                        <TableRow key={index}>
+                      {displayedEvents.map((item, index) => {
+                        const { event, originalIndex } = item as {
+                          event: WorkflowEvent;
+                          originalIndex: number;
+                        };
+                        return (
+                        <TableRow key={`${originalIndex}-${event.type}`}>
                           <TableCell className="text-xs text-muted-foreground align-top">
                             {index + 1}
                           </TableCell>
@@ -202,9 +254,9 @@ export function RunDetailsPanel({
                                 <code className="text-sm font-mono">
                                   {event.type}
                                 </code>
-                                {eventTimestamps[index] !== undefined ? (
+                                {eventTimestamps[originalIndex] !== undefined ? (
                                   <span className="text-[10px] text-muted-foreground font-mono ml-2 whitespace-nowrap">
-                                    {formatTime(eventTimestamps[index])}
+                                    {formatTime(eventTimestamps[originalIndex])}
                                   </span>
                                 ) : null}
                               </div>
@@ -221,7 +273,8 @@ export function RunDetailsPanel({
                             </div>
                           </TableCell>
                         </TableRow>
-                      ))}
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 )}
