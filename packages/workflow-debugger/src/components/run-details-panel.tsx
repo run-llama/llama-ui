@@ -209,7 +209,11 @@ export function RunDetailsPanel({
                                 ) : null}
                               </div>
                               <CodeBlock
-                                language={typeof event.data === "string" ? "text" : "json"}
+                                language={
+                                  typeof event.data === "string"
+                                    ? "text"
+                                    : "json"
+                                }
                                 value={formatJsonData(event.data)}
                                 wrapLongLines={compactJson}
                                 className="rounded border max-h-64 overflow-auto"
