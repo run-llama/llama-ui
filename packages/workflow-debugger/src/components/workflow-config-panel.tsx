@@ -107,7 +107,7 @@ export function WorkflowConfigPanel({
 
     if (
       (isCompleted || hasStopEvent) &&
-      !finalResult &&
+      finalResult === null &&
       !resultLoading &&
       !finalResultError
     ) {
@@ -308,7 +308,7 @@ export function WorkflowConfigPanel({
       </div>
 
       {/* Final Result */}
-      {(finalResult || finalResultError || resultLoading) && (
+      {(finalResult !== null || finalResultError || resultLoading) && (
         <div className="p-4 border-t border-border">
           <h4 className="font-medium text-sm mb-2">Final Result</h4>
           {resultLoading ? (
@@ -323,8 +323,12 @@ export function WorkflowConfigPanel({
             </div>
           ) : (
             <CodeBlock
-              language="json"
-              value={JSON.stringify(finalResult, null, 2)}
+              language={typeof finalResult === "string" ? "text" : "json"}
+              value={
+                typeof finalResult === "string"
+                  ? finalResult
+                  : JSON.stringify(finalResult, null, 2)
+              }
               className="rounded border overflow-hidden"
             />
           )}
