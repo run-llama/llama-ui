@@ -1,5 +1,12 @@
 # @llamaindex/workflow-debugger
 
+## 0.1.3
+
+### Patch Changes
+
+- 50ceb5f: Add toggle to hide/show internal events
+- 4277687: Fix json editor for complex start event fields
+
 ## 0.1.2
 
 ### Patch Changes
