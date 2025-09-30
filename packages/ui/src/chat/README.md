@@ -35,6 +35,7 @@ function MyChat() {
 Creates a chat session backed by a workflow handler.
 
 **Options:**
+
 - `workflowName` (string): Required. Name of the workflow to use
 - `handlerId` (string, optional): Reuse existing session
 - `initialMessages` (Message[], optional): Pre-populate chat
@@ -42,6 +43,7 @@ Creates a chat session backed by a workflow handler.
 - `onError` ((error: Error) => void, optional): Error callback
 
 **Returns:**
+
 ```typescript
 {
   handlerId: string | null;
@@ -60,10 +62,11 @@ Direct access to the chat Zustand store. Useful for advanced use cases.
 
 ```tsx
 const store = useChatStore();
-const session = useChatStore(state => state.sessions[handlerId]);
+const session = useChatStore((state) => state.sessions[handlerId]);
 ```
 
 **Note on Internal Methods:**
+
 - Methods prefixed with `_` (e.g., `_appendMessage`, `_updateAssistantMessage`) are internal-only
 - These bypass backend sync and can cause FE/BE inconsistency
 - Use public methods (`sendMessage`, `setMessages`) for normal operations
@@ -77,6 +80,7 @@ The chat supports **rich message parts** beyond plain text (citations, files, ev
 ⚡ **Quick Reference**: See [`/specs/001-use-chat/PROTOCOL_QUICKREF.md`](../../../specs/001-use-chat/PROTOCOL_QUICKREF.md)
 
 **Supported Part Types:**
+
 - 📝 **Text** - Markdown content (default)
 - 📚 **Sources** - Citations with hover cards (`<sources>`)
 - ❓ **Suggested Questions** - Follow-up question chips (`<suggested_questions>`)
@@ -85,6 +89,7 @@ The chat supports **rich message parts** beyond plain text (citations, files, ev
 - ⚡ **Events** - Status/progress indicators (`<event>`)
 
 **Example LLM Output:**
+
 ```
 Based on research, climate change is accelerating.
 
@@ -97,7 +102,8 @@ Based on research, climate change is accelerating.
 </suggested_questions>
 ```
 
-**Status**: 
+**Status**:
+
 - ✅ Protocol defined
 - 🚧 Parser implementation pending
 - ⏳ Backend integration awaiting
@@ -116,12 +122,14 @@ The `useChat` hook follows a store-first architecture:
 ## Message ↔ Event Flow
 
 **Sending a message:**
+
 1. User message → `sendMessage()`
 2. Adapter converts to `WorkflowEvent`
 3. Event sent to workflow handler
 4. Assistant message placeholder created
 
 **Receiving events:**
+
 1. Workflow streams events
 2. Adapter converts events to `MessagePart[]`
 3. Assistant message parts updated in real-time
@@ -135,7 +143,7 @@ The `useChat` hook follows a store-first architecture:
 function MultiChatApp() {
   const chat1 = useChat({ workflowName: "assistant-1" });
   const chat2 = useChat({ workflowName: "assistant-2" });
-  
+
   return (
     <>
       <ChatSection handler={chat1} />
@@ -161,6 +169,7 @@ const chat = useChat({
 ## Testing
 
 Unit tests for adapters:
+
 ```bash
 pnpm test packages/ui/tests/chat/adapters.test.ts
 ```

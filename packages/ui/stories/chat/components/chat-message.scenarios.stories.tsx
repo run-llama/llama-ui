@@ -21,20 +21,18 @@ const meta: Meta<typeof ChatMessage> = {
   decorators: [
     (Story) => (
       <WithBasicHandler>
-        <div className="flex">
-          <div
-            style={{ maxWidth: 720 }}
-            className="flex min-h-0 flex-1 h-screen flex-col overflow-hidden"
-          >
-            <ChatMessages>
-              <div className="flex flex-col gap-4">
-                <Story />
-              </div>
-            </ChatMessages>
-          </div>
-          <div className="flex-1 min-w-0 h-screen">
-            <ChatCanvas />
-          </div>
+        <div
+          style={{ maxWidth: 720 }}
+          className="flex min-h-0 flex-1 h-screen flex-col overflow-hidden"
+        >
+          <ChatMessages>
+            <div className="flex flex-col gap-4">
+              <Story />
+            </div>
+          </ChatMessages>
+        </div>
+        <div className="flex-1 min-w-0 h-screen">
+          <ChatCanvas />
         </div>
       </WithBasicHandler>
     ),

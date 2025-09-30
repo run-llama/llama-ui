@@ -23,7 +23,7 @@ export type ChatRequestOptions = {
 
 export type ChatHandler = {
   messages: Message[];
-  status: "submitted" | "streaming" | "ready" | "error";
+  status: "idle" | "submitted" | "streaming" | "ready" | "error";
   sendMessage: (msg: Message, opts?: ChatRequestOptions) => Promise<void>;
   stop?: () => Promise<void>;
   regenerate?: (opts?: { messageId?: string } & ChatRequestOptions) => void;

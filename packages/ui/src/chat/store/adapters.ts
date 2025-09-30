@@ -6,7 +6,13 @@
 
 import type { Message } from "../components/chat.interface";
 import type { MessagePart, TextPart } from "../components/message-parts/types";
-import type { WorkflowEvent, ChatDeltaEvent, StopEvent, InputRequiredEvent, HumanResponseEvent } from "../../workflows/types";
+import type {
+  WorkflowEvent,
+  ChatDeltaEvent,
+  StopEvent,
+  InputRequiredEvent,
+  HumanResponseEvent,
+} from "../../workflows/types";
 
 /**
  * Extract text content from message parts
@@ -23,7 +29,6 @@ export function extractTextFromParts(parts: MessagePart[]): string {
  * Determine if event is a ChatDeltaEvent
  */
 export function isDeltaEvent(event: WorkflowEvent): event is ChatDeltaEvent {
-  
   return event.type.includes("ChatDeltaEvent");
 }
 
@@ -37,7 +42,9 @@ export function isStopEvent(event: WorkflowEvent): event is StopEvent {
 /**
  * Determine if event is an InputRequiredEvent (signals waiting for user input)
  */
-export function isInputRequiredEvent(event: WorkflowEvent): event is InputRequiredEvent {
+export function isInputRequiredEvent(
+  event: WorkflowEvent
+): event is InputRequiredEvent {
   return event.type === "workflow.events.InputRequiredEvent";
 }
 
@@ -51,12 +58,12 @@ export function isMessageTerminator(event: WorkflowEvent): boolean {
 
 /**
  * Convert a chat Message to a WorkflowEvent
- * 
+ *
  * @throws Error if message has no text content
  */
 export function messageToEvent(message: Message): HumanResponseEvent {
   const text = extractTextFromParts(message.parts);
-  
+
   if (!text || text.trim() === "") {
     throw new Error("Cannot send empty message");
   }
@@ -71,54 +78,57 @@ export function messageToEvent(message: Message): HumanResponseEvent {
 
 /**
  * Auto-complete unclosed markdown syntax for better streaming UX.
- * 
+ *
  * Uses a stack to track unclosed markdown markers and auto-completes them at the end.
  * Handles: **, *, `, ```.
- * 
+ *
  * @param text Raw markdown text (possibly incomplete during streaming)
  * @returns Text with auto-completed markdown syntax
  */
 export function autoCompleteMarkdown(text: string): string {
   const stack: string[] = [];
   let i = 0;
-  
+
   while (i < text.length) {
-    const inFencedCode = stack[stack.length - 1] === '```';
+    const inFencedCode = stack[stack.length - 1] === "```";
     // Check for ``` (fenced code block)
-    if (text.slice(i, i + 3) === '```') {
-      if (stack[stack.length - 1] === '```') {
+    if (text.slice(i, i + 3) === "```") {
+      if (stack[stack.length - 1] === "```") {
         stack.pop(); // Close fenced code block
       } else {
-        stack.push('```'); // Open fenced code block
+        stack.push("```"); // Open fenced code block
       }
       i += 3;
       continue;
     }
-    
+
     // Check for ** (bold)
-    if (text.slice(i, i + 2) === '**') {
-      if (stack[stack.length - 1] === '**') {
+    if (text.slice(i, i + 2) === "**") {
+      if (stack[stack.length - 1] === "**") {
         stack.pop(); // Close bold
       } else {
-        stack.push('**'); // Open bold
+        stack.push("**"); // Open bold
       }
       i += 2;
       continue;
     }
-    
+
     // Check for * (italic)
-    if (text[i] === '*') {
+    if (text[i] === "*") {
       // Ignore * handling inside fenced code blocks
-      if (inFencedCode) { i++; continue; }
+      if (inFencedCode) {
+        i++;
+        continue;
+      }
 
       // Skip if it's part of ** (already handled above)
-      if (text[i - 1] === '*') {
+      if (text[i - 1] === "*") {
         i++;
         continue;
       }
 
       // Skip if it's part of * (already handled above)
-      if (text[i + 1] === '*') {
+      if (text[i + 1] === "*") {
         i++;
         continue;
       }
@@ -126,90 +136,93 @@ export function autoCompleteMarkdown(text: string): string {
       // Skip if it's the last character, not sure if next character is *
       if (i === text.length - 1) {
         // If top of stack is *, we're pretty sure it's a complete italic
-        if (stack[stack.length - 1] === '*') {
+        if (stack[stack.length - 1] === "*") {
           stack.pop(); // Close italic
         }
         i++;
         continue;
       }
 
-      if (stack[stack.length - 1] === '*') {
+      if (stack[stack.length - 1] === "*") {
         stack.pop(); // Close italic
       } else {
-        stack.push('*'); // Open italic
+        stack.push("*"); // Open italic
       }
       i++;
       continue;
     }
-    
+
     // Check for ` (inline code)
-    if (text[i] === '`') {
+    if (text[i] === "`") {
       // Ignore inline backtick handling inside fenced code blocks
-      if (inFencedCode) { i++; continue; }
-      
-      // Skip if it's part of ``` (already handled above)
-      if (text[i - 1] === '`' && text[i - 2] === '`') {
+      if (inFencedCode) {
         i++;
         continue;
       }
-      
+
+      // Skip if it's part of ``` (already handled above)
+      if (text[i - 1] === "`" && text[i - 2] === "`") {
+        i++;
+        continue;
+      }
+
       // Skip if next two chars are also `` (part of ```)
-      if (text[i + 1] === '`' && text[i + 2] === '`') {
+      if (text[i + 1] === "`" && text[i + 2] === "`") {
         i++;
         continue;
       }
 
       // Skip if it's part of *** (already handled above)
-      if (text[i + 1] === '*' && text[i - 1] === '*') {
+      if (text[i + 1] === "*" && text[i - 1] === "*") {
         i++;
         continue;
       }
-      
+
       // Skip if it's the last character, not sure if next character is `
       if (i === text.length - 1) {
         // If top of stack is `, we're pretty sure it's a complete inline code
-        if (stack[stack.length - 1] === '`') {
+        if (stack[stack.length - 1] === "`") {
           stack.pop(); // Close inline code
         }
         i++;
         continue;
       }
-      
-      if (stack[stack.length - 1] === '`') {
+
+      if (stack[stack.length - 1] === "`") {
         stack.pop(); // Close inline code
       } else {
-        stack.push('`'); // Open inline code
+        stack.push("`"); // Open inline code
       }
       i++;
       continue;
     }
-    
+
     i++;
   }
-  
+
   // Auto-complete: append closing markers in LIFO order (reverse of stack)
   let completedText = text;
   while (stack.length > 0) {
     const marker = stack.pop()!;
-    if (marker === '```') {
-      completedText += '\n';
+    if (marker === "```") {
+      completedText += "\n";
     }
     completedText += marker;
   }
-  
+
   return completedText;
 }
 
 /**
  * XML Protocol: Parse text containing XML markers into MessageParts.
- * 
+ *
  * Streaming parsing strategy:
  * - Optimistic for markdown: show immediately (after auto-completion)
  * - Pessimistic for XML: wait for a complete closing tag
  * - Code-block aware: ignore XML-like tags inside fenced code blocks
- * 
+ *
  * This prevents flickering when partial XML tags arrive during streaming.
- * 
+ *
  * Supported markers:
  * - <sources>...</sources> → SourcesPart
  * - <suggested_questions>...</suggested_questions> → SuggestionPart
@@ -217,7 +230,7 @@ export function autoCompleteMarkdown(text: string): string {
  * - <artifact>...</artifact> → ArtifactPart
  * - <event>...</event> → EventPart
  * - Plain text → TextPart
- * 
+ *
  * See: /specs/001-use-chat/CHAT_PROTOCOL.md
  */
 export function parseTextWithXMLMarkers(text: string): MessagePart[] {
@@ -269,7 +282,9 @@ export function parseTextWithXMLMarkers(text: string): MessagePart[] {
     if (startTagMatch) {
       const tagStartIndex = lastIndex + (startTagMatch.index || 0);
       // Use completedText.length to represent the range to the end
-      if (!isInsideCodeBlock(tagStartIndex, completedText.length, codeBlockRanges)) {
+      if (
+        !isInsideCodeBlock(tagStartIndex, completedText.length, codeBlockRanges)
+      ) {
         const before = remaining.slice(0, startTagMatch.index);
         const trimmed = before.trim();
         if (trimmed) {
@@ -291,24 +306,24 @@ export function parseTextWithXMLMarkers(text: string): MessagePart[] {
 /**
  * Find all code block regions (inline code and fenced code blocks)
  * Returns array of [start, end] positions
- * 
+ *
  * Strategy: Process fenced blocks first, then inline code (excluding what's in fenced blocks)
  */
 function findCodeBlockRanges(text: string): Array<[number, number]> {
   const ranges: Array<[number, number]> = [];
-  
+
   // Find fenced code blocks (```...```)
   // Look for ``` at line start, then find matching closing ```
-  const lines = text.split('\n');
+  const lines = text.split("\n");
   let currentIndex = 0;
   let inFencedBlock = false;
   let fenceStart = 0;
-  
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const lineStart = currentIndex;
-    
-    if (line.trim().startsWith('```')) {
+
+    if (line.trim().startsWith("```")) {
       if (!inFencedBlock) {
         // Opening fence
         inFencedBlock = true;
@@ -320,19 +335,19 @@ function findCodeBlockRanges(text: string): Array<[number, number]> {
         ranges.push([fenceStart, fenceEnd]);
       }
     }
-    
+
     currentIndex += line.length + 1; // +1 for newline
   }
-  
+
   // Find inline code (`...`)
   // Only match single-line inline code, not multiline
   const inlinePattern = /`[^`\n]+`/g;
   let match: RegExpExecArray | null;
-  
+
   while ((match = inlinePattern.exec(text)) !== null) {
     const matchStart = match.index;
     const matchEnd = matchStart + match[0].length;
-    
+
     // Only add if not already inside a fenced code block
     let isInFenced = false;
     for (const [blockStart, blockEnd] of ranges) {
@@ -341,12 +356,12 @@ function findCodeBlockRanges(text: string): Array<[number, number]> {
         break;
       }
     }
-    
+
     if (!isInFenced) {
       ranges.push([matchStart, matchEnd]);
     }
   }
-  
+
   return ranges;
 }
 
@@ -381,38 +396,38 @@ function parseXMLMarker(tagName: string, content: string): MessagePart | null {
   try {
     // Parse JSON content
     const data = JSON.parse(content);
-    
+
     switch (tagName) {
       case "sources":
         return {
           type: "data-sources",
           data: data, // Expected: { nodes: SourceNode[] }
         };
-        
+
       case "suggested_questions":
         return {
           type: "data-suggested_questions",
           data: data, // Expected: string[]
         };
-        
+
       case "file":
         return {
           type: "data-file",
           data: data, // Expected: { filename, mediaType, url }
         };
-        
+
       case "artifact":
         return {
           type: "data-artifact",
           data: data, // Expected: { type, created_at, data }
         };
-        
+
       case "event":
         return {
           type: "data-event",
           data: data, // Expected: { title, status, description?, data? }
         };
-        
+
       default:
         // Unknown tag: create AnyPart for extensibility
         return {
@@ -425,7 +440,11 @@ function parseXMLMarker(tagName: string, content: string): MessagePart | null {
     // Error details available in error object if needed for debugging
     if (process.env.NODE_ENV === "development") {
       // eslint-disable-next-line no-console
-      console.warn(`[XML Protocol] Failed to parse <${tagName}> content:`, content, error);
+      console.warn(
+        `[XML Protocol] Failed to parse <${tagName}> content:`,
+        content,
+        error
+      );
     }
     return null;
   }
@@ -433,12 +452,12 @@ function parseXMLMarker(tagName: string, content: string): MessagePart | null {
 
 /**
  * Convert a WorkflowEvent to MessagePart(s) and merge with current parts
- * 
+ *
  * Protocol Implementation:
  * 1. Extract text from event
  * 2. Parse XML markers in text → MessageParts
  * 3. Merge with current parts (concatenate text, append data parts)
- * 
+ *
  * Handles:
  * - Text events with XML markers: Parse and merge
  * - StopEvent: Return unchanged (signals completion)
@@ -463,15 +482,15 @@ export function eventToMessageParts(
   if (isDeltaEvent(event)) {
     let text: string | undefined;
 
-    // Extract text from various data formats
-    if (typeof event.data === "string") {
-      text = event.data;
+    // Extract text from ChatDeltaEvent data format
+    if (event.data && typeof event.data === "object" && "delta" in event.data) {
+      text = event.data.delta;
     }
 
     if (text !== undefined && text.trim()) {
       // Parse XML markers in the text
       const newParts = parseTextWithXMLMarkers(text);
-      
+
       // Merge with current parts
       return mergeMessageParts(currentParts, newParts);
     }
@@ -489,7 +508,7 @@ export function eventToMessageParts(
 
 /**
  * Merge new parts into current parts
- * 
+ *
  * Strategy:
  * - If first new part is TextPart: concatenate with first existing TextPart
  * - Otherwise: append all new parts
@@ -502,31 +521,31 @@ function mergeMessageParts(
   if (newParts.length === 0) {
     return currentParts;
   }
-  
+
   if (currentParts.length === 0) {
     return newParts;
   }
-  
+
   // Find first TextPart in current parts
-  const firstTextIndex = currentParts.findIndex(part => part.type === "text");
+  const firstTextIndex = currentParts.findIndex((part) => part.type === "text");
   const firstNewPart = newParts[0];
-  
+
   // If both have TextParts at the start, concatenate them
   if (firstTextIndex !== -1 && firstNewPart.type === "text") {
     const updatedParts = [...currentParts];
     const currentTextPart = updatedParts[firstTextIndex] as TextPart;
     const newTextPart = firstNewPart as TextPart;
-    
+
     // Concatenate text
     updatedParts[firstTextIndex] = {
       type: "text",
       text: currentTextPart.text + newTextPart.text,
     };
-    
+
     // Append remaining new parts (after the first TextPart)
     return [...updatedParts, ...newParts.slice(1)];
   }
-  
+
   // Otherwise, just append all new parts
   return [...currentParts, ...newParts];
 }

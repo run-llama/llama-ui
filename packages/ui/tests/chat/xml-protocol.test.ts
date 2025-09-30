@@ -35,12 +35,14 @@ More text.`;
     expect(parts[1]).toMatchObject({
       type: "data-sources",
       data: {
-        nodes: [{
-          id: "1",
-          text: "excerpt",
-          url: "https://example.com",
-          metadata: { title: "Paper" },
-        }],
+        nodes: [
+          {
+            id: "1",
+            text: "excerpt",
+            url: "https://example.com",
+            metadata: { title: "Paper" },
+          },
+        ],
       },
     });
     expect(parts[2]).toEqual({ type: "text", text: "More text." });
@@ -236,7 +238,7 @@ End text.`;
     // Stream chunk 1: Text with incomplete tag
     const chunk1 = "Analysis complete.\n\n<sour";
     const parts1 = parseTextWithXMLMarkers(chunk1);
-    
+
     expect(parts1).toHaveLength(1);
     expect(parts1[0]).toEqual({
       type: "text",
@@ -244,9 +246,9 @@ End text.`;
     });
 
     // Stream chunk 2: Complete accumulated text with full tag
-    const chunk2 = "Analysis complete.\n\n<sources>\n{\"nodes\": []}\n</sources>";
+    const chunk2 = 'Analysis complete.\n\n<sources>\n{"nodes": []}\n</sources>';
     const parts2 = parseTextWithXMLMarkers(chunk2);
-    
+
     expect(parts2).toHaveLength(2);
     expect(parts2[0].type).toBe("text");
     expect(parts2[1].type).toBe("data-sources");

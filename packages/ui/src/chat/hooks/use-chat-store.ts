@@ -14,19 +14,17 @@ let globalStore: ReturnType<typeof createChatStore> | null = null;
 
 // Overloaded function signatures for different use cases
 export function useChatStore(): ChatStoreState;
-export function useChatStore<T>(
-  selector: (state: ChatStoreState) => T
-): T;
+export function useChatStore<T>(selector: (state: ChatStoreState) => T): T;
 
 /**
  * Hook to access the chat store
  * Automatically creates a singleton store instance
  * No ApiProvider registration needed!
- * 
+ *
  * @example
  * // Get full state
  * const chatState = useChatStore();
- * 
+ *
  * @example
  * // Use selector for specific data
  * const session = useChatStore(state => state.sessions[handlerId]);

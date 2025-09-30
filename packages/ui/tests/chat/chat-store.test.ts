@@ -70,7 +70,11 @@ describe("Chat Store - Session Management", () => {
   it("should create session with initial messages", async () => {
     const initialMessages: Message[] = [
       { id: "msg-1", role: "user", parts: [{ type: "text", text: "Hello" }] },
-      { id: "msg-2", role: "assistant", parts: [{ type: "text", text: "Hi there!" }] },
+      {
+        id: "msg-2",
+        role: "assistant",
+        parts: [{ type: "text", text: "Hi there!" }],
+      },
     ];
 
     const handlerId = await store.getState().createSession({
@@ -167,22 +171,28 @@ describe("Chat Store - Message Operations", () => {
       workflowName: "chat_agent",
       initialMessages: [
         { id: "msg-1", role: "user", parts: [{ type: "text", text: "Hello" }] },
-        { id: "msg-2", role: "assistant", parts: [{ type: "text", text: "Hi" }] },
+        {
+          id: "msg-2",
+          role: "assistant",
+          parts: [{ type: "text", text: "Hi" }],
+        },
       ],
     });
 
-    const updatedParts = [{ type: "text" as const, text: "Hi there! How can I help?" }];
+    const updatedParts = [
+      { type: "text" as const, text: "Hi there! How can I help?" },
+    ];
     store.getState()._updateAssistantMessage(handlerId, "msg-2", updatedParts);
 
     const session = store.getState().sessions[handlerId];
-    const assistantMsg = session.messages.find(m => m.id === "msg-2");
+    const assistantMsg = session.messages.find((m) => m.id === "msg-2");
     expect(assistantMsg?.parts).toEqual(updatedParts);
   });
 
   // CS-012: sendMessage creates assistant placeholder (calls _appendMessage internally)
   it("should create assistant placeholder when sending message", async () => {
     const { sendEventToHandler } = await import("../../src/chat/store/helper");
-    
+
     const handlerId = await store.getState().createSession({
       workflowName: "chat_agent",
     });
@@ -289,9 +299,13 @@ describe("Chat Store - Streaming Control", () => {
 
   // CS-017: stop
   it("should stop streaming and update status", async () => {
-    const { unsubscribeFromHandler } = await import("../../src/chat/store/helper");
-    const { StreamingMessage } = await import("../../src/chat/store/streaming-message");
-    
+    const { unsubscribeFromHandler } = await import(
+      "../../src/chat/store/helper"
+    );
+    const { StreamingMessage } = await import(
+      "../../src/chat/store/streaming-message"
+    );
+
     const handlerId = await store.getState().createSession({
       workflowName: "chat_agent",
     });
@@ -315,7 +329,11 @@ describe("Chat Store - Streaming Control", () => {
       workflowName: "chat_agent",
       initialMessages: [
         { id: "msg-1", role: "user", parts: [{ type: "text", text: "Hello" }] },
-        { id: "msg-2", role: "assistant", parts: [{ type: "text", text: "Hi" }] },
+        {
+          id: "msg-2",
+          role: "assistant",
+          parts: [{ type: "text", text: "Hi" }],
+        },
       ],
     });
 
@@ -335,9 +353,21 @@ describe("Chat Store - Streaming Control", () => {
       workflowName: "chat_agent",
       initialMessages: [
         { id: "msg-1", role: "user", parts: [{ type: "text", text: "Hello" }] },
-        { id: "msg-2", role: "assistant", parts: [{ type: "text", text: "Hi" }] },
-        { id: "msg-3", role: "user", parts: [{ type: "text", text: "How are you?" }] },
-        { id: "msg-4", role: "assistant", parts: [{ type: "text", text: "Good!" }] },
+        {
+          id: "msg-2",
+          role: "assistant",
+          parts: [{ type: "text", text: "Hi" }],
+        },
+        {
+          id: "msg-3",
+          role: "user",
+          parts: [{ type: "text", text: "How are you?" }],
+        },
+        {
+          id: "msg-4",
+          role: "assistant",
+          parts: [{ type: "text", text: "Good!" }],
+        },
       ],
     });
 
@@ -355,7 +385,11 @@ describe("Chat Store - Streaming Control", () => {
     const handlerId = await store.getState().createSession({
       workflowName: "chat_agent",
       initialMessages: [
-        { id: "msg-1", role: "assistant", parts: [{ type: "text", text: "Hi" }] },
+        {
+          id: "msg-1",
+          role: "assistant",
+          parts: [{ type: "text", text: "Hi" }],
+        },
       ],
     });
 
@@ -390,8 +424,8 @@ describe("Chat Store - Error Handling", () => {
 
   // CS-022: stop with non-existent session
   it("should throw error when stopping non-existent session", async () => {
-    await expect(
-      store.getState().stop("non-existent")
-    ).rejects.toThrow("Session non-existent not found");
+    await expect(store.getState().stop("non-existent")).rejects.toThrow(
+      "Session non-existent not found"
+    );
   });
 });

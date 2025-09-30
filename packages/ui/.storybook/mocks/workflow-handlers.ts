@@ -1,7 +1,7 @@
 /**
  * Workflow MSW Handlers - Factory Functions
  * Allows easy customization in individual stories
- * 
+ *
  * Uses real types from @llamaindex/workflows-client to ensure type safety
  */
 
@@ -15,11 +15,14 @@ const createdHandlers = new Map<string, Handler>();
 const streamControllers = new Map<string, ReadableStreamDefaultController>();
 
 // Track event generator per handler (story-specific)
-const handlerConfigs = new Map<string, {
-  eventGenerator: EventGenerator;
-  eventDelay: number;
-  initialDelay: number;
-}>();
+const handlerConfigs = new Map<
+  string,
+  {
+    eventGenerator: EventGenerator;
+    eventDelay: number;
+    initialDelay: number;
+  }
+>();
 
 let taskCounter = 1;
 
@@ -40,7 +43,7 @@ function sendEventsToStream(
   delay: number
 ): void {
   let eventsSent = 0;
-  
+
   const sendNextEvent = () => {
     if (eventsSent >= events.length) {
       return;
@@ -53,8 +56,11 @@ function sendEventsToStream(
       qualified_name: event.type,
     };
 
-    console.log(`MSW: Sending event ${eventsSent + 1}/${events.length}:`, rawEvent);
-    
+    console.log(
+      `MSW: Sending event ${eventsSent + 1}/${events.length}:`,
+      rawEvent
+    );
+
     // EventSource expects SSE format: "data: {...}\n\n"
     controller.enqueue(
       new TextEncoder().encode(`data: ${JSON.stringify(rawEvent)}\n\n`)
@@ -145,51 +151,54 @@ export function createWorkflowRunHandler(
     initialDelay = 500,
   } = options;
 
-  return http.post("*/workflows/:workflow_name/run-nowait", async ({ params, request }) => {
-    const { workflow_name } = params as { workflow_name: string };
-    console.log("MSW: Intercepted workflow run-nowait request", {
-      params,
-      url: request.url,
-    });
+  return http.post(
+    "*/workflows/:workflow_name/run-nowait",
+    async ({ params, request }) => {
+      const { workflow_name } = params as { workflow_name: string };
+      console.log("MSW: Intercepted workflow run-nowait request", {
+        params,
+        url: request.url,
+      });
 
-    await delay(createDelay);
+      await delay(createDelay);
 
-    const handlerId = handlerIdGenerator();
-    const now = new Date().toISOString();
+      const handlerId = handlerIdGenerator();
+      const now = new Date().toISOString();
 
-    // Create Handler using real type from workflows-client
-    const handler: Handler = {
-      handler_id: handlerId,
-      workflow_name,
-      run_id: `run-${taskCounter}`,
-      status: "running",
-      started_at: now,
-      updated_at: now,
-      completed_at: null,
-      error: null,
-      result: undefined,
-    };
+      // Create Handler using real type from workflows-client
+      const handler: Handler = {
+        handler_id: handlerId,
+        workflow_name,
+        run_id: `run-${taskCounter}`,
+        status: "running",
+        started_at: now,
+        updated_at: now,
+        completed_at: null,
+        error: null,
+        result: undefined,
+      };
 
-    // Track the created handler
-    createdHandlers.set(handlerId, handler);
-    
-    // Store config for this handler (for POST to use)
-    handlerConfigs.set(handlerId, {
-      eventGenerator,
-      eventDelay,
-      initialDelay,
-    });
+      // Track the created handler
+      createdHandlers.set(handlerId, handler);
 
-    console.log("MSW: Handler created with config:", {
-      handlerId,
-      hasEventGenerator: !!eventGenerator,
-      eventGeneratorName: eventGenerator.name || 'anonymous',
-      eventDelay,
-      initialDelay
-    });
-    console.log("MSW: Returning workflow run-nowait response:", handler);
-    return HttpResponse.json(handler);
-  });
+      // Store config for this handler (for POST to use)
+      handlerConfigs.set(handlerId, {
+        eventGenerator,
+        eventDelay,
+        initialDelay,
+      });
+
+      console.log("MSW: Handler created with config:", {
+        handlerId,
+        hasEventGenerator: !!eventGenerator,
+        eventGeneratorName: eventGenerator.name || "anonymous",
+        eventDelay,
+        initialDelay,
+      });
+      console.log("MSW: Returning workflow run-nowait response:", handler);
+      return HttpResponse.json(handler);
+    }
+  );
 }
 
 /**
@@ -217,8 +226,10 @@ export function createWorkflowEventsHandler(
       start(controller) {
         // Store controller so POST can push events to this stream
         streamControllers.set(handlerId, controller);
-        console.log(`MSW: SSE stream established for handler ${handlerId}, waiting for POST events`);
-        
+        console.log(
+          `MSW: SSE stream established for handler ${handlerId}, waiting for POST events`
+        );
+
         // Stream stays open forever (chat workflow pattern)
         // POST requests will trigger events to be sent through this controller
       },
@@ -250,29 +261,33 @@ export function createPostEventHandler(): HttpHandler {
     try {
       const body = await request.json();
       console.log("MSW: Received user event:", body);
-      
+
       // Get the SSE controller for this handler
       const controller = streamControllers.get(handlerId);
       const config = handlerConfigs.get(handlerId);
-      
+
       if (controller && config) {
         // Use handler-specific configuration
         const responseEvents = config.eventGenerator(handlerId);
         console.log(`MSW: Using config for ${handlerId}:`, {
-          eventGeneratorName: config.eventGenerator.name || 'anonymous',
+          eventGeneratorName: config.eventGenerator.name || "anonymous",
           eventCount: responseEvents.length,
           eventDelay: config.eventDelay,
           initialDelay: config.initialDelay,
-          firstEventType: responseEvents[0]?.type
+          firstEventType: responseEvents[0]?.type,
         });
-        console.log(`MSW: Triggering ${responseEvents.length} response events for ${handlerId}`);
-        
+        console.log(
+          `MSW: Triggering ${responseEvents.length} response events for ${handlerId}`
+        );
+
         setTimeout(() => {
           sendEventsToStream(controller, responseEvents, config.eventDelay);
         }, config.initialDelay);
       } else {
-        if (!controller) console.warn(`MSW: No SSE stream found for handler ${handlerId}`);
-        if (!config) console.warn(`MSW: No config found for handler ${handlerId}`);
+        if (!controller)
+          console.warn(`MSW: No SSE stream found for handler ${handlerId}`);
+        if (!config)
+          console.warn(`MSW: No config found for handler ${handlerId}`);
       }
     } catch (error) {
       console.error("MSW: Error processing post event:", error);
@@ -295,7 +310,7 @@ export function createGetResultsHandler(): HttpHandler {
     await delay(200);
 
     const handler = createdHandlers.get(handlerId);
-    
+
     if (!handler) {
       return new HttpResponse("Handler not found", { status: 404 });
     }
@@ -349,7 +364,7 @@ export function resetWorkflowMocks(): void {
   createdHandlers.clear();
   streamControllers.clear();
   handlerConfigs.clear();
-  console.log('MSW: Workflow mocks reset');
+  console.log("MSW: Workflow mocks reset");
 }
 
 /**
@@ -361,7 +376,7 @@ export function createWorkflowHandlers(
 ): HttpHandler[] {
   // Clear previous state when creating new handlers for a story
   resetWorkflowMocks();
-  
+
   return [
     createWorkflowRunHandler(options),
     createWorkflowEventsHandler(options),

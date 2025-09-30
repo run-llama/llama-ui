@@ -1,24 +1,24 @@
 /**
  * StreamingMessage Class
  * Manages event accumulation and parsing for streaming messages
- * 
+ *
  * Problem:
  * - During streaming, delta events contain partial text (e.g., "```py", "thon\n", "def ")
  * - Parsing each event individually breaks markdown/XML syntax detection
  * - Different event types (delta, tool call, etc.) should not be merged together
- * 
+ *
  * Solution:
  * - Only merge **adjacent** delta events
  * - When a non-delta event arrives, flush the current text buffer
  * - Maintain two lists: finalized parts + current text parts
  * - Incrementally update for O(1) getParts()
- * 
+ *
  * Example flow:
  * 1. delta1 + delta2 + delta3 → merged in buffer, parsed as TextPart(s)
  * 2. tool_call_event → flush buffer to finalized, append ToolCallPart to finalized
  * 3. delta4 + delta5 → merged in new buffer, parsed as TextPart(s)
  * 4. InputRequiredEvent → flush buffer to finalized, append InputRequiredPart to finalized
- * 
+ *
  * Usage in chat-store:
  * - Create instance when streaming starts (with messageId)
  * - Call addEvent() for each incoming event (triggers incremental parse)

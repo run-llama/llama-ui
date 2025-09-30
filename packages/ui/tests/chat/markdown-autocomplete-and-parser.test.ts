@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { autoCompleteMarkdown, parseTextWithXMLMarkers } from "../../src/chat/store/adapters";
+import {
+  autoCompleteMarkdown,
+  parseTextWithXMLMarkers,
+} from "../../src/chat/store/adapters";
 
 describe("autoCompleteMarkdown", () => {
   it("completes bold ** at end", () => {
@@ -37,11 +40,13 @@ describe("autoCompleteMarkdown", () => {
     const input = "```ts\nconst x = 1;\n``` and `y`";
     expect(autoCompleteMarkdown(input)).toBe(input); // already complete
     // incomplete inline but fenced closed
-    expect(autoCompleteMarkdown("```\ncode\n``` and `x")).toBe("```\ncode\n``` and `x`");
+    expect(autoCompleteMarkdown("```\ncode\n``` and `x")).toBe(
+      "```\ncode\n``` and `x`"
+    );
     // incomplete fenced but inline closed
-    expect(autoCompleteMarkdown("```\ncode and `x`"))
-      .toBe("```\ncode and `x`\n```") // will not add ``` here until stream end; autocomplete adds at end
-      ;
+    expect(autoCompleteMarkdown("```\ncode and `x`")).toBe(
+      "```\ncode and `x`\n```"
+    ); // will not add ``` here until stream end; autocomplete adds at end
   });
 
   it("ignores * and ` inside fenced code", () => {
@@ -59,7 +64,7 @@ describe("findCodeBlockRanges + parseTextWithXMLMarkers (integration)", () => {
   });
 
   it("parses XML markers outside code blocks", () => {
-    const input = "answer\n\n<sources>\n{\"nodes\": []}\n</sources>";
+    const input = 'answer\n\n<sources>\n{"nodes": []}\n</sources>';
     const parts = parseTextWithXMLMarkers(input);
     expect(parts.length).toBeGreaterThanOrEqual(2);
     expect(parts[0]).toMatchObject({ type: "text" });
@@ -67,24 +72,27 @@ describe("findCodeBlockRanges + parseTextWithXMLMarkers (integration)", () => {
   });
 
   it("auto-completes markdown before parsing XML", () => {
-    const input = "This is \n```ts\n\n<sources>\n{\"nodes\": []}\n</sources>";
+    const input = 'This is \n```ts\n\n<sources>\n{"nodes": []}\n</sources>';
     const parts = parseTextWithXMLMarkers(input);
     expect(parts[0]).toMatchObject({ type: "text" });
     // @ts-expect-error - text exists on text part
-    expect(parts[0].text).toBe("This is \n```ts\n\n<sources>\n{\"nodes\": []}\n</sources>\n```");
+    expect(parts[0].text).toBe(
+      'This is \n```ts\n\n<sources>\n{"nodes": []}\n</sources>\n```'
+    );
   });
 
   it("treats ` and ``` mixed correctly while parsing", () => {
-    const input = "```\ninside *not* parsed\n``` and here is `code`\n<sources>\n{\"nodes\": []}\n</sources>";
+    const input =
+      '```\ninside *not* parsed\n``` and here is `code`\n<sources>\n{"nodes": []}\n</sources>';
     const parts = parseTextWithXMLMarkers(input);
     // Text before + sources; tail text is none, so at least 2 parts
     expect(parts.length).toBeGreaterThanOrEqual(2);
     expect(parts[0]).toMatchObject({ type: "text" });
-    expect(parts.some(p => p.type === "data-sources")).toBe(true);
+    expect(parts.some((p) => p.type === "data-sources")).toBe(true);
   });
 
   it("incomplete xml tags are not parsed", () => {
-    const input = "<sources>\n{\"nodes\": []}\n</sour";
+    const input = '<sources>\n{"nodes": []}\n</sour';
     const parts = parseTextWithXMLMarkers(input);
     expect(parts.length).toBe(0);
   });
@@ -95,5 +103,3 @@ describe("findCodeBlockRanges + parseTextWithXMLMarkers (integration)", () => {
     expect(parts.length).toBe(0);
   });
 });
-
-

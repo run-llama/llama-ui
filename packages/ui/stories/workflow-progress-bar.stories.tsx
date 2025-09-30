@@ -7,7 +7,8 @@ import {
   __setHandlerStoreState,
   useHandlerStore,
 } from "../src/workflows/hooks/use-handler-store";
-import { resetMockState } from "../.storybook/mocks/handlers";
+import { resetWorkflowMocks } from "../.storybook/mocks/workflow-handlers";
+
 const meta: Meta<typeof WorkflowProgressBar> = {
   title: "Components/WorkflowProgressBar",
   component: WorkflowProgressBar,
@@ -32,11 +33,11 @@ const meta: Meta<typeof WorkflowProgressBar> = {
  * Resets global/mock state between stories
  */
 const Resetter = () => {
-  resetMockState();
+  resetWorkflowMocks();
   const clear = useHandlerStore((x) => x.clearCompleted);
   useEffect(() => {
     clear();
-  }, []);
+  }, [clear]);
   return null;
 };
 

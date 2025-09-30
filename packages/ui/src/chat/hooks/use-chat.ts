@@ -4,7 +4,11 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import type { Message, ChatRequestOptions, ChatHandler } from "../components/chat.interface";
+import type {
+  Message,
+  ChatRequestOptions,
+  ChatHandler,
+} from "../components/chat.interface";
 import { useChatStore } from "./use-chat-store";
 
 export interface UseChatOptions {
@@ -37,7 +41,7 @@ export interface UseChatOptions {
 
 /**
  * Hook to manage a chat session as a workflow
- * 
+ *
  * @example
  * ```tsx
  * function MyChat() {
@@ -45,23 +49,36 @@ export interface UseChatOptions {
  *     workflowName: "my-chat-workflow",
  *     onReady: (handlerId) => console.log("Chat ready:", handlerId),
  *   });
- * 
+ *
  *   return <ChatSection handler={chat} />;
  * }
  * ```
  */
-export function useChat(options: UseChatOptions): ChatHandler & { handlerId: string | null } {
-  const { workflowName, handlerId: providedHandlerId, initialMessages, onReady, onError } = options;
+export function useChat(
+  options: UseChatOptions
+): ChatHandler & { handlerId: string | null } {
+  const {
+    workflowName,
+    handlerId: providedHandlerId,
+    initialMessages,
+    onReady,
+    onError,
+  } = options;
 
   const store = useChatStore();
 
   // Track the handler ID for this hook instance
-  const [handlerId, setHandlerId] = useState<string | null>(providedHandlerId || null);
+  const [handlerId, setHandlerId] = useState<string | null>(
+    providedHandlerId || null
+  );
 
   // Get session from store
-  const session = useChatStore((state) => handlerId ? state.sessions[handlerId] : undefined);
+  const session = useChatStore((state) =>
+    handlerId ? state.sessions[handlerId] : undefined
+  );
 
-  // Initialize session if providedHandlerId is given
+  // Initialize session only if providedHandlerId is given
+  // (initialMessages are just for pre-filling messages, not a trigger for session creation)
   useEffect(() => {
     let mounted = true;
 
@@ -84,7 +101,7 @@ export function useChat(options: UseChatOptions): ChatHandler & { handlerId: str
       }
     }
 
-    // Only create if a specific handler ID is provided
+    // Create if a specific handler ID is provided OR if initial messages exist
     if (providedHandlerId && !session) {
       initSession();
     }
@@ -110,7 +127,7 @@ export function useChat(options: UseChatOptions): ChatHandler & { handlerId: str
   const sendMessage = useCallback(
     async (message: Message, opts?: ChatRequestOptions) => {
       let currentHandlerId = handlerId;
-      
+
       // Lazy initialization: create session on first message if not exists
       if (!currentHandlerId) {
         try {
@@ -126,10 +143,18 @@ export function useChat(options: UseChatOptions): ChatHandler & { handlerId: str
           throw error;
         }
       }
-      
+
       await store.sendMessage(currentHandlerId, message, opts);
     },
-    [handlerId, workflowName, providedHandlerId, initialMessages, store, onReady, onError]
+    [
+      handlerId,
+      workflowName,
+      providedHandlerId,
+      initialMessages,
+      store,
+      onReady,
+      onError,
+    ]
   );
 
   const stop = useCallback(async () => {
@@ -160,13 +185,21 @@ export function useChat(options: UseChatOptions): ChatHandler & { handlerId: str
     () => ({
       handlerId,
       messages: session?.messages || [],
-      status: session?.status || "ready",
+      status: session?.status || (handlerId ? "ready" : "idle"),
       sendMessage,
       stop,
       regenerate,
       setMessages,
     }),
-    [handlerId, session?.messages, session?.status, sendMessage, stop, regenerate, setMessages]
+    [
+      handlerId,
+      session?.messages,
+      session?.status,
+      sendMessage,
+      stop,
+      regenerate,
+      setMessages,
+    ]
   );
 }
 

@@ -9,7 +9,11 @@ import type { Client as LlamaDeployClient } from "@llamaindex/workflows-client";
 import type { Message, ChatRequestOptions } from "../components/chat.interface";
 import type { MessagePart } from "../components/message-parts/types";
 import type { WorkflowEvent } from "../../workflows/types";
-import type { ChatSession, CreateSessionOptions, ChatStoreState } from "./types";
+import type {
+  ChatSession,
+  CreateSessionOptions,
+  ChatStoreState,
+} from "./types";
 import {
   createChatHandler,
   sendEventToHandler,
@@ -32,10 +36,15 @@ export const createChatStore = (client: LlamaDeployClient) =>
 
     // Session management
     createSession: async (options: CreateSessionOptions) => {
-      const { workflowName, handlerId: providedHandlerId, initialMessages = [] } = options;
+      const {
+        workflowName,
+        handlerId: providedHandlerId,
+        initialMessages = [],
+      } = options;
 
       // Create handler if not provided
-      const handlerId = providedHandlerId || await createChatHandler(client, workflowName);
+      const handlerId =
+        providedHandlerId || (await createChatHandler(client, workflowName));
 
       // Initialize session
       const session: ChatSession = {
@@ -81,7 +90,11 @@ export const createChatStore = (client: LlamaDeployClient) =>
 
           // Get updated parts
           const updatedParts = streamingMsg.getParts();
-          get()._updateAssistantMessage(handlerId, streamingMsg.messageId, updatedParts);
+          get()._updateAssistantMessage(
+            handlerId,
+            streamingMsg.messageId,
+            updatedParts
+          );
 
           // Check if this event terminates the current message
           if (isMessageTerminator(event)) {
@@ -94,7 +107,8 @@ export const createChatStore = (client: LlamaDeployClient) =>
           // Ignore abort/network errors (page refresh)
           if (
             error.name === "AbortError" ||
-            (error.name === "TypeError" && error.message.includes("network error"))
+            (error.name === "TypeError" &&
+              error.message.includes("network error"))
           ) {
             return;
           }
@@ -140,7 +154,11 @@ export const createChatStore = (client: LlamaDeployClient) =>
     },
 
     // Message operations
-    sendMessage: async (handlerId: string, message: Message, _opts?: ChatRequestOptions) => {
+    sendMessage: async (
+      handlerId: string,
+      message: Message,
+      _opts?: ChatRequestOptions
+    ) => {
       const session = get().sessions[handlerId];
       if (!session) {
         throw new Error(`Session ${handlerId} not found`);
@@ -160,7 +178,10 @@ export const createChatStore = (client: LlamaDeployClient) =>
 
       // Set streaming state and create new StreamingMessage instance
       get().setStatus(handlerId, "submitted");
-      get()._setStreamingMessage(handlerId, new StreamingMessage(assistantMessageId));
+      get()._setStreamingMessage(
+        handlerId,
+        new StreamingMessage(assistantMessageId)
+      );
 
       try {
         // Convert message to workflow event and send
@@ -207,7 +228,11 @@ export const createChatStore = (client: LlamaDeployClient) =>
       });
     },
 
-    _updateAssistantMessage: (handlerId: string, messageId: string, parts: MessagePart[]) => {
+    _updateAssistantMessage: (
+      handlerId: string,
+      messageId: string,
+      parts: MessagePart[]
+    ) => {
       set((state) => {
         const session = state.sessions[handlerId];
         if (!session) return state;
@@ -255,7 +280,10 @@ export const createChatStore = (client: LlamaDeployClient) =>
     },
 
     // Internal helper for setting streamingMessage
-    _setStreamingMessage: (handlerId: string, streamingMessage: StreamingMessage | null) => {
+    _setStreamingMessage: (
+      handlerId: string,
+      streamingMessage: StreamingMessage | null
+    ) => {
       set((state) => {
         const session = state.sessions[handlerId];
         if (!session) return state;
@@ -300,7 +328,7 @@ export const createChatStore = (client: LlamaDeployClient) =>
       // Find the message to regenerate (last user message if not specified)
       let targetIndex = -1;
       if (messageId) {
-        targetIndex = session.messages.findIndex(m => m.id === messageId);
+        targetIndex = session.messages.findIndex((m) => m.id === messageId);
       } else {
         // Find last user message
         for (let i = session.messages.length - 1; i >= 0; i--) {
@@ -330,7 +358,10 @@ export const createChatStore = (client: LlamaDeployClient) =>
 
       // Set streaming state and create new StreamingMessage instance
       get().setStatus(handlerId, "submitted");
-      get()._setStreamingMessage(handlerId, new StreamingMessage(assistantMessageId));
+      get()._setStreamingMessage(
+        handlerId,
+        new StreamingMessage(assistantMessageId)
+      );
 
       try {
         // Send the user message as event (without adding to messages again)

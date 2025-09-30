@@ -1,9 +1,9 @@
 /**
  * XML Protocol Comprehensive Tests
- * 
+ *
  * Organized into 4 categories:
  * 1. Full Markdown Types (optimistic parsing) - All markdown types with FULL text
- * 2. LaTeX & XML Parts (pessimistic parsing) - LaTeX and XML markers with FULL text  
+ * 2. LaTeX & XML Parts (pessimistic parsing) - LaTeX and XML markers with FULL text
  * 3. Partial Markdown (optimistic) - Streaming markdown with PARTIAL text
  * 4. Partial LaTeX & XML (pessimistic) - Streaming LaTeX/XML with PARTIAL text (should be ignored)
  */
@@ -63,7 +63,8 @@ describe("Category 1: Full Markdown Types - Optimistic Parsing", () => {
 
   // C1-003: Emphasis (bold, italic, strikethrough)
   it("should parse emphasis with full text", () => {
-    const text = "This is **bold** and *italic* and ***bold-italic*** and ~~strikethrough~~.";
+    const text =
+      "This is **bold** and *italic* and ***bold-italic*** and ~~strikethrough~~.";
 
     const parts = parseTextWithXMLMarkers(text);
 
@@ -138,7 +139,8 @@ After rule`;
 
   // C1-008: Inline code
   it("should parse inline code with full text (including < >)", () => {
-    const text = "Use `const x = a < b` or `Array<T>` or `Map<K, V>` for generics.";
+    const text =
+      "Use `const x = a < b` or `Array<T>` or `Map<K, V>` for generics.";
 
     const parts = parseTextWithXMLMarkers(text);
 
@@ -175,7 +177,7 @@ def sort(arr):
     // @ts-expect-error
     const text_content = parts[0].text;
     expect(text_content).toContain("function compare<T>");
-    expect(text_content).toContain("<div class=\"container\">");
+    expect(text_content).toContain('<div class="container">');
     expect(text_content).toContain("x < pivot");
   });
 
@@ -242,7 +244,7 @@ Text after.`;
     const parts = parseTextWithXMLMarkers(text);
 
     expect(parts.length).toBeGreaterThanOrEqual(2);
-    const sourcesPart = parts.find(p => p.type === "data-sources");
+    const sourcesPart = parts.find((p) => p.type === "data-sources");
     expect(sourcesPart).toBeDefined();
   });
 
@@ -314,12 +316,12 @@ More text with $a < b$.`;
     const parts = parseTextWithXMLMarkers(text);
 
     expect(parts.length).toBeGreaterThanOrEqual(2);
-    
-    const sourcesPart = parts.find(p => p.type === "data-sources");
+
+    const sourcesPart = parts.find((p) => p.type === "data-sources");
     expect(sourcesPart).toBeDefined();
-    
-    const textParts = parts.filter(p => p.type === "text");
-    const combined = textParts.map(p => (p as any).text).join(" ");
+
+    const textParts = parts.filter((p) => p.type === "text");
+    const combined = textParts.map((p) => (p as any).text).join(" ");
     expect(combined).toContain("$E = mc^2$");
     expect(combined).toContain("def calculate");
   });
@@ -467,7 +469,9 @@ describe("Category 3: Partial Markdown - Optimistic Parsing (Streaming)", () => 
     expect(parts[0].type).toBe("text");
     // Should auto-complete the closing ``` (no newline before closing fence)
     // @ts-expect-error
-    expect(parts[0].text).toBe("```typescript\nfunction test() {\n  return 42;\n}\n```");
+    expect(parts[0].text).toBe(
+      "```typescript\nfunction test() {\n  return 42;\n}\n```"
+    );
   });
 });
 
@@ -570,15 +574,15 @@ describe("Category 4: Partial LaTeX & XML - Pessimistic Parsing (Should be Ignor
     expect(parts3[0].text).toBe("Analysis result:");
 
     // Step 4: Partial JSON content
-    const chunk4 = chunk1 + "<sources>\n{\"nodes\": [";
+    const chunk4 = chunk1 + '<sources>\n{"nodes": [';
     const parts4 = parseTextWithXMLMarkers(chunk4);
     expect(parts4[0].type).toBe("text");
     // Once content appears after opening tag, shown as text (pragmatic)
-    // @ts-expect-error  
+    // @ts-expect-error
     expect(parts4[0].text).toBe("Analysis result:");
 
     // Step 5: Complete marker!
-    const chunk5 = chunk1 + "<sources>\n{\"nodes\": []}\n</sources>";
+    const chunk5 = chunk1 + '<sources>\n{"nodes": []}\n</sources>';
     const parts5 = parseTextWithXMLMarkers(chunk5);
     expect(parts5.length).toBeGreaterThanOrEqual(2);
     expect(parts5[1].type).toBe("data-sources");
@@ -638,17 +642,17 @@ def quicksort(arr):
 
     // Should have multiple parts
     expect(parts.length).toBeGreaterThanOrEqual(4);
-    
+
     // Verify all part types present
-    const types = parts.map(p => p.type);
+    const types = parts.map((p) => p.type);
     expect(types).toContain("text");
     expect(types).toContain("data-event");
     expect(types).toContain("data-sources");
     expect(types).toContain("data-suggested_questions");
-    
+
     // Verify content integrity
-    const textParts = parts.filter(p => p.type === "text");
-    const allText = textParts.map(p => (p as any).text).join(" ");
+    const textParts = parts.filter((p) => p.type === "text");
+    const allText = textParts.map((p) => (p as any).text).join(" ");
     expect(allText).toContain("# Algorithm Analysis");
     expect(allText).toContain("$O(n \\log n)$");
     expect(allText).toContain("def quicksort");
