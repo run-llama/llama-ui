@@ -15,7 +15,8 @@ import {
   isEqualArtifact,
   ArtifactType,
 } from "./artifacts";
-import { Message } from "../chat.interface";
+import { Message, MessageRole } from "../chat.interface";
+import { TextPartType, ArtifactPartType } from "../message-parts/types";
 import { useChatUI } from "../chat.context";
 import { v4 as uuid } from "uuid";
 
@@ -108,24 +109,24 @@ export function ChatCanvasProvider({
       ...messages,
       {
         id: `restore-msg-${Date.now()}`,
-        role: "user",
+        role: MessageRole.User,
         parts: [
           {
-            type: "text",
+            type: TextPartType,
             text: `Restore to ${artifact.type} version ${getArtifactVersion(artifact).versionNumber}`,
           },
         ],
       },
       {
         id: `restore-success-${Date.now()}`,
-        role: "assistant",
+        role: MessageRole.Assistant,
         parts: [
           {
-            type: "text",
+            type: TextPartType,
             text: `Successfully restored to ${artifact.type} version ${getArtifactVersion(artifact).versionNumber}`,
           },
           {
-            type: "data-artifact",
+            type: ArtifactPartType,
             data: newArtifact,
           },
         ],
@@ -155,24 +156,24 @@ export function ChatCanvasProvider({
       ...messages,
       {
         id: uuid(),
-        role: "user",
+        role: MessageRole.User,
         parts: [
           {
-            type: "text",
+            type: TextPartType,
             text: `Update content for ${artifact.type} artifact version ${getArtifactVersion(artifact).versionNumber}`,
           },
         ],
       },
       {
         id: uuid(),
-        role: "assistant",
+        role: MessageRole.Assistant,
         parts: [
           {
-            type: "text",
+            type: TextPartType,
             text: `Updated content for ${artifact.type} artifact version ${getArtifactVersion(artifact).versionNumber}`,
           },
           {
-            type: "data-artifact",
+            type: ArtifactPartType,
             data: newArtifact,
           },
         ],

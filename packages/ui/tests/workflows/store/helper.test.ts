@@ -206,7 +206,7 @@ describe("Helper Functions Tests", () => {
         onStopEvent: vi.fn(),
       };
 
-      const promise = fetchHandlerEvents(
+      const { promise } = fetchHandlerEvents(
         { client: mockClient, handlerId: "handler-ES" },
         mockCallback
       );

@@ -109,6 +109,8 @@ export function RunDetailsPanel({
       }
       return prev;
     });
+
+    // Only depend on length to avoid re-stamping on identity changes
   }, [events.length]);
 
   // Determine which events are considered internal/noisy for display

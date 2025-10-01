@@ -10,7 +10,6 @@ import { SourcesPartType } from "../types";
 export function SourcesPartUI({ className }: { className?: string }) {
   const sources = usePart(SourcesPartType)?.data;
   const nodes = preprocessSourceNodes(sources?.nodes ?? []);
-
   if (nodes.length === 0) return null;
   return <ChatSources data={{ nodes }} className={className} />;
 }

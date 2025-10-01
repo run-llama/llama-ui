@@ -6,7 +6,6 @@ export * from "./chat-file";
 export * from "./chat-sources";
 export * from "./markdown";
 export * from "./codeblock";
-export * from "./pdf-dialog";
 export * from "./suggested-questions";
 export * from "./starter-questions";
 export * from "./document-info";

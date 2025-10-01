@@ -1,4 +1,5 @@
-import { ChatContext } from "../components/chat.interface";
+import { ChatContext, MessageRole } from "../components/chat.interface";
+import { TextPartType } from "../components/message-parts/types";
 import { cn } from "@/lib/utils";
 import { v4 as uuidv4 } from "uuid";
 
@@ -26,8 +27,8 @@ export function SuggestedQuestions({
               sendMessage(
                 {
                   id: uuidv4(),
-                  role: "user",
-                  parts: [{ type: "text", text: question }],
+                  role: MessageRole.User,
+                  parts: [{ type: TextPartType, text: question }],
                 },
                 { body: requestData }
               );
