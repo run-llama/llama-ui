@@ -1,4 +1,5 @@
-import { ChatContext } from "../components/chat.interface";
+import { ChatContext, MessageRole } from "../components/chat.interface";
+import { TextPartType } from "../components/message-parts/types";
 import { cn } from "@/lib/utils";
 import { Button } from "@/base/button";
 import { v4 as uuidv4 } from "uuid";
@@ -20,8 +21,8 @@ export function StarterQuestions(props: StarterQuestionsProps) {
             onClick={() =>
               props.sendMessage({
                 id: uuidv4(),
-                role: "user",
-                parts: [{ type: "text", text: question }],
+                role: MessageRole.User,
+                parts: [{ type: TextPartType, text: question }],
               })
             }
             className="h-auto whitespace-break-spaces"

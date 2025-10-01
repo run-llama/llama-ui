@@ -16,7 +16,10 @@ vi.mock("../../../src/workflows/store/helper", () => ({
   getRunningHandlers: hoisted.getRunningHandlersMock,
   getExistingHandler: vi.fn(),
   createHandler: vi.fn(),
-  fetchHandlerEvents: vi.fn().mockResolvedValue([]),
+  fetchHandlerEvents: vi.fn(() => ({
+    promise: Promise.resolve([]),
+    unsubscribe: vi.fn(),
+  })),
   sendEventToHandler: vi.fn(),
 }));
 

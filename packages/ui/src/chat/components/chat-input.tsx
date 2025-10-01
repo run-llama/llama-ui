@@ -6,9 +6,10 @@ import { Textarea } from "@/base/textarea";
 import { FileUploader } from "../../file-uploader";
 import { FileType } from "../../file-uploader/file-utils";
 import { useChatUI } from "./chat.context";
-import { Message } from "./chat.interface";
+import { Message, MessageRole } from "./chat.interface";
 import { v4 as uuidv4 } from "uuid";
 import { MessagePart } from "./message-parts";
+import { TextPartType } from "./message-parts/types";
 
 interface ChatInputProps extends React.PropsWithChildren {
   className?: string;
@@ -66,8 +67,11 @@ function ChatInput(props: ChatInputProps) {
   const submit = async () => {
     const userMessage: Message = {
       id: uuidv4(),
-      role: "user",
-      parts: [{ type: "text", text: input }, ...(props.attachments ?? [])],
+      role: MessageRole.User,
+      parts: [
+        { type: TextPartType, text: input },
+        ...(props.attachments ?? []),
+      ],
     };
 
     setInput(""); // Clear the input

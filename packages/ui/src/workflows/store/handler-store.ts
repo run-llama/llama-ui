@@ -189,10 +189,12 @@ export const createHandlerStore = (client: Client) =>
       };
 
       // Use handler-based streaming
-      fetchHandlerEvents(
+      const { promise } = fetchHandlerEvents(
         { client, handlerId: handler.handler_id },
         callback
-      ).catch((error) => {
+      );
+
+      promise.catch((error) => {
         // Ignore network errors caused by page refresh/unload
         if (
           error.name === "AbortError" ||

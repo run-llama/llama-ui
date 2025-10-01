@@ -78,14 +78,14 @@ export async function createHandler<E extends WorkflowEvent>(params: {
   };
 }
 
-export async function fetchHandlerEvents<E extends WorkflowEvent>(
+export function fetchHandlerEvents<E extends WorkflowEvent>(
   params: {
     client: Client;
     handlerId: string;
     signal?: AbortSignal;
   },
   callback?: StreamingEventCallback<E>
-): Promise<E[]> {
+): { promise: Promise<E[]>; unsubscribe: () => void } {
   const streamKey = `handler:${params.handlerId}`;
 
   // Create executor function that implements the actual streaming logic
@@ -150,14 +150,14 @@ export async function fetchHandlerEvents<E extends WorkflowEvent>(
   };
 
   // Use SharedStreamingManager to handle the streaming with deduplication
-  const { promise } = workflowStreamingManager.subscribe(
+  const { promise, unsubscribe } = workflowStreamingManager.subscribe(
     streamKey,
     subscriber,
     executor,
     params.signal
   );
 
-  return promise;
+  return { promise, unsubscribe };
 }
 
 export async function sendEventToHandler<E extends WorkflowEvent>(params: {

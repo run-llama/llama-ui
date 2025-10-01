@@ -69,6 +69,8 @@ $$
  \\end{cases}
 $$
 
+This is inline code \`code\`.
+
 \`\`\`ts
 export function greet(name: string) {
   const msg = \`Hello, \${name}!\`;

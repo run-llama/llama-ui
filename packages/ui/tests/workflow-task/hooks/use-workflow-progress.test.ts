@@ -12,7 +12,10 @@ vi.mock("../../../src/workflows/store/helper", () => ({
   getRunningHandlers: vi.fn().mockResolvedValue([]),
   getExistingHandler: vi.fn(),
   createTask: vi.fn(),
-  fetchHandlerEvents: vi.fn().mockResolvedValue([]),
+  fetchHandlerEvents: vi.fn(() => ({
+    promise: Promise.resolve([]),
+    unsubscribe: vi.fn(),
+  })),
   sendEventToHandler: vi.fn(),
   mergeServerTasksForWorkflow: vi.fn(
     (params: any) => params.existingTasks ?? {}
