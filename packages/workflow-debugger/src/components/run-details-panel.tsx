@@ -85,7 +85,6 @@ export function RunDetailsPanel({
       return prev;
     });
     // Only depend on length to avoid re-stamping on identity changes
-     
   }, [events.length]);
 
   const currentTab: "visualization" | "events" = tab ?? internalTab;
