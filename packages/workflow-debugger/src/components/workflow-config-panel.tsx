@@ -13,6 +13,30 @@ import {
   getResultsByHandlerId,
   getWorkflowsByNameSchema,
 } from "@llamaindex/workflows-client";
+function formatApiError(error: unknown): string {
+  if (!error) return "Unknown error";
+  if (typeof error === "string") return error;
+  if (error instanceof Error) return error.message || "Unknown error";
+  if (typeof error === "object") {
+    const anyErr = error as Record<string, unknown>;
+    const detail = anyErr.detail;
+    if (typeof detail === "string") return detail;
+    if (Array.isArray(detail) && detail.length > 0) {
+      const first = detail[0] as unknown;
+      if (typeof first === "string") return first;
+      if (first && typeof (first as any).message === "string")
+        return (first as any).message as string;
+    }
+    if (typeof anyErr.message === "string") return anyErr.message;
+    if (typeof anyErr.error === "string") return anyErr.error;
+    try {
+      return JSON.stringify(error);
+    } catch {
+      return String(error);
+    }
+  }
+  return String(error);
+}
 export type JSONValue =
   | null
   | string
@@ -165,14 +189,12 @@ export function WorkflowConfigPanel({
       } else if (error) {
         console.error("Failed to fetch final result:", error);
         setFinalResult(null);
-        setFinalResultError(typeof error === "string" ? error : String(error));
+        setFinalResultError(formatApiError(error));
       }
     } catch (error) {
       console.error("Failed to fetch final result:", error);
       setFinalResult(null);
-      setFinalResultError(
-        error instanceof Error ? error.message : "Failed to fetch final result",
-      );
+      setFinalResultError(formatApiError(error));
     } finally {
       setResultLoading(false);
     }
