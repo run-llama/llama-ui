@@ -159,18 +159,24 @@ export function RunDetailsPanel({
         } else if (error) {
           console.error("Failed to fetch final result:", error);
           setFinalResult(null);
-          setFinalResultError(
-            typeof error === "string" ? error : String(error),
-          );
+          setFinalResultError(() => {
+            try {
+              return typeof error === "string" ? error : JSON.stringify(error);
+            } catch {
+              return String(error);
+            }
+          });
         }
       } catch (error) {
         console.error("Failed to fetch final result:", error);
         setFinalResult(null);
-        setFinalResultError(
-          error instanceof Error
-            ? error.message
-            : "Failed to fetch final result",
-        );
+        setFinalResultError(() => {
+          try {
+            return typeof error === "string" ? error : JSON.stringify(error);
+          } catch {
+            return String(error);
+          }
+        });
       } finally {
         setResultLoading(false);
       }
