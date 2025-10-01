@@ -37,6 +37,26 @@ interface Schema {
   required?: string[];
 }
 
+function getReadableErrorMessage(err: unknown): string {
+  if (err == null) return "Unknown error";
+  if (typeof err === "string") return err;
+  if (err instanceof Error) return err.message || "Unknown error";
+  if (typeof err === "object") {
+    const anyErr = err as Record<string, unknown>;
+    const detail = anyErr.detail;
+    if (typeof detail === "string" && detail.trim().length > 0) return detail;
+    const message = anyErr.message;
+    if (typeof message === "string" && message.trim().length > 0)
+      return message;
+    try {
+      return JSON.stringify(err);
+    } catch {
+      return String(err);
+    }
+  }
+  return String(err);
+}
+
 export function WorkflowConfigPanel({
   selectedWorkflow,
   onRunStart,
@@ -165,14 +185,12 @@ export function WorkflowConfigPanel({
       } else if (error) {
         console.error("Failed to fetch final result:", error);
         setFinalResult(null);
-        setFinalResultError(typeof error === "string" ? error : String(error));
+        setFinalResultError(getReadableErrorMessage(error));
       }
     } catch (error) {
       console.error("Failed to fetch final result:", error);
       setFinalResult(null);
-      setFinalResultError(
-        error instanceof Error ? error.message : "Failed to fetch final result",
-      );
+      setFinalResultError(getReadableErrorMessage(error));
     } finally {
       setResultLoading(false);
     }
