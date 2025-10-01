@@ -18,6 +18,36 @@ import { CodeBlock } from "./code-block";
 import { WorkflowVisualization } from "./workflow-visualization";
 import { getResultsByHandlerId } from "@llamaindex/workflows-client";
 
+// Normalize various API error shapes into a readable message
+function formatApiError(err: unknown): string {
+  if (err == null) return "Unknown error";
+  if (typeof err === "string") return err;
+  if (err instanceof Error) return err.message || String(err);
+  if (typeof err === "object") {
+    const anyErr = err as Record<string, unknown>;
+    const candidates = [
+      anyErr.detail,
+      anyErr.message,
+      anyErr.error,
+      anyErr.title,
+      anyErr.reason,
+      (anyErr.data as Record<string, unknown> | undefined)?.detail,
+      (anyErr.data as Record<string, unknown> | undefined)?.message,
+      (anyErr.data as Record<string, unknown> | undefined)?.error,
+      (anyErr.body as Record<string, unknown> | undefined)?.detail,
+      (anyErr.body as Record<string, unknown> | undefined)?.message,
+      (anyErr.body as Record<string, unknown> | undefined)?.error,
+    ].filter(Boolean);
+    if (candidates.length > 0) return String(candidates[0]);
+    try {
+      return JSON.stringify(err);
+    } catch {
+      return String(err);
+    }
+  }
+  return String(err);
+}
+
 type JSONValue =
   | null
   | string
@@ -159,18 +189,12 @@ export function RunDetailsPanel({
         } else if (error) {
           console.error("Failed to fetch final result:", error);
           setFinalResult(null);
-          setFinalResultError(
-            typeof error === "string" ? error : String(error),
-          );
+          setFinalResultError(formatApiError(error));
         }
       } catch (error) {
         console.error("Failed to fetch final result:", error);
         setFinalResult(null);
-        setFinalResultError(
-          error instanceof Error
-            ? error.message
-            : "Failed to fetch final result",
-        );
+        setFinalResultError(formatApiError(error));
       } finally {
         setResultLoading(false);
       }
