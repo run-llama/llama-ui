@@ -446,15 +446,12 @@ function parseXMLMarker(tagName: string, content: string): MessagePart | null {
     }
   } catch (error) {
     // JSON parsing failed: return null for graceful degradation
-    // Error details available in error object if needed for debugging
-    if (process.env.NODE_ENV === "development") {
-      // eslint-disable-next-line no-console
-      console.warn(
-        `[XML Protocol] Failed to parse <${tagName}> content:`,
-        content,
-        error
-      );
-    }
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[XML Protocol] Failed to parse <${tagName}> content:`,
+      content,
+      error
+    );
     return null;
   }
 }
