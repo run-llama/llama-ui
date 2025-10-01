@@ -29,6 +29,9 @@ interface WorkflowVisualizationProps {
   workflowName: string | null;
   className?: string;
   events?: WorkflowEventItem[];
+  onNodeClick?: (nodeId: string) => void;
+  highlightedNodeId?: string | null;
+  selectedNodeId?: string | null;
 }
 
 interface WorkflowGraphNode {
@@ -53,6 +56,9 @@ export function WorkflowVisualization({
   workflowName,
   className = "w-full h-[600px]",
   events,
+  onNodeClick,
+  highlightedNodeId,
+  selectedNodeId,
 }: WorkflowVisualizationProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -72,8 +78,11 @@ export function WorkflowVisualization({
   });
   const nodeTypes: NodeTypes = useMemo(() => {
     return {
-      step: ({ data }) => {
-        const style = data.highlightColor
+      step: ({ data, id }) => {
+        const isHighlighted = highlightedNodeId === id;
+        const isSelected = selectedNodeId === id;
+
+        let style = data.highlightColor
           ? {
               // In light mode, add a tinted fill; in dark mode, avoid washing out
               backgroundColor: isDark ? undefined : "#CCFBEF",
@@ -81,16 +90,32 @@ export function WorkflowVisualization({
               boxShadow: `0 0 0 3px ${data.highlightColor}66`,
             }
           : undefined;
+
+        if (isSelected) {
+          style = {
+            backgroundColor: isDark ? "#1e3a8a" : "#DBEAFE",
+            borderColor: "#3B82F6",
+            boxShadow: "0 0 0 4px #3B82F6",
+          };
+        } else if (isHighlighted) {
+          style = {
+            backgroundColor: style?.backgroundColor,
+            borderColor: "#10B981",
+            boxShadow: "0 0 0 3px #10B98166",
+          };
+        }
         return (
           <div
             className={
-              "px-4 py-2 shadow-md rounded-md min-w-[160px] " +
+              "px-4 py-2 shadow-md rounded-md min-w-[160px] cursor-pointer transition-all " +
               // light
               "bg-[#E6EEFF] border-2 border-[#7EA6FF] " +
               // dark
-              "dark:bg-[#0b1220] dark:border-[#274690]"
+              "dark:bg-[#0b1220] dark:border-[#274690] " +
+              "hover:shadow-lg hover:scale-105"
             }
             style={style}
+            onClick={() => onNodeClick?.(id)}
           >
             <Handle type="target" position={Position.Left} />
             <div className="font-bold text-[#1E3A8A] text-sm dark:text-[#e5edff]">
@@ -121,22 +146,41 @@ export function WorkflowVisualization({
           </div>
         );
       },
-      event: ({ data }) => {
-        const style = data.highlightColor
+      event: ({ data, id }) => {
+        const isHighlighted = highlightedNodeId === id;
+        const isSelected = selectedNodeId === id;
+
+        let style = data.highlightColor
           ? {
               backgroundColor: isDark ? undefined : "#FFE8B5",
               borderColor: data.highlightColor,
               boxShadow: `0 0 0 3px ${data.highlightColor}66`,
             }
           : undefined;
+
+        if (isSelected) {
+          style = {
+            backgroundColor: isDark ? "#1e3a8a" : "#DBEAFE",
+            borderColor: "#3B82F6",
+            boxShadow: "0 0 0 4px #3B82F6",
+          };
+        } else if (isHighlighted) {
+          style = {
+            backgroundColor: style?.backgroundColor,
+            borderColor: "#10B981",
+            boxShadow: "0 0 0 3px #10B98166",
+          };
+        }
         return (
           <div
             className={
-              "px-3 py-2 shadow-md rounded-full min-w-[140px] text-center " +
+              "px-3 py-2 shadow-md rounded-full min-w-[140px] text-center cursor-pointer transition-all " +
               "bg-[#FFF3BF] border-2 border-[#FFD166] " +
-              "dark:bg-[#241a06] dark:border-[#F59E0B]"
+              "dark:bg-[#241a06] dark:border-[#F59E0B] " +
+              "hover:shadow-lg hover:scale-105"
             }
             style={style}
+            onClick={() => onNodeClick?.(id)}
           >
             <Handle type="target" position={Position.Left} />
             <div className="font-bold text-[#92400E] text-sm dark:text-[#fde68a]">
@@ -151,22 +195,41 @@ export function WorkflowVisualization({
           </div>
         );
       },
-      external: ({ data }) => {
-        const style = data.highlightColor
+      external: ({ data, id }) => {
+        const isHighlighted = highlightedNodeId === id;
+        const isSelected = selectedNodeId === id;
+
+        let style = data.highlightColor
           ? {
               backgroundColor: isDark ? undefined : "#FFE5D4",
               borderColor: data.highlightColor,
               boxShadow: `0 0 0 3px ${data.highlightColor}66`,
             }
           : undefined;
+
+        if (isSelected) {
+          style = {
+            backgroundColor: isDark ? "#1e3a8a" : "#DBEAFE",
+            borderColor: "#3B82F6",
+            boxShadow: "0 0 0 4px #3B82F6",
+          };
+        } else if (isHighlighted) {
+          style = {
+            backgroundColor: style?.backgroundColor,
+            borderColor: "#10B981",
+            boxShadow: "0 0 0 3px #10B98166",
+          };
+        }
         return (
           <div
             className={
-              "px-3 py-2 shadow-md rounded-lg min-w-[140px] text-center " +
+              "px-3 py-2 shadow-md rounded-lg min-w-[140px] text-center cursor-pointer transition-all " +
               "bg-[#FFEDD5] border-2 border-[#FB923C] " +
-              "dark:bg-[#1f0f08] dark:border-[#ea7a3a]"
+              "dark:bg-[#1f0f08] dark:border-[#ea7a3a] " +
+              "hover:shadow-lg hover:scale-105"
             }
             style={style}
+            onClick={() => onNodeClick?.(id)}
           >
             <Handle type="target" position={Position.Left} />
             <div className="font-bold text-[#7C2D12] text-sm dark:text-[#fed7aa]">
@@ -182,7 +245,7 @@ export function WorkflowVisualization({
         );
       },
     } as NodeTypes;
-  }, [isDark]);
+  }, [isDark, highlightedNodeId, selectedNodeId, onNodeClick]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !window.matchMedia) return;
@@ -275,7 +338,10 @@ export function WorkflowVisualization({
         target: edge.target,
         type: "smoothstep",
         animated: false,
-        style: { stroke: "var(--wf-edge-stroke)", strokeWidth: 2 },
+        style: {
+          stroke: "var(--wf-edge-stroke)",
+          strokeWidth: 2,
+        },
         markerEnd: {
           type: MarkerType.ArrowClosed,
           color: "var(--wf-edge-stroke)",
@@ -328,7 +394,7 @@ export function WorkflowVisualization({
     } finally {
       setLoading(false);
     }
-  }, [workflowName, workflowsClient]);
+  }, [workflowName, workflowsClient, layoutGraph, setNodes, setEdges]);
 
   useEffect(() => {
     fetchWorkflowVisualization();
@@ -430,7 +496,7 @@ export function WorkflowVisualization({
         return n;
       }),
     );
-  }, [events?.length, setNodes]);
+  }, [events, setNodes]);
 
   if (loading) {
     return (

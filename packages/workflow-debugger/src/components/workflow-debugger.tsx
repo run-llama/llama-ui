@@ -17,7 +17,29 @@ import { getWorkflows, getHealth } from "@llamaindex/workflows-client";
 import { WorkflowConfigPanel } from "./workflow-config-panel";
 import { RunListPanel, RunListPanelHandle } from "./run-list-panel";
 import { RunDetailsPanel } from "./run-details-panel";
-import { Settings, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import {
+  Settings,
+  PanelLeftClose,
+  PanelLeftOpen,
+  PanelRightOpen,
+} from "lucide-react";
+
+// Utility to handle keyboard shortcuts
+function useKeyboardShortcut(key: string, callback: () => void, ctrl = true) {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (ctrl && e.ctrlKey && e.key.toLowerCase() === key.toLowerCase()) {
+        e.preventDefault();
+        callback();
+      } else if (!ctrl && e.key.toLowerCase() === key.toLowerCase()) {
+        e.preventDefault();
+        callback();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [key, callback, ctrl]);
+}
 
 // Utility to resolve base URL from query param or default
 function resolveBaseUrl(): string {
@@ -36,15 +58,13 @@ export function WorkflowDebugger() {
   const [editingUrl, setEditingUrl] = useState<string>(baseUrl);
   const [selectedWorkflow, setSelectedWorkflow] = useState<string | null>(null);
   const [activeHandlerId, setActiveHandlerId] = useState<string | null>(null);
-  const [runDetailsTab, setRunDetailsTab] = useState<
-    "visualization" | "events"
-  >("visualization");
   const [workflows, setWorkflows] = useState<string[]>([]);
   const [workflowsLoading, setWorkflowsLoading] = useState(true);
   // Default to a 3/5 ratio (left/right) => 37.5% / 62.5%
   const [leftPanelWidth, setLeftPanelWidth] = useState(37.5); // percentage
   const [isDragging, setIsDragging] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [configPanelCollapsed, setConfigPanelCollapsed] = useState(false);
   const [isServerHealthy, setIsServerHealthy] = useState<boolean | null>(null);
   const [connectionError, setConnectionError] = useState<string | null>(null);
 
@@ -70,14 +90,7 @@ export function WorkflowDebugger() {
     }
   }, [workflowsClient]);
 
-  // Update client config when baseUrl changes
-  useEffect(() => {
-    workflowsClient.setConfig({ baseUrl });
-    void checkHealth();
-    fetchWorkflows();
-  }, [baseUrl, workflowsClient, checkHealth]);
-
-  const fetchWorkflows = async () => {
+  const fetchWorkflows = useCallback(async () => {
     try {
       setWorkflowsLoading(true);
       const { data, error } = await getWorkflows({ client: workflowsClient });
@@ -93,7 +106,14 @@ export function WorkflowDebugger() {
     } finally {
       setWorkflowsLoading(false);
     }
-  };
+  }, [workflowsClient]);
+
+  // Update client config when baseUrl changes
+  useEffect(() => {
+    workflowsClient.setConfig({ baseUrl });
+    void checkHealth();
+    void fetchWorkflows();
+  }, [baseUrl, workflowsClient, checkHealth, fetchWorkflows]);
 
   const handleUrlSave = () => {
     const normalizedUrl = editingUrl.endsWith("/")
@@ -155,6 +175,15 @@ export function WorkflowDebugger() {
       };
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
+
+  // Keyboard shortcut: Ctrl+B to toggle config panel
+  useKeyboardShortcut(
+    "b",
+    useCallback(() => {
+      setConfigPanelCollapsed((prev) => !prev);
+    }, []),
+    true,
+  );
 
   return (
     <div
@@ -286,36 +315,56 @@ export function WorkflowDebugger() {
         {/* Main Content Area */}
         <div className="flex-1 flex overflow-hidden main-content-area">
           {/* Left Panel - Form */}
-          <div
-            className="border-r border-border overflow-auto"
-            style={{ width: `${leftPanelWidth}%` }}
-          >
-            <WorkflowConfigPanel
-              selectedWorkflow={selectedWorkflow}
-              onRunStart={handleRunStart}
-              activeHandlerId={activeHandlerId}
-            />
-          </div>
+          {!configPanelCollapsed ? (
+            <>
+              <div
+                className="border-r border-border overflow-auto"
+                style={{ width: `${leftPanelWidth}%` }}
+              >
+                <WorkflowConfigPanel
+                  selectedWorkflow={selectedWorkflow}
+                  onRunStart={handleRunStart}
+                  activeHandlerId={activeHandlerId}
+                  onCollapse={() => setConfigPanelCollapsed(true)}
+                />
+              </div>
 
-          {/* Resizable Gutter */}
-          <div
-            className={`w-2 hover:bg-gray-500/20 hover:shadow-lg cursor-col-resize flex-shrink-0 transition-all duration-200 relative group border-l border-r border-border ${
-              isDragging ? "shadow-xl" : ""
-            }`}
-            onMouseDown={handleMouseDown}
-            title="Drag to resize panels"
-          ></div>
+              {/* Resizable Gutter */}
+              <div
+                className={`w-2 hover:bg-gray-500/20 hover:shadow-lg cursor-col-resize flex-shrink-0 transition-all duration-200 relative group border-l border-r border-border ${
+                  isDragging ? "shadow-xl" : ""
+                }`}
+                onMouseDown={handleMouseDown}
+                title="Drag to resize panels"
+              ></div>
+            </>
+          ) : (
+            /* Collapsed Config Panel Trigger */
+            <div className="w-10 border-r border-border bg-muted/30 flex flex-col items-center justify-center hover:bg-muted/50 transition-colors">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setConfigPanelCollapsed(false)}
+                title="Show configuration panel (Ctrl+B)"
+                className="h-10 w-10 p-0"
+              >
+                <PanelRightOpen className="h-5 w-5" />
+              </Button>
+            </div>
+          )}
 
           {/* Right Panel - Results */}
           <div
             className="overflow-auto"
-            style={{ width: `${100 - leftPanelWidth}%` }}
+            style={{
+              width: configPanelCollapsed
+                ? "calc(100% - 40px)"
+                : `${100 - leftPanelWidth}%`,
+            }}
           >
             <RunDetailsPanel
               handlerId={activeHandlerId}
               selectedWorkflow={selectedWorkflow}
-              tab={runDetailsTab}
-              onTabChange={setRunDetailsTab}
             />
           </div>
         </div>

@@ -6,6 +6,15 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Workflow edge colors for better visibility */
+  --wf-edge-stroke: #9ca3af;
+  --wf-edge-stroke-hover: #6b7280;
+}
+
+.dark {
+  --wf-edge-stroke: #6b7280;
+  --wf-edge-stroke-hover: #9ca3af;
 }
 
 /* Reset body to allow UI package to handle layout */
@@ -35,4 +44,43 @@ body {
   transition:
     width 0.2s ease-in-out,
     margin 0.2s ease-in-out;
+}
+
+/* Vertical text for collapsed panels */
+.writing-mode-vertical {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+/* ReactFlow edge styling for better visibility */
+.react-flow__edge-path {
+  stroke: var(--wf-edge-stroke) !important;
+  stroke-width: 2px;
+}
+
+.react-flow__edge:hover .react-flow__edge-path {
+  stroke: var(--wf-edge-stroke-hover) !important;
+  stroke-width: 3px;
+}
+
+.react-flow__edge-textwrapper {
+  pointer-events: all;
+}
+
+/* ReactFlow arrow markers */
+.react-flow__arrowhead {
+  fill: var(--wf-edge-stroke);
+}
+
+.react-flow__edge:hover .react-flow__arrowhead {
+  fill: var(--wf-edge-stroke-hover);
+}
+
+/* Make sure edges are visible over background */
+.react-flow__edges {
+  z-index: 1;
+}
+
+.react-flow__nodes {
+  z-index: 2;
 }
