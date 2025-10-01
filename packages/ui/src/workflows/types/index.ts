@@ -66,7 +66,11 @@ export interface WorkflowProgressState {
 
 // Available events map to qualified name
 export enum WorkflowEventType {
+  StartEvent = "workflow.events.StartEvent",
   StopEvent = "workflow.events.StopEvent",
+  InputRequiredEvent = "workflow.events.InputRequiredEvent",
+  HumanResponseEvent = "workflow.events.HumanResponseEvent",
+  ChatDeltaEvent = "workflow.events.ChatDeltaEvent",
 }
 
 export interface StreamingEventCallback<

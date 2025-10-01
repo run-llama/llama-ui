@@ -29,7 +29,9 @@ export interface UseChatOptions {
   initialMessages?: Message[];
 
   /**
-   * Callback when chat is ready and handlerId is available
+   * Callback when chat session is initialized and handlerId is available
+   * - If handlerId is provided: fires on mount
+   * - If no handlerId: fires when first message is sent (lazy initialization)
    */
   onReady?: (handlerId: string) => void;
 
@@ -42,12 +44,33 @@ export interface UseChatOptions {
 /**
  * Hook to manage a chat session as a workflow
  *
+ * Session initialization is lazy by default - the session is created when the first message is sent.
+ * If you provide a handlerId, the session is initialized immediately on mount.
+ *
  * @example
  * ```tsx
+ * // Lazy initialization - session created on first message
  * function MyChat() {
  *   const chat = useChat({
  *     workflowName: "my-chat-workflow",
- *     onReady: (handlerId) => console.log("Chat ready:", handlerId),
+ *     onReady: (handlerId) => {
+ *       // Called when first message is sent
+ *       console.log("Chat ready:", handlerId);
+ *     },
+ *   });
+ *
+ *   return <ChatSection handler={chat} />;
+ * }
+ *
+ * // Eager initialization - session created on mount
+ * function MyResumableChat() {
+ *   const chat = useChat({
+ *     workflowName: "my-chat-workflow",
+ *     handlerId: "existing-session-123",
+ *     onReady: (handlerId) => {
+ *       // Called immediately on mount
+ *       console.log("Chat ready:", handlerId);
+ *     },
  *   });
  *
  *   return <ChatSection handler={chat} />;
@@ -77,44 +100,27 @@ export function useChat(
     handlerId ? state.sessions[handlerId] : undefined
   );
 
-  // Initialize session only if providedHandlerId is given
-  // (initialMessages are just for pre-filling messages, not a trigger for session creation)
+  // Shared session initialization logic
+  const initSession = useCallback(async () => {
+    const id = await store.createSession({
+      workflowName,
+      handlerId: providedHandlerId,
+      initialMessages,
+    });
+    setHandlerId(id);
+    onReady?.(id);
+    return id;
+  }, [workflowName, providedHandlerId, initialMessages, store, onReady]);
+
+  // Eager initialization: only if providedHandlerId is given
+  // Otherwise, lazy initialization happens in sendMessage on first message
   useEffect(() => {
-    let mounted = true;
-
-    async function initSession() {
-      try {
-        const id = await store.createSession({
-          workflowName,
-          handlerId: providedHandlerId,
-          initialMessages,
-        });
-
-        if (mounted) {
-          setHandlerId(id);
-          onReady?.(id);
-        }
-      } catch (error) {
-        if (mounted) {
-          onError?.(error as Error);
-        }
-      }
-    }
-
-    // Create if a specific handler ID is provided OR if initial messages exist
     if (providedHandlerId && !session) {
-      initSession();
+      initSession().catch((error) => {
+        onError?.(error as Error);
+      });
     }
-
-    return () => {
-      mounted = false;
-      // Clean up session on unmount
-      if (handlerId) {
-        store.deleteSession(handlerId);
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty deps - only run once on mount
+  }, [providedHandlerId, session, initSession, onError]);
 
   // Report errors from store
   useEffect(() => {
@@ -131,13 +137,7 @@ export function useChat(
       // Lazy initialization: create session on first message if not exists
       if (!currentHandlerId) {
         try {
-          currentHandlerId = await store.createSession({
-            workflowName,
-            handlerId: providedHandlerId,
-            initialMessages,
-          });
-          setHandlerId(currentHandlerId);
-          onReady?.(currentHandlerId);
+          currentHandlerId = await initSession();
         } catch (error) {
           onError?.(error as Error);
           throw error;
@@ -146,15 +146,7 @@ export function useChat(
 
       await store.sendMessage(currentHandlerId, message, opts);
     },
-    [
-      handlerId,
-      workflowName,
-      providedHandlerId,
-      initialMessages,
-      store,
-      onReady,
-      onError,
-    ]
+    [handlerId, initSession, store, onError]
   );
 
   const stop = useCallback(async () => {

@@ -7,7 +7,10 @@ import type { WorkflowHandlerSummary } from "../../../src/workflows/types";
 // Mock the helper functions
 vi.mock("../../../src/workflows/store/helper", () => ({
   createHandler: vi.fn(),
-  fetchHandlerEvents: vi.fn().mockResolvedValue([]),
+  fetchHandlerEvents: vi.fn(() => ({
+    promise: Promise.resolve([]),
+    unsubscribe: vi.fn(),
+  })),
 }));
 
 // Mock the shared streaming manager

@@ -10,9 +10,18 @@ export type JSONValue =
     }
   | JSONValue[];
 
+// Message roles
+export const MessageRole = {
+  System: "system",
+  User: "user",
+  Assistant: "assistant",
+} as const;
+
+export type MessageRoleType = (typeof MessageRole)[keyof typeof MessageRole];
+
 export interface Message {
   id: string;
-  role: "system" | "user" | "assistant";
+  role: MessageRoleType;
   parts: MessagePart[];
 }
 

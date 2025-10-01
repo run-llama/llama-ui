@@ -85,7 +85,7 @@ export function RunDetailsPanel({
       return prev;
     });
     // Only depend on length to avoid re-stamping on identity changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [events.length]);
 
   const currentTab: "visualization" | "events" = tab ?? internalTab;

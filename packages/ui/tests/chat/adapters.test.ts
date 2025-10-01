@@ -7,11 +7,20 @@
 
 import { describe, it, expect } from "vitest";
 import type { Message } from "@/src/chat/components/chat.interface";
+import { MessageRole } from "@/src/chat/components/chat.interface";
 import type {
   MessagePart,
+  SourcesPart,
+  SuggestionPart,
   TextPart,
 } from "@/src/chat/components/message-parts/types";
+import {
+  TextPartType,
+  SourcesPartType,
+  SuggestionPartType,
+} from "@/src/chat/components/message-parts/types";
 import type { WorkflowEvent } from "@/src/workflows/types";
+import { WorkflowEventType } from "@/src/workflows/types";
 import {
   messageToEvent,
   extractTextFromParts,
@@ -27,13 +36,13 @@ describe("messageToEvent", () => {
   it("should convert message with single TextPart to HumanResponseEvent", () => {
     const message: Message = {
       id: "msg-1",
-      role: "user",
-      parts: [{ type: "text", text: "Hello" }],
+      role: MessageRole.User,
+      parts: [{ type: TextPartType, text: "Hello" }],
     };
 
     const event = messageToEvent(message);
 
-    expect(event.type).toBe("workflow.events.HumanResponseEvent");
+    expect(event.type).toBe(WorkflowEventType.HumanResponseEvent);
     expect(event.data).toEqual({
       response: "Hello",
     });
@@ -43,10 +52,10 @@ describe("messageToEvent", () => {
   it("should concatenate multiple TextParts with spaces", () => {
     const message: Message = {
       id: "msg-2",
-      role: "user",
+      role: MessageRole.User,
       parts: [
-        { type: "text", text: "Hello" },
-        { type: "text", text: "World" },
+        { type: TextPartType, text: "Hello" },
+        { type: TextPartType, text: "World" },
       ],
     };
 
@@ -61,8 +70,8 @@ describe("messageToEvent", () => {
   it("should throw error for empty message", () => {
     const message: Message = {
       id: "msg-3",
-      role: "user",
-      parts: [{ type: "text", text: "" }],
+      role: MessageRole.User,
+      parts: [{ type: TextPartType, text: "" }],
     };
 
     expect(() => messageToEvent(message)).toThrow("Cannot send empty message");
@@ -71,7 +80,7 @@ describe("messageToEvent", () => {
   it("should throw error for message with no TextParts", () => {
     const message: Message = {
       id: "msg-4",
-      role: "user",
+      role: MessageRole.User,
       parts: [],
     };
 
@@ -82,9 +91,9 @@ describe("messageToEvent", () => {
   it("should ignore non-text parts", () => {
     const message: Message = {
       id: "msg-5",
-      role: "user",
+      role: MessageRole.User,
       parts: [
-        { type: "text", text: "Hello" },
+        { type: TextPartType, text: "Hello" },
         { type: "data-file", data: { name: "file.pdf" } } as any,
       ],
     };
@@ -100,8 +109,8 @@ describe("messageToEvent", () => {
   it("should extract only text content to response field", () => {
     const message: Message = {
       id: "msg-123",
-      role: "user",
-      parts: [{ type: "text", text: "Test" }],
+      role: MessageRole.User,
+      parts: [{ type: TextPartType, text: "Test" }],
     };
 
     const event = messageToEvent(message);
@@ -118,8 +127,8 @@ describe("extractTextFromParts", () => {
   // AC-013: multiple TextParts
   it("should concatenate multiple TextParts with spaces", () => {
     const parts: MessagePart[] = [
-      { type: "text", text: "Hello" },
-      { type: "text", text: "World" },
+      { type: TextPartType, text: "Hello" },
+      { type: TextPartType, text: "World" },
     ];
 
     const text = extractTextFromParts(parts);
@@ -130,9 +139,9 @@ describe("extractTextFromParts", () => {
   // AC-014: mixed parts
   it("should extract only text from mixed parts", () => {
     const parts: MessagePart[] = [
-      { type: "text", text: "Hello" },
+      { type: TextPartType, text: "Hello" },
       { type: "data-file", data: {} } as any,
-      { type: "text", text: "World" },
+      { type: TextPartType, text: "World" },
     ];
 
     const text = extractTextFromParts(parts);
@@ -160,7 +169,7 @@ describe("isDeltaEvent", () => {
   it("should return true for ChatDeltaEvent", () => {
     expect(
       isDeltaEvent({
-        type: "workflow.events.ChatDeltaEvent",
+        type: WorkflowEventType.ChatDeltaEvent,
         data: { delta: "test" },
       })
     ).toBe(true);
@@ -169,7 +178,7 @@ describe("isDeltaEvent", () => {
   it("should match ChatDeltaEvent by exact string", () => {
     expect(
       isDeltaEvent({
-        type: "workflow.events.ChatDeltaEvent",
+        type: WorkflowEventType.ChatDeltaEvent,
         data: { delta: "test" },
       })
     ).toBe(true);
@@ -180,11 +189,11 @@ describe("isDeltaEvent", () => {
 
   // AC-017: false cases
   it("should return false for non-delta types", () => {
-    expect(isDeltaEvent({ type: "workflow.events.StopEvent", data: {} })).toBe(
+    expect(isDeltaEvent({ type: WorkflowEventType.StopEvent, data: {} })).toBe(
       false
     );
     expect(
-      isDeltaEvent({ type: "workflow.events.InputRequiredEvent", data: {} })
+      isDeltaEvent({ type: WorkflowEventType.InputRequiredEvent, data: {} })
     ).toBe(false);
     expect(isDeltaEvent({ type: "workflow.status", data: {} })).toBe(false);
   });
@@ -194,7 +203,7 @@ describe("isStopEvent", () => {
   // AC-018: true case
   it("should return true for StopEvent", () => {
     const event: WorkflowEvent = {
-      type: "workflow.events.StopEvent",
+      type: WorkflowEventType.StopEvent,
       data: {},
     };
 
@@ -203,14 +212,14 @@ describe("isStopEvent", () => {
 
   // AC-019: false cases
   it("should return false for non-StopEvent types", () => {
-    expect(isStopEvent({ type: "workflow.events.StartEvent", data: {} })).toBe(
+    expect(isStopEvent({ type: WorkflowEventType.StartEvent, data: {} })).toBe(
       false
     );
     expect(
-      isStopEvent({ type: "workflow.events.InputRequiredEvent", data: {} })
+      isStopEvent({ type: WorkflowEventType.InputRequiredEvent, data: {} })
     ).toBe(false);
     expect(
-      isStopEvent({ type: "workflow.events.ChatDeltaEvent", data: {} })
+      isStopEvent({ type: WorkflowEventType.ChatDeltaEvent, data: {} })
     ).toBe(false);
   });
 });
@@ -218,7 +227,7 @@ describe("isStopEvent", () => {
 describe("isInputRequiredEvent", () => {
   it("should return true for InputRequiredEvent", () => {
     const event: WorkflowEvent = {
-      type: "workflow.events.InputRequiredEvent",
+      type: WorkflowEventType.InputRequiredEvent,
       data: { prefix: "waiting" },
     };
 
@@ -227,10 +236,10 @@ describe("isInputRequiredEvent", () => {
 
   it("should return false for non-InputRequiredEvent types", () => {
     expect(
-      isInputRequiredEvent({ type: "workflow.events.StopEvent", data: {} })
+      isInputRequiredEvent({ type: WorkflowEventType.StopEvent, data: {} })
     ).toBe(false);
     expect(
-      isInputRequiredEvent({ type: "workflow.events.ChatDeltaEvent", data: {} })
+      isInputRequiredEvent({ type: WorkflowEventType.ChatDeltaEvent, data: {} })
     ).toBe(false);
   });
 });
@@ -238,7 +247,7 @@ describe("isInputRequiredEvent", () => {
 describe("isMessageTerminator", () => {
   it("should return true for StopEvent", () => {
     const event: WorkflowEvent = {
-      type: "workflow.events.StopEvent",
+      type: WorkflowEventType.StopEvent,
       data: {},
     };
 
@@ -247,7 +256,7 @@ describe("isMessageTerminator", () => {
 
   it("should return true for InputRequiredEvent", () => {
     const event: WorkflowEvent = {
-      type: "workflow.events.InputRequiredEvent",
+      type: WorkflowEventType.InputRequiredEvent,
       data: { prefix: "waiting" },
     };
 
@@ -256,10 +265,10 @@ describe("isMessageTerminator", () => {
 
   it("should return false for non-terminator events", () => {
     expect(
-      isMessageTerminator({ type: "workflow.events.ChatDeltaEvent", data: {} })
+      isMessageTerminator({ type: WorkflowEventType.ChatDeltaEvent, data: {} })
     ).toBe(false);
     expect(
-      isMessageTerminator({ type: "workflow.events.StartEvent", data: {} })
+      isMessageTerminator({ type: WorkflowEventType.StartEvent, data: {} })
     ).toBe(false);
   });
 });
@@ -270,26 +279,26 @@ describe("StreamingMessage (XML markers parsing)", () => {
 
     // Simulate streaming events with sources XML marker
     streaming.addEvent({
-      type: "workflow.events.ChatDeltaEvent",
+      type: WorkflowEventType.ChatDeltaEvent,
       data: { delta: "Here are the results:\n\n" },
     });
     streaming.addEvent({
-      type: "workflow.events.ChatDeltaEvent",
+      type: WorkflowEventType.ChatDeltaEvent,
       data: { delta: "<sources>\n" },
     });
     streaming.addEvent({
-      type: "workflow.events.ChatDeltaEvent",
+      type: WorkflowEventType.ChatDeltaEvent,
       data: {
         delta:
           '{"nodes": [{"id": "1", "text": "Result 1", "metadata": {"title": "Doc 1"}}]}\n',
       },
     });
     streaming.addEvent({
-      type: "workflow.events.ChatDeltaEvent",
+      type: WorkflowEventType.ChatDeltaEvent,
       data: { delta: "</sources>\n\n" },
     });
     streaming.addEvent({
-      type: "workflow.events.ChatDeltaEvent",
+      type: WorkflowEventType.ChatDeltaEvent,
       data: { delta: "Done!" },
     });
 
@@ -299,14 +308,18 @@ describe("StreamingMessage (XML markers parsing)", () => {
     expect(parts.length).toBeGreaterThanOrEqual(2);
 
     // Find sources part
-    const sourcesPart = parts.find((p) => p.type === "data-sources");
+    const sourcesPart: SourcesPart = parts.find(
+      (p) => p.type === SourcesPartType
+    ) as SourcesPart;
     expect(sourcesPart).toBeDefined();
-    expect(sourcesPart?.data).toEqual({
+    expect(sourcesPart.data).toEqual({
       nodes: [{ id: "1", text: "Result 1", metadata: { title: "Doc 1" } }],
     });
 
     // Find text parts
-    const textParts = parts.filter((p) => p.type === "text") as TextPart[];
+    const textParts = parts.filter(
+      (p) => p.type === TextPartType
+    ) as TextPart[];
     expect(textParts.length).toBeGreaterThanOrEqual(1);
   });
 
@@ -314,19 +327,19 @@ describe("StreamingMessage (XML markers parsing)", () => {
     const streaming = new StreamingMessage("msg-2");
 
     streaming.addEvent({
-      type: "workflow.events.ChatDeltaEvent",
+      type: WorkflowEventType.ChatDeltaEvent,
       data: { delta: "Here you go!\n\n" },
     });
     streaming.addEvent({
-      type: "workflow.events.ChatDeltaEvent",
+      type: WorkflowEventType.ChatDeltaEvent,
       data: { delta: "<suggested_questions>\n" },
     });
     streaming.addEvent({
-      type: "workflow.events.ChatDeltaEvent",
+      type: WorkflowEventType.ChatDeltaEvent,
       data: { delta: '["Question 1", "Question 2"]\n' },
     });
     streaming.addEvent({
-      type: "workflow.events.ChatDeltaEvent",
+      type: WorkflowEventType.ChatDeltaEvent,
       data: { delta: "</suggested_questions>" },
     });
 
@@ -334,35 +347,38 @@ describe("StreamingMessage (XML markers parsing)", () => {
 
     // Find suggested_questions part
     const suggestionsPart = parts.find(
-      (p) => p.type === "data-suggested_questions"
-    );
+      (p) => p.type === SuggestionPartType
+    ) as SuggestionPart;
     expect(suggestionsPart).toBeDefined();
-    expect(suggestionsPart?.data).toEqual(["Question 1", "Question 2"]);
+    expect(suggestionsPart.data).toEqual(["Question 1", "Question 2"]);
   });
 
   it("should handle streaming ChatDeltaEvents with plain text (no XML)", () => {
     const streaming = new StreamingMessage("msg-3");
 
     streaming.addEvent({
-      type: "workflow.events.ChatDeltaEvent",
+      type: WorkflowEventType.ChatDeltaEvent,
       data: { delta: "Plain text message" },
     });
 
     const parts = streaming.getParts();
 
     expect(parts.length).toBe(1);
-    expect(parts[0]).toEqual({ type: "text", text: "Plain text message" });
+    expect(parts[0]).toEqual({
+      type: TextPartType,
+      text: "Plain text message",
+    });
   });
 
   it("should merge consecutive text deltas", () => {
     const streaming = new StreamingMessage("msg-4");
 
     streaming.addEvent({
-      type: "workflow.events.ChatDeltaEvent",
+      type: WorkflowEventType.ChatDeltaEvent,
       data: { delta: "Hello " },
     });
     streaming.addEvent({
-      type: "workflow.events.ChatDeltaEvent",
+      type: WorkflowEventType.ChatDeltaEvent,
       data: { delta: "World" },
     });
 

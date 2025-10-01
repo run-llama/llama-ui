@@ -10,6 +10,7 @@ import {
 } from "@llamaindex/workflows-client";
 import type { WorkflowEvent } from "../../workflows/types";
 import { fetchHandlerEvents } from "../../workflows/store/helper";
+import { workflowStreamingManager } from "../../lib/shared-streaming";
 
 /**
  * Start a new workflow handler for chat session
@@ -65,7 +66,7 @@ export function subscribeToHandlerEvents(
   const { onEvent, onError, onComplete } = callbacks;
 
   // Use the workflow store helper for streaming
-  fetchHandlerEvents(
+  const { unsubscribe } = fetchHandlerEvents(
     { client, handlerId },
     {
       onData: (event: WorkflowEvent) => {
@@ -80,10 +81,8 @@ export function subscribeToHandlerEvents(
     }
   );
 
-  // Return a no-op unsubscribe for now (streaming manager handles cleanup)
-  return () => {
-    // Cleanup handled by streaming manager
-  };
+  // Return the actual unsubscribe function
+  return unsubscribe;
 }
 
 /**
@@ -91,8 +90,6 @@ export function subscribeToHandlerEvents(
  * Uses the shared streaming manager
  */
 export function unsubscribeFromHandler(handlerId: string): void {
-  // The streaming manager uses a specific key format
   const streamKey = `handler:${handlerId}`;
-  // Access the global streaming manager to close the stream
-  // This is handled internally by the streaming manager
+  workflowStreamingManager.closeStream(streamKey);
 }

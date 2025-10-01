@@ -88,7 +88,10 @@ describe("Complete Task Store Tests", () => {
     const mockedStreaming = vi.mocked(workflowStreamingManager);
 
     mockedCreateHandler.mockResolvedValue(mockTaskSummary);
-    mockedFetchHandlerEvents.mockResolvedValue([]);
+    mockedFetchHandlerEvents.mockReturnValue({
+      promise: Promise.resolve([]),
+      unsubscribe: vi.fn(),
+    });
     mockedGetRunningHandlers.mockResolvedValue([]);
     mockedStreaming.isStreamActive.mockReturnValue(false);
   });

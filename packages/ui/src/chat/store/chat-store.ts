@@ -7,6 +7,7 @@
 import { create } from "zustand";
 import type { Client as LlamaDeployClient } from "@llamaindex/workflows-client";
 import type { Message, ChatRequestOptions } from "../components/chat.interface";
+import { MessageRole } from "../components/chat.interface";
 import type { MessagePart } from "../components/message-parts/types";
 import type { WorkflowEvent } from "../../workflows/types";
 import type {
@@ -74,7 +75,7 @@ export const createChatStore = (client: LlamaDeployClient) =>
             const assistantMessageId = `assistant-${Date.now()}`;
             const assistantMessage: Message = {
               id: assistantMessageId,
-              role: "assistant",
+              role: MessageRole.Assistant,
               parts: [],
             };
             get()._appendMessage(handlerId, assistantMessage);
@@ -171,7 +172,7 @@ export const createChatStore = (client: LlamaDeployClient) =>
       const assistantMessageId = `assistant-${Date.now()}`;
       const assistantMessage: Message = {
         id: assistantMessageId,
-        role: "assistant",
+        role: MessageRole.Assistant,
         parts: [],
       };
       get()._appendMessage(handlerId, assistantMessage);
@@ -351,7 +352,7 @@ export const createChatStore = (client: LlamaDeployClient) =>
       const assistantMessageId = `assistant-${Date.now()}`;
       const assistantMessage: Message = {
         id: assistantMessageId,
-        role: "assistant",
+        role: MessageRole.Assistant,
         parts: [],
       };
       get()._appendMessage(handlerId, assistantMessage);

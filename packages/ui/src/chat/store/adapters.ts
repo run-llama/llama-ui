@@ -6,6 +6,14 @@
 
 import type { Message } from "../components/chat.interface";
 import type { MessagePart, TextPart } from "../components/message-parts/types";
+import {
+  TextPartType,
+  SourcesPartType,
+  SuggestionPartType,
+  FilePartType,
+  ArtifactPartType,
+  EventPartType,
+} from "../components/message-parts/types";
 import type {
   WorkflowEvent,
   ChatDeltaEvent,
@@ -13,6 +21,7 @@ import type {
   InputRequiredEvent,
   HumanResponseEvent,
 } from "../../workflows/types";
+import { WorkflowEventType } from "../../workflows/types";
 
 /**
  * Extract text content from message parts
@@ -20,7 +29,7 @@ import type {
  */
 export function extractTextFromParts(parts: MessagePart[]): string {
   return parts
-    .filter((part): part is TextPart => part.type === "text")
+    .filter((part): part is TextPart => part.type === TextPartType)
     .map((part) => part.text)
     .join(" ");
 }
@@ -36,7 +45,7 @@ export function isDeltaEvent(event: WorkflowEvent): event is ChatDeltaEvent {
  * Determine if event is a StopEvent (signals workflow completion)
  */
 export function isStopEvent(event: WorkflowEvent): event is StopEvent {
-  return event.type === "workflow.events.StopEvent";
+  return event.type === WorkflowEventType.StopEvent;
 }
 
 /**
@@ -45,7 +54,7 @@ export function isStopEvent(event: WorkflowEvent): event is StopEvent {
 export function isInputRequiredEvent(
   event: WorkflowEvent
 ): event is InputRequiredEvent {
-  return event.type === "workflow.events.InputRequiredEvent";
+  return event.type === WorkflowEventType.InputRequiredEvent;
 }
 
 /**
@@ -69,7 +78,7 @@ export function messageToEvent(message: Message): HumanResponseEvent {
   }
 
   return {
-    type: "workflow.events.HumanResponseEvent",
+    type: WorkflowEventType.HumanResponseEvent,
     data: {
       response: text,
     },
@@ -261,7 +270,7 @@ export function parseTextWithXMLMarkers(text: string): MessagePart[] {
       const plainText = completedText.slice(lastIndex, matchStart);
       const trimmed = plainText.trim();
       if (trimmed) {
-        parts.push({ type: "text", text: trimmed });
+        parts.push({ type: TextPartType, text: trimmed });
       }
     }
 
@@ -288,15 +297,15 @@ export function parseTextWithXMLMarkers(text: string): MessagePart[] {
         const before = remaining.slice(0, startTagMatch.index);
         const trimmed = before.trim();
         if (trimmed) {
-          parts.push({ type: "text", text: trimmed });
+          parts.push({ type: TextPartType, text: trimmed });
         }
       } else {
         const trimmed = remaining.trim();
-        if (trimmed) parts.push({ type: "text", text: trimmed });
+        if (trimmed) parts.push({ type: TextPartType, text: trimmed });
       }
     } else {
       const trimmed = remaining.trim();
-      if (trimmed) parts.push({ type: "text", text: trimmed });
+      if (trimmed) parts.push({ type: TextPartType, text: trimmed });
     }
   }
 
@@ -400,31 +409,31 @@ function parseXMLMarker(tagName: string, content: string): MessagePart | null {
     switch (tagName) {
       case "sources":
         return {
-          type: "data-sources",
+          type: SourcesPartType,
           data: data, // Expected: { nodes: SourceNode[] }
         };
 
       case "suggested_questions":
         return {
-          type: "data-suggested_questions",
+          type: SuggestionPartType,
           data: data, // Expected: string[]
         };
 
       case "file":
         return {
-          type: "data-file",
+          type: FilePartType,
           data: data, // Expected: { filename, mediaType, url }
         };
 
       case "artifact":
         return {
-          type: "data-artifact",
+          type: ArtifactPartType,
           data: data, // Expected: { type, created_at, data }
         };
 
       case "event":
         return {
-          type: "data-event",
+          type: EventPartType,
           data: data, // Expected: { title, status, description?, data? }
         };
 
@@ -527,18 +536,20 @@ function mergeMessageParts(
   }
 
   // Find first TextPart in current parts
-  const firstTextIndex = currentParts.findIndex((part) => part.type === "text");
+  const firstTextIndex = currentParts.findIndex(
+    (part) => part.type === TextPartType
+  );
   const firstNewPart = newParts[0];
 
   // If both have TextParts at the start, concatenate them
-  if (firstTextIndex !== -1 && firstNewPart.type === "text") {
+  if (firstTextIndex !== -1 && firstNewPart.type === TextPartType) {
     const updatedParts = [...currentParts];
     const currentTextPart = updatedParts[firstTextIndex] as TextPart;
     const newTextPart = firstNewPart as TextPart;
 
     // Concatenate text
     updatedParts[firstTextIndex] = {
-      type: "text",
+      type: TextPartType,
       text: currentTextPart.text + newTextPart.text,
     };
 
