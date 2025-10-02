@@ -8,7 +8,7 @@ export type Handler = {
     handler_id: string;
     workflow_name: string;
     run_id?: string | null;
-    status: 'running' | 'completed' | 'failed';
+    status: 'running' | 'completed' | 'failed' | 'cancelled';
     started_at: string;
     updated_at?: string | null;
     completed_at?: string | null;
@@ -247,6 +247,14 @@ export type GetEventsByHandlerIdData = {
          * If false, as NDJSON instead of Server-Sent Events.
          */
         sse?: boolean;
+        /**
+         * If true, include internal workflow events (e.g., step state changes).
+         */
+        include_internal?: boolean;
+        /**
+         * Timeout for acquiring the lock to iterate over the events.
+         */
+        acquire_timeout?: number;
     };
     url: '/events/{handler_id}';
 };
@@ -358,6 +366,41 @@ export type GetHandlersResponses = {
 };
 
 export type GetHandlersResponse = GetHandlersResponses[keyof GetHandlersResponses];
+
+export type PostHandlersByHandlerIdCancelData = {
+    body?: never;
+    path: {
+        /**
+         * Workflow handler identifier.
+         */
+        handler_id: string;
+    };
+    query?: {
+        /**
+         * If true, also deletes the handler from the store, otherwise updates the status to cancelled.
+         */
+        purge?: boolean;
+    };
+    url: '/handlers/{handler_id}/cancel';
+};
+
+export type PostHandlersByHandlerIdCancelErrors = {
+    /**
+     * Handler not found
+     */
+    404: unknown;
+};
+
+export type PostHandlersByHandlerIdCancelResponses = {
+    /**
+     * Handler cancelled and deleted or cancelled only
+     */
+    200: {
+        status: 'deleted' | 'cancelled';
+    };
+};
+
+export type PostHandlersByHandlerIdCancelResponse = PostHandlersByHandlerIdCancelResponses[keyof PostHandlersByHandlerIdCancelResponses];
 
 export type GetWorkflowsByNameRepresentationData = {
     body?: never;
