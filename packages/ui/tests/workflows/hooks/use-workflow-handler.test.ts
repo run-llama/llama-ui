@@ -98,6 +98,32 @@ describe("useWorkflowTask", () => {
     });
   });
 
+  describe("H10: notFound is true when handler is missing on server", () => {
+    it("sets notFound to true when server reports missing", async () => {
+      const { getExistingHandler } = await import(
+        "../../../src/workflows/store/helper"
+      );
+
+      (getExistingHandler as unknown as { mockRejectedValueOnce: Function }).mockRejectedValueOnce(
+        new Error("Handler not found"),
+      );
+
+      const { result } = renderHookWithProvider(() =>
+        useWorkflowHandler("missing-123"),
+      );
+
+      // Initially false
+      expect(result.current.notFound).toBe(false);
+
+      // Allow effect to run
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      expect(result.current.notFound).toBe(true);
+    });
+  });
+
   describe("H9: sendEvent calls helper with handlerId and event", () => {
     it("should call sendEventToHandler when sendEvent is invoked", async () => {
       const { sendEventToHandler } = await import(
