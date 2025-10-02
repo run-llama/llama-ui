@@ -131,6 +131,7 @@ describe("useWorkflowTask", () => {
       );
 
       // Force rejection for this check
+      (getExistingHandler as unknown as vi.Mock).mockReset();
       (getExistingHandler as unknown as vi.Mock).mockRejectedValueOnce(
         new Error("not found")
       );
@@ -149,6 +150,7 @@ describe("useWorkflowTask", () => {
         "../../../src/workflows/store/helper"
       );
 
+      (getExistingHandler as unknown as vi.Mock).mockReset();
       (getExistingHandler as unknown as vi.Mock).mockResolvedValueOnce({
         handler_id: "ok-123",
         status: "running",

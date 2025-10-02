@@ -11,6 +11,7 @@ import {
   createHandler as createHandlerAPI,
   fetchHandlerEvents,
   getRunningHandlers,
+  getExistingHandler,
 } from "./helper";
 import type {
   WorkflowHandlerSummary,
@@ -23,6 +24,7 @@ export interface HandlerStoreState {
   // State
   handlers: Record<string, WorkflowHandlerSummary>;
   events: Record<string, WorkflowEvent[]>;
+  missingHandlers: Record<string, boolean>;
 
   // Basic operations
   clearCompleted(): void;
@@ -39,6 +41,10 @@ export interface HandlerStoreState {
   subscribe(handlerId: string): void;
   unsubscribe(handlerId: string): void;
   isSubscribed(handlerId: string): boolean;
+
+  // Existence detection
+  checkExists(handlerId: string): Promise<void>;
+  isMissing(handlerId: string): boolean;
 }
 
 export const createHandlerStore = (client: Client) =>
@@ -46,6 +52,7 @@ export const createHandlerStore = (client: Client) =>
     // Initial state
     handlers: {},
     events: {},
+    missingHandlers: {},
 
     // Basic operations
     clearCompleted: () =>
@@ -133,6 +140,8 @@ export const createHandlerStore = (client: Client) =>
       if (!handler) {
         // eslint-disable-next-line no-console -- needed
         console.warn(`Handler ${handlerId} not found for subscription`);
+        // proactively check existence and mark missing if invalid
+        void get().checkExists(handlerId);
         return;
       }
 
@@ -203,6 +212,8 @@ export const createHandlerStore = (client: Client) =>
         ) {
           return;
         }
+        // If the stream fails to establish or errors, verify existence
+        void get().checkExists(handlerId);
         // Update handler status to error
         set((state) => ({
           handlers: {
@@ -231,5 +242,32 @@ export const createHandlerStore = (client: Client) =>
 
       const streamKey = `handler:${handlerId}`;
       return workflowStreamingManager.isStreamActive(streamKey);
+    },
+
+    // Existence detection using existing API responses
+    checkExists: async (handlerId: string) => {
+      // Avoid empty id
+      if (!handlerId) {
+        set((state) => ({
+          missingHandlers: { ...state.missingHandlers, [handlerId]: false },
+        }));
+        return;
+      }
+
+      // Use helper that queries handlers to determine existence
+      try {
+        await getExistingHandler({ client, handlerId });
+        set((state) => ({
+          missingHandlers: { ...state.missingHandlers, [handlerId]: false },
+        }));
+      } catch (_) {
+        set((state) => ({
+          missingHandlers: { ...state.missingHandlers, [handlerId]: true },
+        }));
+      }
+    },
+
+    isMissing: (handlerId: string): boolean => {
+      return get().missingHandlers[handlerId] === true;
     },
   }));

@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useMemo, useState } from "react";
 import { useHandlerStore } from "./use-handler-store";
 import type { WorkflowHandlerSummary, WorkflowEvent } from "../types";
-import { sendEventToHandler, getExistingHandler } from "../store/helper";
+import { sendEventToHandler } from "../store/helper";
 import { useWorkflowsClient } from "../../lib/api-provider";
 
 interface UseWorkflowHandlerResult {
@@ -26,7 +26,10 @@ export function useWorkflowHandler(
   const unsubscribe = useHandlerStore((state) => state.unsubscribe);
   const isSubscribed = useHandlerStore((state) => state.isSubscribed);
   const clearEvents = useHandlerStore((state) => state.clearEvents);
-  const [notFound, setNotFound] = useState(false);
+  const checkExists = useHandlerStore((state) => state.checkExists);
+  const notFound = useHandlerStore(
+    (state) => state.missingHandlers[handlerId] === true
+  );
 
   // Memoize events array to avoid creating new empty arrays
   const events = useMemo(() => {
@@ -49,31 +52,10 @@ export function useWorkflowHandler(
     };
   }, [handlerId, handler, autoStream, subscribe, unsubscribe]);
 
-  // Verify handler existence on the server when handlerId changes
+  // Trigger existence verification when handlerId changes
   useEffect(() => {
-    let cancelled = false;
-
-    // Empty id: do not attempt to fetch
-    if (!handlerId) {
-      setNotFound(false);
-      return;
-    }
-
-    // Optimistically assume not found is false; verify with server
-    // If the handler is present locally, we still verify to catch expired/deleted cases
-    (async () => {
-      try {
-        await getExistingHandler({ client, handlerId });
-        if (!cancelled) setNotFound(false);
-      } catch (_) {
-        if (!cancelled) setNotFound(true);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [client, handlerId]);
+    void checkExists(handlerId);
+  }, [handlerId, checkExists]);
 
   const stopStreaming = useCallback(() => {
     unsubscribe(handlerId);
