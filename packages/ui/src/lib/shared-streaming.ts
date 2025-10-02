@@ -29,6 +29,9 @@ interface SharedStreamState<TEvent> {
   // Subscriber management
   subscribers: Set<StreamSubscriber<TEvent>>;
 
+  // configuration
+  includeInternal: boolean; // is this stream configured to include internal events
+
   // Event storage
   events: TEvent[];
   isCompleted: boolean;
@@ -83,6 +86,16 @@ export class SharedStreamingManager<TEvent = any> {
   getStreamEvents(streamKey: string): TEvent[] {
     const stream = this.activeStreams.get(streamKey);
     return stream ? [...stream.events] : [];
+  }
+
+  /**
+   * get configuration for a stream
+   */
+  getStreamConfig(streamKey: string): { includeInternal: boolean } {
+    const stream = this.activeStreams.get(streamKey);
+    return stream
+      ? { includeInternal: stream.includeInternal }
+      : { includeInternal: false };
   }
 
   /**
@@ -181,7 +194,8 @@ export class SharedStreamingManager<TEvent = any> {
     streamKey: string,
     subscriber: StreamSubscriber<TEvent>,
     executor: StreamExecutor<TEvent>,
-    externalSignal?: AbortSignal
+    externalSignal?: AbortSignal,
+    includeInternal?: boolean
   ): { promise: Promise<TEvent[]>; unsubscribe: () => void } {
     const controller = new AbortController();
     const subscribers = new Set([subscriber]);
@@ -194,6 +208,7 @@ export class SharedStreamingManager<TEvent = any> {
       events,
       isCompleted: false,
       error: null,
+      includeInternal: includeInternal ?? false,
     };
 
     // Store stream state
