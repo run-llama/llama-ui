@@ -1,5 +1,12 @@
 # @llamaindex/ui
 
+## 2.1.5
+
+### Patch Changes
+
+- 45ab264: Truncate overflowing text in file dialog
+- 45ab264: Make workflow handler internal event inclusion configurable
+
 ## 2.1.4
 
 ### Patch Changes
