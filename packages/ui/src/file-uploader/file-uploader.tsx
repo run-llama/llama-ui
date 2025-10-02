@@ -292,7 +292,7 @@ export function FileUploader({
                       >
                         <div className="flex items-center space-x-2 min-w-0 flex-1">
                           <Upload className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                          <span className="text-sm font-medium truncate">
+                          <span className="text-sm font-medium truncate block min-w-0 flex-1" title={file.name}>
                             {file.name}
                           </span>
                           <span className="text-xs text-muted-foreground flex-shrink-0">

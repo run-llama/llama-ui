@@ -158,7 +158,7 @@ function FileProgressItem({
     // Compact view for many files
     return (
       <div className="space-y-1">
-        <div className="flex items-center gap-2 text-xs">
+        <div className="flex items-center gap-2 text-xs min-w-0">
           <div
             className={`w-2 h-2 rounded-full flex-shrink-0 ${
               status === "error"
@@ -170,7 +170,7 @@ function FileProgressItem({
                     : "bg-primary animate-pulse"
             }`}
           />
-          <span className="font-medium truncate flex-1" title={file.name}>
+          <span className="font-medium truncate flex-1 min-w-0" title={file.name}>
             {file.name}
           </span>
           <span className="text-muted-foreground">
@@ -194,8 +194,8 @@ function FileProgressItem({
   // Full view for fewer files
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between text-sm">
-        <span className="font-medium truncate flex-1" title={file.name}>
+      <div className="flex items-center justify-between text-sm min-w-0">
+        <span className="font-medium truncate flex-1 min-w-0" title={file.name}>
           {file.name}
         </span>
         <span className="text-muted-foreground ml-2">
