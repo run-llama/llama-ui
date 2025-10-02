@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { GetEventsByHandlerIdData, GetEventsByHandlerIdErrors, GetEventsByHandlerIdResponses, GetHandlersData, GetHandlersResponses, GetHealthData, GetHealthResponses, GetResultsByHandlerIdData, GetResultsByHandlerIdErrors, GetResultsByHandlerIdResponses, GetWorkflowsByNameRepresentationData, GetWorkflowsByNameRepresentationErrors, GetWorkflowsByNameRepresentationResponses, GetWorkflowsByNameSchemaData, GetWorkflowsByNameSchemaErrors, GetWorkflowsByNameSchemaResponses, GetWorkflowsData, GetWorkflowsResponses, PostEventsByHandlerIdData, PostEventsByHandlerIdErrors, PostEventsByHandlerIdResponses, PostWorkflowsByNameRunData, PostWorkflowsByNameRunErrors, PostWorkflowsByNameRunNowaitData, PostWorkflowsByNameRunNowaitErrors, PostWorkflowsByNameRunNowaitResponses, PostWorkflowsByNameRunResponses } from './types.gen';
+import type { GetEventsByHandlerIdData, GetEventsByHandlerIdErrors, GetEventsByHandlerIdResponses, GetHandlersData, GetHandlersResponses, GetHealthData, GetHealthResponses, GetResultsByHandlerIdData, GetResultsByHandlerIdErrors, GetResultsByHandlerIdResponses, GetWorkflowsByNameRepresentationData, GetWorkflowsByNameRepresentationErrors, GetWorkflowsByNameRepresentationResponses, GetWorkflowsByNameSchemaData, GetWorkflowsByNameSchemaErrors, GetWorkflowsByNameSchemaResponses, GetWorkflowsData, GetWorkflowsResponses, PostEventsByHandlerIdData, PostEventsByHandlerIdErrors, PostEventsByHandlerIdResponses, PostHandlersByHandlerIdCancelData, PostHandlersByHandlerIdCancelErrors, PostHandlersByHandlerIdCancelResponses, PostWorkflowsByNameRunData, PostWorkflowsByNameRunErrors, PostWorkflowsByNameRunNowaitData, PostWorkflowsByNameRunNowaitErrors, PostWorkflowsByNameRunNowaitResponses, PostWorkflowsByNameRunResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -99,6 +99,9 @@ export const getResultsByHandlerId = <ThrowOnError extends boolean = false>(opti
  * "qualified_name": <python path to pydantic class>
  * }
  *
+ * Event queue is mutable. Elements are added to the queue by the workflow handler, and removed by any consumer of the queue.
+ * The queue is protected by a lock that is acquired by the consumer, so only one consumer of the queue at a time is allowed.
+ *
  */
 export const getEventsByHandlerId = <ThrowOnError extends boolean = false>(options: Options<GetEventsByHandlerIdData, ThrowOnError>) => {
     return (options.client ?? client).sse.get<GetEventsByHandlerIdResponses, GetEventsByHandlerIdErrors, ThrowOnError>({
@@ -140,6 +143,19 @@ export const getHealth = <ThrowOnError extends boolean = false>(options?: Option
 export const getHandlers = <ThrowOnError extends boolean = false>(options?: Options<GetHandlersData, ThrowOnError>) => {
     return (options?.client ?? client).get<GetHandlersResponses, unknown, ThrowOnError>({
         url: '/handlers',
+        ...options
+    });
+};
+
+/**
+ * Stop and delete handler
+ * Stops a running workflow handler by cancelling its tasks. Optionally removes the
+ * handler from the persistence store if purge=true.
+ *
+ */
+export const postHandlersByHandlerIdCancel = <ThrowOnError extends boolean = false>(options: Options<PostHandlersByHandlerIdCancelData, ThrowOnError>) => {
+    return (options.client ?? client).post<PostHandlersByHandlerIdCancelResponses, PostHandlersByHandlerIdCancelErrors, ThrowOnError>({
+        url: '/handlers/{handler_id}/cancel',
         ...options
     });
 };

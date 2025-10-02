@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Workflows API",
-    "version": "2.5.0"
+    "version": "2.6.0"
   },
   "components": {
     "schemas": {
@@ -24,7 +24,8 @@
             "enum": [
               "running",
               "completed",
-              "failed"
+              "failed",
+              "cancelled"
             ]
           },
           "started_at": {
@@ -336,7 +337,7 @@
     "/events/{handler_id}": {
       "get": {
         "summary": "Stream workflow events",
-        "description": "Streams events produced by a workflow execution. Events are emitted as\nnewline-delimited JSON by default, or as Server-Sent Events when `sse=true`.\nEvent data is formatted according to llama-index's json serializer. For\npydantic serializable python types, it returns:\n{\n  \"__is_pydantic\": True,\n  \"value\": <pydantic serialized value>,\n  \"qualified_name\": <python path to pydantic class>\n}\n",
+        "description": "Streams events produced by a workflow execution. Events are emitted as\nnewline-delimited JSON by default, or as Server-Sent Events when `sse=true`.\nEvent data is formatted according to llama-index's json serializer. For\npydantic serializable python types, it returns:\n{\n  \"__is_pydantic\": True,\n  \"value\": <pydantic serialized value>,\n  \"qualified_name\": <python path to pydantic class>\n}\n\nEvent queue is mutable. Elements are added to the queue by the workflow handler, and removed by any consumer of the queue.\nThe queue is protected by a lock that is acquired by the consumer, so only one consumer of the queue at a time is allowed.\n",
         "parameters": [
           {
             "in": "path",
@@ -356,6 +357,26 @@
               "default": true
             },
             "description": "If false, as NDJSON instead of Server-Sent Events."
+          },
+          {
+            "in": "query",
+            "name": "include_internal",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "If true, include internal workflow events (e.g., step state changes)."
+          },
+          {
+            "in": "query",
+            "name": "acquire_timeout",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "default": 1
+            },
+            "description": "Timeout for acquiring the lock to iterate over the events."
           }
         ],
         "responses": {
@@ -501,6 +522,60 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/handlers/{handler_id}/cancel": {
+      "post": {
+        "summary": "Stop and delete handler",
+        "description": "Stops a running workflow handler by cancelling its tasks. Optionally removes the\nhandler from the persistence store if purge=true.\n",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "handler_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Workflow handler identifier."
+          },
+          {
+            "in": "query",
+            "name": "purge",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "If true, also deletes the handler from the store, otherwise updates the status to cancelled."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Handler cancelled and deleted or cancelled only",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "deleted",
+                        "cancelled"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Handler not found"
           }
         }
       }
