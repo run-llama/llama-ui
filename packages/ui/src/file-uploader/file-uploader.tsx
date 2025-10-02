@@ -240,7 +240,7 @@ export function FileUploader({
             <p className="text-sm text-muted-foreground">{modalDescription}</p>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-4 overflow-hidden">
             {/* Input Fields */}
             {inputFields?.map((field) => (
               <div key={field.key} className="space-y-2">
