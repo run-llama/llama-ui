@@ -37,7 +37,9 @@ export function RunDetailsPanel({
   handlerId,
   selectedWorkflow,
 }: RunDetailsPanelProps) {
-  const { handler, events } = useWorkflowHandler(handlerId ?? "", !!handlerId);
+  const { handler, events } = useWorkflowHandler(handlerId ?? "", !!handlerId, {
+    includeInternal: true,
+  });
   const workflowsClient = useWorkflowsClient();
   const [compactJson, setCompactJson] = useState(false);
   const [hideInternal, setHideInternal] = useState(true);

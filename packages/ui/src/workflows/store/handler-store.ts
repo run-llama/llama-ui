@@ -36,7 +36,12 @@ export interface HandlerStoreState {
   sync(): Promise<void>;
 
   // Stream subscription management
-  subscribe(handlerId: string): void;
+  subscribe(
+    handlerId: string,
+    cfg?: {
+      includeInternal?: boolean;
+    }
+  ): void;
   unsubscribe(handlerId: string): void;
   isSubscribed(handlerId: string): boolean;
 }
@@ -76,7 +81,6 @@ export const createHandlerStore = (client: Client) =>
         handlers: { ...state.handlers, [handler.handler_id]: handler },
         events: { ...state.events, [handler.handler_id]: [] },
       }));
-
       // Automatically subscribe to handler events after creation
       try {
         get().subscribe(handler.handler_id);
@@ -88,7 +92,6 @@ export const createHandlerStore = (client: Client) =>
         );
         // Continue execution, subscription can be retried later
       }
-
       return handler;
     },
 
@@ -128,7 +131,7 @@ export const createHandlerStore = (client: Client) =>
     },
 
     // Stream subscription management
-    subscribe: (handlerId: string) => {
+    subscribe: (handlerId: string, cfg?: { includeInternal?: boolean }) => {
       const handler = get().handlers[handlerId];
       if (!handler) {
         // eslint-disable-next-line no-console -- needed
@@ -137,8 +140,21 @@ export const createHandlerStore = (client: Client) =>
       }
 
       // Check if already subscribed to prevent duplicate subscriptions
-      if (get().isSubscribed(handlerId)) {
+      const currentStream = workflowStreamingManager.getStreamConfig(
+        handlerStreamKey(handlerId)
+      );
+      const shouldRestartStream =
+        !!cfg?.includeInternal && !currentStream.includeInternal;
+
+      if (
+        workflowStreamingManager.isStreamActive(handlerStreamKey(handlerId)) &&
+        !shouldRestartStream
+      ) {
         return;
+      }
+
+      if (shouldRestartStream) {
+        workflowStreamingManager.closeStream(handlerStreamKey(handlerId));
       }
 
       // Create streaming callback
@@ -190,7 +206,11 @@ export const createHandlerStore = (client: Client) =>
 
       // Use handler-based streaming
       const { promise } = fetchHandlerEvents(
-        { client, handlerId: handler.handler_id },
+        {
+          client,
+          handlerId: handler.handler_id,
+          includeInternal: cfg?.includeInternal ?? false,
+        },
         callback
       );
 
@@ -228,8 +248,12 @@ export const createHandlerStore = (client: Client) =>
     isSubscribed: (handlerId: string): boolean => {
       const handler = get().handlers[handlerId];
       if (!handler) return false;
-
-      const streamKey = `handler:${handlerId}`;
-      return workflowStreamingManager.isStreamActive(streamKey);
+      return workflowStreamingManager.isStreamActive(
+        handlerStreamKey(handlerId)
+      );
     },
   }));
+
+function handlerStreamKey(handlerId: string): string {
+  return `handler:${handlerId}`;
+}

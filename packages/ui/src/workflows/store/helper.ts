@@ -83,6 +83,7 @@ export function fetchHandlerEvents<E extends WorkflowEvent>(
     client: Client;
     handlerId: string;
     signal?: AbortSignal;
+    includeInternal?: boolean;
   },
   callback?: StreamingEventCallback<E>
 ): { promise: Promise<E[]>; unsubscribe: () => void } {
@@ -123,8 +124,13 @@ export function fetchHandlerEvents<E extends WorkflowEvent>(
       /\/$/,
       ""
     );
+    const urlParams = new URLSearchParams();
+    urlParams.set("sse", "true");
+    if (params.includeInternal) {
+      urlParams.set("include_internal", "true");
+    }
     const eventSource = new EventSource(
-      `${baseUrl}/events/${encodeURIComponent(params.handlerId)}?sse=true`,
+      `${baseUrl}/events/${encodeURIComponent(params.handlerId)}?${urlParams.toString()}`,
       {
         withCredentials: true,
       }

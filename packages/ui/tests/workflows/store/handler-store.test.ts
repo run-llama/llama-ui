@@ -23,6 +23,7 @@ vi.mock("../../../src/lib/shared-streaming", () => ({
   workflowStreamingManager: {
     subscribe: vi.fn(),
     isStreamActive: vi.fn(),
+    getStreamConfig: vi.fn(),
     closeStream: vi.fn(),
   },
 }));
@@ -44,7 +45,7 @@ const localStorageMock = (() => {
   };
 })();
 
-Object.defineProperty(window, "localStorage", {
+Object.defineProperty(globalThis, "localStorage", {
   value: localStorageMock,
 });
 
@@ -201,6 +202,56 @@ describe("Complete Task Store Tests", () => {
 
       expect(vi.mocked(fetchHandlerEvents)).toHaveBeenCalled();
     });
+
+    it("should reconnect with internal events when switching from non-internal to includeInternal", () => {
+      testStore.setState({
+        handlers: { "task-123": mockTaskSummary },
+        events: {},
+      });
+
+      // Simulate already active non-internal stream
+      (workflowStreamingManager.isStreamActive as any).mockReturnValue(true);
+      (workflowStreamingManager.getStreamConfig as any).mockReturnValue({
+        includeInternal: false,
+      });
+
+      const subscribe = testStore.getState().subscribe;
+      subscribe.call(testStore.getState(), "task-123", {
+        includeInternal: true,
+      });
+
+      expect(workflowStreamingManager.closeStream).toHaveBeenCalledWith(
+        "handler:task-123"
+      );
+      expect(fetchHandlerEvents).toHaveBeenCalledWith(
+        expect.objectContaining({
+          handlerId: "task-123",
+          includeInternal: true,
+        }),
+        expect.any(Object)
+      );
+    });
+
+    it("should not reconnect when switching from internal to non-internal", () => {
+      testStore.setState({
+        handlers: { "task-123": mockTaskSummary },
+        events: {},
+      });
+
+      // Simulate already active internal stream
+      (workflowStreamingManager.isStreamActive as any).mockReturnValue(true);
+      (workflowStreamingManager.getStreamConfig as any).mockReturnValue({
+        includeInternal: true,
+      });
+
+      const subscribe = testStore.getState().subscribe;
+      subscribe.call(testStore.getState(), "task-123", {
+        includeInternal: false,
+      });
+
+      expect(workflowStreamingManager.closeStream).not.toHaveBeenCalled();
+      expect(fetchHandlerEvents).not.toHaveBeenCalled();
+    });
   });
 
   describe("unsubscribe", () => {
@@ -271,6 +322,9 @@ describe("Complete Task Store Tests", () => {
 
     it("should auto-subscribe only to running tasks", async () => {
       (getRunningHandlers as any).mockResolvedValue(mockServerTasks);
+      (workflowStreamingManager.getStreamConfig as any).mockReturnValue({
+        includeInternal: false,
+      });
       (workflowStreamingManager.isStreamActive as any).mockReturnValue(false);
 
       await testStore.getState().sync();

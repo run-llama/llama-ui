@@ -15,7 +15,12 @@ interface UseWorkflowHandlerResult {
 
 export function useWorkflowHandler(
   handlerId: string,
-  autoStream: boolean = true
+  autoStream: boolean = true,
+  {
+    includeInternal = false,
+  }: {
+    includeInternal?: boolean;
+  } = {}
 ): UseWorkflowHandlerResult {
   const client = useWorkflowsClient();
   const handler = useHandlerStore((state) => state.handlers[handlerId] || null);
@@ -36,7 +41,7 @@ export function useWorkflowHandler(
     if (handler.status !== "running") return;
 
     // Use store's subscribe method
-    subscribe(handlerId);
+    subscribe(handlerId, { includeInternal: includeInternal });
 
     // Cleanup when handler is no longer running or component unmounts
     return () => {
@@ -44,7 +49,7 @@ export function useWorkflowHandler(
         unsubscribe(handlerId);
       }
     };
-  }, [handlerId, handler, autoStream, subscribe, unsubscribe]);
+  }, [handlerId, handler, autoStream, subscribe, unsubscribe, includeInternal]);
 
   const stopStreaming = useCallback(() => {
     unsubscribe(handlerId);
