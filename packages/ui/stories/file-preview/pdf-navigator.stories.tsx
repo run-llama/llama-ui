@@ -46,6 +46,10 @@ const meta: Meta<typeof PdfNavigator> = {
       action: "fullscreen",
       description: "Callback when fullscreen button is clicked",
     },
+    onRemove: {
+      action: "remove",
+      description: "Callback when remove button is clicked",
+    },
   },
 };
 
@@ -640,6 +644,85 @@ export const InteractiveTests: Story = {
   },
 };
 
+// Component to demonstrate the remove functionality for PdfNavigator
+function WithRemoveNavigatorExample({
+  fileName,
+  currentPage,
+  totalPages,
+  scale,
+}: {
+  fileName: string;
+  currentPage: number;
+  totalPages: number;
+  scale: number;
+}) {
+  const [isRemoved, setIsRemoved] = useState(false);
+  const [removeLog, setRemoveLog] = useState<string[]>([]);
+
+  const handleRemove = () => {
+    setIsRemoved(true);
+    setRemoveLog((prev) => [
+      ...prev,
+      `${new Date().toLocaleTimeString()}: PDF removed - ${fileName}`,
+    ]);
+  };
+
+  if (isRemoved) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🗑️</div>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">
+            PDF Removed
+          </h2>
+          <p className="text-gray-500 mb-4">
+            The PDF "{fileName}" has been removed.
+          </p>
+          <button
+            onClick={() => setIsRemoved(false)}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Restore PDF
+          </button>
+          {removeLog.length > 0 && (
+            <div className="mt-4 p-4 bg-gray-100 rounded text-left max-w-md">
+              <h3 className="font-semibold mb-2">Remove Log:</h3>
+              <div className="text-sm text-gray-600">
+                {removeLog.map((log, index) => (
+                  <div key={index}>{log}</div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-screen p-4">
+      <PdfNavigator
+        fileName={fileName}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        scale={scale}
+        onPageChange={() => {}}
+        onScaleChange={() => {}}
+        onDownload={() => {}}
+        onReset={() => {}}
+        onFullscreen={() => {}}
+        onRemove={handleRemove}
+      />
+      <div className="mt-4 p-4 bg-gray-100 rounded text-center text-gray-600">
+        <p>This is where the PDF content would be displayed</p>
+        <p className="text-sm mt-2">
+          Click the trash icon in the toolbar to test the remove functionality
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // Test component for direct navigator interaction
 function DirectNavigatorTestsComponent() {
   const [currentPage, setCurrentPage] = useState(5);
@@ -771,6 +854,16 @@ function DirectNavigatorTestsComponent() {
     </div>
   );
 }
+
+export const WithRemoveButton: Story = {
+  args: {
+    fileName: "removable-document.pdf",
+    currentPage: 3,
+    totalPages: 15,
+    scale: 1.2,
+  },
+  render: (args) => <WithRemoveNavigatorExample {...args} />,
+};
 
 export const DirectInteractionTests: Story = {
   render: () => <DirectNavigatorTestsComponent />,

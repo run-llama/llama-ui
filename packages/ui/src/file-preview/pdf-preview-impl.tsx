@@ -19,10 +19,11 @@ import("react-pdf/dist/Page/AnnotationLayer.css");
 // @ts-ignore react-pdf CSS import has no types
 import("react-pdf/dist/Page/TextLayer.css");
 
-interface PdfPreviewImplProps {
+export interface PdfPreviewImplProps {
   fileName?: string;
   url: string;
   onDownload?: () => void;
+  onRemove?: () => void;
   highlight?: Highlight;
   toolbarClassName?: string;
 }
@@ -45,6 +46,7 @@ export const PdfPreviewImpl = ({
   fileName,
   url,
   onDownload,
+  onRemove,
   highlight,
   toolbarClassName,
 }: PdfPreviewImplProps) => {
@@ -306,6 +308,7 @@ export const PdfPreviewImpl = ({
             onPageChange={goToPage}
             onScaleChange={setScale}
             onDownload={handleDownload}
+            onRemove={onRemove}
             onReset={handleReset}
             onFullscreen={toggleFullscreen}
             className={toolbarClassName}
