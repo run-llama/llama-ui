@@ -107,9 +107,9 @@ export const PdfNavigator = ({
 
   return (
     <div className={cn("sticky top-0 w-full z-50 text-xs", className)}>
-      <div className="bg-white border px-4 flex items-center justify-between gap-3 h-8">
+      <div className="bg-white border px-6 flex items-center justify-between gap-3 h-10">
         <div className="flex items-center gap-2">
-          <File className="size-3" />
+          <File className="size-4" />
           <span className="text-xs text-muted-foreground">{fileName}</span>
           {onRemove && (
             <Button
@@ -119,7 +119,7 @@ export const PdfNavigator = ({
               className="size-6 p-0"
               title="Remove PDF"
             >
-              <Trash2 className="size-3" />
+              <Trash2 className="size-4" />
             </Button>
           )}
         </div>
@@ -133,7 +133,7 @@ export const PdfNavigator = ({
               disabled={currentPage <= 1}
               className="size-6 p-0"
             >
-              <ChevronLeft className="size-3" />
+              <ChevronLeft className="size-4" />
             </Button>
 
             <div className="flex items-center justify-center gap-0.5">
@@ -161,7 +161,7 @@ export const PdfNavigator = ({
               disabled={currentPage >= totalPages}
               className="size-6 p-0"
             >
-              <ChevronRight className="size-3" />
+              <ChevronRight className="size-4" />
             </Button>
           </div>
 
@@ -178,7 +178,7 @@ export const PdfNavigator = ({
               className="size-6 p-0"
               title="Zoom Out"
             >
-              <Minus className="size-3" />
+              <Minus className="size-4" />
             </Button>
 
             <span className="text-xs text-muted-foreground text-center">
@@ -193,7 +193,7 @@ export const PdfNavigator = ({
               className="size-6 p-0"
               title="Zoom In"
             >
-              <Plus className="size-3" />
+              <Plus className="size-4" />
             </Button>
 
             <Button
@@ -203,7 +203,7 @@ export const PdfNavigator = ({
               className="size-6 p-0"
               title="Reset Zoom"
             >
-              <RotateCcw className="size-3" />
+              <RotateCcw className="size-4" />
             </Button>
           </div>
 
@@ -219,7 +219,7 @@ export const PdfNavigator = ({
               className="size-6 p-0"
               title="Download PDF"
             >
-              <Download className="size-3" />
+              <Download className="size-4" />
             </Button>
           )}
 
@@ -230,7 +230,7 @@ export const PdfNavigator = ({
             className="size-6 p-0"
             title="Fullscreen"
           >
-            <Maximize className="size-3" />
+            <Maximize className="size-4" />
           </Button>
         </div>
       </div>
