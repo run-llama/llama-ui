@@ -523,7 +523,7 @@ function WithRemoveExample({
   fileName,
 }: {
   url: string;
-  fileName: string;
+  fileName?: string;
 }) {
   const [isRemoved, setIsRemoved] = useState(false);
   const [removeLog, setRemoveLog] = useState<string[]>([]);
