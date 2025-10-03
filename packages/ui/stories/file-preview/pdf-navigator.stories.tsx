@@ -649,7 +649,7 @@ function WithRemoveNavigatorExample({
   fileName,
   currentPage,
   totalPages,
-  scale
+  scale,
 }: {
   fileName: string;
   currentPage: number;
@@ -661,9 +661,9 @@ function WithRemoveNavigatorExample({
 
   const handleRemove = () => {
     setIsRemoved(true);
-    setRemoveLog(prev => [
+    setRemoveLog((prev) => [
       ...prev,
-      `${new Date().toLocaleTimeString()}: PDF removed - ${fileName}`
+      `${new Date().toLocaleTimeString()}: PDF removed - ${fileName}`,
     ]);
   };
 
@@ -672,8 +672,12 @@ function WithRemoveNavigatorExample({
       <div className="h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="text-6xl mb-4">🗑️</div>
-          <h2 className="text-xl font-semibold text-gray-700 mb-2">PDF Removed</h2>
-          <p className="text-gray-500 mb-4">The PDF "{fileName}" has been removed.</p>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">
+            PDF Removed
+          </h2>
+          <p className="text-gray-500 mb-4">
+            The PDF "{fileName}" has been removed.
+          </p>
           <button
             onClick={() => setIsRemoved(false)}
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -702,16 +706,18 @@ function WithRemoveNavigatorExample({
         currentPage={currentPage}
         totalPages={totalPages}
         scale={scale}
-        onPageChange={() => { }}
-        onScaleChange={() => { }}
-        onDownload={() => { }}
-        onReset={() => { }}
-        onFullscreen={() => { }}
+        onPageChange={() => {}}
+        onScaleChange={() => {}}
+        onDownload={() => {}}
+        onReset={() => {}}
+        onFullscreen={() => {}}
         onRemove={handleRemove}
       />
       <div className="mt-4 p-4 bg-gray-100 rounded text-center text-gray-600">
         <p>This is where the PDF content would be displayed</p>
-        <p className="text-sm mt-2">Click the trash icon in the toolbar to test the remove functionality</p>
+        <p className="text-sm mt-2">
+          Click the trash icon in the toolbar to test the remove functionality
+        </p>
       </div>
     </div>
   );

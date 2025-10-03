@@ -518,15 +518,21 @@ export const UploadAndPreview: Story = {
 };
 
 // Component to demonstrate the remove functionality
-function WithRemoveExample({ url, fileName }: { url: string; fileName: string }) {
+function WithRemoveExample({
+  url,
+  fileName,
+}: {
+  url: string;
+  fileName: string;
+}) {
   const [isRemoved, setIsRemoved] = useState(false);
   const [removeLog, setRemoveLog] = useState<string[]>([]);
 
   const handleRemove = () => {
     setIsRemoved(true);
-    setRemoveLog(prev => [
+    setRemoveLog((prev) => [
       ...prev,
-      `${new Date().toLocaleTimeString()}: PDF removed - ${fileName}`
+      `${new Date().toLocaleTimeString()}: PDF removed - ${fileName}`,
     ]);
   };
 
@@ -535,8 +541,12 @@ function WithRemoveExample({ url, fileName }: { url: string; fileName: string })
       <div className="h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="text-6xl mb-4">🗑️</div>
-          <h2 className="text-xl font-semibold text-gray-700 mb-2">PDF Removed</h2>
-          <p className="text-gray-500 mb-4">The PDF "{fileName}" has been removed.</p>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">
+            PDF Removed
+          </h2>
+          <p className="text-gray-500 mb-4">
+            The PDF "{fileName}" has been removed.
+          </p>
           <button
             onClick={() => setIsRemoved(false)}
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -560,11 +570,7 @@ function WithRemoveExample({ url, fileName }: { url: string; fileName: string })
 
   return (
     <div className="h-screen">
-      <PdfPreview
-        url={url}
-        fileName={fileName}
-        onRemove={handleRemove}
-      />
+      <PdfPreview url={url} fileName={fileName} onRemove={handleRemove} />
     </div>
   );
 }
