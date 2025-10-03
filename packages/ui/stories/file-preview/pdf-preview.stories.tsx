@@ -19,6 +19,10 @@ const meta: Meta<typeof PdfPreview> = {
       description:
         "Optional highlight: { page, x, y, width, height } in PDF page coordinates",
     },
+    onRemove: {
+      action: "remove",
+      description: "Callback when remove button is clicked",
+    },
   },
 };
 
@@ -469,6 +473,14 @@ export const HighlightInteractiveTests: Story = {
   },
 };
 
+export const WithRemoveButton: Story = {
+  args: {
+    url: "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf",
+    fileName: "sample-document.pdf",
+  },
+  render: (args) => <WithRemoveExample {...args} />,
+};
+
 export const UploadAndPreview: Story = {
   render: () => <UploadAndPreviewExample />,
   play: async ({ canvasElement }) => {
@@ -504,6 +516,58 @@ export const UploadAndPreview: Story = {
     });
   },
 };
+
+// Component to demonstrate the remove functionality
+function WithRemoveExample({ url, fileName }: { url: string; fileName: string }) {
+  const [isRemoved, setIsRemoved] = useState(false);
+  const [removeLog, setRemoveLog] = useState<string[]>([]);
+
+  const handleRemove = () => {
+    setIsRemoved(true);
+    setRemoveLog(prev => [
+      ...prev,
+      `${new Date().toLocaleTimeString()}: PDF removed - ${fileName}`
+    ]);
+  };
+
+  if (isRemoved) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🗑️</div>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">PDF Removed</h2>
+          <p className="text-gray-500 mb-4">The PDF "{fileName}" has been removed.</p>
+          <button
+            onClick={() => setIsRemoved(false)}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Restore PDF
+          </button>
+          {removeLog.length > 0 && (
+            <div className="mt-4 p-4 bg-gray-100 rounded text-left max-w-md">
+              <h3 className="font-semibold mb-2">Remove Log:</h3>
+              <div className="text-sm text-gray-600">
+                {removeLog.map((log, index) => (
+                  <div key={index}>{log}</div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-screen">
+      <PdfPreview
+        url={url}
+        fileName={fileName}
+        onRemove={handleRemove}
+      />
+    </div>
+  );
+}
 
 // We can use these files for testing:
 // https://issuu.com/pamperedchef/docs/pamperedchef-ss25-us-catalog

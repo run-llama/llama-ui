@@ -3,6 +3,7 @@
 import { Clock } from "lucide-react";
 import { lazy, memo, Suspense } from "react";
 import { Highlight } from "./types";
+import type { PdfPreviewImplProps } from "./pdf-preview-impl";
 
 const PdfPreview = memo(
   ({
@@ -10,16 +11,18 @@ const PdfPreview = memo(
     highlight,
     fileName,
     toolbarClassName,
+    onRemove,
   }: {
     url: string;
     highlight?: Highlight;
     fileName?: string;
     toolbarClassName?: string;
+    onRemove?: () => void;
   }) => {
     if (typeof window === "undefined") {
       return null;
     }
-    const PdfPreviewLazy = lazy(() =>
+    const PdfPreviewLazy = lazy<React.ComponentType<PdfPreviewImplProps>>(() =>
       import("./pdf-preview-impl").then((module) => ({
         default: module.PdfPreviewImpl,
       }))
@@ -38,6 +41,7 @@ const PdfPreview = memo(
           highlight={highlight}
           fileName={fileName}
           toolbarClassName={toolbarClassName}
+          onRemove={onRemove}
         />
       </Suspense>
     );

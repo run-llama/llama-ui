@@ -8,6 +8,7 @@ import {
   Plus,
   File,
   Maximize,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/base/button";
 import { Input } from "@/base/input";
@@ -21,6 +22,7 @@ interface PdfNavigatorProps {
   onPageChange: (page: number) => void;
   onScaleChange: (scale: number) => void;
   onDownload?: () => void;
+  onRemove?: () => void;
   onReset?: () => void;
   onFullscreen: () => void;
   className?: string;
@@ -34,6 +36,7 @@ export const PdfNavigator = ({
   onPageChange,
   onScaleChange,
   onDownload,
+  onRemove,
   onReset,
   onFullscreen,
   className,
@@ -108,6 +111,17 @@ export const PdfNavigator = ({
         <div className="flex items-center gap-2">
           <File className="size-3" />
           <span className="text-xs text-muted-foreground">{fileName}</span>
+          {onRemove && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onRemove}
+              className="size-6 p-0"
+              title="Remove PDF"
+            >
+              <Trash2 className="size-3" />
+            </Button>
+          )}
         </div>
         <div className="flex items-center gap-3">
           {/* Page Navigation */}
