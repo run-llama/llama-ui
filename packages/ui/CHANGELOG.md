@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 2.1.6
+
+### Patch Changes
+
+- 0a795fb: Support for removing a file in PdfViewer
+
 ## 2.1.5
 
 ### Patch Changes
