@@ -120,11 +120,12 @@ export const PdfPreviewImpl = ({
       page.pageNumber === 1 &&
       containerRef.current
     ) {
-      // scale to fit the container height
-      const containerHeight = containerRef.current.clientHeight;
-      const newScale = containerHeight / viewport.height;
+      const containerWidth = containerRef.current.clientWidth;
+      const padding = 16;
+      const availableWidth = containerWidth - padding;
+      const newScale = availableWidth / viewport.width;
       setScale(newScale);
-      isInitialScaleSet.current = true; // prevent further auto-scaling
+      isInitialScaleSet.current = true;
     }
   };
 
