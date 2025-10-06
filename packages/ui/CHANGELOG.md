@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 2.1.7
+
+### Patch Changes
+
+- ef43b90: Change PdfPreview to automatically adjust the zoom to fit the available width.
+
 ## 2.1.6
 
 ### Patch Changes
