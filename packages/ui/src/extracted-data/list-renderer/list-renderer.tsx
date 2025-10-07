@@ -6,7 +6,7 @@ import {
   getArrayItemDefaultValue,
 } from "./list-renderer-utils";
 import { Plus, Trash2 } from "lucide-react";
-import { PrimitiveType, toPrimitiveType } from "../primitive-validation";
+import { PrimitiveType, toPrimitiveType, inferTypeFromValue } from "../primitive-validation";
 import type { FieldSchemaMetadata } from "../schema-reconciliation";
 import type { PrimitiveValue, RendererMetadata } from "../types";
 import type { ExtractedFieldMetadata } from "llama-cloud-services/beta/agent";
@@ -75,6 +75,12 @@ export function ListRenderer<S extends PrimitiveValue>({
 
     if (itemMetadata?.schemaType) {
       return toPrimitiveType(itemMetadata.schemaType);
+    }
+
+    // When schema metadata is not available, infer type from the first value
+    // This is critical for boolean fields to be editable as checkboxes
+    if (data && data.length > 0) {
+      return inferTypeFromValue(data[0]);
     }
 
     return PrimitiveType.STRING; // Default fallback

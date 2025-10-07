@@ -80,3 +80,25 @@ export function getDefaultPrimitiveValue(
       return "";
   }
 }
+
+/**
+ * Infer PrimitiveType from a runtime value
+ * This is used as a fallback when schema metadata is not available
+ */
+export function inferTypeFromValue(value: unknown): PrimitiveType {
+  if (value === null || value === undefined) {
+    return PrimitiveType.STRING;
+  }
+
+  const valueType = typeof value;
+  
+  switch (valueType) {
+    case "boolean":
+      return PrimitiveType.BOOLEAN;
+    case "number":
+      return PrimitiveType.NUMBER;
+    case "string":
+    default:
+      return PrimitiveType.STRING;
+  }
+}

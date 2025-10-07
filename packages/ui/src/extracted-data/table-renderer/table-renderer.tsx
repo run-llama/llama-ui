@@ -30,7 +30,7 @@ import {
 } from "../metadata-path-utils";
 import { findExtractedFieldMetadata } from "../metadata-lookup";
 import { Plus, Trash2 } from "lucide-react";
-import { PrimitiveType, toPrimitiveType } from "../primitive-validation";
+import { toPrimitiveType, inferTypeFromValue } from "../primitive-validation";
 import type { PrimitiveValue, JsonValue, JsonObject } from "../types";
 import { DataPagination } from "../data-pagination";
 
@@ -396,9 +396,11 @@ export function TableRenderer<Row extends JsonObject>({
                   fieldKeyPath,
                   effectiveMetadata.schema
                 );
+                // When schema metadata is not available, infer type from the actual value
+                // This is critical for boolean fields to be editable as checkboxes
                 const expectedType = fieldInfo?.schemaType
                   ? toPrimitiveType(fieldInfo.schemaType)
-                  : PrimitiveType.STRING;
+                  : inferTypeFromValue(value);
                 const isRequired = fieldInfo?.isRequired || false;
 
                 return (
