@@ -80,3 +80,18 @@ export function getDefaultPrimitiveValue(
       return "";
   }
 }
+
+/**
+ * Detect primitive type from actual runtime value
+ * Used as fallback when schema metadata is not available
+ */
+export function detectPrimitiveType(value: unknown): PrimitiveType {
+  if (typeof value === "boolean") {
+    return PrimitiveType.BOOLEAN;
+  }
+  if (typeof value === "number") {
+    return PrimitiveType.NUMBER;
+  }
+  // Default to string for everything else (string, null, undefined, etc.)
+  return PrimitiveType.STRING;
+}

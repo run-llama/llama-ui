@@ -23,7 +23,11 @@ import {
   getFieldLabelClasses,
   getFieldLabelText,
 } from "../field-display-utils";
-import { PrimitiveType, toPrimitiveType } from "../primitive-validation";
+import {
+  PrimitiveType,
+  toPrimitiveType,
+  detectPrimitiveType,
+} from "../primitive-validation";
 import { findFieldSchemaMetadata } from "../metadata-path-utils";
 import { findExtractedFieldMetadata } from "../metadata-lookup";
 
@@ -115,6 +119,7 @@ export function PropertyRenderer<S extends JsonShape<S>>({
       keyPath,
       effectiveMetadata.schema
     );
+    // For null/undefined, rely on schema metadata since we can't detect runtime type
     const expectedType = fieldInfo?.schemaType
       ? toPrimitiveType(fieldInfo.schemaType)
       : PrimitiveType.STRING;
@@ -313,9 +318,14 @@ export function PropertyRenderer<S extends JsonShape<S>>({
 
   // Primitive value
   const fieldInfo = findFieldSchemaMetadata(keyPath, effectiveMetadata.schema);
+  
+  // RUNTIME TYPE DETECTION FALLBACK
+  // ================================
+  // If schema metadata is not available, detect type from actual value
+  // This ensures boolean and number fields render correctly even without schema
   const expectedType = fieldInfo?.schemaType
     ? toPrimitiveType(fieldInfo.schemaType)
-    : PrimitiveType.STRING;
+    : detectPrimitiveType(value);
   const isRequired = fieldInfo?.isRequired || false;
 
   return (
