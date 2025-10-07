@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { act } from "@testing-library/react";
+import { act, waitFor } from "@testing-library/react";
 import { useWorkflowHandler } from "../../../src/workflows/hooks/use-workflow-handler";
 import { renderHookWithProvider } from "../../test-utils";
 
@@ -121,6 +121,48 @@ describe("useWorkflowTask", () => {
           event,
         })
       );
+    });
+  });
+
+  describe("notFound flag when handler id is missing on server", () => {
+    it("sets notFound=true when getExistingHandler rejects", async () => {
+      const { getExistingHandler } = await import(
+        "../../../src/workflows/store/helper"
+      );
+
+      // Force rejection for this check
+      (getExistingHandler as unknown as vi.Mock).mockReset();
+      (getExistingHandler as unknown as vi.Mock).mockRejectedValueOnce(
+        new Error("not found")
+      );
+
+      const { result } = renderHookWithProvider(() =>
+        useWorkflowHandler("missing-123")
+      );
+
+      await waitFor(() => {
+        expect(result.current.notFound).toBe(true);
+      });
+    });
+
+    it("sets notFound=false when getExistingHandler resolves", async () => {
+      const { getExistingHandler } = await import(
+        "../../../src/workflows/store/helper"
+      );
+
+      (getExistingHandler as unknown as vi.Mock).mockReset();
+      (getExistingHandler as unknown as vi.Mock).mockResolvedValueOnce({
+        handler_id: "ok-123",
+        status: "running",
+      });
+
+      const { result } = renderHookWithProvider(() =>
+        useWorkflowHandler("ok-123")
+      );
+
+      await waitFor(() => {
+        expect(result.current.notFound).toBe(false);
+      });
     });
   });
 });

@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useMemo } from "react";
+import { useEffect, useCallback, useMemo, useState } from "react";
 import { useHandlerStore } from "./use-handler-store";
 import type { WorkflowHandlerSummary, WorkflowEvent } from "../types";
 import { sendEventToHandler } from "../store/helper";
@@ -11,6 +11,8 @@ interface UseWorkflowHandlerResult {
   stopStreaming: () => void;
   clearEvents: () => void;
   sendEvent: (event: WorkflowEvent) => Promise<void>;
+  /** True when the provided handler id does not exist on the server */
+  notFound: boolean;
 }
 
 export function useWorkflowHandler(
@@ -29,6 +31,10 @@ export function useWorkflowHandler(
   const unsubscribe = useHandlerStore((state) => state.unsubscribe);
   const isSubscribed = useHandlerStore((state) => state.isSubscribed);
   const clearEvents = useHandlerStore((state) => state.clearEvents);
+  const checkExists = useHandlerStore((state) => state.checkExists);
+  const notFound = useHandlerStore(
+    (state) => state.missingHandlers[handlerId] === true
+  );
 
   // Memoize events array to avoid creating new empty arrays
   const events = useMemo(() => {
@@ -50,6 +56,11 @@ export function useWorkflowHandler(
       }
     };
   }, [handlerId, handler, autoStream, subscribe, unsubscribe, includeInternal]);
+
+  // Trigger existence verification when handlerId changes
+  useEffect(() => {
+    void checkExists(handlerId);
+  }, [handlerId, checkExists]);
 
   const stopStreaming = useCallback(() => {
     unsubscribe(handlerId);
@@ -77,5 +88,6 @@ export function useWorkflowHandler(
     stopStreaming,
     clearEvents: clearHandlerEvents,
     sendEvent,
+    notFound,
   };
 }
