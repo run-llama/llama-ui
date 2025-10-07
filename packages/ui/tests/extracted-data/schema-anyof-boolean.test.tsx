@@ -1,4 +1,3 @@
-import React from "react";
 import { describe, it, expect, vi } from "vitest";
 import { JSONSchema } from "zod/v4/core";
 import { reconcileDataWithJsonSchema } from "@/src/extracted-data/schema-reconciliation";
@@ -13,7 +12,10 @@ const schema: JSONSchema.ObjectSchema = {
   required: ["currency", "grand_total"],
   properties: {
     currency: { type: "string", title: "Currency" },
-    grand_total: { anyOf: [{ type: "number" }, { type: "string" }], title: "Grand Total" },
+    grand_total: {
+      anyOf: [{ type: "number" }, { type: "string" }],
+      title: "Grand Total",
+    },
     line_items: {
       anyOf: [
         {
@@ -55,7 +57,11 @@ describe("anyOf(boolean|null) renders boolean editor", () => {
       grand_total: 100,
       line_items: [
         { is_tax: false, line_total: 22.68, description: "RESORT FEE" },
-        { is_tax: true, line_total: 27.96, description: "TAX2 for ROOM CHARGE" },
+        {
+          is_tax: true,
+          line_total: 27.96,
+          description: "TAX2 for ROOM CHARGE",
+        },
       ],
     };
 
