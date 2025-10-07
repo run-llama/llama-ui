@@ -57,27 +57,6 @@ export function convertPrimitiveValue(
 }
 
 /**
- * Infer primitive type from a runtime value when schema metadata is unavailable.
- * Returns undefined for null/undefined to avoid forcing a type for missing values.
- */
-export function inferPrimitiveTypeFromValue(
-  value: PrimitiveValue
-): PrimitiveType | undefined {
-  if (value === null || value === undefined) {
-    return undefined;
-  }
-
-  switch (typeof value) {
-    case "boolean":
-      return PrimitiveType.BOOLEAN;
-    case "number":
-      return PrimitiveType.NUMBER;
-    default:
-      return PrimitiveType.STRING;
-  }
-}
-
-/**
  * Get default value for primitive types based on whether the field is required
  */
 export function getDefaultPrimitiveValue(

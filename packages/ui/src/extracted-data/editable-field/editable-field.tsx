@@ -7,7 +7,6 @@ import { PrimitiveType, convertPrimitiveValue } from "../primitive-validation";
 import { Popover, PopoverContent, PopoverTrigger } from "@/base/popover";
 import { Button } from "@/base/button";
 import { Input } from "@/base/input";
-import { Checkbox } from "@/base/checkbox";
 import { Textarea } from "@/base/textarea";
 import type { ExtractedFieldMetadata } from "llama-cloud-services/beta/agent";
 import {
@@ -156,26 +155,16 @@ export function EditableField<S extends PrimitiveValue>({
   const renderEditInput = () => {
     switch (expectedType) {
       case PrimitiveType.BOOLEAN:
-        // Prefer a simple checkbox for boolean editing, with select fallback for accessibility
         return (
-          <div className="flex items-center gap-3">
-            <Checkbox
-              checked={editValue === "true"}
-              onCheckedChange={(checked) =>
-                setEditValue(checked ? "true" : "false")
-              }
-              aria-label="Toggle boolean"
-            />
-            <Select onValueChange={handleSelectChange} value={editValue}>
-              <SelectTrigger className="w-32" aria-label="Boolean value">
-                <SelectValue placeholder="Select a value" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="true">true</SelectItem>
-                <SelectItem value="false">false</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <Select onValueChange={handleSelectChange} value={editValue}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select a value" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="true">true</SelectItem>
+              <SelectItem value="false">false</SelectItem>
+            </SelectContent>
+          </Select>
         );
       case PrimitiveType.STRING:
         // Use textarea for string inputs to allow multiline text

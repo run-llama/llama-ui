@@ -80,8 +80,7 @@ describe("anyOf(boolean|null) renders boolean editor", () => {
     await userEvent.click(trueCell);
 
     const popover = await screen.findByTestId("editable-field-popover");
-    // Boolean editor should expose a checkbox and combobox
-    expect(within(popover).getByRole("checkbox")).toBeInTheDocument();
+    // Boolean editor should expose a combobox (select)
     expect(within(popover).getByRole("combobox")).toBeInTheDocument();
   });
 });

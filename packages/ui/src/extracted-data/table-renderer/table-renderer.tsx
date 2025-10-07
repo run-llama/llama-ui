@@ -30,11 +30,7 @@ import {
 } from "../metadata-path-utils";
 import { findExtractedFieldMetadata } from "../metadata-lookup";
 import { Plus, Trash2 } from "lucide-react";
-import {
-  PrimitiveType,
-  toPrimitiveType,
-  inferPrimitiveTypeFromValue,
-} from "../primitive-validation";
+import { PrimitiveType, toPrimitiveType } from "../primitive-validation";
 import type { PrimitiveValue, JsonValue, JsonObject } from "../types";
 import { DataPagination } from "../data-pagination";
 
@@ -400,12 +396,9 @@ export function TableRenderer<Row extends JsonObject>({
                   fieldKeyPath,
                   effectiveMetadata.schema
                 );
-                // Prefer schema metadata; fall back to inferring from runtime value
                 const expectedType = fieldInfo?.schemaType
                   ? toPrimitiveType(fieldInfo.schemaType)
-                  : inferPrimitiveTypeFromValue(
-                      value as PrimitiveValue
-                    ) ?? PrimitiveType.STRING;
+                  : PrimitiveType.STRING;
                 const isRequired = fieldInfo?.isRequired || false;
 
                 return (

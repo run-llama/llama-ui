@@ -6,11 +6,7 @@ import {
   getArrayItemDefaultValue,
 } from "./list-renderer-utils";
 import { Plus, Trash2 } from "lucide-react";
-import {
-  PrimitiveType,
-  toPrimitiveType,
-  inferPrimitiveTypeFromValue,
-} from "../primitive-validation";
+import { PrimitiveType, toPrimitiveType } from "../primitive-validation";
 import type { FieldSchemaMetadata } from "../schema-reconciliation";
 import type { PrimitiveValue, RendererMetadata } from "../types";
 import type { ExtractedFieldMetadata } from "llama-cloud-services/beta/agent";
@@ -81,12 +77,7 @@ export function ListRenderer<S extends PrimitiveValue>({
       return toPrimitiveType(itemMetadata.schemaType);
     }
 
-    // Fallback to inferring from the first visible value when schema is absent
-    const sampleValue = data?.[0];
-    return (
-      inferPrimitiveTypeFromValue(sampleValue as PrimitiveValue) ??
-      PrimitiveType.STRING
-    );
+    return PrimitiveType.STRING; // Default fallback
   };
 
   const expectedType = getExpectedType();
