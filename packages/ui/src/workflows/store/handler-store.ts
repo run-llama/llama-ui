@@ -81,17 +81,8 @@ export const createHandlerStore = (client: Client) =>
         handlers: { ...state.handlers, [handler.handler_id]: handler },
         events: { ...state.events, [handler.handler_id]: [] },
       }));
-      // Automatically subscribe to handler events after creation
-      try {
-        get().subscribe(handler.handler_id);
-      } catch (error) {
-        // eslint-disable-next-line no-console -- needed
-        console.error(
-          `Failed to auto-subscribe to handler ${handler.handler_id}:`,
-          error
-        );
-        // Continue execution, subscription can be retried later
-      }
+      // Don't auto-subscribe - let components decide if they want internal events or not
+      // Components using useWorkflowHandler will subscribe with their preferred includeInternal setting
       return handler;
     },
 
@@ -114,15 +105,8 @@ export const createHandlerStore = (client: Client) =>
         );
         set({ handlers: newHandlersRecord });
 
-        // 3. Auto-subscribe to running handlers
-        serverHandlers.forEach((handler) => {
-          if (
-            handler.status === "running" &&
-            !get().isSubscribed(handler.handler_id)
-          ) {
-            get().subscribe(handler.handler_id);
-          }
-        });
+        // 3. Don't auto-subscribe here - let components decide if they want internal events or not
+        // Auto-subscribing here causes duplicate subscriptions when RunDetailsPanel subscribes with includeInternal:true
       } catch (error) {
         // eslint-disable-next-line no-console -- needed for visibility and tests
         console.error("Failed to sync with server:", error);
@@ -139,22 +123,22 @@ export const createHandlerStore = (client: Client) =>
         return;
       }
 
-      // Check if already subscribed to prevent duplicate subscriptions
-      const currentStream = workflowStreamingManager.getStreamConfig(
-        handlerStreamKey(handlerId)
-      );
-      const shouldRestartStream =
-        !!cfg?.includeInternal && !currentStream.includeInternal;
+      // Use the same stream key logic as fetchHandlerEvents
+      const streamKey = cfg?.includeInternal
+        ? handlerStreamKey(handlerId, true)
+        : handlerStreamKey(handlerId, false);
 
-      if (
-        workflowStreamingManager.isStreamActive(handlerStreamKey(handlerId)) &&
-        !shouldRestartStream
-      ) {
+      // Check if already subscribed to prevent duplicate subscriptions
+      if (workflowStreamingManager.isStreamActive(streamKey)) {
         return;
       }
 
-      if (shouldRestartStream) {
-        workflowStreamingManager.closeStream(handlerStreamKey(handlerId));
+      // Close any other stream for this handler (with different includeInternal setting)
+      const otherStreamKey = cfg?.includeInternal
+        ? handlerStreamKey(handlerId, false)
+        : handlerStreamKey(handlerId, true);
+      if (workflowStreamingManager.isStreamActive(otherStreamKey)) {
+        workflowStreamingManager.closeStream(otherStreamKey);
       }
 
       // Create streaming callback
@@ -241,19 +225,28 @@ export const createHandlerStore = (client: Client) =>
       const handler = get().handlers[handlerId];
       if (!handler) return;
 
-      const streamKey = `handler:${handlerId}`;
-      workflowStreamingManager.closeStream(streamKey);
+      // Close both possible streams
+      workflowStreamingManager.closeStream(handlerStreamKey(handlerId, false));
+      workflowStreamingManager.closeStream(handlerStreamKey(handlerId, true));
     },
 
     isSubscribed: (handlerId: string): boolean => {
       const handler = get().handlers[handlerId];
       if (!handler) return false;
-      return workflowStreamingManager.isStreamActive(
-        handlerStreamKey(handlerId)
+      // Check if either stream is active
+      return (
+        workflowStreamingManager.isStreamActive(
+          handlerStreamKey(handlerId, false)
+        ) ||
+        workflowStreamingManager.isStreamActive(
+          handlerStreamKey(handlerId, true)
+        )
       );
     },
   }));
 
-function handlerStreamKey(handlerId: string): string {
-  return `handler:${handlerId}`;
+function handlerStreamKey(handlerId: string, includeInternal: boolean): string {
+  return includeInternal
+    ? `handler:${handlerId}:internal`
+    : `handler:${handlerId}`;
 }

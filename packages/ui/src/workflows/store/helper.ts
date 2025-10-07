@@ -87,7 +87,10 @@ export function fetchHandlerEvents<E extends WorkflowEvent>(
   },
   callback?: StreamingEventCallback<E>
 ): { promise: Promise<E[]>; unsubscribe: () => void } {
-  const streamKey = `handler:${params.handlerId}`;
+  // Use different stream keys for internal vs non-internal to prevent conflicts
+  const streamKey = params.includeInternal
+    ? `handler:${params.handlerId}:internal`
+    : `handler:${params.handlerId}`;
 
   // Create executor function that implements the actual streaming logic
   const executor = async (
@@ -129,12 +132,10 @@ export function fetchHandlerEvents<E extends WorkflowEvent>(
     if (params.includeInternal) {
       urlParams.set("include_internal", "true");
     }
-    const eventSource = new EventSource(
-      `${baseUrl}/events/${encodeURIComponent(params.handlerId)}?${urlParams.toString()}`,
-      {
-        withCredentials: true,
-      }
-    );
+    const url = `${baseUrl}/events/${encodeURIComponent(params.handlerId)}?${urlParams.toString()}`;
+    const eventSource = new EventSource(url, {
+      withCredentials: true,
+    });
 
     await processUntilClosed(eventSource, onMessage, signal, () =>
       // EventSource does not complete until the backoff reconnect gets a 204. Proactively check for completion.
