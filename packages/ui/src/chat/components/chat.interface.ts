@@ -1,15 +1,5 @@
 import { MessagePart } from "./message-parts/types";
 
-export type JSONValue =
-  | null
-  | string
-  | number
-  | boolean
-  | {
-      [value: string]: JSONValue;
-    }
-  | JSONValue[];
-
 // Message roles
 export const MessageRole = {
   System: "system",
@@ -27,7 +17,6 @@ export interface Message {
 
 export type ChatRequestOptions = {
   headers?: Record<string, string> | Headers;
-  body?: object;
 };
 
 export type ChatHandler = {
@@ -43,10 +32,6 @@ export type ChatContext = ChatHandler & {
   // user input state
   input: string;
   setInput: (input: string) => void;
-
-  // additional data including in the body
-  requestData: any;
-  setRequestData: (data: any) => void;
 
   // computed state from status
   isLoading: boolean;

@@ -1,14 +1,12 @@
-import { type FileData } from "../../widgets/chat-file";
 import { type Artifact } from "../canvas/artifacts";
 import { type ChatEvent } from "../../widgets/chat-event";
 import { type SourceData } from "../../widgets/chat-sources";
 import { type SuggestedQuestionsData } from "../../widgets/suggested-questions";
 
-export type MessagePart = TextPart | DataPart | FilePart | AnyPart;
+export type MessagePart = TextPart | DataPart | AnyPart;
 
 // All ChatUI supported part types
 export const TextPartType = "text" as const;
-export const FilePartType = "data-file" as const;
 export const ArtifactPartType = "data-artifact" as const;
 export const EventPartType = "data-event" as const;
 export const SourcesPartType = "data-sources" as const;
@@ -29,7 +27,6 @@ export type DataPart<T extends `data-${string}` = `data-${string}`, D = any> = {
   data: D;
 };
 
-export type FilePart = DataPart<typeof FilePartType, FileData>;
 export type ArtifactPart = DataPart<typeof ArtifactPartType, Artifact>;
 export type EventPart = DataPart<typeof EventPartType, ChatEvent>;
 export type SourcesPart = DataPart<typeof SourcesPartType, SourceData>;

@@ -4,8 +4,6 @@ import {
   ArtifactPartType,
   EventPart,
   EventPartType,
-  FilePart,
-  FilePartType,
   MessagePart,
   SourcesPart,
   SourcesPartType,
@@ -20,10 +18,6 @@ export function getParts(
   message: Message,
   type: typeof TextPartType
 ): TextPart[];
-export function getParts(
-  message: Message,
-  type: typeof FilePartType
-): FilePart[];
 export function getParts(
   message: Message,
   type: typeof ArtifactPartType

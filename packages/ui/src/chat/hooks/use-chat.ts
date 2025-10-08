@@ -18,6 +18,11 @@ export interface UseChatOptions {
   workflowName: string;
 
   /**
+   * Index name to use for this chat session
+   */
+  indexName?: string;
+
+  /**
    * Optional handler ID to reuse existing session
    * If not provided, a new session will be created
    */
@@ -44,8 +49,8 @@ export interface UseChatOptions {
 /**
  * Hook to manage a chat session as a workflow
  *
- * Session initialization is lazy by default - the session is created when the first message is sent.
- * If you provide a handlerId, the session is initialized immediately on mount.
+ * Session initialization is eager by default - the session is created on mount.
+ * If you provide a handlerId, the session will reuse that session when available.
  *
  * @example
  * ```tsx
@@ -53,6 +58,7 @@ export interface UseChatOptions {
  * function MyChat() {
  *   const chat = useChat({
  *     workflowName: "my-chat-workflow",
+ *     indexName: "my-index",
  *     onReady: (handlerId) => {
  *       // Called when first message is sent
  *       console.log("Chat ready:", handlerId);
@@ -67,6 +73,7 @@ export interface UseChatOptions {
  *   const chat = useChat({
  *     workflowName: "my-chat-workflow",
  *     handlerId: "existing-session-123",
+ *     indexName: "my-index",
  *     onReady: (handlerId) => {
  *       // Called immediately on mount
  *       console.log("Chat ready:", handlerId);
@@ -82,6 +89,7 @@ export function useChat(
 ): ChatHandler & { handlerId: string | null } {
   const {
     workflowName,
+    indexName,
     handlerId: providedHandlerId,
     initialMessages,
     onReady,
@@ -89,6 +97,7 @@ export function useChat(
   } = options;
 
   const store = useChatStore();
+  const sessions = useChatStore((state) => state.sessions);
 
   // Track the handler ID for this hook instance
   const [handlerId, setHandlerId] = useState<string | null>(
@@ -100,27 +109,36 @@ export function useChat(
     handlerId ? state.sessions[handlerId] : undefined
   );
 
-  // Shared session initialization logic
+  // Shared session initialization logic with reuse semantics handled in the hook
   const initSession = useCallback(async () => {
+    // 1) If provided handlerId exists in store, reuse it
+    if (providedHandlerId) {
+      const existing = sessions[providedHandlerId];
+      if (existing) {
+        setHandlerId(providedHandlerId);
+        return providedHandlerId;
+      }
+    }
+
+    // 2) Create new session
     const id = await store.createSession({
       workflowName,
       handlerId: providedHandlerId,
       initialMessages,
+      indexName,
     });
     setHandlerId(id);
     onReady?.(id);
     return id;
-  }, [workflowName, providedHandlerId, initialMessages, store, onReady]);
+  }, [workflowName, providedHandlerId, initialMessages, store, onReady, indexName, sessions]);
 
-  // Eager initialization: only if providedHandlerId is given
-  // Otherwise, lazy initialization happens in sendMessage on first message
+  // Eager initialization on mount and when core identifiers change
   useEffect(() => {
-    if (providedHandlerId && !session) {
-      initSession().catch((error) => {
-        onError?.(error as Error);
-      });
-    }
-  }, [providedHandlerId, session, initSession, onError]);
+    initSession().catch((error) => {
+      onError?.(error as Error);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workflowName, indexName, providedHandlerId]);
 
   // Report errors from store
   useEffect(() => {
@@ -132,21 +150,13 @@ export function useChat(
   // Memoized handler functions
   const sendMessage = useCallback(
     async (message: Message, opts?: ChatRequestOptions) => {
-      let currentHandlerId = handlerId;
-
-      // Lazy initialization: create session on first message if not exists
+      const currentHandlerId = handlerId;
       if (!currentHandlerId) {
-        try {
-          currentHandlerId = await initSession();
-        } catch (error) {
-          onError?.(error as Error);
-          throw error;
-        }
+        throw new Error("Chat session not initialized");
       }
-
       await store.sendMessage(currentHandlerId, message, opts);
     },
-    [handlerId, initSession, store, onError]
+    [handlerId, store]
   );
 
   const stop = useCallback(async () => {
@@ -176,6 +186,7 @@ export function useChat(
   return useMemo(
     () => ({
       handlerId,
+      indexName,
       messages: session?.messages || [],
       status: session?.status || (handlerId ? "ready" : "idle"),
       sendMessage,
@@ -185,6 +196,7 @@ export function useChat(
     }),
     [
       handlerId,
+      indexName,
       session?.messages,
       session?.status,
       sendMessage,

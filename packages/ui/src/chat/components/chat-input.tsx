@@ -60,7 +60,7 @@ export const useChatInput = () => {
 };
 
 function ChatInput(props: ChatInputProps) {
-  const { input, setInput, sendMessage, isLoading, requestData } = useChatUI();
+  const { input, setInput, sendMessage, isLoading } = useChatUI();
   const isDisabled = isLoading || !input.trim();
   const [isComposing, setIsComposing] = useState(false);
 
@@ -78,7 +78,7 @@ function ChatInput(props: ChatInputProps) {
     props.resetUploadedFiles?.(); // Reset the uploaded files
 
     // Trigger sendMessage with the user message only
-    await sendMessage(userMessage, { body: requestData });
+    await sendMessage(userMessage);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -177,7 +177,7 @@ function ChatInputField(props: ChatInputFieldProps) {
 }
 
 function ChatInputUpload(props: ChatInputUploadProps) {
-  const { requestData, setRequestData, isLoading } = useChatUI();
+  const { isLoading } = useChatUI();
 
   return (
     <FileUploader
@@ -187,11 +187,7 @@ function ChatInputUpload(props: ChatInputUploadProps) {
       allowedFileTypes={props.allowedFileTypes}
       maxFileSizeBytes={(props.maxFileSizeMB ?? 50) * 1024 * 1024}
       onSuccess={async (uploaded) => {
-        // update chat requestData for downstream handlers
-        const lastFile = uploaded[uploaded.length - 1]?.file;
-        if (lastFile) {
-          setRequestData({ ...(requestData || {}), file: lastFile });
-        }
+        // no-op: request scoped data removed
         await props.onSuccess?.(uploaded.map((u) => u.file));
       }}
       isProcessing={isLoading}

@@ -24,35 +24,35 @@ export interface WorkflowEvent {
 }
 
 export interface StartEvent extends WorkflowEvent {
-  type: "workflow.events.StartEvent";
+  type: "workflows.events.StartEvent";
   data: {
     input: JSONValue;
   };
 }
 
 export interface StopEvent extends WorkflowEvent {
-  type: "workflow.events.StopEvent";
+  type: "workflows.events.StopEvent";
   data: {
     result: JSONValue;
   };
 }
 
 export interface InputRequiredEvent extends WorkflowEvent {
-  type: "workflow.events.InputRequiredEvent";
+  type: "workflows.events.InputRequiredEvent";
   data: {
     prefix: string;
   };
 }
 
 export interface HumanResponseEvent extends WorkflowEvent {
-  type: "workflow.events.HumanResponseEvent";
+  type: "workflows.events.HumanResponseEvent";
   data: {
     response: JSONValue;
   };
 }
 
 export interface ChatDeltaEvent extends WorkflowEvent {
-  type: "workflow.events.ChatDeltaEvent";
+  type: "workflows.events.ChatDeltaEvent";
   data: {
     delta: string;
   };
@@ -66,11 +66,11 @@ export interface WorkflowProgressState {
 
 // Available events map to qualified name
 export enum WorkflowEventType {
-  StartEvent = "workflow.events.StartEvent",
-  StopEvent = "workflow.events.StopEvent",
-  InputRequiredEvent = "workflow.events.InputRequiredEvent",
-  HumanResponseEvent = "workflow.events.HumanResponseEvent",
-  ChatDeltaEvent = "workflow.events.ChatDeltaEvent",
+  StartEvent = "workflows.events.StartEvent",
+  StopEvent = "workflows.events.StopEvent",
+  InputRequiredEvent = "workflows.events.InputRequiredEvent",
+  HumanResponseEvent = "workflows.events.HumanResponseEvent",
+  ChatDeltaEvent = "workflows.events.ChatDeltaEvent",
 }
 
 export interface StreamingEventCallback<

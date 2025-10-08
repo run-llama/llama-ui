@@ -10,7 +10,7 @@ import { SuggestionPartType } from "../types";
  * @param className - custom styles for the suggested questions
  */
 export function SuggestionPartUI({ className }: { className?: string }) {
-  const { sendMessage, requestData } = useChatUI();
+  const { sendMessage } = useChatUI();
   const { isLast } = useChatMessage();
   const suggestedQuestions = usePart(SuggestionPartType)?.data;
 
@@ -20,7 +20,6 @@ export function SuggestionPartUI({ className }: { className?: string }) {
     <SuggestedQuestions
       questions={suggestedQuestions}
       sendMessage={sendMessage}
-      requestData={requestData}
       className={className}
     />
   );

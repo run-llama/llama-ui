@@ -17,6 +17,7 @@ import type { StreamingMessage } from "./streaming-message";
 export interface ChatSession {
   handlerId: string; // Unique handler identifier (= sessionId)
   workflowName: string;
+  indexName?: string;
   messages: Message[];
   status: "idle" | "submitted" | "streaming" | "ready" | "error";
   error: Error | null;
@@ -29,6 +30,7 @@ export interface ChatSession {
 export interface CreateSessionOptions {
   workflowName: string;
   handlerId?: string;
+  indexName?: string;
   initialMessages?: Message[];
 }
 

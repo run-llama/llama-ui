@@ -245,15 +245,6 @@ describe("isInputRequiredEvent", () => {
 });
 
 describe("isMessageTerminator", () => {
-  it("should return true for StopEvent", () => {
-    const event: WorkflowEvent = {
-      type: WorkflowEventType.StopEvent,
-      data: {},
-    };
-
-    expect(isMessageTerminator(event)).toBe(true);
-  });
-
   it("should return true for InputRequiredEvent", () => {
     const event: WorkflowEvent = {
       type: WorkflowEventType.InputRequiredEvent,
@@ -264,6 +255,9 @@ describe("isMessageTerminator", () => {
   });
 
   it("should return false for non-terminator events", () => {
+    expect(
+      isMessageTerminator({ type: WorkflowEventType.StopEvent, data: {} })
+    ).toBe(false);
     expect(
       isMessageTerminator({ type: WorkflowEventType.ChatDeltaEvent, data: {} })
     ).toBe(false);

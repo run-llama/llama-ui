@@ -19,7 +19,6 @@ export interface ChatSectionProps extends React.PropsWithChildren {
 export default function ChatSection(props: ChatSectionProps) {
   const { handler, className, autoOpenCanvas = true } = props;
   const [input, setInput] = useState("");
-  const [requestData, setRequestData] = useState<any>();
   const rootRef = useRef<HTMLDivElement | null>(null);
 
   // show loading immediately after the user submits the request
@@ -50,8 +49,6 @@ export default function ChatSection(props: ChatSectionProps) {
         ...handler,
         input,
         setInput,
-        requestData,
-        setRequestData,
         isLoading,
       }}
     >

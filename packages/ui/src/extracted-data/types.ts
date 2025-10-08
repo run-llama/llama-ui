@@ -1,5 +1,11 @@
 import type { JSONSchema } from "zod/v4/core";
 import type {
+  PrimitiveValue,
+  JsonObject,
+  JsonValue,
+  JsonShape,
+} from "../lib/json-types";
+import type {
   ExtractedData,
   ExtractedFieldMetadataDict,
   ExtractedFieldMetadata,
@@ -30,7 +36,4 @@ export interface RendererMetadata {
   extracted?: ExtractedFieldMetadataDict;
 }
 
-export type PrimitiveValue = string | number | boolean | null | undefined;
-export type JsonObject = { [k: string]: JsonValue };
-export type JsonValue = PrimitiveValue | JsonObject | JsonValue[] | object;
-export type JsonShape<T> = { [K in keyof T]: JsonValue };
+export type { PrimitiveValue, JsonObject, JsonValue, JsonShape };

@@ -9,6 +9,7 @@ import { ApiProvider } from "../../src/lib/api-provider";
 import {
   createWorkflowHandlers,
   chatEventGenerator,
+  chatInitEvents,
 } from "../../.storybook/mocks";
 import { createWorkflowsClient } from "../../src/lib/clients";
 import ChatSection from "../../src/chat/components/chat-section";
@@ -75,6 +76,7 @@ export const Default: Story = {
   parameters: {
     msw: {
       handlers: createWorkflowHandlers({
+        initEventGenerator: chatInitEvents,
         eventGenerator: chatEventGenerator,
         eventDelay: 300,
         initialDelay: 500,
@@ -95,62 +97,62 @@ export const WithXMLMarkers: Story = {
       handlers: createWorkflowHandlers({
         eventGenerator: (): Array<{ type: string; data: unknown }> => [
           {
-            type: "workflow.events.ChatDeltaEvent",
+            type: "workflows.events.ChatDeltaEvent",
             data: { delta: "Let me search for that information.\n\n" },
           },
           {
-            type: "workflow.events.ChatDeltaEvent",
+            type: "workflows.events.ChatDeltaEvent",
             data: { delta: "<event>\n" },
           },
           {
-            type: "workflow.events.ChatDeltaEvent",
+            type: "workflows.events.ChatDeltaEvent",
             data: {
               delta: '{"title": "Searching database", "status": "success"}\n',
             },
           },
           {
-            type: "workflow.events.ChatDeltaEvent",
+            type: "workflows.events.ChatDeltaEvent",
             data: { delta: "</event>\n\n" },
           },
           {
-            type: "workflow.events.ChatDeltaEvent",
+            type: "workflows.events.ChatDeltaEvent",
             data: {
               delta: "I found the following results [citation:node-1].\n\n",
             },
           },
           {
-            type: "workflow.events.ChatDeltaEvent",
+            type: "workflows.events.ChatDeltaEvent",
             data: { delta: "<sources>\n" },
           },
           {
-            type: "workflow.events.ChatDeltaEvent",
+            type: "workflows.events.ChatDeltaEvent",
             data: {
               delta:
                 '{"nodes": [{"id": "node-1", "text": "Result 1", "metadata": {"title": "Document 1"}, "url": "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf"}]}\n',
             },
           },
           {
-            type: "workflow.events.ChatDeltaEvent",
+            type: "workflows.events.ChatDeltaEvent",
             data: { delta: "</sources>\n\n" },
           },
           {
-            type: "workflow.events.ChatDeltaEvent",
+            type: "workflows.events.ChatDeltaEvent",
             data: { delta: "Is there anything else you'd like to know?\n\n" },
           },
           {
-            type: "workflow.events.ChatDeltaEvent",
+            type: "workflows.events.ChatDeltaEvent",
             data: { delta: "<suggested_questions>\n" },
           },
           {
-            type: "workflow.events.ChatDeltaEvent",
+            type: "workflows.events.ChatDeltaEvent",
             data: { delta: '["Tell me more", "What are the details?"]\n' },
           },
           {
-            type: "workflow.events.ChatDeltaEvent",
+            type: "workflows.events.ChatDeltaEvent",
             data: { delta: "</suggested_questions>" },
           },
           {
-            type: "workflow.events.InputRequiredEvent",
+            type: "workflows.events.InputRequiredEvent",
             data: { prefix: "waiting" },
           },
         ],
@@ -173,29 +175,29 @@ export const WithCodeBlock: Story = {
       handlers: createWorkflowHandlers({
         eventGenerator: (): Array<{ type: string; data: unknown }> => [
           {
-            type: "workflow.events.ChatDeltaEvent",
+            type: "workflows.events.ChatDeltaEvent",
             data: { delta: "Here's a Python example:\n\n" },
           },
-          { type: "workflow.events.ChatDeltaEvent", data: { delta: "```py" } },
-          { type: "workflow.events.ChatDeltaEvent", data: { delta: "thon\n" } },
+          { type: "workflows.events.ChatDeltaEvent", data: { delta: "```py" } },
+          { type: "workflows.events.ChatDeltaEvent", data: { delta: "thon\n" } },
           {
-            type: "workflow.events.ChatDeltaEvent",
+            type: "workflows.events.ChatDeltaEvent",
             data: { delta: "def hello():\n" },
           },
           {
-            type: "workflow.events.ChatDeltaEvent",
+            type: "workflows.events.ChatDeltaEvent",
             data: { delta: "    print('Hello, World!')\n" },
           },
           {
-            type: "workflow.events.ChatDeltaEvent",
+            type: "workflows.events.ChatDeltaEvent",
             data: { delta: "```\n\n" },
           },
           {
-            type: "workflow.events.ChatDeltaEvent",
+            type: "workflows.events.ChatDeltaEvent",
             data: { delta: "This function prints a greeting." },
           },
           {
-            type: "workflow.events.InputRequiredEvent",
+            type: "workflows.events.InputRequiredEvent",
             data: { prefix: "waiting" },
           },
         ],

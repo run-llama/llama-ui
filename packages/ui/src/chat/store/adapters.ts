@@ -10,7 +10,6 @@ import {
   TextPartType,
   SourcesPartType,
   SuggestionPartType,
-  FilePartType,
   ArtifactPartType,
   EventPartType,
 } from "../components/message-parts/types";
@@ -62,7 +61,9 @@ export function isInputRequiredEvent(
  * (StopEvent or InputRequiredEvent)
  */
 export function isMessageTerminator(event: WorkflowEvent): boolean {
-  return isStopEvent(event) || isInputRequiredEvent(event);
+  // For never-ending chat workflows, InputRequiredEvent marks the end of a turn
+  // StopEvent should not be relied upon for chat; ignore it here
+  return isInputRequiredEvent(event);
 }
 
 /**
@@ -417,12 +418,6 @@ function parseXMLMarker(tagName: string, content: string): MessagePart | null {
         return {
           type: SuggestionPartType,
           data: data, // Expected: string[]
-        };
-
-      case "file":
-        return {
-          type: FilePartType,
-          data: data, // Expected: { filename, mediaType, url }
         };
 
       case "artifact":

@@ -4,8 +4,6 @@ import {
   ArtifactPartType,
   EventPart,
   EventPartType,
-  FilePart,
-  FilePartType,
   MessagePart,
   SourcesPart,
   SourcesPartType,
@@ -25,7 +23,6 @@ export const ChatPartProvider = chatPartContext.Provider;
 
 // Function overloads for automatic type inference
 export function usePart(type: typeof TextPartType): TextPart | null;
-export function usePart(type: typeof FilePartType): FilePart | null;
 export function usePart(type: typeof ArtifactPartType): ArtifactPart | null;
 export function usePart(type: typeof EventPartType): EventPart | null;
 export function usePart(type: typeof SourcesPartType): SourcesPart | null;

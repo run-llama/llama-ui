@@ -260,18 +260,6 @@ Text after.`;
     expect(parts[0].type).toBe("data-suggested_questions");
   });
 
-  // C2-005: XML markers - file
-  it("should parse complete <file> marker", () => {
-    const text = `<file>
-{"filename": "report.pdf", "mediaType": "application/pdf", "url": "https://example.com/report.pdf"}
-</file>`;
-
-    const parts = parseTextWithXMLMarkers(text);
-
-    expect(parts).toHaveLength(1);
-    expect(parts[0].type).toBe("data-file");
-  });
-
   // C2-006: XML markers - event
   it("should parse complete <event> marker", () => {
     const text = `<event>

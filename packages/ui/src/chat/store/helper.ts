@@ -18,12 +18,13 @@ import { workflowStreamingManager } from "../../lib/shared-streaming";
  */
 export async function createChatHandler(
   client: LlamaDeployClient,
-  workflowName: string
+  workflowName: string,
+  indexName?: string,
 ): Promise<string> {
   const response = await postWorkflowsByNameRunNowait({
     client,
     path: { name: workflowName },
-    body: { start_event: {} },
+    body: { start_event: { index_name: indexName, conversation_history: [] } },
   });
 
   if (!response.data?.handler_id) {

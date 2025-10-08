@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { useChat } from "../../src/chat/hooks/use-chat";
-import { __resetChatStore } from "../../src/chat/hooks/use-chat-store";
+import { __resetChatStore, __setChatStoreState } from "../../src/chat/hooks/use-chat-store";
 import type { Message } from "../../src/chat/components/chat.interface";
 import { renderHookWithProvider } from "../test-utils";
 
@@ -28,37 +28,74 @@ describe("useChat Hook - Initialization", () => {
     __resetChatStore();
   });
 
-  // CT-001: Basic initialization (lazy - no session created until first message)
-  it("should initialize with empty messages and idle status", async () => {
+  // CT-001: Basic initialization (eager - session created on mount)
+  it("should initialize with empty messages and ready status", async () => {
     const { result } = renderHookWithProvider(() =>
       useChat({ workflowName: "chat_agent" })
     );
 
-    // handlerId should be null initially (lazy initialization)
-    expect(result.current.handlerId).toBeNull();
+    await waitFor(() => {
+      expect(result.current.handlerId).not.toBeNull();
+      expect(result.current.status).toBe("ready");
+    });
     expect(result.current.messages).toEqual([]);
-    expect(result.current.status).toBe("idle");
     expect(typeof result.current.sendMessage).toBe("function");
     expect(typeof result.current.stop).toBe("function");
     expect(typeof result.current.regenerate).toBe("function");
   });
 
-  // CT-002: Initialize with handlerId
-  it("should initialize with provided handlerId", async () => {
+  // CT-002: Initialize with handlerId (reuses existing session, does NOT call onReady)
+  it("should initialize with provided handlerId and not call onReady when reused", async () => {
     const providedHandlerId = "handler-123";
+    const onReady = vi.fn();
+
     const { result } = renderHookWithProvider(() =>
       useChat({
         workflowName: "chat_agent",
         handlerId: providedHandlerId,
+        onReady,
+      })
+    );
+
+    // Wait for session to be created
+    await waitFor(() => {
+      expect(result.current.handlerId).toBe(providedHandlerId);
+    });
+
+    // Prime store with the session to simulate reuse on next mount
+    __setChatStoreState((state) => ({
+      sessions: {
+        ...state.sessions,
+        [providedHandlerId]: {
+          handlerId: providedHandlerId,
+          workflowName: "chat_agent",
+          messages: [],
+          status: "ready",
+          error: null,
+          streamingMessage: null,
+        },
+      },
+    }));
+
+    // Create a second hook instance with same handlerId
+    const onReady2 = vi.fn();
+    const { result: result2 } = renderHookWithProvider(() =>
+      useChat({
+        workflowName: "chat_agent",
+        handlerId: providedHandlerId,
+        onReady: onReady2,
       })
     );
 
     await waitFor(() => {
-      expect(result.current.handlerId).toBe(providedHandlerId);
+      expect(result2.current.handlerId).toBe(providedHandlerId);
     });
+
+    // onReady should NOT be called when reusing existing handlerId
+    expect(onReady2).not.toHaveBeenCalled();
   });
 
-  // CT-003: Initialize with initialMessages (lazy - session created on first message send)
+  // CT-003: Initialize with initialMessages (eager - messages available on mount)
   it("should initialize with initial messages", async () => {
     const initialMessages: Message[] = [
       { id: "msg-1", role: "user", parts: [{ type: "text", text: "Hello" }] },
@@ -71,12 +108,13 @@ describe("useChat Hook - Initialization", () => {
       })
     );
 
-    // Initially no session (lazy initialization)
-    expect(result.current.handlerId).toBeNull();
-    expect(result.current.messages).toEqual([]);
+    await waitFor(() => {
+      expect(result.current.handlerId).not.toBeNull();
+    });
+    expect(result.current.messages).toEqual(initialMessages);
   });
 
-  // CT-004: onReady callback (called on first message send - lazy init)
+  // CT-004: onReady callback (called on mount - eager init)
   it("should call onReady with handlerId when session is created", async () => {
     const onReady = vi.fn();
 
@@ -87,24 +125,15 @@ describe("useChat Hook - Initialization", () => {
       })
     );
 
-    // Initially not called (lazy init)
+    // Initially not called synchronously
     expect(onReady).not.toHaveBeenCalled();
-
-    // Send message to trigger session creation
-    const message: Message = {
-      id: "msg-1",
-      role: "user",
-      parts: [{ type: "text", text: "Hello" }],
-    };
-
-    await result.current.sendMessage(message);
 
     await waitFor(() => {
       expect(onReady).toHaveBeenCalledWith(expect.any(String));
     });
   });
 
-  // CT-005: onError callback (called when first message send fails - lazy init)
+  // CT-005: onError callback (called on mount when init fails - eager init)
   it("should call onError when session creation fails", async () => {
     const { createChatHandler } = await import("../../src/chat/store/helper");
     vi.mocked(createChatHandler).mockRejectedValueOnce(
@@ -119,15 +148,6 @@ describe("useChat Hook - Initialization", () => {
         onError,
       })
     );
-
-    // Send message to trigger session creation
-    const message: Message = {
-      id: "msg-1",
-      role: "user",
-      parts: [{ type: "text", text: "Hello" }],
-    };
-
-    await expect(result.current.sendMessage(message)).rejects.toThrow();
 
     await waitFor(() => {
       expect(onError).toHaveBeenCalledWith(expect.any(Error));
@@ -145,14 +165,15 @@ describe("useChat Hook - Message Operations", () => {
     __resetChatStore();
   });
 
-  // CT-006: sendMessage (creates session on first send - lazy init)
+  // CT-006: sendMessage (session already created on mount)
   it("should send a message and update state", async () => {
     const { result } = renderHookWithProvider(() =>
       useChat({ workflowName: "chat_agent" })
     );
 
-    // Initially no session (lazy init)
-    expect(result.current.handlerId).toBeNull();
+    await waitFor(() => {
+      expect(result.current.handlerId).not.toBeNull();
+    });
 
     const userMessage: Message = {
       id: "msg-1",
@@ -170,15 +191,16 @@ describe("useChat Hook - Message Operations", () => {
     });
   });
 
-  // CT-007: sendMessage updates status (lazy init)
+  // CT-007: sendMessage updates status
   it("should update status when sending message", async () => {
     const { result } = renderHookWithProvider(() =>
       useChat({ workflowName: "chat_agent" })
     );
 
-    // Initially no session (lazy init)
-    expect(result.current.handlerId).toBeNull();
-    expect(result.current.status).toBe("idle");
+    await waitFor(() => {
+      expect(result.current.handlerId).not.toBeNull();
+      expect(result.current.status).toBe("ready");
+    });
 
     const userMessage: Message = {
       id: "msg-1",
@@ -194,14 +216,15 @@ describe("useChat Hook - Message Operations", () => {
     });
   });
 
-  // CT-008: setMessages (creates session first - lazy init)
+  // CT-008: setMessages (session already exists)
   it("should set messages via setMessages", async () => {
     const { result } = renderHookWithProvider(() =>
       useChat({ workflowName: "chat_agent" })
     );
 
-    // Initially no session (lazy init)
-    expect(result.current.handlerId).toBeNull();
+    await waitFor(() => {
+      expect(result.current.handlerId).not.toBeNull();
+    });
 
     // Send a message to create session
     const initialMessage: Message = {
@@ -242,14 +265,15 @@ describe("useChat Hook - Streaming Control", () => {
     __resetChatStore();
   });
 
-  // CT-009: stop (lazy init)
+  // CT-009: stop
   it("should stop streaming", async () => {
     const { result } = renderHookWithProvider(() =>
       useChat({ workflowName: "chat_agent" })
     );
 
-    // Initially no session (lazy init)
-    expect(result.current.handlerId).toBeNull();
+    await waitFor(() => {
+      expect(result.current.handlerId).not.toBeNull();
+    });
 
     // Send message to start streaming (creates session)
     const userMessage: Message = {
@@ -273,7 +297,7 @@ describe("useChat Hook - Streaming Control", () => {
     });
   });
 
-  // CT-010: regenerate (lazy init - need to send message first)
+  // CT-010: regenerate (session already exists)
   it("should regenerate last message", async () => {
     const { result } = renderHookWithProvider(() =>
       useChat({
@@ -281,7 +305,12 @@ describe("useChat Hook - Streaming Control", () => {
       })
     );
 
-    // Send first message to create session
+    // Wait for session to be initialized
+    await waitFor(() => {
+      expect(result.current.handlerId).not.toBeNull();
+    });
+
+    // Send first message
     const firstMessage: Message = {
       id: "msg-1",
       role: "user",
@@ -290,7 +319,6 @@ describe("useChat Hook - Streaming Control", () => {
     await result.current.sendMessage(firstMessage);
 
     await waitFor(() => {
-      expect(result.current.handlerId).not.toBeNull();
       expect(result.current.messages.length).toBeGreaterThan(0);
     });
 
@@ -305,13 +333,18 @@ describe("useChat Hook - Streaming Control", () => {
     });
   });
 
-  // CT-011: regenerate from specific message (lazy init)
+  // CT-011: regenerate from specific message
   it("should regenerate from specific message", async () => {
     const { result } = renderHookWithProvider(() =>
       useChat({
         workflowName: "chat_agent",
       })
     );
+
+    // Wait for session to be initialized
+    await waitFor(() => {
+      expect(result.current.handlerId).not.toBeNull();
+    });
 
     // Send multiple messages to create a conversation
     const msg1: Message = {
@@ -322,7 +355,7 @@ describe("useChat Hook - Streaming Control", () => {
     await result.current.sendMessage(msg1);
 
     await waitFor(() => {
-      expect(result.current.handlerId).not.toBeNull();
+      expect(result.current.messages.length).toBeGreaterThan(0);
     });
 
     const msg2: Message = {
@@ -357,25 +390,14 @@ describe("useChat Hook - Lifecycle", () => {
     __resetChatStore();
   });
 
-  // CT-012: Cleanup on unmount (lazy init)
+  // CT-012: Cleanup on unmount
   it("should delete session on unmount", async () => {
     const { result, unmount } = renderHookWithProvider(() =>
       useChat({ workflowName: "chat_agent" })
     );
 
-    // Send a message to create session
-    const message: Message = {
-      id: "msg-1",
-      role: "user",
-      parts: [{ type: "text", text: "Hello" }],
-    };
-    await result.current.sendMessage(message);
-
-    let handlerId: string | null = null;
-
     await waitFor(() => {
       expect(result.current.handlerId).not.toBeNull();
-      handlerId = result.current.handlerId;
     });
 
     // Just unmount - we can't directly access the store outside of React context
@@ -386,7 +408,7 @@ describe("useChat Hook - Lifecycle", () => {
     // but the hook's cleanup effect should have been called
   });
 
-  // CT-013: Multiple instances (lazy init)
+  // CT-013: Multiple instances (eager init)
   it("should support multiple chat instances independently", async () => {
     // Make mock return different handlerIds
     const { createChatHandler } = await import("../../src/chat/store/helper");
@@ -404,38 +426,8 @@ describe("useChat Hook - Lifecycle", () => {
       useChat({ workflowName: "agent-2" })
     );
 
-    // Initially both should be null (lazy init)
-    expect(result1.current.handlerId).toBeNull();
-    expect(result2.current.handlerId).toBeNull();
-
-    // Send message to first chat (creates session)
-    const message1: Message = {
-      id: "msg-1",
-      role: "user",
-      parts: [{ type: "text", text: "Hello from chat 1" }],
-    };
-
-    await result1.current.sendMessage(message1);
-
     await waitFor(() => {
       expect(result1.current.handlerId).not.toBeNull();
-      expect(result1.current.messages.length).toBeGreaterThan(0);
-    });
-
-    // Second chat should still be null and empty (no session created yet)
-    expect(result2.current.handlerId).toBeNull();
-    expect(result2.current.messages).toEqual([]);
-
-    // Send message to second chat
-    const message2: Message = {
-      id: "msg-2",
-      role: "user",
-      parts: [{ type: "text", text: "Hello from chat 2" }],
-    };
-
-    await result2.current.sendMessage(message2);
-
-    await waitFor(() => {
       expect(result2.current.handlerId).not.toBeNull();
     });
 
@@ -454,31 +446,18 @@ describe("useChat Hook - Error Handling", () => {
     __resetChatStore();
   });
 
-  // CT-014: sendMessage with lazy init creates session automatically
-  it("should create session automatically when sending first message", async () => {
+  // CT-014: session is created on mount
+  it("should create session on mount", async () => {
     const { result } = renderHookWithProvider(() =>
       useChat({ workflowName: "chat_agent" })
     );
 
-    // Initially no session (lazy init)
-    expect(result.current.handlerId).toBeNull();
-
-    // Send message - should create session automatically
-    const message: Message = {
-      id: "msg-1",
-      role: "user",
-      parts: [{ type: "text", text: "Hello" }],
-    };
-
-    await result.current.sendMessage(message);
-
-    // Session should now be created
     await waitFor(() => {
       expect(result.current.handlerId).not.toBeNull();
     });
   });
 
-  // CT-015: onError reports store errors (lazy init)
+  // CT-015: onError reports store errors
   it("should call onError when store operations fail", async () => {
     const { sendEventToHandler } = await import("../../src/chat/store/helper");
 
@@ -491,7 +470,12 @@ describe("useChat Hook - Error Handling", () => {
       })
     );
 
-    // Send first message to create session (lazy init) - this should succeed
+    // Wait for session to be initialized
+    await waitFor(() => {
+      expect(result.current.handlerId).not.toBeNull();
+    });
+
+    // Send first message - session already created on mount, this should succeed
     const firstMessage: Message = {
       id: "msg-init",
       role: "user",
@@ -500,7 +484,7 @@ describe("useChat Hook - Error Handling", () => {
     await result.current.sendMessage(firstMessage);
 
     await waitFor(() => {
-      expect(result.current.handlerId).not.toBeNull();
+      expect(result.current.messages.length).toBeGreaterThan(0);
     });
 
     // Mock sendEventToHandler to fail on next call
