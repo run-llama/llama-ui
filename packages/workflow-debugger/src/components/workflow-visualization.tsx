@@ -64,6 +64,7 @@ export function WorkflowVisualization({
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastProcessedEventIndex, setLastProcessedEventIndex] = useState(-1);
   const [isDark, setIsDark] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     try {
@@ -82,24 +83,33 @@ export function WorkflowVisualization({
         const isHighlighted = highlightedNodeId === id;
         const isSelected = selectedNodeId === id;
 
-        let style = data.highlightColor
-          ? {
-              // In light mode, add a tinted fill; in dark mode, avoid washing out
-              backgroundColor: isDark ? undefined : "#CCFBEF",
-              borderColor: data.highlightColor,
-              boxShadow: `0 0 0 3px ${data.highlightColor}66`,
-            }
-          : undefined;
+        // Always include transition for smooth fade-out
+        let style: React.CSSProperties = {
+          transition: "all 1s ease-out",
+        };
+
+        // If highlight color is set and not null, apply highlight styles
+        if (data.highlightColor && data.highlightColor !== null) {
+          style.backgroundColor = isDark ? undefined : "#CCFBEF";
+          style.borderColor = data.highlightColor;
+          style.boxShadow = `0 0 0 3px ${data.highlightColor}66`;
+        } else if (data.highlightColor === null) {
+          // Explicitly fade back to default styles
+          style.backgroundColor = isDark ? "#0b1220" : "#E6EEFF";
+          style.borderColor = isDark ? "#274690" : "#7EA6FF";
+          style.boxShadow = "0 0 0 0px transparent";
+        }
 
         if (isSelected) {
           style = {
             backgroundColor: isDark ? "#1e3a8a" : "#DBEAFE",
             borderColor: "#3B82F6",
             boxShadow: "0 0 0 4px #3B82F6",
+            transition: "all 1s ease-out",
           };
         } else if (isHighlighted) {
           style = {
-            backgroundColor: style?.backgroundColor,
+            ...style,
             borderColor: "#10B981",
             boxShadow: "0 0 0 3px #10B98166",
           };
@@ -118,8 +128,15 @@ export function WorkflowVisualization({
             onClick={() => onNodeClick?.(id)}
           >
             <Handle type="target" position={Position.Left} />
-            <div className="font-bold text-[#1E3A8A] text-sm dark:text-[#e5edff]">
-              {data.label}
+            <div className="flex items-center justify-between gap-2">
+              <div className="font-bold text-[#1E3A8A] text-sm dark:text-[#e5edff]">
+                {data.label}
+              </div>
+              {data.workerCount > 0 && (
+                <div className="flex items-center justify-center min-w-[20px] h-[20px] px-1.5 rounded-full bg-[#10B981] text-white text-[10px] font-bold">
+                  {data.workerCount}
+                </div>
+              )}
             </div>
             {data.title && (
               <div className="text-xs text-[#1D4ED8] mt-1 dark:text-[#9db4ff]">
@@ -150,23 +167,33 @@ export function WorkflowVisualization({
         const isHighlighted = highlightedNodeId === id;
         const isSelected = selectedNodeId === id;
 
-        let style = data.highlightColor
-          ? {
-              backgroundColor: isDark ? undefined : "#FFE8B5",
-              borderColor: data.highlightColor,
-              boxShadow: `0 0 0 3px ${data.highlightColor}66`,
-            }
-          : undefined;
+        // Always include transition for smooth fade-out
+        let style: React.CSSProperties = {
+          transition: "all 1s ease-out",
+        };
+
+        // If highlight color is set and not null, apply highlight styles
+        if (data.highlightColor && data.highlightColor !== null) {
+          style.backgroundColor = isDark ? undefined : "#FFE8B5";
+          style.borderColor = data.highlightColor;
+          style.boxShadow = `0 0 0 3px ${data.highlightColor}66`;
+        } else if (data.highlightColor === null) {
+          // Explicitly fade back to default styles
+          style.backgroundColor = isDark ? "#241a06" : "#FFF3BF";
+          style.borderColor = isDark ? "#F59E0B" : "#FFD166";
+          style.boxShadow = "0 0 0 0px transparent";
+        }
 
         if (isSelected) {
           style = {
             backgroundColor: isDark ? "#1e3a8a" : "#DBEAFE",
             borderColor: "#3B82F6",
             boxShadow: "0 0 0 4px #3B82F6",
+            transition: "all 1s ease-out",
           };
         } else if (isHighlighted) {
           style = {
-            backgroundColor: style?.backgroundColor,
+            ...style,
             borderColor: "#10B981",
             boxShadow: "0 0 0 3px #10B98166",
           };
@@ -402,11 +429,27 @@ export function WorkflowVisualization({
 
   // React to streaming events to highlight nodes and update last input/output
   useEffect(() => {
-    if (!events || events.length === 0) return;
+    if (!events || events.length === 0) {
+      setLastProcessedEventIndex(-1);
+      // Clear all highlights when events are cleared (new run)
+      setNodes((prev) =>
+        prev.map((n) => {
+          const newData: Record<string, unknown> = { ...n.data };
+          delete newData.highlightColor;
+          delete newData.activeWorkers;
+          delete newData.workerCount;
+          delete newData.fadeTimestamp;
+          return { ...n, data: newData } as Node;
+        }),
+      );
+      return;
+    }
 
-    const last = events[events.length - 1];
-    const type = last?.type ?? "";
-    const payload = (last?.data as Record<string, unknown> | undefined) ?? {};
+    // Process only new events since last time
+    const newEvents = events.slice(lastProcessedEventIndex + 1);
+    if (newEvents.length === 0) return;
+
+    setLastProcessedEventIndex(events.length - 1);
 
     const getSimpleName = (raw: unknown): string => {
       if (!raw) return "";
@@ -423,23 +466,6 @@ export function WorkflowVisualization({
         return "";
       }
     };
-
-    // Determine which node to highlight
-    let highlightId = "";
-    if (
-      type === "workflows.events.StepStateChanged" &&
-      (payload as { name?: unknown })?.name
-    ) {
-      highlightId = String((payload as { name?: unknown }).name);
-    } else if (type) {
-      const simple = getSimpleName(
-        type.replace("__main__.", "").replace("workflows.events.", ""),
-      );
-      highlightId = simple;
-    }
-
-    if (!highlightId) return;
-    // Track active node implicitly via node highlight state
 
     const stateColor = (stepState?: string): string | null => {
       switch (stepState) {
@@ -458,45 +484,132 @@ export function WorkflowVisualization({
       }
     };
 
-    const color =
-      type === "workflows.events.StepStateChanged"
-        ? stateColor(String((payload as { step_state?: unknown })?.step_state))
-        : "#10B981";
+    // Process each new event
+    for (const event of newEvents) {
+      const type = event?.type ?? "";
+      const payload =
+        (event?.data as Record<string, unknown> | undefined) ?? {};
 
-    setNodes((prev) =>
-      prev.map((n) => {
-        const newData: Record<string, unknown> = { ...n.data };
-        if (n.id === highlightId) {
-          if (color) {
-            newData.highlightColor = color;
-          } else {
-            delete newData.highlightColor; // completed or not active
-          }
-          if (type === "workflows.events.StepStateChanged") {
-            newData.lastInputEvent = getSimpleName(
-              (payload as { input_event_name?: unknown })?.input_event_name,
-            );
-            newData.lastOutputEvent = getSimpleName(
-              (payload as { output_event_name?: unknown })?.output_event_name,
-            );
-            newData.status = String(
-              ((payload as { step_state?: unknown })?.step_state as
-                | string
-                | undefined) || "",
-            );
-          }
-          return { ...n, data: newData } as Node;
-        }
-        // For other nodes: keep their current highlight unless we are moving the step state
-        if (type === "workflows.events.StepStateChanged") {
-          // Only one active step at a time; clear highlight from others
-          delete newData.highlightColor;
-          return { ...n, data: newData } as Node;
-        }
-        return n;
-      }),
-    );
-  }, [events, setNodes]);
+      // Handle StepStateChanged events
+      if (type === "workflows.events.StepStateChanged") {
+        const stepName = String((payload as { name?: unknown })?.name || "");
+        const stepState = String(
+          (payload as { step_state?: unknown })?.step_state || "",
+        );
+        const workerId = String(
+          (payload as { worker_id?: unknown })?.worker_id || "",
+        );
+        const color = stateColor(stepState);
+
+        setNodes((prev) =>
+          prev.map((n) => {
+            const newData: Record<string, unknown> = { ...n.data };
+
+            if (n.id === stepName) {
+              // Track active workers for this step
+              const activeWorkers = new Set<string>(
+                (newData.activeWorkers as string[]) || [],
+              );
+
+              // Update worker set based on state
+              if (
+                stepState === "preparing" ||
+                stepState === "in_progress" ||
+                stepState === "running"
+              ) {
+                activeWorkers.add(workerId);
+              } else if (
+                stepState === "not_running" ||
+                stepState === "not_in_progress" ||
+                stepState === "exited"
+              ) {
+                activeWorkers.delete(workerId);
+              }
+
+              newData.activeWorkers = Array.from(activeWorkers);
+              newData.workerCount = activeWorkers.size;
+
+              // Determine highlight color based on active workers
+              if (activeWorkers.size > 0) {
+                // Use the color for the current state, or default to running color
+                newData.highlightColor = color || "#10B981";
+                newData.fadeTimestamp = Date.now();
+              } else {
+                // Trigger fade-out after a delay when all workers complete
+                const fadeTimestamp = Date.now();
+                newData.fadeTimestamp = fadeTimestamp;
+
+                // Keep the highlight visible for 1s, then fade out
+                setTimeout(() => {
+                  setNodes((prev) =>
+                    prev.map((n) => {
+                      if (
+                        n.id === stepName &&
+                        n.data.fadeTimestamp === fadeTimestamp
+                      ) {
+                        const newData: Record<string, unknown> = { ...n.data };
+                        newData.highlightColor = null;
+                        return { ...n, data: newData } as Node;
+                      }
+                      return n;
+                    }),
+                  );
+                }, 1000);
+              }
+
+              newData.lastInputEvent = getSimpleName(
+                (payload as { input_event_name?: unknown })?.input_event_name,
+              );
+              newData.lastOutputEvent = getSimpleName(
+                (payload as { output_event_name?: unknown })?.output_event_name,
+              );
+              newData.status = stepState;
+              return { ...n, data: newData } as Node;
+            }
+
+            // Keep other nodes unchanged (don't clear their highlights)
+            return n;
+          }),
+        );
+      } else if (
+        type &&
+        !type.includes("workflows.events.EventsQueueChanged")
+      ) {
+        // Handle user-defined events (like ProgressEvent)
+        const eventName = getSimpleName(
+          type.replace("__main__.", "").replace("workflows.events.", ""),
+        );
+
+        setNodes((prev) =>
+          prev.map((n) => {
+            if (n.id === eventName && n.type === "event") {
+              const newData: Record<string, unknown> = { ...n.data };
+              newData.highlightColor = "#10B981";
+              newData.fadeTimestamp = Date.now();
+              return { ...n, data: newData } as Node;
+            }
+            return n;
+          }),
+        );
+
+        // Clear the event highlight after 1 second
+        // Don't add to cleanup array - let it run independently
+        setTimeout(() => {
+          setNodes((prev) =>
+            prev.map((n) => {
+              if (n.id === eventName && n.type === "event") {
+                const newData: Record<string, unknown> = { ...n.data };
+                newData.highlightColor = null;
+                newData.fadeTimestamp = null;
+                return { ...n, data: newData } as Node;
+              }
+              return n;
+            }),
+          );
+        }, 1000);
+      }
+    }
+  }, [events, lastProcessedEventIndex, setNodes]);
 
   if (loading) {
     return (
