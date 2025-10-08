@@ -438,3 +438,31 @@ export type GetWorkflowsByNameRepresentationResponses = {
 };
 
 export type GetWorkflowsByNameRepresentationResponse = GetWorkflowsByNameRepresentationResponses[keyof GetWorkflowsByNameRepresentationResponses];
+
+export type GetWorkflowsByNameEventsData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Name of the workflow to list events for
+         */
+        workflow_name: string;
+    };
+    url: '/workflows/{name}/events';
+};
+
+export type GetWorkflowsByNameEventsResponses = {
+    /**
+     * List of workflow event schemas
+     */
+    200: {
+        events: Array<{
+            name: string;
+            schema: {
+                [key: string]: unknown;
+            };
+        }>;
+    };
+};
+
+export type GetWorkflowsByNameEventsResponse = GetWorkflowsByNameEventsResponses[keyof GetWorkflowsByNameEventsResponses];
