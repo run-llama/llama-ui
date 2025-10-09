@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Workflows API",
-    "version": "2.6.0"
+    "version": "2.7.0"
   },
   "components": {
     "schemas": {
@@ -433,7 +433,13 @@
                 "properties": {
                   "event": {
                     "type": "string",
-                    "description": "Serialized event in JSON format."
+                    "description": "Serialized event in JSON format.",
+                    "examples": {
+                      "type": "event_name",
+                      "data": {
+                        "key": "value"
+                      }
+                    }
                   },
                   "step": {
                     "type": "string",
@@ -622,6 +628,58 @@
           },
           "500": {
             "description": "Error while getting JSON workflow representation"
+          }
+        }
+      }
+    },
+    "/workflows/{name}/events": {
+      "get": {
+        "summary": "List workflow events",
+        "description": "Returns the list of registered workflow event schemas.",
+        "parameters": [
+          {
+            "name": "workflow_name",
+            "in": "query",
+            "description": "Name of the workflow to list events for",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of workflow event schemas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "events": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "schema": {
+                            "type": "object"
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "schema"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "events"
+                  ]
+                }
+              }
+            }
           }
         }
       }
