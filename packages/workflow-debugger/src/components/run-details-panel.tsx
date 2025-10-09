@@ -247,7 +247,9 @@ export function RunDetailsPanel({
               handlerId={handlerId}
               workflowName={selectedWorkflow ?? null}
               disabled={
-                !handler || handler.status === "complete" || handler.status === "failed"
+                !handler ||
+                handler.status === "complete" ||
+                handler.status === "failed"
               }
             />
           </div>
