@@ -456,11 +456,11 @@ export type GetWorkflowsByNameEventsResponses = {
      * List of workflow event schemas
      */
     200: {
+        /**
+         * List of workflow event JSON schemas
+         */
         events: Array<{
-            name: string;
-            schema: {
-                [key: string]: unknown;
-            };
+            [key: string]: unknown;
         }>;
     };
 };
