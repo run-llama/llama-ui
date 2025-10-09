@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Workflows API",
-    "version": "2.7.0"
+    "version": "2.7.1"
   },
   "components": {
     "schemas": {
@@ -657,20 +657,9 @@
                   "properties": {
                     "events": {
                       "type": "array",
+                      "description": "List of workflow event JSON schemas",
                       "items": {
-                        "type": "object",
-                        "properties": {
-                          "name": {
-                            "type": "string"
-                          },
-                          "schema": {
-                            "type": "object"
-                          }
-                        },
-                        "required": [
-                          "name",
-                          "schema"
-                        ]
+                        "type": "object"
                       }
                     }
                   },
