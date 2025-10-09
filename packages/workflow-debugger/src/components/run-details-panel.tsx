@@ -16,6 +16,7 @@ import {
 import type { WorkflowEvent } from "@llamaindex/ui";
 import { CodeBlock } from "./code-block";
 import { WorkflowVisualization } from "./workflow-visualization";
+import { SendEventDialog } from "./send-event-dialog";
 import { getResultsByHandlerId } from "@llamaindex/workflows-client";
 
 type JSONValue =
@@ -242,6 +243,13 @@ export function RunDetailsPanel({
                 {handler.status}
               </Badge>
             )}
+            <SendEventDialog
+              handlerId={handlerId}
+              workflowName={selectedWorkflow ?? null}
+              disabled={
+                !handler || handler.status === "complete" || handler.status === "failed"
+              }
+            />
           </div>
         </div>
         {handler ? (
