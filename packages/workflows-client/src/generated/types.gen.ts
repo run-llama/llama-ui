@@ -441,13 +441,13 @@ export type GetWorkflowsByNameRepresentationResponse = GetWorkflowsByNameReprese
 
 export type GetWorkflowsByNameEventsData = {
     body?: never;
-    path?: never;
-    query: {
+    path: {
         /**
-         * Name of the workflow to list events for
+         * Registered workflow name.
          */
-        workflow_name: string;
+        name: string;
     };
+    query?: never;
     url: '/workflows/{name}/events';
 };
 
