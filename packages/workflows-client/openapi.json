@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Workflows API",
-    "version": "2.7.1"
+    "version": "2.8.0"
   },
   "components": {
     "schemas": {
@@ -337,7 +337,7 @@
     "/events/{handler_id}": {
       "get": {
         "summary": "Stream workflow events",
-        "description": "Streams events produced by a workflow execution. Events are emitted as\nnewline-delimited JSON by default, or as Server-Sent Events when `sse=true`.\nEvent data is formatted according to llama-index's json serializer. For\npydantic serializable python types, it returns:\n{\n  \"__is_pydantic\": True,\n  \"value\": <pydantic serialized value>,\n  \"qualified_name\": <python path to pydantic class>\n}\n\nEvent queue is mutable. Elements are added to the queue by the workflow handler, and removed by any consumer of the queue.\nThe queue is protected by a lock that is acquired by the consumer, so only one consumer of the queue at a time is allowed.\n",
+        "description": "Streams events produced by a workflow execution. Events are emitted as\nnewline-delimited JSON by default, or as Server-Sent Events when `sse=true`.\nEvent data is returned as an envelope that preserves backward-compatible fields\nand adds metadata for type-safety on the client:\n{\n  \"__is_pydantic\": true,\n  \"value\": <pydantic serialized value>,\n  \"qualified_name\": <python path to pydantic class>,  # deprecated, prefer `mro`\n  \"mro\": [<qualified class names from most to least specific>],\n  \"origin\": \"builtin\" | \"user\"\n}\n\nEvent queue is mutable. Elements are added to the queue by the workflow handler, and removed by any consumer of the queue.\nThe queue is protected by a lock that is acquired by the consumer, so only one consumer of the queue at a time is allowed.\n",
         "parameters": [
           {
             "in": "path",
@@ -638,13 +638,13 @@
         "description": "Returns the list of registered workflow event schemas.",
         "parameters": [
           {
-            "name": "workflow_name",
-            "in": "query",
-            "description": "Name of the workflow to list events for",
+            "in": "path",
+            "name": "name",
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Registered workflow name."
           }
         ],
         "responses": {
