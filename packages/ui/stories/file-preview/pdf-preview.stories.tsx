@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 import { expect, within, userEvent, waitFor } from "@storybook/test";
 import { PdfPreview } from "../../src/file-preview/pdf-preview";
+import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../src";
 
 const meta: Meta<typeof PdfPreview> = {
   title: "Components/FilePreview/PdfPreview",
@@ -624,3 +625,51 @@ function UploadAndPreviewExample() {
     </div>
   );
 }
+
+export const DialogPreviewWithRerender: Story = {
+  name: "Dialog preview in dialog",
+  args: {
+    url: "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf",
+  },
+  render: (args) => <PdfPreviewDialogWithRerender url={args.url} />,
+};
+
+function PdfPreviewDialogWithRerender({ url }: { url: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [renderCount, setRenderCount] = useState(0);
+
+  const handleRerender = () => {
+    setRenderCount((prev) => prev + 1);
+  };
+
+  const pdfUrl = url
+    ? `${url}${url.includes("?") ? "&" : "?"}version=${renderCount}`
+    : "";
+
+  return (
+    <div className="h-screen flex items-center justify-center">
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
+          <Button>Open PDF preview</Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-5xl w-full max-h-[85vh]">
+          <DialogHeader className="sm:flex-row sm:items-center sm:justify-between">
+            <DialogTitle>PDF preview in a dialog</DialogTitle>
+            <span className="text-sm text-muted-foreground">
+              Render count: {renderCount + 1}
+            </span>
+          </DialogHeader>
+          <div className="flex justify-end">
+            <Button size="sm" variant="secondary" onClick={handleRerender}>
+              Re-render PDF
+            </Button>
+          </div>
+          <div className="border rounded-md h-[70vh] overflow-hidden">
+            <PdfPreview key={renderCount} url={pdfUrl} />
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
