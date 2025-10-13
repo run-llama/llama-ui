@@ -32,6 +32,7 @@ interface WorkflowVisualizationProps {
   onNodeClick?: (nodeId: string) => void;
   highlightedNodeId?: string | null;
   selectedNodeId?: string | null;
+  isComplete?: boolean;
 }
 
 interface WorkflowGraphNode {
@@ -59,6 +60,7 @@ export function WorkflowVisualization({
   onNodeClick,
   highlightedNodeId,
   selectedNodeId,
+  isComplete = false,
 }: WorkflowVisualizationProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -445,6 +447,41 @@ export function WorkflowVisualization({
       return;
     }
 
+    // Trigger fade-out when workflow is complete
+    if (isComplete) {
+      const fadeTimestamp = Date.now();
+
+      // Set all highlighted nodes to start fading
+      setNodes((prev) =>
+        prev.map((n) => {
+          const newData: Record<string, unknown> = { ...n.data };
+          if (newData.highlightColor) {
+            newData.fadeTimestamp = fadeTimestamp;
+          }
+          return { ...n, data: newData } as Node;
+        }),
+      );
+
+      // Clear all highlights after 1 second
+      setTimeout(() => {
+        setNodes((prev) =>
+          prev.map((n) => {
+            if (n.data.fadeTimestamp === fadeTimestamp) {
+              const newData: Record<string, unknown> = { ...n.data };
+              newData.highlightColor = null;
+              delete newData.activeWorkers;
+              delete newData.workerCount;
+              delete newData.fadeTimestamp;
+              return { ...n, data: newData } as Node;
+            }
+            return n;
+          }),
+        );
+      }, 1000);
+
+      return;
+    }
+
     // Process only new events since last time
     const newEvents = events.slice(lastProcessedEventIndex + 1);
     if (newEvents.length === 0) return;
@@ -609,7 +646,7 @@ export function WorkflowVisualization({
         }, 1000);
       }
     }
-  }, [events, lastProcessedEventIndex, setNodes]);
+  }, [events, lastProcessedEventIndex, setNodes, isComplete]);
 
   if (loading) {
     return (

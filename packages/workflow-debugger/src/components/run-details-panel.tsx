@@ -278,6 +278,9 @@ export function RunDetailsPanel({
               data: e.data,
             }))}
             className="w-full h-full min-h-[400px]"
+            isComplete={
+              handler?.status === "complete" || handler?.status === "failed"
+            }
           />
         </div>
 

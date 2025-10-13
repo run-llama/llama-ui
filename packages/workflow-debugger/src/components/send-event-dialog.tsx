@@ -18,7 +18,10 @@ import {
 import { Send } from "lucide-react";
 import { JsonSchemaEditor } from "./json-schema-editor";
 import type { JSONValue } from "./workflow-config-panel";
-import { postEventsByHandlerId } from "@llamaindex/workflows-client";
+import {
+  postEventsByHandlerId,
+  getWorkflowsByNameEvents,
+} from "@llamaindex/workflows-client";
 
 interface EventSchema {
   title?: string;
@@ -63,19 +66,28 @@ export function SendEventDialog({
       setLoading(true);
       setSendError(null);
       try {
-        const response = await fetch(
-          `${workflowsClient.getConfig().baseUrl}/workflows/${workflowName}/events`,
-        );
-        if (!response.ok) {
-          throw new Error(`Failed to fetch event schemas: ${response.status}`);
+        const response = await getWorkflowsByNameEvents({
+          client: workflowsClient,
+          path: { name: workflowName },
+        });
+
+        const data = response.data;
+        if (!data) {
+          setEventSchemas([]);
+          return;
         }
-        const data = (await response.json()) as { events?: EventSchema[] };
-        setEventSchemas(data.events || []);
+        if (!data.events) {
+          setEventSchemas([]);
+          return;
+        }
+
+        setEventSchemas(data.events);
 
         // Auto-select first event if available
         if (data.events && data.events.length > 0) {
           const firstEvent = data.events[0];
-          setSelectedEventType(firstEvent.title || null);
+          const title = firstEvent.title as string;
+          setSelectedEventType(title || null);
         }
       } catch (error) {
         console.error("Failed to fetch event schemas:", error);
