@@ -6,8 +6,6 @@ export { default as ChatInput } from "./components/chat-input";
 export { default as ChatMessages } from "./components/chat-messages";
 export { default as ChatMessage } from "./components/chat-message";
 export { default as ChatCanvas } from "./components/canvas";
-export { ChatHistorySidebar } from "./components/chat-history-sidebar";
-export type { ChatHistorySidebarProps } from "./components/chat-history-sidebar";
 
 // Contexts and hooks for chat UI layer
 export { ChatProvider, useChatUI } from "./components/chat.context";

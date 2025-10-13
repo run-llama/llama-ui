@@ -130,7 +130,15 @@ export function useChat(
     setHandlerId(id);
     onReady?.(id);
     return id;
-  }, [workflowName, providedHandlerId, initialMessages, store, onReady, indexName, sessions]);
+  }, [
+    workflowName,
+    providedHandlerId,
+    initialMessages,
+    store,
+    onReady,
+    indexName,
+    sessions,
+  ]);
 
   // Eager initialization on mount and when core identifiers change
   useEffect(() => {

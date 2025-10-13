@@ -6,11 +6,13 @@
  * improving performance and reducing server load.
  */
 
+import { logger } from "./logger";
+
 export interface StreamSubscriber<TEvent> {
   onStart?: () => void;
   onData?: (event: TEvent) => void;
   onError?: (error: Error) => void;
-  onFinish?: (allEvents: TEvent[]) => void;
+  onSucceed?: (allEvents: TEvent[]) => void;
   onComplete?: () => void; // Called when stream ends (success or error)
 }
 
@@ -21,6 +23,13 @@ export interface StreamExecutor<TEvent> {
   ): Promise<TEvent[]>;
 }
 
+export interface StreamOperation<TEvent> {
+  promise: Promise<TEvent[]>;
+  unsubscribe: () => void;
+  disconnect: () => void;
+  cancel: () => Promise<void>;
+}
+
 interface SharedStreamState<TEvent> {
   // Stream control
   controller: AbortController;
@@ -29,13 +38,12 @@ interface SharedStreamState<TEvent> {
   // Subscriber management
   subscribers: Set<StreamSubscriber<TEvent>>;
 
-  // configuration
-  includeInternal: boolean; // is this stream configured to include internal events
-
   // Event storage
   events: TEvent[];
   isCompleted: boolean;
   error: Error | null;
+
+  canceler: () => Promise<void>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -57,27 +65,18 @@ export class SharedStreamingManager<TEvent = any> {
     streamKey: string,
     subscriber: StreamSubscriber<TEvent>,
     executor: StreamExecutor<TEvent>,
-    externalSignal?: AbortSignal
-  ): {
-    promise: Promise<TEvent[]>;
-    unsubscribe: () => void;
-  } {
+    canceler: () => Promise<void>
+  ): StreamOperation<TEvent> {
     const existingStream = this.activeStreams.get(streamKey);
     if (existingStream) {
       return this.subscribeToExistingStream(
         streamKey,
         existingStream,
-        subscriber,
-        externalSignal
+        subscriber
       );
     }
 
-    return this.createNewStream(
-      streamKey,
-      subscriber,
-      executor,
-      externalSignal
-    );
+    return this.createNewStream(streamKey, subscriber, executor, canceler);
   }
 
   /**
@@ -86,16 +85,6 @@ export class SharedStreamingManager<TEvent = any> {
   getStreamEvents(streamKey: string): TEvent[] {
     const stream = this.activeStreams.get(streamKey);
     return stream ? [...stream.events] : [];
-  }
-
-  /**
-   * get configuration for a stream
-   */
-  getStreamConfig(streamKey: string): { includeInternal: boolean } {
-    const stream = this.activeStreams.get(streamKey);
-    return stream
-      ? { includeInternal: stream.includeInternal }
-      : { includeInternal: false };
   }
 
   /**
@@ -136,9 +125,8 @@ export class SharedStreamingManager<TEvent = any> {
   private subscribeToExistingStream(
     streamKey: string,
     stream: SharedStreamState<TEvent>,
-    subscriber: StreamSubscriber<TEvent>,
-    externalSignal?: AbortSignal
-  ): { promise: Promise<TEvent[]>; unsubscribe: () => void } {
+    subscriber: StreamSubscriber<TEvent>
+  ): StreamOperation<TEvent> {
     // Add subscriber to existing stream
     stream.subscribers.add(subscriber);
 
@@ -155,7 +143,7 @@ export class SharedStreamingManager<TEvent = any> {
         if (stream.error) {
           subscriber.onError?.(stream.error);
         } else {
-          subscriber.onFinish?.(stream.events);
+          subscriber.onSucceed?.(stream.events);
         }
         subscriber.onComplete?.();
       }
@@ -164,29 +152,11 @@ export class SharedStreamingManager<TEvent = any> {
       console.error("Error sending historical events to subscriber:", error);
     }
 
-    // Handle external abort signal
-    const handleExternalAbort = () => {
-      this.unsubscribe(streamKey, subscriber);
-    };
-
-    if (externalSignal) {
-      if (externalSignal.aborted) {
-        this.unsubscribe(streamKey, subscriber);
-      } else {
-        externalSignal.addEventListener("abort", handleExternalAbort);
-      }
-    }
-
-    const unsubscribe = () => {
-      if (externalSignal) {
-        externalSignal.removeEventListener("abort", handleExternalAbort);
-      }
-      this.unsubscribe(streamKey, subscriber);
-    };
-
     return {
       promise: stream.promise,
-      unsubscribe,
+      unsubscribe: () => this.unsubscribe(streamKey, subscriber),
+      disconnect: () => this.disconnect(streamKey),
+      cancel: () => this.cancel(streamKey),
     };
   }
 
@@ -194,9 +164,8 @@ export class SharedStreamingManager<TEvent = any> {
     streamKey: string,
     subscriber: StreamSubscriber<TEvent>,
     executor: StreamExecutor<TEvent>,
-    externalSignal?: AbortSignal,
-    includeInternal?: boolean
-  ): { promise: Promise<TEvent[]>; unsubscribe: () => void } {
+    canceler: () => Promise<void>
+  ): StreamOperation<TEvent> {
     const controller = new AbortController();
     const subscribers = new Set([subscriber]);
     const events: TEvent[] = [];
@@ -208,24 +177,11 @@ export class SharedStreamingManager<TEvent = any> {
       events,
       isCompleted: false,
       error: null,
-      includeInternal: includeInternal ?? false,
+      canceler,
     };
 
     // Store stream state
     this.activeStreams.set(streamKey, streamState);
-
-    // Handle external abort signal
-    const handleExternalAbort = () => {
-      this.unsubscribe(streamKey, subscriber);
-    };
-
-    if (externalSignal) {
-      if (externalSignal.aborted) {
-        this.unsubscribe(streamKey, subscriber);
-        return { promise: Promise.resolve([]), unsubscribe: () => {} };
-      }
-      externalSignal.addEventListener("abort", handleExternalAbort);
-    }
 
     // Create composite subscriber that distributes events to all subscribers
     const compositeSubscriber: StreamSubscriber<TEvent> = {
@@ -269,12 +225,12 @@ export class SharedStreamingManager<TEvent = any> {
         this.cleanupStream(streamKey);
       },
 
-      onFinish: (allEvents: TEvent[]) => {
+      onSucceed: (allEvents: TEvent[]) => {
         streamState.isCompleted = true;
 
         streamState.subscribers.forEach((sub) => {
           try {
-            sub.onFinish?.(allEvents);
+            sub.onSucceed?.(allEvents);
             sub.onComplete?.();
           } catch (error) {
             // eslint-disable-next-line no-console
@@ -294,16 +250,11 @@ export class SharedStreamingManager<TEvent = any> {
     );
     streamState.promise = streamPromise;
 
-    const unsubscribe = () => {
-      if (externalSignal) {
-        externalSignal.removeEventListener("abort", handleExternalAbort);
-      }
-      this.unsubscribe(streamKey, subscriber);
-    };
-
     return {
       promise: streamPromise,
-      unsubscribe,
+      unsubscribe: () => this.unsubscribe(streamKey, subscriber),
+      cancel: () => this.cancel(streamKey),
+      disconnect: () => this.disconnect(streamKey),
     };
   }
 
@@ -322,6 +273,23 @@ export class SharedStreamingManager<TEvent = any> {
     }
   }
 
+  private async cancel(streamKey: string): Promise<void> {
+    const stream = this.activeStreams.get(streamKey);
+    this.disconnect(streamKey);
+    await stream?.canceler();
+  }
+
+  private disconnect(streamKey: string): void {
+    const stream = this.activeStreams.get(streamKey);
+    if (stream) {
+      // No need to abort because last unsubscribe will do it
+      for (const subscriber of stream.subscribers) {
+        this.unsubscribe(streamKey, subscriber);
+      }
+      this.cleanupStream(streamKey);
+    }
+  }
+
   private unsubscribe(
     streamKey: string,
     subscriber: StreamSubscriber<TEvent>
@@ -335,8 +303,9 @@ export class SharedStreamingManager<TEvent = any> {
     if (stream.subscribers.size === 0) {
       try {
         stream.controller.abort();
-      } catch {
+      } catch (error) {
         // Ignore abort errors
+        logger.debug("Error aborting stream in unsubscribe", error);
       }
       this.cleanupStream(streamKey);
     }

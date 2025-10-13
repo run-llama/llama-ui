@@ -9,7 +9,6 @@ import { ApiProvider } from "../../src/lib/api-provider";
 import {
   createWorkflowHandlers,
   chatEventGenerator,
-  chatInitEvents,
 } from "../../.storybook/mocks";
 import { createWorkflowsClient } from "../../src/lib/clients";
 import ChatSection from "../../src/chat/components/chat-section";
@@ -76,7 +75,6 @@ export const Default: Story = {
   parameters: {
     msw: {
       handlers: createWorkflowHandlers({
-        initEventGenerator: chatInitEvents,
         eventGenerator: chatEventGenerator,
         eventDelay: 300,
         initialDelay: 500,
@@ -179,7 +177,10 @@ export const WithCodeBlock: Story = {
             data: { delta: "Here's a Python example:\n\n" },
           },
           { type: "workflows.events.ChatDeltaEvent", data: { delta: "```py" } },
-          { type: "workflows.events.ChatDeltaEvent", data: { delta: "thon\n" } },
+          {
+            type: "workflows.events.ChatDeltaEvent",
+            data: { delta: "thon\n" },
+          },
           {
             type: "workflows.events.ChatDeltaEvent",
             data: { delta: "def hello():\n" },

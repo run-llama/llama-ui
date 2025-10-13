@@ -148,7 +148,9 @@ describe("StreamingMessage", () => {
       const parts = streamingMsg.getParts();
       expect(parts).toHaveLength(3);
       expect(parts[0]).toMatchObject({ type: "text", text: "First" });
-      expect(parts[1]).toMatchObject({ type: "workflows.events.ToolCallEvent" });
+      expect(parts[1]).toMatchObject({
+        type: "workflows.events.ToolCallEvent",
+      });
       expect(parts[2]).toMatchObject({ type: "text", text: "Second" });
     });
   });

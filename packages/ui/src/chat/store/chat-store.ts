@@ -9,19 +9,12 @@ import type { Client as LlamaDeployClient } from "@llamaindex/workflows-client";
 import type { Message, ChatRequestOptions } from "../components/chat.interface";
 import { MessageRole } from "../components/chat.interface";
 import type { MessagePart } from "../components/message-parts/types";
-import type { WorkflowEvent } from "../../workflows/types";
 import type {
   ChatSession,
   CreateSessionOptions,
   ChatStoreState,
 } from "./types";
-import {
-  createChatHandler,
-  sendEventToHandler,
-  subscribeToHandlerEvents,
-  unsubscribeFromHandler,
-} from "./helper";
-import { messageToEvent, isMessageTerminator } from "./adapters";
+import { messageToEvent } from "./adapters";
 import { StreamingMessage } from "./streaming-message";
 
 export type { ChatStoreState, ChatSession, CreateSessionOptions };
@@ -45,8 +38,7 @@ export const createChatStore = (client: LlamaDeployClient) =>
       } = options;
 
       // Create handler if not provided
-      const handlerId =
-        providedHandlerId || (await createChatHandler(client, workflowName, indexName));
+      const handlerId = providedHandlerId || "";
 
       // Initialize session
       const session: ChatSession = {
@@ -72,7 +64,7 @@ export const createChatStore = (client: LlamaDeployClient) =>
 
     deleteSession: (handlerId: string) => {
       // Unsubscribe from events
-      unsubscribeFromHandler(handlerId);
+      // unsubscribeFromHandler(handlerId);
 
       // Remove session
       set((state) => {
@@ -119,7 +111,7 @@ export const createChatStore = (client: LlamaDeployClient) =>
       try {
         // Convert message to workflow event and send
         const event = messageToEvent(message);
-        await sendEventToHandler(client, handlerId, event);
+        // await sendEventToHandler(client, handlerId, event);
 
         // Update status to streaming (waiting for events)
         get().setStatus(handlerId, "streaming");
@@ -243,7 +235,7 @@ export const createChatStore = (client: LlamaDeployClient) =>
       }
 
       // Unsubscribe from streaming
-      unsubscribeFromHandler(handlerId);
+      // unsubscribeFromHandler(handlerId);
 
       // Update status and clear streaming state
       get().setStatus(handlerId, "ready");
@@ -300,7 +292,7 @@ export const createChatStore = (client: LlamaDeployClient) =>
         // Send the user message as event (without adding to messages again)
         const messageToResend = session.messages[targetIndex];
         const event = messageToEvent(messageToResend);
-        await sendEventToHandler(client, handlerId, event);
+        // await sendEventToHandler(client, handlerId, event);
 
         // Update status to streaming
         get().setStatus(handlerId, "streaming");
