@@ -91,12 +91,14 @@ export const getResultsByHandlerId = <ThrowOnError extends boolean = false>(opti
  * Stream workflow events
  * Streams events produced by a workflow execution. Events are emitted as
  * newline-delimited JSON by default, or as Server-Sent Events when `sse=true`.
- * Event data is formatted according to llama-index's json serializer. For
- * pydantic serializable python types, it returns:
+ * Event data is returned as an envelope that preserves backward-compatible fields
+ * and adds metadata for type-safety on the client:
  * {
- * "__is_pydantic": True,
+ * "__is_pydantic": true,
  * "value": <pydantic serialized value>,
- * "qualified_name": <python path to pydantic class>
+ * "qualified_name": <python path to pydantic class>,  # deprecated, prefer `mro`
+ * "mro": [<qualified class names from most to least specific>],
+ * "origin": "builtin" | "user"
  * }
  *
  * Event queue is mutable. Elements are added to the queue by the workflow handler, and removed by any consumer of the queue.
