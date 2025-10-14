@@ -104,6 +104,7 @@ if __name__ == "__main__":
 From there, you can open your browser at `http://127.0.0.1:8000` to see the UI.
 
 To use the debugger:
+
 - select your workflow from the dropdown menu in the top middle
 - input your payload to kick off the workflow (e.g. `["item1", "item2", "item3"]`)
 - click the "Run Workflow" button to start the workflow
