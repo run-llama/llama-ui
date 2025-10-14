@@ -23,6 +23,16 @@ const meta: Meta<typeof PdfPreview> = {
       action: "remove",
       description: "Callback when remove button is clicked",
     },
+    maxPages: {
+      control: "number",
+      description:
+        "Maximum number of pages to render. When unset, all pages render.",
+    },
+    maxPagesWarning: {
+      control: "text",
+      description:
+        "Warning text displayed above the viewer when the document exceeds maxPages.",
+    },
   },
 };
 
@@ -32,6 +42,19 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     url: "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf",
+  },
+  render: (args) => (
+    <div className="h-screen">
+      <PdfPreview {...args} />
+    </div>
+  ),
+};
+
+export const LargeFile: Story = {
+  args: {
+    url: "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf",
+    maxPages: 10,
+    maxPagesWarning: "Showing only the first 10 pages to keep things speedy.",
   },
   render: (args) => (
     <div className="h-screen">

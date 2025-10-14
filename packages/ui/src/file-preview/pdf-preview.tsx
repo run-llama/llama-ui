@@ -12,12 +12,16 @@ const PdfPreview = memo(
     fileName,
     toolbarClassName,
     onRemove,
+    maxPages,
+    maxPagesWarning,
   }: {
     url: string;
     highlight?: Highlight;
     fileName?: string;
     toolbarClassName?: string;
     onRemove?: () => void;
+    maxPages?: number;
+    maxPagesWarning?: string;
   }) => {
     if (typeof window === "undefined") {
       return null;
@@ -42,6 +46,8 @@ const PdfPreview = memo(
           fileName={fileName}
           toolbarClassName={toolbarClassName}
           onRemove={onRemove}
+          maxPages={maxPages}
+          maxPagesWarning={maxPagesWarning}
         />
       </Suspense>
     );
