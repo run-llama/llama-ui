@@ -37,7 +37,7 @@ export function RunDetailsPanel({
   handlerId,
   selectedWorkflow,
 }: RunDetailsPanelProps) {
-  const handler = useHandlerStore(state => state.handlers[handlerId ?? ""]);
+  const handler = useHandlerStore((state) => state.handlers[handlerId ?? ""]);
   const [compactJson, setCompactJson] = useState(false);
   const [hideInternal, setHideInternal] = useState(true);
   const [finalResult, setFinalResult] = useState<JSONValue | null>(null);
@@ -69,20 +69,25 @@ export function RunDetailsPanel({
 
   useEffect(() => {
     if (handler) {
-      handler.subscribeToEvents({
-        onData: (event: WorkflowEvent) => {
-          setEvents((prev: WorkflowEvent[]) => {
-            return [...prev, event].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-          });
+      handler.subscribeToEvents(
+        {
+          onData: (event: WorkflowEvent) => {
+            setEvents((prev: WorkflowEvent[]) => {
+              return [...prev, event].sort(
+                (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+              );
+            });
+          },
+          onSucceed(allEvents) {
+            setEvents(allEvents);
+            setFinalResult(handler.result?.data.result ?? null);
+          },
+          onError(error) {
+            setFinalResultError(error.message);
+          },
         },
-        onSucceed(allEvents) {
-          setEvents(allEvents);
-          setFinalResult(handler.result?.data.result ?? null);
-        },
-        onError(error) {
-          setFinalResultError(error.message);
-        },
-      }, true);
+        true,
+      );
       return () => {
         handler.disconnect();
       };
@@ -95,16 +100,11 @@ export function RunDetailsPanel({
     setFinalResultError(null);
   }, [handlerId]);
 
-  const displayedEvents: WorkflowEvent[] =
-    useMemo(
-      () =>
-        hideInternal
-          ? events.filter(
-              (event) => !isBuiltInEvent(event),
-            )
-          : events,
-      [events, hideInternal],
-    );
+  const displayedEvents: WorkflowEvent[] = useMemo(
+    () =>
+      hideInternal ? events.filter((event) => !isBuiltInEvent(event)) : events,
+    [events, hideInternal],
+  );
 
   return (
     <div className="h-full flex flex-col">

@@ -6,7 +6,10 @@ interface RunListPanelProps {
   onHandlerSelect: (handlerId: string) => void;
 }
 
-export function RunListPanel({ activeHandlerId, onHandlerSelect }: RunListPanelProps) {
+export function RunListPanel({
+  activeHandlerId,
+  onHandlerSelect,
+}: RunListPanelProps) {
   const { handlers, fetchRunningHandlers } = useHandlerStore();
   const [loading, setLoading] = useState(false);
   useEffect(() => {
@@ -26,15 +29,12 @@ export function RunListPanel({ activeHandlerId, onHandlerSelect }: RunListPanelP
       {/* Header */}
       <div className="px-3 py-2 border-b border-border">
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-xs tracking-tight">
-            Recent Runs
-          </h2>
+          <h2 className="font-semibold text-xs tracking-tight">Recent Runs</h2>
         </div>
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
-
         {/* Loading State */}
         {loading && (
           <div className="p-2 space-y-2">

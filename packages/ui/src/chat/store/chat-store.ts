@@ -69,7 +69,6 @@ export const createChatStore = (client: LlamaDeployClient) =>
 
       // Remove session
       set((state) => {
-         
         const { [handlerId]: _, ...remainingSessions } = state.sessions;
         return { sessions: remainingSessions };
       });
