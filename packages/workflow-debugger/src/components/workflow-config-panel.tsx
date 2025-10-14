@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import {
   useWorkflowsClient,
-  useWorkflowRun,
   Button,
   Textarea,
   Skeleton,
+  useHandlerStore,
 } from "@llamaindex/ui";
 import { PanelRightClose } from "lucide-react";
 import { JsonSchemaEditor } from "./json-schema-editor";
@@ -50,9 +50,10 @@ export function WorkflowConfigPanel({
   const [rawJsonErrors, setRawJsonErrors] = useState<
     Record<string, string | null>
   >({});
+  const [isCreating, setIsCreating] = useState(false);
 
   const workflowsClient = useWorkflowsClient();
-  const { runWorkflow, isCreating, error: runError } = useWorkflowRun();
+  const { createHandler } = useHandlerStore();
 
   useEffect(() => {
     const fetchSchema = async () => {
@@ -97,8 +98,9 @@ export function WorkflowConfigPanel({
     if (!selectedWorkflow) return;
 
     try {
-      const handler = await runWorkflow(selectedWorkflow, formData);
-      onRunStart(handler.handler_id);
+      setIsCreating(true);
+      const handler = await createHandler(selectedWorkflow, formData);
+      onRunStart(handler.handlerId);
 
       // Auto-collapse the config panel after starting a run
       if (onCollapse) {
@@ -106,6 +108,8 @@ export function WorkflowConfigPanel({
       }
     } catch (err) {
       console.error("Failed to run workflow:", err);
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -169,15 +173,6 @@ export function WorkflowConfigPanel({
         {error && (
           <div className="text-destructive text-sm p-3 bg-destructive/10 border border-destructive/20 rounded">
             Error loading schema: {error}
-          </div>
-        )}
-
-        {runError && (
-          <div className="text-destructive text-sm p-3 bg-destructive/10 border border-destructive/20 rounded">
-            Error running workflow:{" "}
-            {typeof runError === "string"
-              ? runError
-              : runError.message || "Unknown error"}
           </div>
         )}
 

@@ -12,10 +12,10 @@ import {
   PopoverTrigger,
   Skeleton,
 } from "@llamaindex/ui";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getWorkflows, getHealth } from "@llamaindex/workflows-client";
 import { WorkflowConfigPanel } from "./workflow-config-panel";
-import { RunListPanel, RunListPanelHandle } from "./run-list-panel";
+import { RunListPanel } from "./run-list-panel";
 import { RunDetailsPanel } from "./run-details-panel";
 import {
   Settings,
@@ -69,7 +69,6 @@ export function WorkflowDebugger() {
   const [connectionError, setConnectionError] = useState<string | null>(null);
 
   const workflowsClient = useWorkflowsClient();
-  const runListRef = useRef<RunListPanelHandle | null>(null);
 
   const checkHealth = useCallback(async (): Promise<void> => {
     try {
@@ -130,12 +129,6 @@ export function WorkflowDebugger() {
 
   const handleRunStart = (handlerId: string) => {
     setActiveHandlerId(handlerId);
-
-    // Inform the run list about the new local handler via imperative ref
-    runListRef.current?.addLocalHandler(
-      handlerId,
-      selectedWorkflow || undefined,
-    );
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -305,7 +298,6 @@ export function WorkflowDebugger() {
         {!sidebarCollapsed && (
           <div className="w-48 border-r border-border bg-card overflow-hidden transition-all duration-200">
             <RunListPanel
-              ref={runListRef}
               activeHandlerId={activeHandlerId}
               onHandlerSelect={setActiveHandlerId}
             />

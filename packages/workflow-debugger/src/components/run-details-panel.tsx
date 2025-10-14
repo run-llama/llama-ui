@@ -1,6 +1,5 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import {
-  useWorkflowHandler,
   useWorkflowsClient,
   Badge,
   Button,
@@ -12,12 +11,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  useHandlerStore,
+  isBuiltInEvent,
 } from "@llamaindex/ui";
 import type { WorkflowEvent } from "@llamaindex/ui";
 import { CodeBlock } from "./code-block";
 import { WorkflowVisualization } from "./workflow-visualization";
 import { SendEventDialog } from "./send-event-dialog";
-import { getResultsByHandlerId } from "@llamaindex/workflows-client";
 
 type JSONValue =
   | null
@@ -38,23 +38,13 @@ export function RunDetailsPanel({
   handlerId,
   selectedWorkflow,
 }: RunDetailsPanelProps) {
-  const { handler, events } = useWorkflowHandler(handlerId ?? "", !!handlerId, {
-    includeInternal: true,
-  });
-  const workflowsClient = useWorkflowsClient();
+  const handler = useHandlerStore(state => state.handlers[handlerId ?? ""]);
   const [compactJson, setCompactJson] = useState(false);
   const [hideInternal, setHideInternal] = useState(true);
-  const [eventTimestamps, setEventTimestamps] = useState<number[]>([]);
   const [finalResult, setFinalResult] = useState<JSONValue | null>(null);
   const [resultLoading, setResultLoading] = useState(false);
   const [finalResultError, setFinalResultError] = useState<string | null>(null);
-
-  // Throttle configuration for result fetching
-  const RESULT_FETCH_THROTTLE_MS = 1000;
-  const lastResultFetchAtRef = useRef<number>(0);
-  const pendingResultFetchTimeoutRef = useRef<ReturnType<
-    typeof setTimeout
-  > | null>(null);
+  const [events, setEvents] = useState<WorkflowEvent[]>([]);
 
   const formatJsonData = (data: unknown) => {
     if (typeof data === "string") {
@@ -79,153 +69,44 @@ export function RunDetailsPanel({
     return `${base}.${ms}`;
   };
 
-  // Clear any pending throttled fetch when handler changes or on unmount
   useEffect(() => {
-    return () => {
-      if (pendingResultFetchTimeoutRef.current) {
-        clearTimeout(pendingResultFetchTimeoutRef.current);
-        pendingResultFetchTimeoutRef.current = null;
-      }
-    };
-  }, [handlerId]);
+    if (handler) {
+      handler.subscribeToEvents({
+        onData: (event: WorkflowEvent) => {
+          setEvents((prev: WorkflowEvent[]) => {
+            return [...prev, event].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+          });
+        },
+        onSucceed(allEvents) {
+          setEvents(allEvents);
+          setFinalResult(handler.result?.data.result ?? null);
+        },
+        onError(error) {
+          setFinalResultError(error.message);
+        },
+      }, true);
+      return () => {
+        handler.disconnect();
+      };
+    }
+  }, [handler]);
 
   // Reset timestamps and result when switching handlers
   useEffect(() => {
-    setEventTimestamps([]);
     setFinalResult(null);
-    setResultLoading(false);
     setFinalResultError(null);
   }, [handlerId]);
 
-  // Append timestamps as new events arrive; trim if events are cleared
-  useEffect(() => {
-    setEventTimestamps((prev: number[]) => {
-      if (events.length < prev.length) {
-        return prev.slice(0, events.length);
-      }
-      if (events.length > prev.length) {
-        const additions = Array.from(
-          { length: events.length - prev.length },
-          () => Date.now(),
-        );
-        return [...prev, ...additions];
-      }
-      return prev;
-    });
-
-    // Only depend on length to avoid re-stamping on identity changes
-  }, [events.length]);
-
-  // Determine which events are considered internal/noisy for display
-  const isInternalEventType = (type: string | undefined): boolean => {
-    if (!type) return false;
-    return (
-      type === "workflows.events.StepStateChanged" ||
-      type === "workflows.events.EventsQueueChanged"
-    );
-  };
-
-  // Preserve original indices to keep timestamp alignment when filtering
-  const indexedEvents: { event: WorkflowEvent; originalIndex: number }[] =
-    useMemo(
-      () => events.map((event, i) => ({ event, originalIndex: i })),
-      [events],
-    );
-
-  const displayedEvents: { event: WorkflowEvent; originalIndex: number }[] =
+  const displayedEvents: WorkflowEvent[] =
     useMemo(
       () =>
         hideInternal
-          ? indexedEvents.filter(
-              ({ event }) => !isInternalEventType(event.type),
+          ? events.filter(
+              (event) => !isBuiltInEvent(event),
             )
-          : indexedEvents,
-      [indexedEvents, hideInternal],
+          : events,
+      [events, hideInternal],
     );
-
-  const fetchFinalResult = useCallback((): void => {
-    if (!handlerId) return;
-
-    const doFetchFinalResult = async (): Promise<void> => {
-      try {
-        lastResultFetchAtRef.current = Date.now();
-        setResultLoading(true);
-        setFinalResultError(null);
-        const { data, error } = await getResultsByHandlerId({
-          client: workflowsClient,
-          path: { handler_id: handlerId },
-        });
-        if (data) {
-          setFinalResult(
-            (data as { result?: JSONValue | null })?.result ?? null,
-          );
-        } else if (error) {
-          console.error("Failed to fetch final result:", error);
-          setFinalResult(null);
-          setFinalResultError(() => {
-            try {
-              return typeof error === "string" ? error : JSON.stringify(error);
-            } catch {
-              return String(error);
-            }
-          });
-        }
-      } catch (error) {
-        console.error("Failed to fetch final result:", error);
-        setFinalResult(null);
-        setFinalResultError(() => {
-          try {
-            return typeof error === "string" ? error : JSON.stringify(error);
-          } catch {
-            return String(error);
-          }
-        });
-      } finally {
-        setResultLoading(false);
-      }
-    };
-
-    const now = Date.now();
-    const elapsed = now - (lastResultFetchAtRef.current || 0);
-
-    if (elapsed < RESULT_FETCH_THROTTLE_MS) {
-      const waitMs = RESULT_FETCH_THROTTLE_MS - elapsed;
-      if (!pendingResultFetchTimeoutRef.current) {
-        pendingResultFetchTimeoutRef.current = setTimeout(() => {
-          pendingResultFetchTimeoutRef.current = null;
-          void doFetchFinalResult();
-        }, waitMs);
-      }
-      return;
-    }
-
-    void doFetchFinalResult();
-  }, [handlerId, workflowsClient]);
-
-  // Check for completion and fetch final result
-  useEffect(() => {
-    if (!handlerId || !handler) return;
-    const isCompleted =
-      handler.status === "complete" || handler.status === "failed";
-    const hasStopEvent = events.some((e) => e.type.endsWith(".StopEvent"));
-
-    if (
-      (isCompleted || hasStopEvent) &&
-      !finalResult &&
-      !resultLoading &&
-      !finalResultError
-    ) {
-      fetchFinalResult();
-    }
-  }, [
-    handler,
-    events,
-    handlerId,
-    finalResult,
-    resultLoading,
-    finalResultError,
-    fetchFinalResult,
-  ]);
 
   return (
     <div className="h-full flex flex-col">
@@ -237,7 +118,7 @@ export function RunDetailsPanel({
             {handler && (
               <Badge
                 variant={
-                  handler.status === "complete" ? "default" : "secondary"
+                  handler.status === "completed" ? "default" : "secondary"
                 }
               >
                 {handler.status}
@@ -248,7 +129,7 @@ export function RunDetailsPanel({
               workflowName={selectedWorkflow ?? null}
               disabled={
                 !handler ||
-                handler.status === "complete" ||
+                handler.status === "completed" ||
                 handler.status === "failed"
               }
             />
@@ -256,7 +137,7 @@ export function RunDetailsPanel({
         </div>
         {handler ? (
           <p className="text-xs text-muted-foreground font-mono mt-1">
-            {handler.handler_id}
+            {handler.handlerId}
           </p>
         ) : (
           <p className="text-xs text-muted-foreground mt-1">
@@ -279,7 +160,7 @@ export function RunDetailsPanel({
             }))}
             className="w-full h-full min-h-[400px]"
             isComplete={
-              handler?.status === "complete" || handler?.status === "failed"
+              handler?.status === "completed" || handler?.status === "failed"
             }
           />
         </div>
@@ -340,13 +221,10 @@ export function RunDetailsPanel({
                 </TableHeader>
                 <TableBody>
                   {displayedEvents.map((item, index) => {
-                    const { event, originalIndex } = item as {
-                      event: WorkflowEvent;
-                      originalIndex: number;
-                    };
+                    const event = item;
                     return (
                       <TableRow
-                        key={`${originalIndex}-${event.type}`}
+                        key={`${event.type}-${index}`}
                         data-event-index={index}
                         className={`cursor-pointer transition-colors`}
                       >
@@ -361,9 +239,9 @@ export function RunDetailsPanel({
                                   {event.type}
                                 </code>
                               </div>
-                              {eventTimestamps[originalIndex] !== undefined ? (
+                              {event.timestamp !== undefined ? (
                                 <span className="text-[10px] text-muted-foreground font-mono whitespace-nowrap">
-                                  {formatTime(eventTimestamps[originalIndex])}
+                                  {formatTime(event.timestamp.getTime())}
                                 </span>
                               ) : null}
                             </div>
