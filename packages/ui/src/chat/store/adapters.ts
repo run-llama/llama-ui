@@ -13,14 +13,8 @@ import {
   ArtifactPartType,
   EventPartType,
 } from "../components/message-parts/types";
-import type {
-  WorkflowEvent,
-  ChatDeltaEvent,
-  StopEvent,
-  InputRequiredEvent,
-  HumanResponseEvent,
-} from "../../workflows/types";
-import { WorkflowEventType } from "../../workflows/types";
+import { WorkflowEvent, isChatDeltaEvent, isInputRequiredEvent, isStopEvent } from "../../workflows/store/workflow-event";
+import { HumanResponseEvent } from "../../workflows/store/workflow-event";
 
 /**
  * Extract text content from message parts
@@ -31,29 +25,6 @@ export function extractTextFromParts(parts: MessagePart[]): string {
     .filter((part): part is TextPart => part.type === TextPartType)
     .map((part) => part.text)
     .join(" ");
-}
-
-/**
- * Determine if event is a ChatDeltaEvent
- */
-export function isDeltaEvent(event: WorkflowEvent): event is ChatDeltaEvent {
-  return event.type.includes("ChatDeltaEvent");
-}
-
-/**
- * Determine if event is a StopEvent (signals workflow completion)
- */
-export function isStopEvent(event: WorkflowEvent): event is StopEvent {
-  return event.type === WorkflowEventType.StopEvent;
-}
-
-/**
- * Determine if event is an InputRequiredEvent (signals waiting for user input)
- */
-export function isInputRequiredEvent(
-  event: WorkflowEvent
-): event is InputRequiredEvent {
-  return event.type === WorkflowEventType.InputRequiredEvent;
 }
 
 /**
@@ -78,12 +49,7 @@ export function messageToEvent(message: Message): HumanResponseEvent {
     throw new Error("Cannot send empty message");
   }
 
-  return {
-    type: WorkflowEventType.HumanResponseEvent,
-    data: {
-      response: text,
-    },
-  };
+  return new HumanResponseEvent({ response: text });
 }
 
 /**
@@ -480,12 +446,12 @@ export function eventToMessageParts(
   }
 
   // Text events: extract text and parse XML markers
-  if (isDeltaEvent(event)) {
+  if (isChatDeltaEvent(event)) {
     let text: string | undefined;
 
     // Extract text from ChatDeltaEvent data format
     if (event.data && typeof event.data === "object" && "delta" in event.data) {
-      text = event.data.delta;
+      text = event.data.delta as string;
     }
 
     if (text !== undefined && text.trim()) {

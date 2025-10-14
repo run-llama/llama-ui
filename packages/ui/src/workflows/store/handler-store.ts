@@ -34,9 +34,18 @@ export const createHandlerStore = (client: Client) =>
       });
       const allHandlers = resp.data?.handlers ?? [];
 
-      return allHandlers
+      const runningHandlers = allHandlers
         .filter((handler) => handler.status === "running")
         .map((handler) => new Handler(handler, client));
+
+      set((state) => ({
+        handlers: {
+          ...state.handlers,
+          ...Object.fromEntries(runningHandlers.map((h) => [h.handlerId, h])),
+        },
+      }));
+
+      return runningHandlers;
     },
 
     createHandler: async (workflowName: string, input: JSONValue) => {

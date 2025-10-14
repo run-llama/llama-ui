@@ -1,14 +1,13 @@
 import {
   Client,
   Handler as RawHandler,
+  getResultsByHandlerId,
   postEventsByHandlerId,
   postHandlersByHandlerIdCancel,
 } from "@llamaindex/workflows-client";
 import {
   RawEvent,
   RunStatus,
-  WorkflowEvent,
-  WorkflowEventType,
 } from "../types";
 import {
   StreamOperation,
@@ -16,6 +15,7 @@ import {
   workflowStreamingManager,
 } from "../../lib/shared-streaming";
 import { logger } from "../../lib/logger";
+import { StopEvent, WorkflowEvent, WorkflowEventType } from "./workflow-event";
 
 /**
  * This handler won't communicate with server to sync status unless developers explicitly call stream.
@@ -28,6 +28,7 @@ export class Handler {
   updatedAt?: Date | null;
   completedAt?: Date | null;
   error?: string | null;
+  result?: StopEvent | null;
 
   _disconnect?: () => void;
   _unsubscribe?: () => void;
@@ -48,10 +49,11 @@ export class Handler {
       ? new Date(rawHandler.completed_at)
       : null;
     this.error = rawHandler.error;
+    this.result = rawHandler.result ? WorkflowEvent.fromRawEvent(rawHandler.result as RawEvent) as StopEvent : null;
   }
 
   async sendEvent<E extends WorkflowEvent>(event: E, step?: string) {
-    const rawEvent = toRawEvent(event); // convert to raw event before sending
+    const rawEvent = event.toRawEvent(); // convert to raw event before sending
     const data = await postEventsByHandlerId({
       client: this.client,
       path: { handler_id: this.handlerId },
@@ -62,6 +64,14 @@ export class Handler {
     });
 
     return data.data;
+  }
+
+  async getResult(): Promise<StopEvent | undefined> {
+    const data = await getResultsByHandlerId({
+      client: this.client,
+      path: { handler_id: this.handlerId },
+    });
+    return data.data?.result ? WorkflowEvent.fromRawEvent(data.data.result as RawEvent) as StopEvent : undefined;
   }
 
   subscribeToEvents(
@@ -92,6 +102,7 @@ export class Handler {
         this.status = "completed";
         this.completedAt = new Date();
         this.updatedAt = new Date();
+        this.result = events[events.length - 1] as StopEvent;
         callbacks?.onSucceed?.(events);
       },
       onComplete: () => {
@@ -159,14 +170,6 @@ export class Handler {
   }
 }
 
-function toRawEvent(event: WorkflowEvent): RawEvent {
-  return {
-    __is_pydantic: true,
-    value: event.data ?? {},
-    qualified_name: event.type,
-  };
-}
-
 function streamByEventSource(
   params: {
     client: Client;
@@ -202,20 +205,23 @@ function streamByEventSource(
     }
 
     eventSource.addEventListener("message", (event) => {
-      logger.debug("[streamByEventSource] message", event);
-      const workflowEvent = JSON.parse(event.data) as WorkflowEvent;
+      logger.debug("[streamByEventSource] message", JSON.parse(event.data));
+      const workflowEvent = WorkflowEvent.fromRawEvent(JSON.parse(event.data) as RawEvent);
       callbacks.onData?.(workflowEvent);
       accumulatedEvents.push(workflowEvent);
       if (workflowEvent.type === WorkflowEventType.StopEvent) {
         callbacks.onSucceed?.(accumulatedEvents);
+        logger.debug("[streamByEventSource] stop event received, closing event source");
         eventSource.close();
         resolve(accumulatedEvents);
       }
     });
-    eventSource.addEventListener("error", (event) => {
-      logger.error("[streamByEventSource] error", event);
-      callbacks.onError?.(new Error(event.toString()));
-      reject(new Error(event.toString()));
+    eventSource.addEventListener("error", () => {
+      // Ignore error for now due to EventSource limitations.
+      // 1. Now py server close sse connection and will always trigger error event even readyState is 2 (CLOSED)
+      // 2. The error event isself is a general event without any error information
+      // TODO: swtich to more fetch + stream approach
+      return;
     });
     eventSource.addEventListener("open", () => {
       logger.debug("[streamByEventSource] open");
