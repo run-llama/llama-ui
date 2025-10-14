@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 2.1.8
+
+### Patch Changes
+
+- aad82ca: Add maxPages to PdfPreview
+
 ## 2.1.7
 
 ### Patch Changes
