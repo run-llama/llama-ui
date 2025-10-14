@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Chat Store Implementation
  * Zustand store for managing chat sessions with workflow integration
@@ -68,7 +69,7 @@ export const createChatStore = (client: LlamaDeployClient) =>
 
       // Remove session
       set((state) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+         
         const { [handlerId]: _, ...remainingSessions } = state.sessions;
         return { sessions: remainingSessions };
       });

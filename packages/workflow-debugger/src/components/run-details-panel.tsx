@@ -1,6 +1,5 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
-  useWorkflowsClient,
   Badge,
   Button,
   Label,
@@ -42,7 +41,6 @@ export function RunDetailsPanel({
   const [compactJson, setCompactJson] = useState(false);
   const [hideInternal, setHideInternal] = useState(true);
   const [finalResult, setFinalResult] = useState<JSONValue | null>(null);
-  const [resultLoading, setResultLoading] = useState(false);
   const [finalResultError, setFinalResultError] = useState<string | null>(null);
   const [events, setEvents] = useState<WorkflowEvent[]>([]);
 
@@ -264,16 +262,10 @@ export function RunDetailsPanel({
           </div>
 
           {/* Final Result Section */}
-          {(finalResult || finalResultError || resultLoading) && (
+          {(finalResult || finalResultError) && (
             <div className="p-4 border-t border-border">
               <h4 className="font-medium text-sm mb-2">Final Result</h4>
-              {resultLoading ? (
-                <div className="bg-muted p-3 rounded">
-                  <div className="text-sm text-muted-foreground">
-                    Loading result...
-                  </div>
-                </div>
-              ) : finalResultError ? (
+              {finalResultError ? (
                 <div className="text-destructive text-sm p-3 bg-destructive/10 border border-destructive/20 rounded">
                   Failed to load final result: {finalResultError}
                 </div>

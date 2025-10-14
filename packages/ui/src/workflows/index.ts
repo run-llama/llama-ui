@@ -1,8 +1,5 @@
 // Types
-export type {
-  WorkflowProgressState,
-  RunStatus,
-} from "./types";
+export type { WorkflowProgressState, RunStatus } from "./types";
 
 export * from "./store/workflow-event";
 

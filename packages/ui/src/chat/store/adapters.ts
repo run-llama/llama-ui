@@ -13,7 +13,13 @@ import {
   ArtifactPartType,
   EventPartType,
 } from "../components/message-parts/types";
-import { WorkflowEvent, isChatDeltaEvent, isInputRequiredEvent, isStopEvent } from "../../workflows/store/workflow-event";
+import {
+  WorkflowEvent,
+  WorkflowEventType,
+  isChatDeltaEvent,
+  isInputRequiredEvent,
+  isStopEvent,
+} from "../../workflows/store/workflow-event";
 import { HumanResponseEvent } from "../../workflows/store/workflow-event";
 
 /**
@@ -49,7 +55,9 @@ export function messageToEvent(message: Message): HumanResponseEvent {
     throw new Error("Cannot send empty message");
   }
 
-  return new HumanResponseEvent({ response: text });
+  return new HumanResponseEvent(WorkflowEventType.HumanResponseEvent, {
+    response: text,
+  });
 }
 
 /**

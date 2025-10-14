@@ -26,7 +26,11 @@
  * - Call complete() when streaming ends (flushes remaining buffer)
  */
 
-import { WorkflowEvent, isChatDeltaEvent, isStopEvent } from "../../workflows/store/workflow-event";
+import {
+  WorkflowEvent,
+  isChatDeltaEvent,
+  isStopEvent,
+} from "../../workflows/store/workflow-event";
 import type { MessagePart } from "../components/message-parts/types";
 import { parseTextWithXMLMarkers } from "./adapters";
 

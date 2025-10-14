@@ -96,7 +96,9 @@ describe("Handler Store Tests", () => {
         response: {} as Response,
       });
 
-      await testStore.getState().createHandler("test-workflow", { key: "value" });
+      await testStore
+        .getState()
+        .createHandler("test-workflow", { key: "value" });
 
       expect(postWorkflowsByNameRunNowait).toHaveBeenCalledWith({
         client: mockClient,
@@ -128,7 +130,9 @@ describe("Handler Store Tests", () => {
         response: {} as Response,
       });
 
-      await testStore.getState().createHandler("test-workflow", { input: "test" });
+      await testStore
+        .getState()
+        .createHandler("test-workflow", { input: "test" });
 
       expect(Handler).toHaveBeenCalledWith(mockRawHandler, mockClient);
     });
@@ -240,7 +244,9 @@ describe("Handler Store Tests", () => {
         response: {} as Response,
       });
 
-      await testStore.getState().createHandler("test-workflow", { input: "test" });
+      await testStore
+        .getState()
+        .createHandler("test-workflow", { input: "test" });
 
       const handlers = testStore.getState().handlers;
       expect(Object.keys(handlers)).toHaveLength(1);
@@ -272,8 +278,12 @@ describe("Handler Store Tests", () => {
           response: {} as Response,
         });
 
-      await testStore.getState().createHandler("workflow-1", { input: "test1" });
-      await testStore.getState().createHandler("workflow-2", { input: "test2" });
+      await testStore
+        .getState()
+        .createHandler("workflow-1", { input: "test1" });
+      await testStore
+        .getState()
+        .createHandler("workflow-2", { input: "test2" });
 
       const handlers = testStore.getState().handlers;
       expect(Object.keys(handlers)).toHaveLength(2);

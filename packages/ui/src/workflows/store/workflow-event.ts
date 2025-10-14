@@ -9,6 +9,10 @@ export enum WorkflowEventType {
   InternalDispatchEvent = "InternalDispatchEvent",
   StepStateChanged = "StepStateChanged",
   EventsQueueChanged = "EventsQueueChanged",
+
+  // Temporary custom events
+  // May need to add to py server side if needed
+  ToolCallEvent = "ToolCallEvent",
 }
 
 export const builtInEventTypes: string[] = [
@@ -34,22 +38,42 @@ export class WorkflowEvent {
     this.timestamp = new Date();
     this.types = types;
   }
-  
+
   static fromRawEvent(event: RawEvent): WorkflowEvent {
     if (isStartEvent(event)) {
-      return new StartEvent(event.type, event.value as { input: JSONValue }, event.types);
+      return new StartEvent(
+        event.type,
+        event.value as { input: JSONValue },
+        event.types
+      );
     }
     if (isStopEvent(event)) {
-      return new StopEvent(event.type, event.value as { result: JSONValue }, event.types);
+      return new StopEvent(
+        event.type,
+        event.value as { result: JSONValue },
+        event.types
+      );
     }
     if (isInputRequiredEvent(event)) {
-      return new InputRequiredEvent(event.type, event.value as { prefix: string }, event.types);
+      return new InputRequiredEvent(
+        event.type,
+        event.value as { prefix: string },
+        event.types
+      );
     }
     if (isHumanResponseEvent(event)) {
-      return new HumanResponseEvent(event.type, event.value as { response: JSONValue }, event.types);
+      return new HumanResponseEvent(
+        event.type,
+        event.value as { response: JSONValue },
+        event.types
+      );
     }
     if (isChatDeltaEvent(event)) {
-      return new ChatDeltaEvent(event.type, event.value as { delta: string }, event.types);
+      return new ChatDeltaEvent(
+        event.type,
+        event.value as { delta: string },
+        event.types
+      );
     }
     if (isInternalDispatchEvent(event)) {
       return new InternalDispatchEvent(event.type, event.value, event.types);
@@ -76,7 +100,7 @@ export class WorkflowEvent {
 
 export class StartEvent extends WorkflowEvent {
   declare data: { input: JSONValue };
-  
+
   constructor(type: string, data: { input: JSONValue }, types?: string[]) {
     super(type, data, types);
   }
@@ -84,7 +108,7 @@ export class StartEvent extends WorkflowEvent {
 
 export class StopEvent extends WorkflowEvent {
   declare data: { result: JSONValue };
-  
+
   constructor(type: string, data: { result: JSONValue }, types?: string[]) {
     super(type, data, types);
   }
@@ -92,7 +116,7 @@ export class StopEvent extends WorkflowEvent {
 
 export class InputRequiredEvent extends WorkflowEvent {
   declare data: { prefix: string };
-  
+
   constructor(type: string, data: { prefix: string }, types?: string[]) {
     super(type, data, types);
   }
@@ -100,7 +124,7 @@ export class InputRequiredEvent extends WorkflowEvent {
 
 export class HumanResponseEvent extends WorkflowEvent {
   declare data: { response: JSONValue };
-  
+
   constructor(type: string, data: { response: JSONValue }, types?: string[]) {
     super(type, data, types);
   }
@@ -108,7 +132,7 @@ export class HumanResponseEvent extends WorkflowEvent {
 
 export class ChatDeltaEvent extends WorkflowEvent {
   declare data: { delta: string };
-  
+
   constructor(type: string, data: { delta: string }, types?: string[]) {
     super(type, data, types);
   }
@@ -161,7 +185,9 @@ export function isStopEvent(event: RawEvent | WorkflowEvent): boolean {
   return event.types?.includes(WorkflowEventType.StopEvent) ?? false;
 }
 
-export function isInputRequiredEvent(event: WorkflowEvent): event is InputRequiredEvent;
+export function isInputRequiredEvent(
+  event: WorkflowEvent
+): event is InputRequiredEvent;
 export function isInputRequiredEvent(event: RawEvent): boolean;
 export function isInputRequiredEvent(event: RawEvent | WorkflowEvent): boolean {
   if (event instanceof WorkflowEvent) {
@@ -173,7 +199,9 @@ export function isInputRequiredEvent(event: RawEvent | WorkflowEvent): boolean {
   return event.types?.includes(WorkflowEventType.InputRequiredEvent) ?? false;
 }
 
-export function isHumanResponseEvent(event: WorkflowEvent): event is HumanResponseEvent;
+export function isHumanResponseEvent(
+  event: WorkflowEvent
+): event is HumanResponseEvent;
 export function isHumanResponseEvent(event: RawEvent): boolean;
 export function isHumanResponseEvent(event: RawEvent | WorkflowEvent): boolean {
   if (event instanceof WorkflowEvent) {
@@ -197,19 +225,27 @@ export function isChatDeltaEvent(event: RawEvent | WorkflowEvent): boolean {
   return event.types?.includes(WorkflowEventType.ChatDeltaEvent) ?? false;
 }
 
-export function isInternalDispatchEvent(event: WorkflowEvent): event is InternalDispatchEvent;
+export function isInternalDispatchEvent(
+  event: WorkflowEvent
+): event is InternalDispatchEvent;
 export function isInternalDispatchEvent(event: RawEvent): boolean;
-export function isInternalDispatchEvent(event: RawEvent | WorkflowEvent): boolean {
+export function isInternalDispatchEvent(
+  event: RawEvent | WorkflowEvent
+): boolean {
   if (event instanceof WorkflowEvent) {
     return event instanceof InternalDispatchEvent;
   }
   if (event.type === WorkflowEventType.InternalDispatchEvent) {
     return true;
   }
-  return event.types?.includes(WorkflowEventType.InternalDispatchEvent) ?? false;
+  return (
+    event.types?.includes(WorkflowEventType.InternalDispatchEvent) ?? false
+  );
 }
 
-export function isStepStateChanged(event: WorkflowEvent): event is StepStateChanged;
+export function isStepStateChanged(
+  event: WorkflowEvent
+): event is StepStateChanged;
 export function isStepStateChanged(event: RawEvent): boolean;
 export function isStepStateChanged(event: RawEvent | WorkflowEvent): boolean {
   if (event instanceof WorkflowEvent) {
@@ -221,7 +257,9 @@ export function isStepStateChanged(event: RawEvent | WorkflowEvent): boolean {
   return event.types?.includes(WorkflowEventType.StepStateChanged) ?? false;
 }
 
-export function isEventsQueueChanged(event: WorkflowEvent): event is EventsQueueChanged;
+export function isEventsQueueChanged(
+  event: WorkflowEvent
+): event is EventsQueueChanged;
 export function isEventsQueueChanged(event: RawEvent): boolean;
 export function isEventsQueueChanged(event: RawEvent | WorkflowEvent): boolean {
   if (event instanceof WorkflowEvent) {
@@ -256,11 +294,12 @@ export function isOverriddenBuiltInEvent(event: WorkflowEvent): boolean {
   return false;
 }
 
-
 /**
  * Check if an event is a custom event
  * e.g CustomEvent(Event)
  */
 export function isCustomEvent(event: WorkflowEvent): boolean {
-  return !builtInEventTypes.includes(event.type) && !isOverriddenBuiltInEvent(event);
+  return (
+    !builtInEventTypes.includes(event.type) && !isOverriddenBuiltInEvent(event)
+  );
 }

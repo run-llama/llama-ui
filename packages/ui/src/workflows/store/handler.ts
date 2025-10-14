@@ -5,10 +5,7 @@ import {
   postEventsByHandlerId,
   postHandlersByHandlerIdCancel,
 } from "@llamaindex/workflows-client";
-import {
-  RawEvent,
-  RunStatus,
-} from "../types";
+import { RawEvent, RunStatus } from "../types";
 import {
   StreamOperation,
   StreamSubscriber,
@@ -49,7 +46,9 @@ export class Handler {
       ? new Date(rawHandler.completed_at)
       : null;
     this.error = rawHandler.error;
-    this.result = rawHandler.result ? WorkflowEvent.fromRawEvent(rawHandler.result as RawEvent) as StopEvent : null;
+    this.result = rawHandler.result
+      ? (WorkflowEvent.fromRawEvent(rawHandler.result as RawEvent) as StopEvent)
+      : null;
   }
 
   async sendEvent<E extends WorkflowEvent>(event: E, step?: string) {
@@ -71,7 +70,9 @@ export class Handler {
       client: this.client,
       path: { handler_id: this.handlerId },
     });
-    return data.data?.result ? WorkflowEvent.fromRawEvent(data.data.result as RawEvent) as StopEvent : undefined;
+    return data.data?.result
+      ? (WorkflowEvent.fromRawEvent(data.data.result as RawEvent) as StopEvent)
+      : undefined;
   }
 
   subscribeToEvents(
@@ -206,12 +207,16 @@ function streamByEventSource(
 
     eventSource.addEventListener("message", (event) => {
       logger.debug("[streamByEventSource] message", JSON.parse(event.data));
-      const workflowEvent = WorkflowEvent.fromRawEvent(JSON.parse(event.data) as RawEvent);
+      const workflowEvent = WorkflowEvent.fromRawEvent(
+        JSON.parse(event.data) as RawEvent
+      );
       callbacks.onData?.(workflowEvent);
       accumulatedEvents.push(workflowEvent);
       if (workflowEvent.type === WorkflowEventType.StopEvent) {
         callbacks.onSucceed?.(accumulatedEvents);
-        logger.debug("[streamByEventSource] stop event received, closing event source");
+        logger.debug(
+          "[streamByEventSource] stop event received, closing event source"
+        );
         eventSource.close();
         resolve(accumulatedEvents);
       }
