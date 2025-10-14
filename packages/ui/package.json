@@ -285,6 +285,7 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@llamaindex/shared": "workspace:*",
     "@codemirror/lang-css": "^6.3.1",
     "@codemirror/lang-html": "^6.4.9",
     "@codemirror/lang-javascript": "^6.2.3",
@@ -386,7 +387,6 @@
     "tsup": "^8.5.0",
     "typescript": "^5",
     "typescript-eslint": "^8",
-    "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.2.4"
+    "vite-tsconfig-paths": "^5.1.4"
   }
 }

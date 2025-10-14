@@ -11,7 +11,7 @@ import {
   StreamSubscriber,
   workflowStreamingManager,
 } from "../../lib/shared-streaming";
-import { logger } from "../../lib/logger";
+import { logger } from "@llamaindex/shared";
 import { StopEvent, WorkflowEvent, WorkflowEventType } from "./workflow-event";
 
 /**
