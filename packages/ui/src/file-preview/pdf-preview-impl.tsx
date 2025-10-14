@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
-import { PdfNavigator } from "./pdf-navigator";
-import { BoundingBoxOverlay } from "./bounding-box-overlay";
-import { BoundingBox, Highlight } from "./types";
 // @ts-expect-error react-pdf types have no declarations
-import { PageCallback } from "react-pdf/dist/shared/types";
+import type { PageCallback } from "react-pdf/dist/shared/types";
+import { BoundingBoxOverlay } from "./bounding-box-overlay";
+import { PdfNavigator } from "./pdf-navigator";
+import type { BoundingBox, Highlight } from "./types";
 
 // Configure worker path for PDF.js
 if (typeof window !== "undefined") {
@@ -26,6 +26,8 @@ export interface PdfPreviewImplProps {
   onRemove?: () => void;
   highlight?: Highlight;
   toolbarClassName?: string;
+  maxPages?: number;
+  maxPagesWarning?: string;
 }
 
 // map of page number to page viewport dimensions
@@ -49,6 +51,8 @@ export const PdfPreviewImpl = ({
   onRemove,
   highlight,
   toolbarClassName,
+  maxPages,
+  maxPagesWarning,
 }: PdfPreviewImplProps) => {
   const [numPages, setNumPages] = useState<number>();
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -63,6 +67,21 @@ export const PdfPreviewImpl = ({
 
   const [pageBaseDims, setPageBaseDims] = useState<PageBaseDims>({}); // store page viewport to use for bounding box overlay
   const [showHighlight, setShowHighlight] = useState<boolean>(false); // whether to show the highlight
+
+  const hasPageLimit =
+    typeof maxPages === "number" && Number.isFinite(maxPages) && maxPages > 0;
+
+  const effectiveNumPages = useMemo(() => {
+    if (!numPages) return numPages;
+    if (!hasPageLimit) return numPages;
+    return Math.min(numPages, maxPages ?? numPages);
+  }, [numPages, hasPageLimit, maxPages]);
+
+  const showMaxPagesWarning =
+    hasPageLimit &&
+    !!maxPagesWarning &&
+    !!numPages &&
+    numPages > (maxPages ?? 0);
 
   // bounding box from highlight (only 1 highlight at a time for now)
   const boundingBoxes: BoundingBox[] = [
@@ -85,23 +104,47 @@ export const PdfPreviewImpl = ({
   function handlePageRenderSuccess() {
     setRenderedPages((prev) => {
       const next = prev + 1;
-      if (next === numPages) {
+      if (effectiveNumPages && next === effectiveNumPages) {
         setIsRendering(false); // all pages finished
       }
       return next;
     });
   }
 
+  // Navigate to specific page
+  const goToPage = useCallback(
+    (pageNumber: number) => {
+      const maxPage = effectiveNumPages ?? 1;
+      const targetPage = Math.min(Math.max(pageNumber, 1), maxPage);
+      setCurrentPage(targetPage);
+      const pageElement = pageRefs.current[targetPage];
+      if (pageElement && containerRef.current) {
+        pageElement.scrollIntoView({
+          behavior: "instant",
+          block: "center",
+        });
+      }
+    },
+    [effectiveNumPages]
+  );
+
   // when highlight is set, go to the page and show the highlight
   useEffect(() => {
     if (!highlight) return;
-    if (!numPages) return;
+    if (!effectiveNumPages) return;
+    if (highlight.page > effectiveNumPages) return;
     const pageEl = pageRefs.current[highlight.page];
     if (pageEl) {
       goToPage(highlight.page);
       setShowHighlight(true);
     }
-  }, [highlight, numPages]);
+  }, [highlight, effectiveNumPages, goToPage]);
+
+  useEffect(() => {
+    // Clamp any pre-existing currentPage so it never points past the capped render range.
+    if (!effectiveNumPages) return;
+    setCurrentPage((prev) => Math.min(prev, effectiveNumPages));
+  }, [effectiveNumPages]);
 
   // store page viewport to use for bounding box overlay
   const handleLoadPage = (page: PageCallback) => {
@@ -160,7 +203,9 @@ export const PdfPreviewImpl = ({
         }
       });
 
-      setCurrentPage(closestPage);
+      const totalPages = effectiveNumPages ?? closestPage;
+      const clampedPage = Math.min(Math.max(closestPage, 1), totalPages);
+      setCurrentPage(clampedPage);
     };
 
     const container = containerRef.current;
@@ -168,7 +213,7 @@ export const PdfPreviewImpl = ({
       container.addEventListener("scroll", handleScroll);
       return () => container.removeEventListener("scroll", handleScroll);
     }
-  }, [numPages]);
+  }, [effectiveNumPages]);
 
   const lastLoadedUrl = useRef<string | null>(null);
   useEffect(() => {
@@ -191,17 +236,6 @@ export const PdfPreviewImpl = ({
     };
   }, [url]);
 
-  // Navigate to specific page
-  const goToPage = (pageNumber: number) => {
-    const pageElement = pageRefs.current[pageNumber];
-    if (pageElement && containerRef.current) {
-      pageElement.scrollIntoView({
-        behavior: "instant",
-        block: "center",
-      });
-    }
-  };
-
   // Handle keyboard navigation
   useEffect(() => {
     const container = containerRef.current;
@@ -215,7 +249,8 @@ export const PdfPreviewImpl = ({
         }
       } else if (event.key === "ArrowRight") {
         event.preventDefault();
-        if (currentPage < (numPages || 1)) {
+        const totalPages = effectiveNumPages ?? currentPage;
+        if (currentPage < totalPages) {
           goToPage(currentPage + 1);
         }
       } else if (event.key === "=" || event.key === "+") {
@@ -235,7 +270,7 @@ export const PdfPreviewImpl = ({
     return () => {
       container.removeEventListener("keydown", handleKeyDown);
     };
-  }, [currentPage, numPages]);
+  }, [currentPage, effectiveNumPages, goToPage]);
 
   const handleDownload = () => {
     if (onDownload) {
@@ -294,17 +329,17 @@ export const PdfPreviewImpl = ({
       {isRendering && file && file.size > FILE_SIZE_THRESHOLD && (
         <PdfRenderingProgress
           renderedPages={renderedPages}
-          numPages={numPages}
+          numPages={effectiveNumPages}
         />
       )}
 
       {/* Navigation Component */}
-      {numPages && (
+      {effectiveNumPages && effectiveNumPages > 0 && (
         <>
           <PdfNavigator
             fileName={fileName ?? file?.name ?? DEFAULT_FILE_NAME}
             currentPage={currentPage}
-            totalPages={numPages}
+            totalPages={effectiveNumPages}
             scale={scale}
             onPageChange={goToPage}
             onScaleChange={setScale}
@@ -314,6 +349,14 @@ export const PdfPreviewImpl = ({
             onFullscreen={toggleFullscreen}
             className={toolbarClassName}
           />
+          {showMaxPagesWarning && (
+            <div
+              role="alert"
+              className="bg-amber-50 border border-amber-200 text-amber-900 px-4 py-2 text-sm"
+            >
+              {maxPagesWarning ?? ""}
+            </div>
+          )}
           <div className="h-3 bg-[#F3F3F3]"></div>
         </>
       )}
@@ -328,7 +371,7 @@ export const PdfPreviewImpl = ({
           loading={isLoading}
           options={pdfOptions}
         >
-          {Array.from(new Array(numPages), (_, index) => (
+          {Array.from({ length: effectiveNumPages ?? 0 }, (_, index) => (
             <div
               key={`page_${index + 1}`}
               ref={(el) => {
@@ -385,7 +428,7 @@ function PdfRenderingProgress({
         </h2>
 
         <p className="text-sm text-gray-600 mb-3">
-          Page {renderedPages} of {numPages}
+          Page {renderedPages} of {numPages ?? "?"}
         </p>
 
         <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
