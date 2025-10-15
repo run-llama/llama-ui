@@ -1,67 +1,57 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { createHandlerStore } from "../../../src/workflows/store/handler-store";
-/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any */
-import {
-  createHandler,
-  fetchHandlerEvents,
-  getRunningHandlers,
-} from "../../../src/workflows/store/helper";
-import { workflowStreamingManager } from "../../../src/lib/shared-streaming";
 import {
   createClient,
   createConfig,
   type Client,
+  getHandlers,
+  postWorkflowsByNameRunNowait,
 } from "@llamaindex/workflows-client";
-import type {
-  WorkflowHandlerSummary,
-  WorkflowEvent,
-} from "../../../src/workflows/types";
+import type { Handler as RawHandler } from "@llamaindex/workflows-client";
+import { Handler } from "../../../src/workflows/store/handler";
 
-// Mock the helper functions
-vi.mock("../../../src/workflows/store/helper");
-vi.mock("../../../src/lib/shared-streaming", () => ({
-  workflowStreamingManager: {
-    subscribe: vi.fn(),
-    isStreamActive: vi.fn(),
-    getStreamConfig: vi.fn(),
-    closeStream: vi.fn(),
-  },
-}));
-
-// Mock localStorage
-const localStorageMock = (() => {
-  let store: Record<string, string> = {};
+// Mock the workflows-client API functions
+vi.mock("@llamaindex/workflows-client", async () => {
+  const actual = await vi.importActual("@llamaindex/workflows-client");
   return {
-    getItem: vi.fn((key: string) => store[key] || null),
-    setItem: vi.fn((key: string, value: string) => {
-      store[key] = value;
-    }),
-    removeItem: vi.fn((key: string) => {
-      delete store[key];
-    }),
-    clear: vi.fn(() => {
-      store = {};
-    }),
+    ...actual,
+    getHandlers: vi.fn(),
+    postWorkflowsByNameRunNowait: vi.fn(),
   };
-})();
-
-Object.defineProperty(globalThis, "localStorage", {
-  value: localStorageMock,
 });
 
-describe("Complete Task Store Tests", () => {
-  const mockTaskSummary: WorkflowHandlerSummary = {
-    handler_id: "task-123",
+// Mock the Handler class
+vi.mock("../../../src/workflows/store/handler", () => ({
+  Handler: vi.fn().mockImplementation((rawHandler: RawHandler) => ({
+    handlerId: rawHandler.handler_id,
+    workflowName: rawHandler.workflow_name,
+    status: rawHandler.status,
+    startedAt: new Date(rawHandler.started_at),
+    updatedAt: rawHandler.updated_at ? new Date(rawHandler.updated_at) : null,
+    completedAt: rawHandler.completed_at
+      ? new Date(rawHandler.completed_at)
+      : null,
+    error: rawHandler.error,
+    subscribeToEvents: vi.fn(),
+    sendEvent: vi.fn(),
+    disconnect: vi.fn(),
+    unsubscribe: vi.fn(),
+    cancel: vi.fn(),
+  })),
+}));
+
+describe("Handler Store Tests", () => {
+  const mockRawHandler: RawHandler = {
+    handler_id: "handler-123",
+    workflow_name: "test-workflow",
     status: "running",
-    workflowName: "test-workflow",
+    started_at: "2024-01-01T00:00:00Z",
+    updated_at: null,
+    completed_at: null,
+    error: null,
   };
 
-  const mockEvent: WorkflowEvent = {
-    type: "progress",
-    data: "test event data",
-  };
-
-  // Real client instance (no network since APIs are mocked in tests)
+  // Real client instance (APIs are mocked)
   const mockClient: Client = createClient(
     createConfig({
       baseUrl: "http://localhost:8000" as unknown as `${string}://${string}`,
@@ -76,332 +66,229 @@ describe("Complete Task Store Tests", () => {
     testStore = createHandlerStore(mockClient);
     testStore.setState({
       handlers: {},
-      events: {},
     });
-
-    // Clear localStorage mock
-    localStorageMock.clear();
-
-    // Setup default mock implementations
-    const mockedCreateHandler = vi.mocked(createHandler);
-    const mockedFetchHandlerEvents = vi.mocked(fetchHandlerEvents);
-    const mockedGetRunningHandlers = vi.mocked(getRunningHandlers);
-    const mockedStreaming = vi.mocked(workflowStreamingManager);
-
-    mockedCreateHandler.mockResolvedValue(mockTaskSummary);
-    mockedFetchHandlerEvents.mockReturnValue({
-      promise: Promise.resolve([]),
-      unsubscribe: vi.fn(),
-    });
-    mockedGetRunningHandlers.mockResolvedValue([]);
-    mockedStreaming.isStreamActive.mockReturnValue(false);
-  });
-
-  afterEach(() => {
-    vi.clearAllMocks();
   });
 
   describe("createHandler", () => {
-    it("should create task and add to store", async () => {
+    it("should create handler and add to store", async () => {
+      vi.mocked(postWorkflowsByNameRunNowait).mockResolvedValue({
+        data: mockRawHandler,
+        error: undefined,
+        request: {} as Request,
+        response: {} as Response,
+      });
+
       const result = await testStore
         .getState()
-        .createHandler("test-workflow", "test input");
+        .createHandler("test-workflow", { input: "test" });
 
-      expect(result.handler_id).toBe("task-123");
-      expect(result.status).toBe("running");
+      expect(result.handlerId).toBe("handler-123");
       expect(result.workflowName).toBe("test-workflow");
-      expect(testStore.getState().handlers["task-123"]).toBeDefined();
-      expect(testStore.getState().events["task-123"]).toEqual([]);
+      expect(result.status).toBe("running");
+      expect(testStore.getState().handlers["handler-123"]).toBeDefined();
     });
 
-    it("should call createHandler API with correct parameters", async () => {
-      await testStore.getState().createHandler("test-workflow", "test input");
+    it("should call API with correct parameters", async () => {
+      vi.mocked(postWorkflowsByNameRunNowait).mockResolvedValue({
+        data: mockRawHandler,
+        error: undefined,
+        request: {} as Request,
+        response: {} as Response,
+      });
 
-      expect(createHandler).toHaveBeenCalledWith({
+      await testStore
+        .getState()
+        .createHandler("test-workflow", { key: "value" });
+
+      expect(postWorkflowsByNameRunNowait).toHaveBeenCalledWith({
         client: mockClient,
-        workflowName: "test-workflow",
-        eventData: "test input",
-      });
-    });
-
-    it("should automatically call fetchTaskEvents for subscription", async () => {
-      await testStore.getState().createHandler("test-workflow", "test input");
-
-      // Should call subscribe which internally calls fetchTaskEvents
-      expect(vi.mocked(fetchHandlerEvents)).toHaveBeenCalled();
-    });
-  });
-
-  describe("clearCompleted", () => {
-    it("should remove completed and error tasks", () => {
-      const completedTask: WorkflowHandlerSummary = {
-        ...mockTaskSummary,
-        handler_id: "completed",
-        status: "complete",
-      };
-      const errorTask: WorkflowHandlerSummary = {
-        ...mockTaskSummary,
-        handler_id: "error",
-        status: "failed",
-      };
-      const runningTask: WorkflowHandlerSummary = {
-        ...mockTaskSummary,
-        handler_id: "running",
-        status: "running",
-      };
-
-      testStore.setState({
-        handlers: {
-          completed: completedTask,
-          error: errorTask,
-          running: runningTask,
-        },
-        events: {},
-      });
-
-      testStore.getState().clearCompleted();
-
-      expect(testStore.getState().handlers).toEqual({
-        running: runningTask,
-      });
-    });
-  });
-
-  describe("clearEvents", () => {
-    it("should clear events for specific task", () => {
-      testStore.setState({
-        handlers: {},
-        events: {
-          "task-123": [mockEvent],
-          "task-456": [mockEvent],
+        path: { name: "test-workflow" },
+        body: {
+          start_event: { key: "value" },
         },
       });
+    });
 
-      testStore.getState().clearEvents("task-123");
+    it("should throw error if handler creation fails", async () => {
+      vi.mocked(postWorkflowsByNameRunNowait).mockResolvedValue({
+        data: undefined,
+        error: undefined,
+        request: {} as Request,
+        response: {} as Response,
+      });
 
-      expect(testStore.getState().events["task-123"]).toEqual([]);
-      expect(testStore.getState().events["task-456"]).toEqual([mockEvent]);
+      await expect(
+        testStore.getState().createHandler("test-workflow", { input: "test" })
+      ).rejects.toThrow("Handler creation failed");
+    });
+
+    it("should create Handler instance with client", async () => {
+      vi.mocked(postWorkflowsByNameRunNowait).mockResolvedValue({
+        data: mockRawHandler,
+        error: undefined,
+        request: {} as Request,
+        response: {} as Response,
+      });
+
+      await testStore
+        .getState()
+        .createHandler("test-workflow", { input: "test" });
+
+      expect(Handler).toHaveBeenCalledWith(mockRawHandler, mockClient);
     });
   });
 
-  describe("subscribe", () => {
-    it("should not subscribe if task does not exist", () => {
-      testStore.getState().subscribe("nonexistent");
+  describe("fetchRunningHandlers", () => {
+    it("should fetch and return only running handlers", async () => {
+      const mockHandlers: RawHandler[] = [
+        {
+          handler_id: "handler-1",
+          workflow_name: "workflow-1",
+          status: "running",
+          started_at: "2024-01-01T00:00:00Z",
+          updated_at: null,
+          completed_at: null,
+          error: null,
+        },
+        {
+          handler_id: "handler-2",
+          workflow_name: "workflow-2",
+          status: "completed",
+          started_at: "2024-01-01T00:00:00Z",
+          updated_at: "2024-01-01T00:01:00Z",
+          completed_at: "2024-01-01T00:01:00Z",
+          error: null,
+        },
+        {
+          handler_id: "handler-3",
+          workflow_name: "workflow-3",
+          status: "running",
+          started_at: "2024-01-01T00:00:00Z",
+          updated_at: null,
+          completed_at: null,
+          error: null,
+        },
+      ];
 
-      expect(vi.mocked(fetchHandlerEvents)).not.toHaveBeenCalled();
+      vi.mocked(getHandlers).mockResolvedValue({
+        data: { handlers: mockHandlers },
+        error: undefined,
+        request: {} as Request,
+        response: {} as Response,
+      });
+
+      const result = await testStore.getState().fetchRunningHandlers();
+
+      expect(getHandlers).toHaveBeenCalledWith({ client: mockClient });
+      expect(result).toHaveLength(2);
+      expect(result[0].handlerId).toBe("handler-1");
+      expect(result[1].handlerId).toBe("handler-3");
     });
 
-    it("should subscribe to existing task", () => {
-      testStore.setState({
-        handlers: { "task-123": mockTaskSummary },
-        events: {},
+    it("should handle empty handlers list", async () => {
+      vi.mocked(getHandlers).mockResolvedValue({
+        data: { handlers: [] },
+        error: undefined,
+        request: {} as Request,
+        response: {} as Response,
       });
 
-      const subscribe = testStore.getState().subscribe;
-      subscribe.call(testStore.getState(), "task-123");
+      const result = await testStore.getState().fetchRunningHandlers();
 
-      expect(vi.mocked(fetchHandlerEvents)).toHaveBeenCalled();
+      expect(result).toHaveLength(0);
     });
 
-    it("should reconnect with internal events when switching from non-internal to includeInternal", () => {
-      testStore.setState({
-        handlers: { "task-123": mockTaskSummary },
-        events: {},
+    it("should handle undefined data", async () => {
+      vi.mocked(getHandlers).mockResolvedValue({
+        data: undefined,
+        error: undefined,
+        request: {} as Request,
+        response: {} as Response,
       });
 
-      // Simulate already active non-internal stream
-      (workflowStreamingManager.isStreamActive as any).mockReturnValue(true);
-      (workflowStreamingManager.getStreamConfig as any).mockReturnValue({
-        includeInternal: false,
-      });
+      const result = await testStore.getState().fetchRunningHandlers();
 
-      const subscribe = testStore.getState().subscribe;
-      subscribe.call(testStore.getState(), "task-123", {
-        includeInternal: true,
-      });
-
-      expect(workflowStreamingManager.closeStream).toHaveBeenCalledWith(
-        "handler:task-123"
-      );
-      expect(fetchHandlerEvents).toHaveBeenCalledWith(
-        expect.objectContaining({
-          handlerId: "task-123",
-          includeInternal: true,
-        }),
-        expect.any(Object)
-      );
+      expect(result).toHaveLength(0);
     });
 
-    it("should not reconnect when switching from internal to non-internal", () => {
-      testStore.setState({
-        handlers: { "task-123": mockTaskSummary },
-        events: {},
-      });
-
-      // Simulate already active internal stream
-      (workflowStreamingManager.isStreamActive as any).mockReturnValue(true);
-      (workflowStreamingManager.getStreamConfig as any).mockReturnValue({
-        includeInternal: true,
-      });
-
-      const subscribe = testStore.getState().subscribe;
-      subscribe.call(testStore.getState(), "task-123", {
-        includeInternal: false,
-      });
-
-      expect(workflowStreamingManager.closeStream).not.toHaveBeenCalled();
-      expect(fetchHandlerEvents).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("unsubscribe", () => {
-    it("should call workflowStreamingManager.closeStream", () => {
-      testStore.setState({
-        handlers: { "task-123": mockTaskSummary },
-        events: {},
-      });
-
-      const closeStream = workflowStreamingManager.closeStream;
-      testStore.getState().unsubscribe("task-123");
-
-      expect(closeStream).toHaveBeenCalledWith("handler:task-123");
-    });
-  });
-
-  describe("isSubscribed", () => {
-    it("should return streaming manager status for existing task", () => {
-      testStore.setState({
-        handlers: { "task-123": mockTaskSummary },
-        events: {},
-      });
-
-      // access via variable to bind this: void
-      const isActive = workflowStreamingManager.isStreamActive;
-      vi.mocked(isActive).mockReturnValue(true);
-
-      const result = testStore.getState().isSubscribed("task-123");
-
-      expect(result).toBe(true);
-      const isActiveMethod = workflowStreamingManager.isStreamActive;
-      expect(isActiveMethod).toHaveBeenCalledWith("handler:task-123");
-    });
-
-    it("should return false for non-existent task", () => {
-      const result = testStore.getState().isSubscribed("nonexistent");
-
-      expect(result).toBe(false);
-    });
-  });
-
-  describe("sync", () => {
-    const mockServerTasks: WorkflowHandlerSummary[] = [
-      {
-        handler_id: "server-task-1",
+    it("should create Handler instances for each running handler", async () => {
+      const runningHandler: RawHandler = {
+        handler_id: "handler-1",
+        workflow_name: "workflow-1",
         status: "running",
-      },
-      {
-        handler_id: "server-task-2",
-        status: "running",
-      },
-    ];
-
-    it("should fetch and sync running tasks from server", async () => {
-      (getRunningHandlers as any).mockResolvedValue(mockServerTasks);
-
-      await testStore.getState().sync();
-
-      expect(getRunningHandlers).toHaveBeenCalledWith({
-        client: mockClient,
-      });
-
-      // Check if tasks were added to store
-      const state = testStore.getState();
-      expect(state.handlers["server-task-1"]).toEqual(mockServerTasks[0]);
-      expect(state.handlers["server-task-2"]).toEqual(mockServerTasks[1]);
-    });
-
-    it("should auto-subscribe only to running tasks", async () => {
-      (getRunningHandlers as any).mockResolvedValue(mockServerTasks);
-      (workflowStreamingManager.getStreamConfig as any).mockReturnValue({
-        includeInternal: false,
-      });
-      (workflowStreamingManager.isStreamActive as any).mockReturnValue(false);
-
-      await testStore.getState().sync();
-
-      // Should call fetchTaskEvents for each running task
-      expect(fetchHandlerEvents).toHaveBeenCalledTimes(2);
-
-      // Check if subscription calls were made correctly
-      expect(fetchHandlerEvents).toHaveBeenCalledWith(
-        expect.objectContaining({
-          client: mockClient,
-          handlerId: "server-task-1",
-        }),
-        expect.any(Object)
-      );
-      expect(fetchHandlerEvents).toHaveBeenCalledWith(
-        expect.objectContaining({
-          client: mockClient,
-          handlerId: "server-task-2",
-        }),
-        expect.any(Object)
-      );
-    });
-
-    it("should not subscribe to already subscribed tasks", async () => {
-      (getRunningHandlers as any).mockResolvedValue(mockServerTasks);
-      (workflowStreamingManager.isStreamActive as any).mockReturnValue(true);
-
-      await testStore.getState().sync();
-
-      // Should not call fetchTaskEvents since tasks are already subscribed
-      expect(fetchHandlerEvents).not.toHaveBeenCalled();
-    });
-
-    it("should handle sync errors gracefully", async () => {
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      const consoleErrorSpy = vi
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
-      (getRunningHandlers as any).mockRejectedValue(new Error("Server error"));
-
-      // Should not throw
-      await expect(testStore.getState().sync()).resolves.toBeUndefined();
-
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "Failed to sync with server:",
-        expect.any(Error)
-      );
-
-      consoleErrorSpy.mockRestore();
-    });
-
-    it("should replace existing tasks with server tasks", async () => {
-      // First add some local tasks
-      const localTask: WorkflowHandlerSummary = {
-        ...mockTaskSummary,
-        handler_id: "local-task",
-        status: "running",
+        started_at: "2024-01-01T00:00:00Z",
+        updated_at: null,
+        completed_at: null,
+        error: null,
       };
 
-      testStore.setState({
-        handlers: { "local-task": localTask },
-        events: {},
+      vi.mocked(getHandlers).mockResolvedValue({
+        data: { handlers: [runningHandler] },
+        error: undefined,
+        request: {} as Request,
+        response: {} as Response,
       });
 
-      // Mock server returning different tasks
-      (getRunningHandlers as any).mockResolvedValue(mockServerTasks);
+      await testStore.getState().fetchRunningHandlers();
 
-      await testStore.getState().sync();
+      expect(Handler).toHaveBeenCalledWith(runningHandler, mockClient);
+    });
+  });
 
-      const state = testStore.getState();
+  describe("handlers state", () => {
+    it("should store created handlers by handler_id", async () => {
+      vi.mocked(postWorkflowsByNameRunNowait).mockResolvedValue({
+        data: mockRawHandler,
+        error: undefined,
+        request: {} as Request,
+        response: {} as Response,
+      });
 
-      // Local task should be replaced by server tasks
-      expect(state.handlers["local-task"]).toBeUndefined();
-      expect(state.handlers["server-task-1"]).toBeDefined();
-      expect(state.handlers["server-task-2"]).toBeDefined();
+      await testStore
+        .getState()
+        .createHandler("test-workflow", { input: "test" });
+
+      const handlers = testStore.getState().handlers;
+      expect(Object.keys(handlers)).toHaveLength(1);
+      expect(handlers["handler-123"]).toBeDefined();
+      expect(handlers["handler-123"].handlerId).toBe("handler-123");
+    });
+
+    it("should handle multiple handlers", async () => {
+      const handler1: RawHandler = {
+        ...mockRawHandler,
+        handler_id: "handler-1",
+      };
+      const handler2: RawHandler = {
+        ...mockRawHandler,
+        handler_id: "handler-2",
+      };
+
+      vi.mocked(postWorkflowsByNameRunNowait)
+        .mockResolvedValueOnce({
+          data: handler1,
+          error: undefined,
+          request: {} as Request,
+          response: {} as Response,
+        })
+        .mockResolvedValueOnce({
+          data: handler2,
+          error: undefined,
+          request: {} as Request,
+          response: {} as Response,
+        });
+
+      await testStore
+        .getState()
+        .createHandler("workflow-1", { input: "test1" });
+      await testStore
+        .getState()
+        .createHandler("workflow-2", { input: "test2" });
+
+      const handlers = testStore.getState().handlers;
+      expect(Object.keys(handlers)).toHaveLength(2);
+      expect(handlers["handler-1"]).toBeDefined();
+      expect(handlers["handler-2"]).toBeDefined();
     });
   });
 });

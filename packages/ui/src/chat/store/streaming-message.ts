@@ -26,10 +26,13 @@
  * - Call complete() when streaming ends (flushes remaining buffer)
  */
 
-import type { WorkflowEvent } from "../../workflows/types";
+import {
+  WorkflowEvent,
+  isChatDeltaEvent,
+  isStopEvent,
+} from "../../workflows/store/workflow-event";
 import type { MessagePart } from "../components/message-parts/types";
 import { parseTextWithXMLMarkers } from "./adapters";
-import { isDeltaEvent, isStopEvent } from "./adapters";
 
 export class StreamingMessage {
   private events: WorkflowEvent[] = [];
@@ -68,7 +71,7 @@ export class StreamingMessage {
     }
 
     // Handle delta events: accumulate in buffer
-    if (isDeltaEvent(event)) {
+    if (isChatDeltaEvent(event)) {
       const delta = event.data.delta;
       if (delta) {
         this.currentTextBuffer += delta;

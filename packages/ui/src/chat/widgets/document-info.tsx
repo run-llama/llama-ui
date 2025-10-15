@@ -14,7 +14,7 @@ import { DocxIcon } from "@/base/icons/docx";
 import { PDFIcon } from "@/base/icons/pdf";
 import { SheetIcon } from "@/base/icons/sheet";
 import { TxtIcon } from "@/base/icons/txt";
-import { JSONValue } from "../components/chat.interface";
+import type { JSONValue } from "../../lib/json-types";
 import { ArtifactType } from "../components/canvas/artifacts";
 
 export type DocumentFile = {

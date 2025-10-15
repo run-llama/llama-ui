@@ -9,8 +9,7 @@ export * from "./item-count";
 export * from "./lib";
 
 // Chat hooks and components
-export { useChat, useChatStore } from "./chat/hooks";
-export type { UseChatOptions } from "./chat/hooks";
+export * from "./chat";
 
 // shadcn/ui components
 export * from "../base/accordion";

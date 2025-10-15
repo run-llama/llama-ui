@@ -9,7 +9,6 @@ import { useChatUI } from "./chat.context";
 import { Message } from "./chat.interface";
 import {
   EventPartUI,
-  FilePartUI,
   MarkdownPartUI,
   SourcesPartUI,
   SuggestionPartUI,
@@ -96,7 +95,6 @@ function ChatMessageContent(props: ChatMessageContentProps) {
   const { message } = useChatMessage();
   const children = props.children ?? (
     <>
-      <FilePartUI />
       <EventPartUI />
       <MarkdownPartUI />
       <SourcesPartUI />
@@ -116,7 +114,7 @@ function ChatMessageContent(props: ChatMessageContentProps) {
 }
 
 function ChatMessageActions(props: ChatMessageActionsProps) {
-  const { regenerate, requestData, isLoading } = useChatUI();
+  const { regenerate, isLoading } = useChatUI();
   const { isCopied, copyToClipboard } = useCopyToClipboard({ timeout: 2000 });
   const { message, isLast } = useChatMessage();
 
@@ -151,7 +149,7 @@ function ChatMessageActions(props: ChatMessageActionsProps) {
           title="Regenerate"
           variant="outline"
           size="icon"
-          onClick={() => regenerate?.({ body: requestData })}
+          onClick={() => regenerate?.()}
           className="h-8 w-8"
         >
           <RefreshCw className="h-4 w-4" />
@@ -167,7 +165,6 @@ function ChatMessageActions(props: ChatMessageActionsProps) {
 }
 
 type ComposibleChatMessagePart = typeof ChatMessageContent & {
-  File: typeof FilePartUI;
   Event: typeof EventPartUI;
   Markdown: typeof MarkdownPartUI;
   Source: typeof SourcesPartUI;
@@ -194,7 +191,6 @@ PrimiviteChatMessage.Content = ChatMessageContent as ComposibleChatMessagePart;
 // create alias Part with available built-in parts
 PrimiviteChatMessage.Part = ChatMessageContent as ComposibleChatMessagePart;
 PrimiviteChatMessage.Part.Event = EventPartUI;
-PrimiviteChatMessage.Part.File = FilePartUI;
 PrimiviteChatMessage.Part.Markdown = MarkdownPartUI;
 PrimiviteChatMessage.Part.Source = SourcesPartUI;
 PrimiviteChatMessage.Part.Suggestion = SuggestionPartUI;

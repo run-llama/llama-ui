@@ -24,6 +24,8 @@ describe("SharedStreamingManager", () => {
   let mockExecutor: MockedFunction<StreamExecutor<TestEvent>>;
   let mockSubscriber: StreamSubscriber<TestEvent>;
 
+  let mockCanceler: MockedFunction<() => Promise<void>>;
+
   beforeEach(() => {
     manager = new SharedStreamingManager<TestEvent>();
 
@@ -31,11 +33,12 @@ describe("SharedStreamingManager", () => {
       onStart: vi.fn(),
       onData: vi.fn(),
       onError: vi.fn(),
-      onFinish: vi.fn(),
+      onSuccess: vi.fn(),
       onComplete: vi.fn(),
     };
 
     mockExecutor = vi.fn();
+    mockCanceler = vi.fn().mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -57,7 +60,7 @@ describe("SharedStreamingManager", () => {
         ) => {
           subscriber.onStart?.();
           testEvents.forEach((event) => subscriber.onData?.(event));
-          subscriber.onFinish?.(testEvents);
+          subscriber.onSuccess?.(testEvents);
           return testEvents;
         }
       );
@@ -65,14 +68,15 @@ describe("SharedStreamingManager", () => {
       const { promise } = manager.subscribe(
         "test-stream",
         mockSubscriber,
-        mockExecutor
+        mockExecutor,
+        mockCanceler
       );
       const events = await promise;
 
       expect(mockExecutor).toHaveBeenCalledTimes(1);
       expect(mockSubscriber.onStart).toHaveBeenCalledTimes(1);
       expect(mockSubscriber.onData).toHaveBeenCalledTimes(2);
-      expect(mockSubscriber.onFinish).toHaveBeenCalledWith(testEvents);
+      expect(mockSubscriber.onSuccess).toHaveBeenCalledWith(testEvents);
       expect(events).toEqual(testEvents);
     });
 
@@ -119,7 +123,7 @@ describe("SharedStreamingManager", () => {
           });
 
           const events = await executorPromise;
-          subscriber.onFinish?.(events);
+          subscriber.onSuccess?.(events);
           return events;
         }
       );
@@ -129,13 +133,14 @@ describe("SharedStreamingManager", () => {
         onStart: vi.fn(),
         onData: vi.fn(),
         onError: vi.fn(),
-        onFinish: vi.fn(),
+        onSuccess: vi.fn(),
         onComplete: vi.fn(),
       };
       const { promise: promise1 } = manager.subscribe(
         "shared-stream",
         subscriber1,
-        mockExecutor
+        mockExecutor,
+        mockCanceler
       );
 
       // Wait a bit then start second subscription (should reuse)
@@ -145,14 +150,15 @@ describe("SharedStreamingManager", () => {
         onStart: vi.fn(),
         onData: vi.fn(),
         onError: vi.fn(),
-        onFinish: vi.fn(),
+        onSuccess: vi.fn(),
         onComplete: vi.fn(),
       };
 
       const { promise: promise2 } = manager.subscribe(
         "shared-stream",
         subscriber2,
-        mockExecutor
+        mockExecutor,
+        mockCanceler
       );
 
       // Executor should only be called once
@@ -175,8 +181,8 @@ describe("SharedStreamingManager", () => {
       // Both subscribers should have received all events
       expect(subscriber1.onData).toHaveBeenCalledTimes(2);
       expect(subscriber2.onData).toHaveBeenCalledTimes(2);
-      expect(subscriber1.onFinish).toHaveBeenCalledWith(testEvents);
-      expect(subscriber2.onFinish).toHaveBeenCalledWith(testEvents);
+      expect(subscriber1.onSuccess).toHaveBeenCalledWith(testEvents);
+      expect(subscriber2.onSuccess).toHaveBeenCalledWith(testEvents);
     });
 
     it("should handle subscriber joining after stream was released/cleaned up", async () => {
@@ -196,18 +202,20 @@ describe("SharedStreamingManager", () => {
         ) => {
           subscriber.onStart?.();
           subscriber.onData?.(testEvents[0]);
-          subscriber.onFinish?.(testEvents);
+          subscriber.onSuccess?.(testEvents);
           return testEvents;
         }
       );
 
       // Create and complete a stream with single subscriber first
       const originalSubscriber = { ...mockSubscriber };
+      const testCanceler = vi.fn().mockResolvedValue(undefined);
 
       const { promise: originalPromise } = isolatedManager.subscribe(
         "released-stream",
         originalSubscriber,
-        releasedTestExecutor
+        releasedTestExecutor,
+        testCanceler
       );
 
       // Wait for stream to complete (which triggers cleanup)
@@ -223,14 +231,15 @@ describe("SharedStreamingManager", () => {
         onStart: vi.fn(),
         onData: vi.fn(),
         onError: vi.fn(),
-        onFinish: vi.fn(),
+        onSuccess: vi.fn(),
         onComplete: vi.fn(),
       };
 
       const { promise: newPromise } = isolatedManager.subscribe(
         "released-stream",
         newSubscriber,
-        releasedTestExecutor
+        releasedTestExecutor,
+        testCanceler
       );
       const newEvents = await newPromise;
 
@@ -238,7 +247,7 @@ describe("SharedStreamingManager", () => {
       expect(releasedTestExecutor).toHaveBeenCalledTimes(2); // Once for original, once for new
       expect(newSubscriber.onStart).toHaveBeenCalledTimes(1);
       expect(newSubscriber.onData).toHaveBeenCalledWith(testEvents[0]);
-      expect(newSubscriber.onFinish).toHaveBeenCalledWith(testEvents);
+      expect(newSubscriber.onSuccess).toHaveBeenCalledWith(testEvents);
       expect(newEvents).toEqual(testEvents);
 
       // After completion, stream should be cleaned up again (this is expected behavior)
@@ -251,22 +260,35 @@ describe("SharedStreamingManager", () => {
     it("should handle executor errors and notify all subscribers", async () => {
       const testError = new Error("Stream execution failed");
 
+      // Use a delay to allow both subscribers to register before error
+      let triggerError: (() => void) | undefined;
+      const errorTrigger = new Promise<void>((resolve) => {
+        triggerError = resolve;
+      });
+
       mockExecutor.mockImplementation(
         async (
           subscriber: StreamSubscriber<TestEvent>,
           _signal: AbortSignal
         ) => {
           subscriber.onStart?.();
+          await errorTrigger; // Wait for both subscribers to join
           throw testError;
         }
       );
 
-      const subscriber1 = { ...mockSubscriber };
+      const subscriber1 = {
+        onStart: vi.fn(),
+        onData: vi.fn(),
+        onError: vi.fn(),
+        onSuccess: vi.fn(),
+        onComplete: vi.fn(),
+      };
       const subscriber2 = {
         onStart: vi.fn(),
         onData: vi.fn(),
         onError: vi.fn(),
-        onFinish: vi.fn(),
+        onSuccess: vi.fn(),
         onComplete: vi.fn(),
       };
 
@@ -274,13 +296,21 @@ describe("SharedStreamingManager", () => {
       const { promise: promise1 } = manager.subscribe(
         "error-stream",
         subscriber1,
-        mockExecutor
+        mockExecutor,
+        mockCanceler
       );
       const { promise: promise2 } = manager.subscribe(
         "error-stream",
         subscriber2,
-        mockExecutor
+        mockExecutor,
+        mockCanceler
       );
+
+      // Ensure both subscribers joined
+      expect(manager.getSubscriberCount("error-stream")).toBe(2);
+
+      // Trigger the error
+      triggerError!();
 
       // Wait for completion
       await expect(promise1).rejects.toThrow(testError);
@@ -308,15 +338,15 @@ describe("SharedStreamingManager", () => {
         onData: vi.fn(() => {
           throw new Error("onData error");
         }),
-        onFinish: vi.fn(() => {
-          throw new Error("onFinish error");
+        onSuccess: vi.fn(() => {
+          throw new Error("onSuccess error");
         }),
       };
 
       const goodSubscriber = {
         onStart: vi.fn(),
         onData: vi.fn(),
-        onFinish: vi.fn(),
+        onSuccess: vi.fn(),
       };
 
       const testEvents: TestEvent[] = [
@@ -330,7 +360,7 @@ describe("SharedStreamingManager", () => {
         ) => {
           subscriber.onStart?.();
           subscriber.onData?.(testEvents[0]);
-          subscriber.onFinish?.(testEvents);
+          subscriber.onSuccess?.(testEvents);
           return testEvents;
         }
       );
@@ -338,12 +368,14 @@ describe("SharedStreamingManager", () => {
       const { promise: promise1 } = manager.subscribe(
         "faulty-stream",
         faultySubscriber,
-        mockExecutor
+        mockExecutor,
+        mockCanceler
       );
       const { promise: promise2 } = manager.subscribe(
         "faulty-stream",
         goodSubscriber,
-        mockExecutor
+        mockExecutor,
+        mockCanceler
       );
 
       const [events1, events2] = await Promise.all([promise1, promise2]);
@@ -355,7 +387,7 @@ describe("SharedStreamingManager", () => {
       // Good subscriber should work normally
       expect(goodSubscriber.onStart).toHaveBeenCalledTimes(1);
       expect(goodSubscriber.onData).toHaveBeenCalledWith(testEvents[0]);
-      expect(goodSubscriber.onFinish).toHaveBeenCalledWith(testEvents);
+      expect(goodSubscriber.onSuccess).toHaveBeenCalledWith(testEvents);
 
       // Console errors should be logged
       expect(consoleErrorSpy).toHaveBeenCalledTimes(3);
@@ -384,7 +416,8 @@ describe("SharedStreamingManager", () => {
       const { unsubscribe } = manager.subscribe(
         "unsubscribe-stream",
         mockSubscriber,
-        mockExecutor
+        mockExecutor,
+        mockCanceler
       );
 
       expect(manager.getSubscriberCount("unsubscribe-stream")).toBe(1);
@@ -399,9 +432,7 @@ describe("SharedStreamingManager", () => {
       resolveExecutor!([]);
     });
 
-    it("should handle external abort signal", async () => {
-      const abortController = new AbortController();
-
+    it("should handle cancel operation", async () => {
       let resolveExecutor: ((events: TestEvent[]) => void) | undefined;
       const executorPromise = new Promise<TestEvent[]>((resolve) => {
         resolveExecutor = resolve;
@@ -417,30 +448,28 @@ describe("SharedStreamingManager", () => {
         }
       );
 
-      const subscriptionPromise = manager.subscribe(
-        "abort-stream",
+      const { cancel } = manager.subscribe(
+        "cancel-stream",
         mockSubscriber,
         mockExecutor,
-        abortController.signal
+        mockCanceler
       );
 
-      expect(manager.getSubscriberCount("abort-stream")).toBe(1);
+      expect(manager.getSubscriberCount("cancel-stream")).toBe(1);
 
-      // Abort externally
-      abortController.abort();
+      // Cancel the stream
+      await cancel();
 
       // Should clean up
-      await new Promise((resolve) => setTimeout(resolve, 0)); // Wait for cleanup
-      expect(manager.getSubscriberCount("abort-stream")).toBe(0);
+      expect(manager.getSubscriberCount("cancel-stream")).toBe(0);
+      expect(manager.isStreamActive("cancel-stream")).toBe(false);
+      expect(mockCanceler).toHaveBeenCalledTimes(1);
 
       // Complete the executor
       resolveExecutor!([]);
-      await subscriptionPromise;
     });
 
-    it("should handle external signal cleanup during unsubscribe", async () => {
-      const abortController = new AbortController();
-
+    it("should handle disconnect operation", async () => {
       let resolveExecutor: ((events: TestEvent[]) => void) | undefined;
       const executorPromise = new Promise<TestEvent[]>((resolve) => {
         resolveExecutor = resolve;
@@ -456,24 +485,20 @@ describe("SharedStreamingManager", () => {
         }
       );
 
-      // Subscribe with external signal
-      const { unsubscribe } = manager.subscribe(
-        "cleanup-stream",
+      const { disconnect } = manager.subscribe(
+        "disconnect-stream",
         mockSubscriber,
         mockExecutor,
-        abortController.signal
+        mockCanceler
       );
 
-      expect(manager.getSubscriberCount("cleanup-stream")).toBe(1);
+      expect(manager.getSubscriberCount("disconnect-stream")).toBe(1);
 
-      // Manually unsubscribe (this should trigger external signal cleanup)
-      unsubscribe();
+      // Disconnect (unsubscribe all)
+      disconnect();
 
-      expect(manager.getSubscriberCount("cleanup-stream")).toBe(0);
-      expect(manager.isStreamActive("cleanup-stream")).toBe(false);
-
-      // Verify that aborting the already cleaned-up signal doesn't cause issues
-      abortController.abort();
+      expect(manager.getSubscriberCount("disconnect-stream")).toBe(0);
+      expect(manager.isStreamActive("disconnect-stream")).toBe(false);
 
       // Complete the executor
       resolveExecutor!([]);
@@ -498,17 +523,20 @@ describe("SharedStreamingManager", () => {
       const subscription1 = manager.subscribe(
         "multi-unsub-stream",
         mockSubscriber,
-        mockExecutor
+        mockExecutor,
+        mockCanceler
       );
       const subscription2 = manager.subscribe(
         "multi-unsub-stream",
         { ...mockSubscriber },
-        mockExecutor
+        mockExecutor,
+        mockCanceler
       );
       const subscription3 = manager.subscribe(
         "multi-unsub-stream",
         { ...mockSubscriber },
-        mockExecutor
+        mockExecutor,
+        mockCanceler
       );
 
       expect(manager.getSubscriberCount("multi-unsub-stream")).toBe(3);
@@ -541,17 +569,19 @@ describe("SharedStreamingManager", () => {
         onData: vi.fn(),
         onError: vi.fn(() => {
           throw new Error("onError callback failed");
-        }), // This will trigger line 238-239
-        onFinish: vi.fn(),
+        }),
+        onSuccess: vi.fn(),
         onComplete: vi.fn(),
       };
 
+      // Use a small delay to ensure proper async execution
       mockExecutor.mockImplementation(
         async (
           subscriber: StreamSubscriber<TestEvent>,
           _signal: AbortSignal
         ) => {
           subscriber.onStart?.();
+          await Promise.resolve(); // Let microtasks complete
           throw testError;
         }
       );
@@ -559,7 +589,8 @@ describe("SharedStreamingManager", () => {
       const { promise } = manager.subscribe(
         "faulty-error-stream",
         faultyErrorSubscriber,
-        mockExecutor
+        mockExecutor,
+        mockCanceler
       );
 
       // Wait for completion - should handle the onError callback error gracefully
@@ -595,7 +626,12 @@ describe("SharedStreamingManager", () => {
         }
       );
 
-      manager.subscribe("force-close-stream", mockSubscriber, mockExecutor);
+      manager.subscribe(
+        "force-close-stream",
+        mockSubscriber,
+        mockExecutor,
+        mockCanceler
+      );
 
       expect(manager.isStreamActive("force-close-stream")).toBe(true);
 
@@ -644,8 +680,18 @@ describe("SharedStreamingManager", () => {
           }
         );
 
-      manager.subscribe("stream-1", mockSubscriber, mockExecutor1);
-      manager.subscribe("stream-2", { ...mockSubscriber }, mockExecutor2);
+      manager.subscribe(
+        "stream-1",
+        mockSubscriber,
+        mockExecutor1,
+        mockCanceler
+      );
+      manager.subscribe(
+        "stream-2",
+        { ...mockSubscriber },
+        mockExecutor2,
+        mockCanceler
+      );
 
       expect(manager.isStreamActive("stream-1")).toBe(true);
       expect(manager.isStreamActive("stream-2")).toBe(true);
@@ -662,85 +708,6 @@ describe("SharedStreamingManager", () => {
   });
 
   describe("Edge cases", () => {
-    it("should handle already aborted external signal", async () => {
-      const abortController = new AbortController();
-      abortController.abort();
-
-      const { promise } = manager.subscribe(
-        "aborted-stream",
-        mockSubscriber,
-        mockExecutor,
-        abortController.signal
-      );
-      const events = await promise;
-
-      expect(mockExecutor).not.toHaveBeenCalled();
-      expect(events).toEqual([]);
-      expect(manager.isStreamActive("aborted-stream")).toBe(false);
-    });
-
-    it("should handle already aborted external signal when joining existing stream", async () => {
-      const testEvents: TestEvent[] = [
-        { id: 1, data: "existing-stream-event", timestamp: 1000 },
-      ];
-
-      // First, create an active stream
-      let resolveExecutor: ((events: TestEvent[]) => void) | undefined;
-      const executorPromise = new Promise<TestEvent[]>((resolve) => {
-        resolveExecutor = resolve;
-      });
-
-      mockExecutor.mockImplementation(
-        async (
-          subscriber: StreamSubscriber<TestEvent>,
-          _signal: AbortSignal
-        ) => {
-          subscriber.onStart?.();
-          subscriber.onData?.(testEvents[0]);
-          return await executorPromise;
-        }
-      );
-
-      const firstSubscription = manager.subscribe(
-        "existing-aborted-stream",
-        mockSubscriber,
-        mockExecutor
-      );
-
-      // Now try to join with an already aborted signal
-      const abortController = new AbortController();
-      abortController.abort();
-
-      const abortedSubscriber = {
-        onStart: vi.fn(),
-        onData: vi.fn(),
-        onError: vi.fn(),
-        onFinish: vi.fn(),
-        onComplete: vi.fn(),
-      };
-
-      // This should trigger the `externalSignal.aborted` path in subscribeToExistingStream (lines 148-149)
-      const { promise: abortedPromise } = manager.subscribe(
-        "existing-aborted-stream",
-        abortedSubscriber,
-        mockExecutor,
-        abortController.signal
-      );
-
-      // The aborted subscriber should be immediately unsubscribed
-      expect(manager.getSubscriberCount("existing-aborted-stream")).toBe(1); // Only the first subscriber remains
-
-      // Complete the first stream
-      resolveExecutor!(testEvents);
-      await firstSubscription.promise;
-      await abortedPromise;
-
-      // The aborted subscriber should have received start and historical events
-      // but then been immediately unsubscribed
-      expect(abortedSubscriber.onStart).toHaveBeenCalledTimes(1);
-      expect(abortedSubscriber.onData).toHaveBeenCalledWith(testEvents[0]);
-    });
-
     it("should handle concurrent subscriptions to same stream", async () => {
       let startExecutor: (() => void) | undefined;
       const executorStarted = new Promise<void>((resolve) => {
@@ -756,7 +723,7 @@ describe("SharedStreamingManager", () => {
           await executorStarted;
           const events = [{ id: 1, data: "concurrent", timestamp: 1000 }];
           subscriber.onData?.(events[0]);
-          subscriber.onFinish?.(events);
+          subscriber.onSuccess?.(events);
           return events;
         }
       );
@@ -765,17 +732,20 @@ describe("SharedStreamingManager", () => {
       const { promise: promise1 } = manager.subscribe(
         "concurrent-stream",
         mockSubscriber,
-        mockExecutor
+        mockExecutor,
+        mockCanceler
       );
       const { promise: promise2 } = manager.subscribe(
         "concurrent-stream",
         { ...mockSubscriber },
-        mockExecutor
+        mockExecutor,
+        mockCanceler
       );
       const { promise: promise3 } = manager.subscribe(
         "concurrent-stream",
         { ...mockSubscriber },
-        mockExecutor
+        mockExecutor,
+        mockCanceler
       );
 
       // Should only create one executor

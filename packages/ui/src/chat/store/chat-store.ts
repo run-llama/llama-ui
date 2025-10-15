@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Chat Store Implementation
  * Zustand store for managing chat sessions with workflow integration
@@ -9,19 +10,12 @@ import type { Client as LlamaDeployClient } from "@llamaindex/workflows-client";
 import type { Message, ChatRequestOptions } from "../components/chat.interface";
 import { MessageRole } from "../components/chat.interface";
 import type { MessagePart } from "../components/message-parts/types";
-import type { WorkflowEvent } from "../../workflows/types";
 import type {
   ChatSession,
   CreateSessionOptions,
   ChatStoreState,
 } from "./types";
-import {
-  createChatHandler,
-  sendEventToHandler,
-  subscribeToHandlerEvents,
-  unsubscribeFromHandler,
-} from "./helper";
-import { messageToEvent, isMessageTerminator } from "./adapters";
+import { messageToEvent } from "./adapters";
 import { StreamingMessage } from "./streaming-message";
 
 export type { ChatStoreState, ChatSession, CreateSessionOptions };
@@ -41,16 +35,17 @@ export const createChatStore = (client: LlamaDeployClient) =>
         workflowName,
         handlerId: providedHandlerId,
         initialMessages = [],
+        indexName,
       } = options;
 
       // Create handler if not provided
-      const handlerId =
-        providedHandlerId || (await createChatHandler(client, workflowName));
+      const handlerId = providedHandlerId || "";
 
       // Initialize session
       const session: ChatSession = {
         handlerId,
         workflowName,
+        indexName,
         messages: initialMessages,
         status: "ready",
         error: null,
@@ -61,90 +56,19 @@ export const createChatStore = (client: LlamaDeployClient) =>
         sessions: { ...state.sessions, [handlerId]: session },
       }));
 
-      // Subscribe to workflow events
-      subscribeToHandlerEvents(client, handlerId, {
-        onEvent: (event: WorkflowEvent) => {
-          const session = get().sessions[handlerId];
-          if (!session) return;
-
-          let streamingMsg = session.streamingMessage;
-
-          // If no streaming message exists, agent is initiating a new message
-          if (!streamingMsg) {
-            // Create new assistant message
-            const assistantMessageId = `assistant-${Date.now()}`;
-            const assistantMessage: Message = {
-              id: assistantMessageId,
-              role: MessageRole.Assistant,
-              parts: [],
-            };
-            get()._appendMessage(handlerId, assistantMessage);
-
-            // Create new StreamingMessage
-            streamingMsg = new StreamingMessage(assistantMessageId);
-            get()._setStreamingMessage(handlerId, streamingMsg);
-            get().setStatus(handlerId, "streaming");
-          }
-
-          // Add event to accumulator
-          streamingMsg.addEvent(event);
-
-          // Get updated parts
-          const updatedParts = streamingMsg.getParts();
-          get()._updateAssistantMessage(
-            handlerId,
-            streamingMsg.messageId,
-            updatedParts
-          );
-
-          // Check if this event terminates the current message
-          if (isMessageTerminator(event)) {
-            streamingMsg.complete();
-            get().setStatus(handlerId, "ready");
-            get()._setStreamingMessage(handlerId, null);
-          }
-        },
-        onError: (error: Error) => {
-          // Ignore abort/network errors (page refresh)
-          if (
-            error.name === "AbortError" ||
-            (error.name === "TypeError" &&
-              error.message.includes("network error"))
-          ) {
-            return;
-          }
-
-          // Complete current streaming message if exists
-          const session = get().sessions[handlerId];
-          if (session?.streamingMessage) {
-            session.streamingMessage.complete();
-            get()._setStreamingMessage(handlerId, null);
-          }
-
-          get().setError(handlerId, error);
-          get().setStatus(handlerId, "error");
-        },
-        onComplete: () => {
-          // Complete current streaming message if exists
-          const session = get().sessions[handlerId];
-          if (session?.streamingMessage) {
-            session.streamingMessage.complete();
-            get()._setStreamingMessage(handlerId, null);
-          }
-          get().setStatus(handlerId, "ready");
-        },
-      });
+      // Note: Don't auto-subscribe here to avoid connection limit issues
+      // Subscription should be controlled externally (e.g., by ChatHistorySidebar)
+      // Only the currently active chat should maintain an SSE connection
 
       return handlerId;
     },
 
     deleteSession: (handlerId: string) => {
       // Unsubscribe from events
-      unsubscribeFromHandler(handlerId);
+      // unsubscribeFromHandler(handlerId);
 
       // Remove session
       set((state) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { [handlerId]: _, ...remainingSessions } = state.sessions;
         return { sessions: remainingSessions };
       });
@@ -187,7 +111,7 @@ export const createChatStore = (client: LlamaDeployClient) =>
       try {
         // Convert message to workflow event and send
         const event = messageToEvent(message);
-        await sendEventToHandler(client, handlerId, event);
+        // await sendEventToHandler(client, handlerId, event);
 
         // Update status to streaming (waiting for events)
         get().setStatus(handlerId, "streaming");
@@ -311,7 +235,7 @@ export const createChatStore = (client: LlamaDeployClient) =>
       }
 
       // Unsubscribe from streaming
-      unsubscribeFromHandler(handlerId);
+      // unsubscribeFromHandler(handlerId);
 
       // Update status and clear streaming state
       get().setStatus(handlerId, "ready");
@@ -368,7 +292,7 @@ export const createChatStore = (client: LlamaDeployClient) =>
         // Send the user message as event (without adding to messages again)
         const messageToResend = session.messages[targetIndex];
         const event = messageToEvent(messageToResend);
-        await sendEventToHandler(client, handlerId, event);
+        // await sendEventToHandler(client, handlerId, event);
 
         // Update status to streaming
         get().setStatus(handlerId, "streaming");

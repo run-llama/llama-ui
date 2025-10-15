@@ -8,12 +8,10 @@ export type SuggestedQuestionsData = string[];
 export function SuggestedQuestions({
   questions,
   sendMessage,
-  requestData,
   className,
 }: {
   questions: SuggestedQuestionsData;
   sendMessage: ChatContext["sendMessage"];
-  requestData?: any;
   className?: string;
 }) {
   const showQuestions = questions.length > 0;
@@ -24,14 +22,11 @@ export function SuggestedQuestions({
           <a
             key={index}
             onClick={() => {
-              sendMessage(
-                {
-                  id: uuidv4(),
-                  role: MessageRole.User,
-                  parts: [{ type: TextPartType, text: question }],
-                },
-                { body: requestData }
-              );
+              sendMessage({
+                id: uuidv4(),
+                role: MessageRole.User,
+                parts: [{ type: TextPartType, text: question }],
+              });
             }}
             className="cursor-pointer text-sm italic hover:underline"
           >

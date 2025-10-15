@@ -23,3 +23,11 @@ export {
   type CloudAgentClient,
   type CloudApiClient,
 } from "./clients";
+
+export type {
+  JSONValue,
+  PrimitiveValue,
+  JsonValue,
+  JsonObject,
+  JsonShape,
+} from "./json-types";

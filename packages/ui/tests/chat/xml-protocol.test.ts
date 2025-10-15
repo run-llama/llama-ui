@@ -66,25 +66,6 @@ More text.`;
     });
   });
 
-  // Test: File marker
-  it("should parse <file> marker into FilePart", () => {
-    const text = `<file>
-{"filename": "report.pdf", "mediaType": "application/pdf", "url": "https://storage/report.pdf"}
-</file>`;
-
-    const parts = parseTextWithXMLMarkers(text);
-
-    expect(parts).toHaveLength(1);
-    expect(parts[0]).toEqual({
-      type: "data-file",
-      data: {
-        filename: "report.pdf",
-        mediaType: "application/pdf",
-        url: "https://storage/report.pdf",
-      },
-    });
-  });
-
   // Test: Artifact marker
   it("should parse <artifact> marker into ArtifactPart", () => {
     const text = `<artifact>

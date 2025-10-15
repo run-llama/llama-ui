@@ -5,7 +5,12 @@
 
 import { describe, it, expect, beforeEach } from "vitest";
 import { StreamingMessage } from "@/src/chat/store/streaming-message";
-import type { WorkflowEvent } from "@/src/workflows/types";
+import {
+  ChatDeltaEvent,
+  StopEvent,
+  WorkflowEvent,
+  WorkflowEventType,
+} from "@/src/workflows/store/workflow-event";
 
 describe("StreamingMessage", () => {
   let streamingMsg: StreamingMessage;
@@ -31,18 +36,17 @@ describe("StreamingMessage", () => {
 
   describe("addEvent - delta events", () => {
     it("should accumulate adjacent delta events", () => {
-      const delta1: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: "Hello" },
-      };
-      const delta2: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: " World" },
-      };
+      const delta1 = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: "Hello",
+      });
+      const delta2 = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: " World",
+      });
 
       streamingMsg.addEvent(delta1);
       streamingMsg.addEvent(delta2);
 
+      // Delta events are accumulated in buffer and parsed to text parts
       const parts = streamingMsg.getParts();
       expect(parts).toHaveLength(1);
       expect(parts[0]).toMatchObject({
@@ -52,18 +56,15 @@ describe("StreamingMessage", () => {
     });
 
     it("should update parts incrementally", () => {
-      const delta1: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: "```py" },
-      };
-      const delta2: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: "thon\n" },
-      };
-      const delta3: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: "print('hi')\n```" },
-      };
+      const delta1 = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: "```py",
+      });
+      const delta2 = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: "thon\n",
+      });
+      const delta3 = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: "print('hi')\n```",
+      });
 
       streamingMsg.addEvent(delta1);
       // First delta might have incomplete markdown
@@ -85,31 +86,31 @@ describe("StreamingMessage", () => {
     });
 
     it("should handle empty delta", () => {
-      const delta: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: "" },
-      };
+      const delta = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: "",
+      });
 
       streamingMsg.addEvent(delta);
 
+      // Empty delta doesn't create any parts
       expect(streamingMsg.getParts()).toEqual([]);
+      // But the event is still stored
+      expect(streamingMsg.getEvents()).toHaveLength(1);
     });
   });
 
   describe("addEvent - non-delta events", () => {
     it("should flush text buffer when non-delta event arrives", () => {
-      const delta1: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: "Hello" },
-      };
-      const delta2: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: " World" },
-      };
-      const toolCall: WorkflowEvent = {
-        type: "workflow.events.ToolCallEvent",
-        data: { tool: "search", args: {} },
-      };
+      const delta1 = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: "Hello",
+      });
+      const delta2 = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: " World",
+      });
+      const toolCall = new WorkflowEvent(WorkflowEventType.ToolCallEvent, {
+        tool: "search",
+        args: {},
+      });
 
       streamingMsg.addEvent(delta1);
       streamingMsg.addEvent(delta2);
@@ -122,24 +123,21 @@ describe("StreamingMessage", () => {
         text: "Hello World",
       });
       expect(parts[1]).toMatchObject({
-        type: "workflow.events.ToolCallEvent",
+        type: "ToolCallEvent",
         data: { tool: "search", args: {} },
       });
     });
 
     it("should keep adjacent deltas separate after flush", () => {
-      const delta1: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: "First" },
-      };
-      const toolCall: WorkflowEvent = {
-        type: "workflow.events.ToolCallEvent",
-        data: { tool: "test" },
-      };
-      const delta2: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: "Second" },
-      };
+      const delta1 = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: "First",
+      });
+      const toolCall = new WorkflowEvent(WorkflowEventType.ToolCallEvent, {
+        tool: "test",
+      });
+      const delta2 = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: "Second",
+      });
 
       streamingMsg.addEvent(delta1);
       streamingMsg.addEvent(toolCall);
@@ -148,18 +146,19 @@ describe("StreamingMessage", () => {
       const parts = streamingMsg.getParts();
       expect(parts).toHaveLength(3);
       expect(parts[0]).toMatchObject({ type: "text", text: "First" });
-      expect(parts[1]).toMatchObject({ type: "workflow.events.ToolCallEvent" });
+      expect(parts[1]).toMatchObject({
+        type: "ToolCallEvent",
+        data: { tool: "test" },
+      });
       expect(parts[2]).toMatchObject({ type: "text", text: "Second" });
     });
   });
 
   describe("addEvent - special events", () => {
     it("should skip StopEvent (no content)", () => {
-      const stopEvent: WorkflowEvent = {
-        type: "workflow.events.StopEvent",
-        data: { result: "done" },
-      };
-
+      const stopEvent = new StopEvent(WorkflowEventType.StopEvent, {
+        result: "done",
+      });
       streamingMsg.addEvent(stopEvent);
 
       expect(streamingMsg.getParts()).toEqual([]);
@@ -186,10 +185,9 @@ describe("StreamingMessage", () => {
 
   describe("complete", () => {
     it("should flush remaining text buffer", () => {
-      const delta: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: "Hello" },
-      };
+      const delta = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: "Hello",
+      });
 
       streamingMsg.addEvent(delta);
       streamingMsg.complete();
@@ -209,10 +207,9 @@ describe("StreamingMessage", () => {
     });
 
     it("should handle multiple complete calls", () => {
-      const delta: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: "Test" },
-      };
+      const delta = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: "Test",
+      });
 
       streamingMsg.addEvent(delta);
       streamingMsg.complete();
@@ -226,12 +223,13 @@ describe("StreamingMessage", () => {
 
   describe("getParts", () => {
     it("should return parts without re-parsing (cached logic)", () => {
-      const delta: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: "Hello" },
-      };
+      const delta = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: "Hello",
+      });
 
       streamingMsg.addEvent(delta);
+      // Must complete to flush the buffer and finalize parts
+      streamingMsg.complete();
 
       const parts1 = streamingMsg.getParts();
       const parts2 = streamingMsg.getParts();
@@ -243,18 +241,15 @@ describe("StreamingMessage", () => {
     });
 
     it("should return finalized + current parts", () => {
-      const delta1: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: "First" },
-      };
-      const toolCall: WorkflowEvent = {
-        type: "workflow.events.ToolCallEvent",
-        data: { tool: "test" },
-      };
-      const delta2: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: "Second" },
-      };
+      const delta1 = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: "First",
+      });
+      const toolCall = new WorkflowEvent(WorkflowEventType.ToolCallEvent, {
+        tool: "test",
+      });
+      const delta2 = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: "Second",
+      });
 
       streamingMsg.addEvent(delta1);
       streamingMsg.addEvent(toolCall);
@@ -270,14 +265,12 @@ describe("StreamingMessage", () => {
 
   describe("getEvents", () => {
     it("should return all accumulated events", () => {
-      const delta1: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: "Hello" },
-      };
-      const delta2: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: " World" },
-      };
+      const delta1 = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: "Hello",
+      });
+      const delta2 = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: " World",
+      });
 
       streamingMsg.addEvent(delta1);
       streamingMsg.addEvent(delta2);
@@ -289,10 +282,9 @@ describe("StreamingMessage", () => {
     });
 
     it("should return copy of events array", () => {
-      const delta: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: "Test" },
-      };
+      const delta = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: "Test",
+      });
 
       streamingMsg.addEvent(delta);
 
@@ -307,30 +299,27 @@ describe("StreamingMessage", () => {
 
   describe("getTextBuffer", () => {
     it("should return current text buffer", () => {
-      const delta1: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: "Hello" },
-      };
-      const delta2: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: " World" },
-      };
+      const delta1 = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: "Hello",
+      });
+      const delta2 = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: " World",
+      });
 
       streamingMsg.addEvent(delta1);
       streamingMsg.addEvent(delta2);
 
+      // Text buffer contains accumulated delta text
       expect(streamingMsg.getTextBuffer()).toBe("Hello World");
     });
 
     it("should return empty string after flush", () => {
-      const delta: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: "Hello" },
-      };
-      const toolCall: WorkflowEvent = {
-        type: "workflow.events.ToolCallEvent",
-        data: { tool: "test" },
-      };
+      const delta = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: "Hello",
+      });
+      const toolCall = new WorkflowEvent(WorkflowEventType.ToolCallEvent, {
+        tool: "test",
+      });
 
       streamingMsg.addEvent(delta);
       streamingMsg.addEvent(toolCall); // Triggers flush
@@ -341,10 +330,9 @@ describe("StreamingMessage", () => {
 
   describe("clear", () => {
     it("should reset all state", () => {
-      const delta: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: "Hello" },
-      };
+      const delta = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: "Hello",
+      });
 
       streamingMsg.addEvent(delta);
       streamingMsg.complete();
@@ -359,18 +347,15 @@ describe("StreamingMessage", () => {
 
   describe("XML protocol integration", () => {
     it("should parse XML markers in complete text", () => {
-      const delta1: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: "Here are sources: <sources>" },
-      };
-      const delta2: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: '{"nodes": []}' },
-      };
-      const delta3: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: "</sources>" },
-      };
+      const delta1 = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: "Here are sources: <sources>",
+      });
+      const delta2 = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: '{"nodes": []}',
+      });
+      const delta3 = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: "</sources>",
+      });
 
       streamingMsg.addEvent(delta1);
       streamingMsg.addEvent(delta2);
@@ -383,21 +368,18 @@ describe("StreamingMessage", () => {
     });
 
     it("should handle incomplete XML during streaming", () => {
-      const delta1: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: "Text with <sources" },
-      };
+      const delta1 = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: "Text with <sources",
+      });
+      const delta2 = new ChatDeltaEvent(WorkflowEventType.ChatDeltaEvent, {
+        delta: ">data</sources>",
+      });
 
       streamingMsg.addEvent(delta1);
 
       const parts1 = streamingMsg.getParts();
       // Should show text (incomplete XML not parsed yet)
       expect(parts1.length).toBeGreaterThan(0);
-
-      const delta2: WorkflowEvent = {
-        type: "workflow.events.ChatDeltaEvent",
-        data: { delta: ">data</sources>" },
-      };
 
       streamingMsg.addEvent(delta2);
 

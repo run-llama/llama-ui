@@ -10,18 +10,17 @@ import {
   TextPartType,
   SourcesPartType,
   SuggestionPartType,
-  FilePartType,
   ArtifactPartType,
   EventPartType,
 } from "../components/message-parts/types";
-import type {
+import {
   WorkflowEvent,
-  ChatDeltaEvent,
-  StopEvent,
-  InputRequiredEvent,
-  HumanResponseEvent,
-} from "../../workflows/types";
-import { WorkflowEventType } from "../../workflows/types";
+  WorkflowEventType,
+  isChatDeltaEvent,
+  isInputRequiredEvent,
+  isStopEvent,
+} from "../../workflows/store/workflow-event";
+import { HumanResponseEvent } from "../../workflows/store/workflow-event";
 
 /**
  * Extract text content from message parts
@@ -35,34 +34,13 @@ export function extractTextFromParts(parts: MessagePart[]): string {
 }
 
 /**
- * Determine if event is a ChatDeltaEvent
- */
-export function isDeltaEvent(event: WorkflowEvent): event is ChatDeltaEvent {
-  return event.type.includes("ChatDeltaEvent");
-}
-
-/**
- * Determine if event is a StopEvent (signals workflow completion)
- */
-export function isStopEvent(event: WorkflowEvent): event is StopEvent {
-  return event.type === WorkflowEventType.StopEvent;
-}
-
-/**
- * Determine if event is an InputRequiredEvent (signals waiting for user input)
- */
-export function isInputRequiredEvent(
-  event: WorkflowEvent
-): event is InputRequiredEvent {
-  return event.type === WorkflowEventType.InputRequiredEvent;
-}
-
-/**
  * Determine if event signals the end of a streaming message
  * (StopEvent or InputRequiredEvent)
  */
 export function isMessageTerminator(event: WorkflowEvent): boolean {
-  return isStopEvent(event) || isInputRequiredEvent(event);
+  // For never-ending chat workflows, InputRequiredEvent marks the end of a turn
+  // StopEvent should not be relied upon for chat; ignore it here
+  return isInputRequiredEvent(event);
 }
 
 /**
@@ -77,12 +55,9 @@ export function messageToEvent(message: Message): HumanResponseEvent {
     throw new Error("Cannot send empty message");
   }
 
-  return {
-    type: WorkflowEventType.HumanResponseEvent,
-    data: {
-      response: text,
-    },
-  };
+  return new HumanResponseEvent(WorkflowEventType.HumanResponseEvent, {
+    response: text,
+  });
 }
 
 /**
@@ -419,12 +394,6 @@ function parseXMLMarker(tagName: string, content: string): MessagePart | null {
           data: data, // Expected: string[]
         };
 
-      case "file":
-        return {
-          type: FilePartType,
-          data: data, // Expected: { filename, mediaType, url }
-        };
-
       case "artifact":
         return {
           type: ArtifactPartType,
@@ -485,12 +454,12 @@ export function eventToMessageParts(
   }
 
   // Text events: extract text and parse XML markers
-  if (isDeltaEvent(event)) {
+  if (isChatDeltaEvent(event)) {
     let text: string | undefined;
 
     // Extract text from ChatDeltaEvent data format
     if (event.data && typeof event.data === "object" && "delta" in event.data) {
-      text = event.data.delta;
+      text = event.data.delta as string;
     }
 
     if (text !== undefined && text.trim()) {
