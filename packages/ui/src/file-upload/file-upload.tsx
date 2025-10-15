@@ -9,15 +9,11 @@ import {
 } from "@/base/tabs";
 import { cn } from "@/lib/utils";
 import { Upload } from "lucide-react";
-import {
-  type ChangeEvent,
-  type DragEvent,
-  type ReactNode,
-  useRef,
-  useState,
-} from "react";
+import type { ReactNode } from "react";
 
-interface FileUploadProps {
+import { useFileDropzone } from "./use-file-dropzone";
+
+export interface FileUploadProps {
   className?: string;
   heading: string;
   content: File | string | null;
@@ -52,42 +48,23 @@ export function FileUpload({
   fileUrlPlaceholder = "Paste the file link here",
   footer = defaultFooter,
 }: FileUploadProps) {
-  const [isDragging, setIsDragging] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const processFile = (file: File) => {
-    onContentChange(file);
-  };
-
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      processFile(file);
-    }
-  };
-
-  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (event: DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setIsDragging(false);
-    const file = event.dataTransfer.files?.[0];
-    if (file) {
-      processFile(file);
-    }
-  };
-
-  const handleClick = () => {
-    fileInputRef.current?.click();
-  };
+  const {
+    inputRef,
+    isDragging,
+    handleDragEnter,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+    handleFileInputChange,
+    handleClick,
+  } = useFileDropzone({
+    onFilesSelected: (files) => {
+      const [file] = files;
+      if (file) {
+        onContentChange(file);
+      }
+    },
+  });
 
   return (
     <div className={cn("w-full", className)}>
@@ -168,6 +145,7 @@ export function FileUpload({
                 ? "bg-primary/5 border-primary"
                 : "hover:border-primary/50 border-gray-300"
             }`}
+            onDragEnter={handleDragEnter}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
@@ -177,8 +155,8 @@ export function FileUpload({
           >
             <input
               type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
+              ref={inputRef}
+              onChange={handleFileInputChange}
               className="hidden"
             />
             <div className="flex flex-col items-center justify-center gap-4">

@@ -1,5 +1,4 @@
-import * as React from "react";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Loader2, Upload, X } from "lucide-react";
 
 import { Button } from "@/base/button";
@@ -12,6 +11,7 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/base/dialog";
+import { useFileDropzone } from "../file-upload/use-file-dropzone";
 import { validateFile, FileType } from "./file-utils";
 import { useFileUpload, type FileUploadData } from "./use-file-upload";
 import { useUploadProgress } from "./use-upload-progress";
@@ -36,7 +36,7 @@ export interface FileUploaderProps {
     data: FileUploadData[],
     fieldValues: Record<string, string>
   ) => Promise<void>;
-  trigger?: React.ReactNode;
+  trigger?: ReactNode;
   /** Set to true while processing the file after a callback, in order to show a spinner */
   isProcessing?: boolean;
 }
@@ -55,7 +55,6 @@ export function FileUploader({
   const [isOpen, setIsOpen] = useState(false);
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [dragActive, setDragActive] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // Dynamic title and description based on multiple setting
@@ -79,7 +78,6 @@ export function FileUploader({
     setIsOpen(false);
     setFieldValues({});
     setSelectedFiles([]);
-    setDragActive(false);
     setFieldErrors({});
   };
 
@@ -138,40 +136,19 @@ export function FileUploader({
     }
   };
 
-  const handleDragEnter = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-
-    const files = Array.from(e.dataTransfer.files);
-    if (files.length > 0) {
-      handleFileSelect(files);
-    }
-  };
-
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      handleFileSelect(Array.from(files));
-    }
-  };
+  const {
+    inputRef: fileInputRef,
+    isDragging,
+    handleDragEnter,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+    handleFileInputChange,
+    handleClick,
+  } = useFileDropzone({
+    onFilesSelected: handleFileSelect,
+    multiple,
+  });
 
   const handleUpload = async () => {
     if (selectedFiles.length === 0) {
@@ -273,7 +250,7 @@ export function FileUploader({
               </label>
               <div
                 className={`border border-dashed rounded-lg p-4 text-center transition-colors cursor-pointer ${
-                  dragActive
+                  isDragging
                     ? "border-primary bg-primary/5"
                     : "border-muted-foreground/30 hover:border-primary/60"
                 }`}
@@ -281,7 +258,7 @@ export function FileUploader({
                 onDragLeave={handleDragLeave}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
-                onClick={() => document.getElementById("file-upload")?.click()}
+                onClick={handleClick}
               >
                 {selectedFiles.length > 0 ? (
                   <div className="space-y-2">
@@ -342,7 +319,7 @@ export function FileUploader({
                 <input
                   type="file"
                   className="sr-only"
-                  id="file-upload"
+                  ref={fileInputRef}
                   onChange={handleFileInputChange}
                   accept={allowedFileTypes.join(",")}
                   multiple={multiple}
