@@ -1,4 +1,5 @@
 export * from "./file-uploader";
+export * from "./managed-file-upload";
 export * from "./file-utils";
 export * from "./use-file-upload";
 export * from "./upload-progress";
