@@ -133,7 +133,7 @@ describe("SharedStreamingManager", () => {
         onStart: vi.fn(),
         onData: vi.fn(),
         onError: vi.fn(),
-        onSucceed: vi.fn(),
+        onSuccess: vi.fn(),
         onComplete: vi.fn(),
       };
       const { promise: promise1 } = manager.subscribe(
@@ -150,7 +150,7 @@ describe("SharedStreamingManager", () => {
         onStart: vi.fn(),
         onData: vi.fn(),
         onError: vi.fn(),
-        onSucceed: vi.fn(),
+        onSuccess: vi.fn(),
         onComplete: vi.fn(),
       };
 
@@ -181,8 +181,8 @@ describe("SharedStreamingManager", () => {
       // Both subscribers should have received all events
       expect(subscriber1.onData).toHaveBeenCalledTimes(2);
       expect(subscriber2.onData).toHaveBeenCalledTimes(2);
-      expect(subscriber1.onSucceed).toHaveBeenCalledWith(testEvents);
-      expect(subscriber2.onSucceed).toHaveBeenCalledWith(testEvents);
+      expect(subscriber1.onSuccess).toHaveBeenCalledWith(testEvents);
+      expect(subscriber2.onSuccess).toHaveBeenCalledWith(testEvents);
     });
 
     it("should handle subscriber joining after stream was released/cleaned up", async () => {
@@ -231,7 +231,7 @@ describe("SharedStreamingManager", () => {
         onStart: vi.fn(),
         onData: vi.fn(),
         onError: vi.fn(),
-        onSucceed: vi.fn(),
+        onSuccess: vi.fn(),
         onComplete: vi.fn(),
       };
 
@@ -247,7 +247,7 @@ describe("SharedStreamingManager", () => {
       expect(releasedTestExecutor).toHaveBeenCalledTimes(2); // Once for original, once for new
       expect(newSubscriber.onStart).toHaveBeenCalledTimes(1);
       expect(newSubscriber.onData).toHaveBeenCalledWith(testEvents[0]);
-      expect(newSubscriber.onSucceed).toHaveBeenCalledWith(testEvents);
+      expect(newSubscriber.onSuccess).toHaveBeenCalledWith(testEvents);
       expect(newEvents).toEqual(testEvents);
 
       // After completion, stream should be cleaned up again (this is expected behavior)
@@ -281,14 +281,14 @@ describe("SharedStreamingManager", () => {
         onStart: vi.fn(),
         onData: vi.fn(),
         onError: vi.fn(),
-        onSucceed: vi.fn(),
+        onSuccess: vi.fn(),
         onComplete: vi.fn(),
       };
       const subscriber2 = {
         onStart: vi.fn(),
         onData: vi.fn(),
         onError: vi.fn(),
-        onSucceed: vi.fn(),
+        onSuccess: vi.fn(),
         onComplete: vi.fn(),
       };
 
@@ -338,15 +338,15 @@ describe("SharedStreamingManager", () => {
         onData: vi.fn(() => {
           throw new Error("onData error");
         }),
-        onSucceed: vi.fn(() => {
-          throw new Error("onSucceed error");
+        onSuccess: vi.fn(() => {
+          throw new Error("onSuccess error");
         }),
       };
 
       const goodSubscriber = {
         onStart: vi.fn(),
         onData: vi.fn(),
-        onSucceed: vi.fn(),
+        onSuccess: vi.fn(),
       };
 
       const testEvents: TestEvent[] = [
@@ -387,7 +387,7 @@ describe("SharedStreamingManager", () => {
       // Good subscriber should work normally
       expect(goodSubscriber.onStart).toHaveBeenCalledTimes(1);
       expect(goodSubscriber.onData).toHaveBeenCalledWith(testEvents[0]);
-      expect(goodSubscriber.onSucceed).toHaveBeenCalledWith(testEvents);
+      expect(goodSubscriber.onSuccess).toHaveBeenCalledWith(testEvents);
 
       // Console errors should be logged
       expect(consoleErrorSpy).toHaveBeenCalledTimes(3);
@@ -570,7 +570,7 @@ describe("SharedStreamingManager", () => {
         onError: vi.fn(() => {
           throw new Error("onError callback failed");
         }),
-        onSucceed: vi.fn(),
+        onSuccess: vi.fn(),
         onComplete: vi.fn(),
       };
 

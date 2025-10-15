@@ -107,7 +107,6 @@ export class Handler {
         callbacks?.onSuccess?.(events);
       },
       onComplete: () => {
-        this.status = "completed";
         this.completedAt = new Date();
         this.updatedAt = new Date();
         callbacks?.onComplete?.();
