@@ -78,7 +78,7 @@ export function RunDetailsPanel({
               );
             });
           },
-          onSucceed(allEvents) {
+          onSuccess(allEvents) {
             setEvents(allEvents);
             setFinalResult(handler.result?.data.result ?? null);
           },

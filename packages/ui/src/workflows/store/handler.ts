@@ -99,12 +99,12 @@ export class Handler {
         this.error = error.message;
         callbacks?.onError?.(error);
       },
-      onSucceed: (events) => {
+      onSuccess: (events) => {
         this.status = "completed";
         this.completedAt = new Date();
         this.updatedAt = new Date();
         this.result = events[events.length - 1] as StopEvent;
-        callbacks?.onSucceed?.(events);
+        callbacks?.onSuccess?.(events);
       },
       onComplete: () => {
         this.status = "completed";
@@ -213,7 +213,7 @@ function streamByEventSource(
       callbacks.onData?.(workflowEvent);
       accumulatedEvents.push(workflowEvent);
       if (workflowEvent.type === WorkflowEventType.StopEvent) {
-        callbacks.onSucceed?.(accumulatedEvents);
+        callbacks.onSuccess?.(accumulatedEvents);
         logger.debug(
           "[streamByEventSource] stop event received, closing event source"
         );
@@ -234,7 +234,7 @@ function streamByEventSource(
     });
     eventSource.addEventListener("close", () => {
       logger.debug("[streamByEventSource] close");
-      callbacks.onSucceed?.(accumulatedEvents);
+      callbacks.onSuccess?.(accumulatedEvents);
       resolve(accumulatedEvents);
     });
   });

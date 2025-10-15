@@ -12,7 +12,7 @@ export interface StreamSubscriber<TEvent> {
   onStart?: () => void;
   onData?: (event: TEvent) => void;
   onError?: (error: Error) => void;
-  onSucceed?: (allEvents: TEvent[]) => void;
+  onSuccess?: (allEvents: TEvent[]) => void;
   onComplete?: () => void; // Called when stream ends (success or error)
 }
 
@@ -143,7 +143,7 @@ export class SharedStreamingManager<TEvent = any> {
         if (stream.error) {
           subscriber.onError?.(stream.error);
         } else {
-          subscriber.onSucceed?.(stream.events);
+          subscriber.onSuccess?.(stream.events);
         }
         subscriber.onComplete?.();
       }
@@ -225,12 +225,12 @@ export class SharedStreamingManager<TEvent = any> {
         this.cleanupStream(streamKey);
       },
 
-      onSucceed: (allEvents: TEvent[]) => {
+      onSuccess: (allEvents: TEvent[]) => {
         streamState.isCompleted = true;
 
         streamState.subscribers.forEach((sub) => {
           try {
-            sub.onSucceed?.(allEvents);
+            sub.onSuccess?.(allEvents);
             sub.onComplete?.();
           } catch (error) {
             // eslint-disable-next-line no-console

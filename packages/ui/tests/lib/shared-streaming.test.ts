@@ -33,7 +33,7 @@ describe("SharedStreamingManager", () => {
       onStart: vi.fn(),
       onData: vi.fn(),
       onError: vi.fn(),
-      onSucceed: vi.fn(),
+      onSuccess: vi.fn(),
       onComplete: vi.fn(),
     };
 
@@ -60,7 +60,7 @@ describe("SharedStreamingManager", () => {
         ) => {
           subscriber.onStart?.();
           testEvents.forEach((event) => subscriber.onData?.(event));
-          subscriber.onSucceed?.(testEvents);
+          subscriber.onSuccess?.(testEvents);
           return testEvents;
         }
       );
@@ -76,7 +76,7 @@ describe("SharedStreamingManager", () => {
       expect(mockExecutor).toHaveBeenCalledTimes(1);
       expect(mockSubscriber.onStart).toHaveBeenCalledTimes(1);
       expect(mockSubscriber.onData).toHaveBeenCalledTimes(2);
-      expect(mockSubscriber.onSucceed).toHaveBeenCalledWith(testEvents);
+      expect(mockSubscriber.onSuccess).toHaveBeenCalledWith(testEvents);
       expect(events).toEqual(testEvents);
     });
 
@@ -123,7 +123,7 @@ describe("SharedStreamingManager", () => {
           });
 
           const events = await executorPromise;
-          subscriber.onSucceed?.(events);
+          subscriber.onSuccess?.(events);
           return events;
         }
       );
@@ -202,7 +202,7 @@ describe("SharedStreamingManager", () => {
         ) => {
           subscriber.onStart?.();
           subscriber.onData?.(testEvents[0]);
-          subscriber.onSucceed?.(testEvents);
+          subscriber.onSuccess?.(testEvents);
           return testEvents;
         }
       );
@@ -360,7 +360,7 @@ describe("SharedStreamingManager", () => {
         ) => {
           subscriber.onStart?.();
           subscriber.onData?.(testEvents[0]);
-          subscriber.onSucceed?.(testEvents);
+          subscriber.onSuccess?.(testEvents);
           return testEvents;
         }
       );
@@ -723,7 +723,7 @@ describe("SharedStreamingManager", () => {
           await executorStarted;
           const events = [{ id: 1, data: "concurrent", timestamp: 1000 }];
           subscriber.onData?.(events[0]);
-          subscriber.onSucceed?.(events);
+          subscriber.onSuccess?.(events);
           return events;
         }
       );
