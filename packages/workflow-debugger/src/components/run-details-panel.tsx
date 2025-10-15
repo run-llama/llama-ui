@@ -94,8 +94,9 @@ export function RunDetailsPanel({
     }
   }, [handler]);
 
-  // Reset timestamps and result when switching handlers
+  // Reset events, timestamps and result when switching handlers
   useEffect(() => {
+    setEvents([]);
     setFinalResult(null);
     setFinalResultError(null);
   }, [handlerId]);
