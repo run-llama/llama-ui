@@ -447,44 +447,13 @@ export function WorkflowVisualization({
       return;
     }
 
-    // Trigger fade-out when workflow is complete
-    if (isComplete) {
-      const fadeTimestamp = Date.now();
+    // Process only new events since last time (DO THIS BEFORE isComplete check!)
+    const newEvents = events.slice(lastProcessedEventIndex + 1);
 
-      // Set all highlighted nodes to start fading
-      setNodes((prev) =>
-        prev.map((n) => {
-          const newData: Record<string, unknown> = { ...n.data };
-          if (newData.highlightColor) {
-            newData.fadeTimestamp = fadeTimestamp;
-          }
-          return { ...n, data: newData } as Node;
-        }),
-      );
-
-      // Clear all highlights after 1 second
-      setTimeout(() => {
-        setNodes((prev) =>
-          prev.map((n) => {
-            if (n.data.fadeTimestamp === fadeTimestamp) {
-              const newData: Record<string, unknown> = { ...n.data };
-              newData.highlightColor = null;
-              delete newData.activeWorkers;
-              delete newData.workerCount;
-              delete newData.fadeTimestamp;
-              return { ...n, data: newData } as Node;
-            }
-            return n;
-          }),
-        );
-      }, 1000);
-
+    // If no new events but workflow is complete, still trigger fade-out
+    if (newEvents.length === 0) {
       return;
     }
-
-    // Process only new events since last time
-    const newEvents = events.slice(lastProcessedEventIndex + 1);
-    if (newEvents.length === 0) return;
 
     setLastProcessedEventIndex(events.length - 1);
 
@@ -528,7 +497,11 @@ export function WorkflowVisualization({
         (event?.data as Record<string, unknown> | undefined) ?? {};
 
       // Handle StepStateChanged events
-      if (type === "workflows.events.StepStateChanged") {
+      // Note: event.type is the short name like "StepStateChanged", not the qualified name
+      if (
+        type === "StepStateChanged" ||
+        type === "workflows.events.StepStateChanged"
+      ) {
         const stepName = String((payload as { name?: unknown })?.name || "");
         const stepState = String(
           (payload as { step_state?: unknown })?.step_state || "",
@@ -571,27 +544,36 @@ export function WorkflowVisualization({
                 // Use the color for the current state, or default to running color
                 newData.highlightColor = color || "#10B981";
                 newData.fadeTimestamp = Date.now();
-              } else {
-                // Trigger fade-out after a delay when all workers complete
-                const fadeTimestamp = Date.now();
-                newData.fadeTimestamp = fadeTimestamp;
+              } else if (
+                stepState === "exited" ||
+                stepState === "not_running"
+              ) {
+                // When step exits/completes, keep the last highlight color and trigger fade-out
+                // Only fade if there was a highlight to begin with
+                if (newData.highlightColor) {
+                  const fadeTimestamp = Date.now();
+                  newData.fadeTimestamp = fadeTimestamp;
 
-                // Keep the highlight visible for 1s, then fade out
-                setTimeout(() => {
-                  setNodes((prev) =>
-                    prev.map((n) => {
-                      if (
-                        n.id === stepName &&
-                        n.data.fadeTimestamp === fadeTimestamp
-                      ) {
-                        const newData: Record<string, unknown> = { ...n.data };
-                        newData.highlightColor = null;
-                        return { ...n, data: newData } as Node;
-                      }
-                      return n;
-                    }),
-                  );
-                }, 1000);
+                  // Keep the highlight visible for 1s, then fade out
+                  setTimeout(() => {
+                    setNodes((prev) =>
+                      prev.map((n) => {
+                        if (
+                          n.id === stepName &&
+                          n.data.fadeTimestamp === fadeTimestamp
+                        ) {
+                          const newData: Record<string, unknown> = {
+                            ...n.data,
+                          };
+                          newData.highlightColor = null;
+
+                          return { ...n, data: newData } as Node;
+                        }
+                        return n;
+                      }),
+                    );
+                  }, 1000);
+                }
               }
 
               newData.lastInputEvent = getSimpleName(
