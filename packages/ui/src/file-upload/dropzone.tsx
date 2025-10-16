@@ -145,7 +145,7 @@ export function FileDropzone({
     <>
       <div
         className={cn(
-          "flex min-h-[200px] flex-col gap-4 rounded-lg border-2 border-dotted p-8 transition-colors",
+          "flex flex-col gap-4 rounded-lg border-2 border-dotted p-8 transition-colors",
           disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           !disabled && isDragging
@@ -153,7 +153,7 @@ export function FileDropzone({
             : "border-gray-300 hover-border-primary/50",
           hasFiles
             ? "items-stretch text-left"
-            : "items-center text-center",
+            : "items-center text-center min-h-[200px]",
           className,
         )}
         onDragEnter={disabled ? undefined : handleDragEnter}
