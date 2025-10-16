@@ -69,7 +69,7 @@ export function FileUploader({
 
   const uploadProgress = useUploadProgress();
 
-  const { uploadAndReturn } = useFileUpload({
+  const { uploadAndReturn, uploadFromUrl } = useFileUpload({
     onUploadStart: uploadProgress.startUpload,
     onProgress: uploadProgress.updateProgress,
     onUploadComplete: uploadProgress.completeUpload,
@@ -191,26 +191,19 @@ export function FileUploader({
     };
 
     if (!multiple && trimmedUrl.length > 0 && !hasFiles) {
-      const virtualFile =
-        typeof File !== "undefined"
-          ? new File([""], trimmedUrl, {
-              type: "text/plain",
-              lastModified: Date.now(),
-            })
-          : null;
-
-      if (virtualFile) {
-        uploadProgress.startUpload(virtualFile);
-        uploadProgress.updateProgress(virtualFile, 80);
-      }
-
       handleClose();
 
-      if (virtualFile) {
-        uploadProgress.completeUpload(virtualFile);
+      try {
+        const result = await uploadFromUrl(trimmedUrl);
+        if (result.success && result.data) {
+          await onSuccess([result.data], {
+            ...currentFieldValues,
+            fileUrl: trimmedUrl,
+          });
+        }
+      } catch {
+        // Errors are handled by the upload hook
       }
-
-      await onSuccess([], { ...currentFieldValues, fileUrl: trimmedUrl });
       return;
     }
 
@@ -225,7 +218,6 @@ export function FileUploader({
   const singleUploadContent = selectedFiles[0] ?? (fileUrl ? fileUrl : null);
 
   const maxSizeMb = Math.round(maxFileSizeBytes / 1000 / 1000);
-  const allowedFileTypeLabels = allowedFileTypes.map((type) => type.toUpperCase());
 
 
   const canSubmit = () => {
@@ -305,7 +297,7 @@ export function FileUploader({
                   selectedFiles={selectedFiles}
                   onFilesSelected={handleFileSelect}
                   onRemoveFile={removeFile}
-                  allowedFileTypes={allowedFileTypeLabels}
+                  allowedFileTypes={allowedFileTypes}
                   maxSizeMb={maxSizeMb}
                   listFooter={
                     <div className="border-t border-muted-foreground/20 pt-2 text-xs text-muted-foreground">
@@ -321,7 +313,7 @@ export function FileUploader({
                   onContentChange={handleContentChange}
                   allowFileRemoval
                   showHeader={false}
-                  allowedFileTypes={allowedFileTypeLabels}
+                  allowedFileTypes={allowedFileTypes}
                   maxFileSizeMb={maxSizeMb}
                   disableWhenFileSelected
                   disableWhenUrlProvided
