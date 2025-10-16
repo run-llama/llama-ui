@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Loader2, Upload, X } from "lucide-react";
+import { Loader2, Upload } from "lucide-react";
 
 import { Button } from "@/base/button";
 import { Input } from "@/base/input";
@@ -11,7 +11,8 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/base/dialog";
-import { useFileDropzone } from "../file-upload/use-file-dropzone";
+import { FileUpload } from "../file-upload/file-upload";
+import { FileDropzone } from "../file-upload/dropzone";
 import { validateFile, FileType } from "./file-utils";
 import { useFileUpload, type FileUploadData } from "./use-file-upload";
 import { useUploadProgress } from "./use-upload-progress";
@@ -56,6 +57,7 @@ export function FileUploader({
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [fileUrl, setFileUrl] = useState("");
 
   // Dynamic title and description based on multiple setting
   const modalTitle = title || (multiple ? "Upload Files" : "Upload File");
@@ -79,6 +81,7 @@ export function FileUploader({
     setFieldValues({});
     setSelectedFiles([]);
     setFieldErrors({});
+    setFileUrl("");
   };
 
   const handleFieldChange = (key: string, value: string) => {
@@ -133,69 +136,117 @@ export function FileUploader({
       } else {
         setSelectedFiles(validFiles.slice(0, 1)); // Only take the first file for single upload
       }
+      setFileUrl("");
     }
   };
 
-  const {
-    inputRef: fileInputRef,
-    isDragging,
-    handleDragEnter,
-    handleDragOver,
-    handleDragLeave,
-    handleDrop,
-    handleFileInputChange,
-    handleClick,
-  } = useFileDropzone({
-    onFilesSelected: handleFileSelect,
-    multiple,
-  });
+  const handleContentChange = (content: File | string | null) => {
+    if (content instanceof File) {
+      handleFileSelect([content]);
+      return;
+    }
+
+    if (typeof content === "string") {
+      setSelectedFiles([]);
+      setFileUrl(content);
+      return;
+    }
+
+    setSelectedFiles([]);
+    setFileUrl("");
+  };
 
   const handleUpload = async () => {
-    if (selectedFiles.length === 0) {
-      // No toast, just return
+    const hasFiles = selectedFiles.length > 0;
+    const trimmedUrl = fileUrl.trim();
+    const currentFieldValues = { ...fieldValues };
+
+    if (multiple) {
+      if (!hasFiles) {
+        return;
+      }
+    } else if (!hasFiles && trimmedUrl.length === 0) {
       return;
     }
 
     if (!validateFields()) {
-      // No toast, just return
       return;
     }
 
-    // Close modal immediately when upload starts
-    handleClose();
+    const uploadFiles = async (files: File[]) => {
+      handleClose();
 
-    try {
-      // Upload all selected files and get results
-      const uploadPromises = selectedFiles.map((file) => uploadAndReturn(file));
-      const results = await Promise.all(uploadPromises);
+      try {
+        const results = await Promise.all(files.map((file) => uploadAndReturn(file)));
+        const successfulData = results
+          .filter((result) => result.success && result.data)
+          .map((result) => result.data!);
 
-      // Filter only successful uploads and extract their data
-      const successfulData = results
-        .filter((result) => result.success && result.data)
-        .map((result) => result.data!);
-
-      // Only call onSuccess if there are successful uploads
-      if (successfulData.length > 0) {
-        await onSuccess(successfulData, fieldValues);
+        if (successfulData.length > 0) {
+          await onSuccess(successfulData, currentFieldValues);
+        }
+      } catch {
+        // Error is already handled in the hook/progress panel
       }
-    } catch {
-      // Error is already handled in the hook/progress panel
+    };
+
+    if (!multiple && trimmedUrl.length > 0 && !hasFiles) {
+      const virtualFile =
+        typeof File !== "undefined"
+          ? new File([""], trimmedUrl, {
+              type: "text/plain",
+              lastModified: Date.now(),
+            })
+          : null;
+
+      if (virtualFile) {
+        uploadProgress.startUpload(virtualFile);
+        uploadProgress.updateProgress(virtualFile, 80);
+      }
+
+      handleClose();
+
+      if (virtualFile) {
+        uploadProgress.completeUpload(virtualFile);
+      }
+
+      await onSuccess([], { ...currentFieldValues, fileUrl: trimmedUrl });
+      return;
     }
+
+    await uploadFiles(multiple ? selectedFiles : selectedFiles.slice(0, 1));
   };
 
   const removeFile = (fileToRemove: File) => {
     setSelectedFiles((prev) => prev.filter((file) => file !== fileToRemove));
   };
 
+
+  const singleUploadContent = selectedFiles[0] ?? (fileUrl ? fileUrl : null);
+
+  const maxSizeMb = Math.round(maxFileSizeBytes / 1000 / 1000);
+  const allowedFileTypeLabels = allowedFileTypes.map((type) => type.toUpperCase());
+
+
   const canSubmit = () => {
-    if (!inputFields) return true;
-    if (inputFields.length === 0) return true;
-    if (selectedFiles.length === 0) return false;
-    return inputFields.every(
-      (field) =>
-        !field.required ||
-        (fieldValues[field.key] && fieldValues[field.key].trim())
-    );
+    const requiredFieldsSatisfied =
+      !inputFields ||
+      inputFields.length === 0 ||
+      inputFields.every(
+        (field) =>
+          !field.required ||
+          (fieldValues[field.key] && fieldValues[field.key].trim())
+      );
+
+    if (!requiredFieldsSatisfied) {
+      return false;
+    }
+
+    if (multiple) {
+      return selectedFiles.length > 0;
+    }
+
+    return selectedFiles.length > 0 || fileUrl.trim().length > 0;
   };
   return (
     <>
@@ -248,83 +299,35 @@ export function FileUploader({
                 {multiple ? "Files" : "File"}{" "}
                 <span className="text-destructive ml-1">*</span>
               </label>
-              <div
-                className={`border border-dashed rounded-lg p-4 text-center transition-colors cursor-pointer ${
-                  isDragging
-                    ? "border-primary bg-primary/5"
-                    : "border-muted-foreground/30 hover:border-primary/60"
-                }`}
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-                onClick={handleClick}
-              >
-                {selectedFiles.length > 0 ? (
-                  <div className="space-y-2">
-                    {selectedFiles.map((file, index) => (
-                      <div
-                        key={`${file.name}-${index}`}
-                        className="flex items-center justify-between bg-muted/30 px-3 py-2 rounded"
-                      >
-                        <div className="flex items-center space-x-2 min-w-0 flex-1">
-                          <Upload className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                          <span className="text-sm font-medium truncate">
-                            {file.name}
-                          </span>
-                          <span className="text-xs text-muted-foreground flex-shrink-0">
-                            ({Math.round(file.size / 1000)}KB)
-                          </span>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 w-6 p-0 flex-shrink-0"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            removeFile(file);
-                          }}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ))}
-                    {multiple && (
-                      <div className="text-xs text-muted-foreground pt-2 mt-3 border-t border-muted-foreground/20">
-                        Click to add more files or drag and drop
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <Upload className="h-6 w-6 text-muted-foreground mx-auto" />
-                    <div>
-                      <div className="text-sm font-medium">
-                        Click to upload{multiple ? " files" : ""}
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        or drag and drop
-                      </div>
+              {multiple ? (
+                <FileDropzone
+                  multiple
+                  selectedFiles={selectedFiles}
+                  onFilesSelected={handleFileSelect}
+                  onRemoveFile={removeFile}
+                  allowedFileTypes={allowedFileTypeLabels}
+                  maxSizeMb={maxSizeMb}
+                  listFooter={
+                    <div className="border-t border-muted-foreground/20 pt-2 text-xs text-muted-foreground">
+                      Click to add more files or drag and drop
                     </div>
-                    {allowedFileTypes.length > 0 && (
-                      <p className="text-xs text-muted-foreground">
-                        Supported: {allowedFileTypes.join(", ")}
-                      </p>
-                    )}
-                    <p className="text-xs text-muted-foreground">
-                      Max size: {Math.round(maxFileSizeBytes / 1000 / 1000)}MB
-                    </p>
-                  </div>
-                )}
-                <input
-                  type="file"
-                  className="sr-only"
-                  ref={fileInputRef}
-                  onChange={handleFileInputChange}
-                  accept={allowedFileTypes.join(",")}
-                  multiple={multiple}
+                  }
                 />
-              </div>
+              ) : (
+                <FileUpload
+                  className="mt-0"
+                  heading={modalTitle}
+                  content={singleUploadContent}
+                  onContentChange={handleContentChange}
+                  allowFileRemoval
+                  showHeader={false}
+                  allowedFileTypes={allowedFileTypeLabels}
+                  maxFileSizeMb={maxSizeMb}
+                  uploadDescription="Upload file (drag or click)"
+                  fileUrlPlaceholder="Paste the file link here"
+                  footer={null}
+                />
+              )}
             </div>
           </div>
 

@@ -1,0 +1,179 @@
+import type { ReactNode } from "react";
+
+import { Button } from "@/base/button";
+import { cn } from "@/lib/utils";
+import { Upload, X } from "lucide-react";
+
+import { useFileDropzone } from "./use-file-dropzone";
+
+export interface FileDropzoneProps {
+  multiple?: boolean;
+  selectedFiles?: File[];
+  onFilesSelected: (files: File[]) => void;
+  onRemoveFile?: (file: File) => void;
+  className?: string;
+  emptyTitle?: string;
+  emptyDescription?: string;
+  allowedFileTypes?: string[];
+  maxSizeMb?: number;
+  accept?: string;
+  listFooter?: ReactNode;
+  footer?: ReactNode;
+  showRemoveButton?: boolean;
+}
+
+const unitLabels = ["B", "KB", "MB", "GB"];
+
+function formatFileSize(bytes: number): string {
+  if (bytes <= 0) return "0 B";
+
+  let size = bytes;
+  let index = 0;
+
+  while (size >= 1024 && index < unitLabels.length - 1) {
+    size /= 1024;
+    index += 1;
+  }
+
+  const precision = size < 10 && index > 0 ? 1 : 0;
+  return `${size.toFixed(precision)} ${unitLabels[index]}`;
+}
+
+export function FileDropzone({
+  multiple = false,
+  selectedFiles = [],
+  onFilesSelected,
+  onRemoveFile,
+  className,
+  emptyTitle = multiple ? "Upload files (drag or click)" : "Upload file (drag or click)",
+  emptyDescription,
+  allowedFileTypes,
+  maxSizeMb,
+  listFooter,
+  footer,
+  showRemoveButton = true,
+}: FileDropzoneProps) {
+  const {
+    inputRef,
+    isDragging,
+    handleDragEnter,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+    handleFileInputChange,
+    handleClick,
+  } = useFileDropzone({
+    onFilesSelected,
+    multiple,
+  });
+
+  const hasFiles = selectedFiles.length > 0;
+
+  const renderFileRow = (file: File) => (
+    <div className="flex items-center justify-between rounded-md bg-muted/30 px-3 py-2">
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        <Upload className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+        <span className="truncate text-sm font-medium">{file.name}</span>
+        <span className="flex-shrink-0 text-xs text-muted-foreground">
+          {formatFileSize(file.size)}
+        </span>
+      </div>
+      {showRemoveButton && onRemoveFile && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-6 w-6 p-0 flex-shrink-0"
+          onClick={(event) => {
+            event.stopPropagation();
+            onRemoveFile(file);
+          }}
+        >
+          <X className="h-3 w-3" />
+        </Button>
+      )}
+    </div>
+  );
+
+  const renderFileContent = () => {
+    if (!hasFiles) {
+      return (
+        <div className="flex flex-col items-center justify-center gap-4 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+            <Upload className="h-8 w-8" />
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm font-semibold text-gray-600">{emptyTitle}</p>
+            {emptyDescription && (
+              <p className="text-xs text-muted-foreground">{emptyDescription}</p>
+            )}
+          </div>
+          {(allowedFileTypes?.length || maxSizeMb) && (
+            <div className="space-y-1 text-xs text-muted-foreground">
+              {allowedFileTypes?.length && !footer ? (
+                <p>Supported: {allowedFileTypes.join(", ")}</p>
+              ) : null}
+              {maxSizeMb ? <p>Max size: {maxSizeMb}MB</p> : null}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (multiple) {
+      return (
+        <div className="flex w-full flex-col gap-3">
+          {selectedFiles.map((file, index) => (
+            <div key={`${file.name}-${file.size}-${index}`}>
+              {renderFileRow(file)}
+            </div>
+          ))}
+          {listFooter}
+        </div>
+      );
+    }
+
+    return renderFileRow(selectedFiles[0]);
+  };
+
+  return (
+    <>
+      <div
+        className={cn(
+          "flex min-h-[200px] flex-col gap-4 rounded-lg border-2 border-dotted p-8 transition-colors",
+          "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          isDragging
+            ? "border-primary bg-primary/5"
+            : "border-gray-300 hover:border-primary/50",
+          hasFiles
+            ? "items-stretch text-left"
+            : "items-center text-center",
+          className,
+        )}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+        onClick={handleClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            handleClick();
+          }
+        }}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          className="hidden"
+          onChange={handleFileInputChange}
+          accept={allowedFileTypes?.length ? allowedFileTypes.join(",") : undefined}
+          multiple={multiple}
+        />
+        {renderFileContent()}
+      </div>
+      {footer}
+    </>
+  );
+}

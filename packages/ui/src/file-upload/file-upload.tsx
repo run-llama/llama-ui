@@ -8,16 +8,19 @@ import {
   TabsTrigger,
 } from "@/base/tabs";
 import { cn } from "@/lib/utils";
-import { Upload } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { useFileDropzone } from "./use-file-dropzone";
+import { FileDropzone } from "./dropzone";
 
 export interface FileUploadProps {
   className?: string;
   heading: string;
   content: File | string | null;
   onContentChange: (content: File | string | null) => void;
+  allowFileRemoval?: boolean;
+  showHeader?: boolean;
+  allowedFileTypes?: string[];
+  maxFileSizeMb?: number;
   uploadDescription?: string;
   uploadHelpText?: string;
   fileUrlPlaceholder?: string;
@@ -43,84 +46,92 @@ export function FileUpload({
   heading,
   content,
   onContentChange,
+  allowFileRemoval = false,
+  showHeader = true,
+  allowedFileTypes,
+  maxFileSizeMb,
   uploadDescription = "Upload file (drag or click)",
-  uploadHelpText = "You can upload a file up to 315 MB",
+  uploadHelpText,
   fileUrlPlaceholder = "Paste the file link here",
   footer = defaultFooter,
 }: FileUploadProps) {
-  const {
-    inputRef,
-    isDragging,
-    handleDragEnter,
-    handleDragOver,
-    handleDragLeave,
-    handleDrop,
-    handleFileInputChange,
-    handleClick,
-  } = useFileDropzone({
-    onFilesSelected: (files) => {
-      const [file] = files;
-      if (file) {
-        onContentChange(file);
-      }
-    },
-  });
+  const selectedFile = content instanceof File ? content : null;
+
+  const handleFilesSelected = (files: File[]) => {
+    const [file] = files;
+    if (file) {
+      onContentChange(file);
+    }
+  };
+
+  const handleRemoveFile = (file: File) => {
+    if (
+      allowFileRemoval &&
+      selectedFile &&
+      selectedFile.name === file.name &&
+      selectedFile.size === file.size
+    ) {
+      onContentChange(null);
+    }
+  };
 
   return (
     <div className={cn("w-full", className)}>
-      <div className="text-center">
-        <div className="mb-6 flex justify-center">
-          <div
-            className="flex h-12 w-12 items-center justify-center rounded-full"
-            style={{ backgroundColor: "#F3F0FF", color: "#8B5CF6" }}
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+      {showHeader && (
+        <div className="text-center">
+          <div className="mb-6 flex justify-center">
+            <div
+              className="flex h-12 w-12 items-center justify-center rounded-full"
+              style={{ backgroundColor: "#F3F0FF", color: "#8B5CF6" }}
             >
-              <path
-                d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M14 2V8H20"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M16 13H8"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M16 17H8"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M10 9H9H8"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M14 2V8H20"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M16 13H8"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M16 17H8"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M10 9H9H8"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
           </div>
+          <h1 className="mb-8 text-sm font-semibold">{heading}</h1>
         </div>
-        <h1 className="mb-8 text-sm font-semibold">{heading}</h1>
-      </div>
+      )}
 
       <Tabs defaultValue="upload">
         <TabsList className="grid w-full grid-cols-2 rounded-none border-b border-gray-200 bg-transparent p-0">
@@ -139,36 +150,16 @@ export function FileUpload({
         </TabsList>
 
         <TabsContent value="upload" className="mt-6">
-          <div
-            className={`flex min-h-[200px] cursor-pointer items-center justify-center rounded-lg border-2 border-dotted p-8 text-center transition-colors ${
-              isDragging
-                ? "bg-primary/5 border-primary"
-                : "hover:border-primary/50 border-gray-300"
-            }`}
-            onDragEnter={handleDragEnter}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onClick={handleClick}
-            role="button"
-            tabIndex={0}
-          >
-            <input
-              type="file"
-              ref={inputRef}
-              onChange={handleFileInputChange}
-              className="hidden"
-            />
-            <div className="flex flex-col items-center justify-center gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-                <Upload className="h-8 w-8" />
-              </div>
-              <p className="text-sm font-semibold text-gray-600">
-                {uploadDescription}
-              </p>
-              <p className="text-xs text-gray-400">{uploadHelpText}</p>
-            </div>
-          </div>
+          <FileDropzone
+            selectedFiles={selectedFile ? [selectedFile] : []}
+            onFilesSelected={handleFilesSelected}
+            onRemoveFile={allowFileRemoval ? handleRemoveFile : undefined}
+            allowedFileTypes={allowedFileTypes}
+            maxSizeMb={maxFileSizeMb}
+            emptyTitle={uploadDescription}
+            emptyDescription={uploadHelpText}
+            showRemoveButton={allowFileRemoval}
+          />
         </TabsContent>
 
         <TabsContent value="url" className="mt-6">
