@@ -33,7 +33,7 @@ const tabsListVariants = cva(
     defaultVariants: {
       size: "default",
     },
-  },
+  }
 );
 
 function TabsList({
@@ -64,7 +64,7 @@ const tabsTriggerVariants = cva(
     defaultVariants: {
       size: "default",
     },
-  },
+  }
 );
 
 function TabsTrigger({

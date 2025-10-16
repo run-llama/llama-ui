@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   uploadFileApiV1FilesPost,
   readFileContentApiV1FilesIdContentGet,
-  uploadFileFromUrlApiV1FilesUploadFromUrlPut
+  uploadFileFromUrlApiV1FilesUploadFromUrlPut,
 } from "llama-cloud-services/api";
 
 function deriveFileNameFromUrl(url: string): string {
@@ -40,7 +40,14 @@ export interface UseFileUploadOptions {
 
 export interface UseFileUploadReturn {
   isUploading: boolean;
-  uploadFromUrl: (url: string, options?: { name?: string; proxyUrl?: string; requestHeaders?: Record<string, string>; }) => Promise<UploadResult>;
+  uploadFromUrl: (
+    url: string,
+    options?: {
+      name?: string;
+      proxyUrl?: string;
+      requestHeaders?: Record<string, string>;
+    }
+  ) => Promise<UploadResult>;
   uploadAndReturn: (file: File) => Promise<UploadResult>;
 }
 
@@ -119,10 +126,17 @@ export function useFileUpload({
 
   const uploadFromUrl = async (
     url: string,
-    options: { name?: string; proxyUrl?: string; requestHeaders?: Record<string, string> } = {},
+    options: {
+      name?: string;
+      proxyUrl?: string;
+      requestHeaders?: Record<string, string>;
+    } = {}
   ): Promise<UploadResult> => {
     const filename = options.name || deriveFileNameFromUrl(url);
-    const virtualFile = new File([""], filename, { type: "text/url", lastModified: Date.now() });
+    const virtualFile = new File([""], filename, {
+      type: "text/url",
+      lastModified: Date.now(),
+    });
 
     setIsUploading(true);
     onUploadStart?.(virtualFile);

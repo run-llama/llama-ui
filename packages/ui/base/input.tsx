@@ -16,12 +16,12 @@ const inputVariants = cva(
     defaultVariants: {
       size: "default",
     },
-  },
+  }
 );
 
 export interface InputProps
   extends Omit<React.ComponentPropsWithoutRef<"input">, "size">,
-  VariantProps<typeof inputVariants> { }
+    VariantProps<typeof inputVariants> {}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, size, type = "text", disabled, ...props }, ref) => {
@@ -39,7 +39,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       inputVariants({ size }),
       isPassword && "pr-10",
       className,
-      disabled ? 'cursor-not-allowed' : '',
+      disabled ? "cursor-not-allowed" : "",
       "focus-visible:border-[#8B5CF6]"
     );
 
@@ -76,7 +76,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         </button>
       </div>
     );
-  },
+  }
 );
 
 Input.displayName = "Input";

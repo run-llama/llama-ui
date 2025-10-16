@@ -177,7 +177,9 @@ export function FileUploader({
       handleClose();
 
       try {
-        const results = await Promise.all(files.map((file) => uploadAndReturn(file)));
+        const results = await Promise.all(
+          files.map((file) => uploadAndReturn(file))
+        );
         const successfulData = results
           .filter((result) => result.success && result.data)
           .map((result) => result.data!);
@@ -214,11 +216,9 @@ export function FileUploader({
     setSelectedFiles((prev) => prev.filter((file) => file !== fileToRemove));
   };
 
-
   const singleUploadContent = selectedFiles[0] ?? (fileUrl ? fileUrl : null);
 
   const maxSizeMb = Math.round(maxFileSizeBytes / 1000 / 1000);
-
 
   const canSubmit = () => {
     const requiredFieldsSatisfied =

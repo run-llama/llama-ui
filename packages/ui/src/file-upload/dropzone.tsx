@@ -46,7 +46,9 @@ export function FileDropzone({
   onFilesSelected,
   onRemoveFile,
   className,
-  emptyTitle = multiple ? "Upload files (drag or click)" : "Upload file (drag or click)",
+  emptyTitle = multiple
+    ? "Upload files (drag or click)"
+    : "Upload file (drag or click)",
   emptyDescription,
   allowedFileTypes,
   maxSizeMb,
@@ -110,7 +112,9 @@ export function FileDropzone({
           <div className="space-y-1">
             <p className="text-sm font-semibold text-gray-600">{emptyTitle}</p>
             {emptyDescription && (
-              <p className="text-xs text-muted-foreground">{emptyDescription}</p>
+              <p className="text-xs text-muted-foreground">
+                {emptyDescription}
+              </p>
             )}
           </div>
           {(allowedFileTypes?.length || maxSizeMb) && (
@@ -154,7 +158,7 @@ export function FileDropzone({
           hasFiles
             ? "items-stretch text-left"
             : "items-center text-center min-h-[200px]",
-          className,
+          className
         )}
         onDragEnter={disabled ? undefined : handleDragEnter}
         onDragLeave={disabled ? undefined : handleDragLeave}
@@ -180,7 +184,9 @@ export function FileDropzone({
           type="file"
           className="hidden"
           onChange={disabled ? undefined : handleFileInputChange}
-          accept={allowedFileTypes?.length ? allowedFileTypes.join(",") : undefined}
+          accept={
+            allowedFileTypes?.length ? allowedFileTypes.join(",") : undefined
+          }
           multiple={multiple}
           disabled={disabled}
         />

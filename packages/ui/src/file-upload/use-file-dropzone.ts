@@ -27,35 +27,26 @@ export function useFileDropzone({
 
       onFilesSelected([fileArray[0]]);
     },
-    [multiple, onFilesSelected],
+    [multiple, onFilesSelected]
   );
 
-  const handleDragEnter = useCallback(
-    (event: DragEvent<HTMLElement>) => {
-      event.preventDefault();
-      event.stopPropagation();
-      setIsDragging(true);
-    },
-    [],
-  );
+  const handleDragEnter = useCallback((event: DragEvent<HTMLElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragging(true);
+  }, []);
 
-  const handleDragOver = useCallback(
-    (event: DragEvent<HTMLElement>) => {
-      event.preventDefault();
-      event.stopPropagation();
-      setIsDragging(true);
-    },
-    [],
-  );
+  const handleDragOver = useCallback((event: DragEvent<HTMLElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragging(true);
+  }, []);
 
-  const handleDragLeave = useCallback(
-    (event: DragEvent<HTMLElement>) => {
-      event.preventDefault();
-      event.stopPropagation();
-      setIsDragging(false);
-    },
-    [],
-  );
+  const handleDragLeave = useCallback((event: DragEvent<HTMLElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragging(false);
+  }, []);
 
   const handleDrop = useCallback(
     (event: DragEvent<HTMLElement>) => {
@@ -67,7 +58,7 @@ export function useFileDropzone({
         selectFiles(event.dataTransfer.files);
       }
     },
-    [selectFiles],
+    [selectFiles]
   );
 
   const handleFileInputChange = useCallback(
@@ -78,7 +69,7 @@ export function useFileDropzone({
         event.target.value = "";
       }
     },
-    [selectFiles],
+    [selectFiles]
   );
 
   const handleClick = useCallback(() => {

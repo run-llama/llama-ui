@@ -1,12 +1,7 @@
 "use client";
 
 import { Input } from "@/base/input";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/base/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/base/tabs";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
@@ -24,8 +19,8 @@ export interface FileUploadProps {
   uploadDescription?: string;
   uploadHelpText?: string;
   fileUrlPlaceholder?: string;
-  disableWhenFileSelected?: boolean
-  disableWhenUrlProvided?: boolean
+  disableWhenFileSelected?: boolean;
+  disableWhenUrlProvided?: boolean;
   footer?: ReactNode;
 }
 
@@ -163,7 +158,11 @@ export function FileUpload({
             emptyTitle={uploadDescription}
             emptyDescription={uploadHelpText}
             showRemoveButton={allowFileRemoval}
-            disabled={disableWhenUrlProvided && typeof content === "string" && content.trim().length > 0}
+            disabled={
+              disableWhenUrlProvided &&
+              typeof content === "string" &&
+              content.trim().length > 0
+            }
           />
         </TabsContent>
 

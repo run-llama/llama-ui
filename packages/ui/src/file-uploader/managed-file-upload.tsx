@@ -1,10 +1,7 @@
 import type { ComponentProps } from "react";
 
 import { FileUpload } from "../file-upload/file-upload";
-import {
-  FileUploader,
-  type FileUploaderProps,
-} from "./file-uploader";
+import { FileUploader, type FileUploaderProps } from "./file-uploader";
 
 type FileUploadProps = ComponentProps<typeof FileUpload>;
 
@@ -23,17 +20,19 @@ type ModalVariantProps = BaseManagedProps & {
 export type ManagedFileUploadProps = InlineVariantProps | ModalVariantProps;
 
 function isModalVariant(
-  props: ManagedFileUploadProps,
+  props: ManagedFileUploadProps
 ): props is ModalVariantProps {
   return props.variant === "modal";
 }
 
 export function ManagedFileUpload(props: ManagedFileUploadProps) {
   if (isModalVariant(props)) {
-    const modalProps = (({ variant: _variant, ...rest }: ModalVariantProps) => rest)(props);
+    const modalProps = (({ variant: _variant, ...rest }: ModalVariantProps) =>
+      rest)(props);
     return <FileUploader {...modalProps} />;
   }
 
-  const inlineProps = (({ variant: _variant, ...rest }: InlineVariantProps) => rest)(props);
+  const inlineProps = (({ variant: _variant, ...rest }: InlineVariantProps) =>
+    rest)(props);
   return <FileUpload {...inlineProps} />;
 }
