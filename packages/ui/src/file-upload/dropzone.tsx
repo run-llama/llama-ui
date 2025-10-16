@@ -20,6 +20,7 @@ export interface FileDropzoneProps {
   listFooter?: ReactNode;
   footer?: ReactNode;
   showRemoveButton?: boolean;
+  disabled?: boolean;
 }
 
 const unitLabels = ["B", "KB", "MB", "GB"];
@@ -52,6 +53,7 @@ export function FileDropzone({
   listFooter,
   footer,
   showRemoveButton = true,
+  disabled = false,
 }: FileDropzoneProps) {
   const {
     inputRef,
@@ -63,7 +65,11 @@ export function FileDropzone({
     handleFileInputChange,
     handleClick,
   } = useFileDropzone({
-    onFilesSelected,
+    onFilesSelected: (files) => {
+      if (!disabled) {
+        onFilesSelected(files);
+      }
+    },
     multiple,
   });
 
@@ -140,36 +146,43 @@ export function FileDropzone({
       <div
         className={cn(
           "flex min-h-[200px] flex-col gap-4 rounded-lg border-2 border-dotted p-8 transition-colors",
-          "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-          isDragging
+          disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          !disabled && isDragging
             ? "border-primary bg-primary/5"
-            : "border-gray-300 hover:border-primary/50",
+            : "border-gray-300 hover-border-primary/50",
           hasFiles
             ? "items-stretch text-left"
             : "items-center text-center",
           className,
         )}
-        onDragEnter={handleDragEnter}
-        onDragLeave={handleDragLeave}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-        onClick={handleClick}
+        onDragEnter={disabled ? undefined : handleDragEnter}
+        onDragLeave={disabled ? undefined : handleDragLeave}
+        onDragOver={disabled ? undefined : handleDragOver}
+        onDrop={disabled ? undefined : handleDrop}
+        onClick={disabled ? undefined : handleClick}
         role="button"
-        tabIndex={0}
-        onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            handleClick();
-          }
-        }}
+        tabIndex={disabled ? -1 : 0}
+        aria-disabled={disabled}
+        onKeyDown={
+          disabled
+            ? undefined
+            : (event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  handleClick();
+                }
+              }
+        }
       >
         <input
           ref={inputRef}
           type="file"
           className="hidden"
-          onChange={handleFileInputChange}
+          onChange={disabled ? undefined : handleFileInputChange}
           accept={allowedFileTypes?.length ? allowedFileTypes.join(",") : undefined}
           multiple={multiple}
+          disabled={disabled}
         />
         {renderFileContent()}
       </div>

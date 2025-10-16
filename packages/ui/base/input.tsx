@@ -24,7 +24,7 @@ export interface InputProps
     VariantProps<typeof inputVariants> {}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, size, type = "text", ...props }, ref) => {
+  ({ className, size, type = "text", disabled, ...props }, ref) => {
     const [showPassword, setShowPassword] = React.useState(false);
     const isPassword = type === "password";
 
@@ -39,6 +39,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       inputVariants({ size }),
       isPassword && "pr-10",
       className,
+      disabled ? 'cursor-not-allowed' : ''
     );
 
     const inputElement = (
@@ -64,7 +65,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           onClick={() => setShowPassword((prev) => !prev)}
           aria-label={showPassword ? "Hide password" : "Show password"}
           aria-pressed={showPassword}
-          disabled={props.disabled}
+          disabled={disabled}
         >
           {showPassword ? (
             <Eye className="size-4" aria-hidden="true" />

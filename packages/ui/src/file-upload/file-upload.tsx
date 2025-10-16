@@ -24,6 +24,8 @@ export interface FileUploadProps {
   uploadDescription?: string;
   uploadHelpText?: string;
   fileUrlPlaceholder?: string;
+  disableWhenFileSelected?: boolean
+  disableWhenUrlProvided?: boolean
   footer?: ReactNode;
 }
 
@@ -48,8 +50,10 @@ export function FileUpload({
   onContentChange,
   allowFileRemoval = false,
   showHeader = true,
-  allowedFileTypes,
+  allowedFileTypes = [],
   maxFileSizeMb,
+  disableWhenFileSelected = false,
+  disableWhenUrlProvided = false,
   uploadDescription = "Upload file (drag or click)",
   uploadHelpText,
   fileUrlPlaceholder = "Paste the file link here",
@@ -159,6 +163,7 @@ export function FileUpload({
             emptyTitle={uploadDescription}
             emptyDescription={uploadHelpText}
             showRemoveButton={allowFileRemoval}
+            disabled={disableWhenUrlProvided && typeof content === "string" && content.trim().length > 0}
           />
         </TabsContent>
 
@@ -170,6 +175,7 @@ export function FileUpload({
               placeholder={fileUrlPlaceholder}
               value={typeof content === "string" ? content : ""}
               onChange={(event) => onContentChange(event.target.value)}
+              disabled={disableWhenFileSelected && selectedFile !== null}
             />
           </div>
         </TabsContent>
