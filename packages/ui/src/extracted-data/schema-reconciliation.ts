@@ -1,5 +1,9 @@
 import { JSONSchema } from "zod/v4/core";
-import { isNullable } from "@/lib/json-schema";
+import {
+  isNullable,
+  extractFirstNotNullableSchema,
+  getSchemaType,
+} from "@/lib/json-schema";
 import type { JsonShape, JsonValue } from "./types";
 
 /**
@@ -180,14 +184,16 @@ function fillMissingFieldsFromJsonSchema<S extends JsonShape<S>>(
     }
 
     const baseSchema = fieldSchema as JSONSchema.BaseSchema;
+    const { schema: primarySchema } = extractFirstNotNullableSchema(baseSchema);
+    const effectiveSchema = primarySchema ?? baseSchema;
 
-    // Store metadata
+    // Store metadata using normalized schema (handles anyOf/nullable unions)
     const metadata: FieldSchemaMetadata = {
       isRequired,
       isOptional: !isRequired,
-      schemaType: baseSchema.type || "unknown",
-      title: baseSchema.title,
-      description: baseSchema.description,
+      schemaType: getSchemaType(effectiveSchema),
+      title: (effectiveSchema as JSONSchema.BaseSchema).title,
+      description: (effectiveSchema as JSONSchema.BaseSchema).description,
       wasMissing,
     };
 
@@ -197,8 +203,8 @@ function fillMissingFieldsFromJsonSchema<S extends JsonShape<S>>(
     // ===================================
     // For arrays, generate normalized metadata entries for array items
     // using "*" wildcard syntax. This unifies list and table renderer lookup.
-    if (baseSchema.type === "array") {
-      const arraySchema = baseSchema as JSONSchema.ArraySchema;
+    if (effectiveSchema.type === "array") {
+      const arraySchema = effectiveSchema as JSONSchema.ArraySchema;
       if (
         arraySchema.items &&
         typeof arraySchema.items === "object" &&
@@ -222,7 +228,7 @@ function fillMissingFieldsFromJsonSchema<S extends JsonShape<S>>(
           const itemMetadata: FieldSchemaMetadata = {
             isRequired: false, // Array items themselves are not required
             isOptional: true,
-            schemaType: itemSchema.type || "unknown",
+            schemaType: getSchemaType(itemSchema),
             title: itemSchema.title,
             description: itemSchema.description,
             wasMissing: false,
@@ -238,11 +244,11 @@ function fillMissingFieldsFromJsonSchema<S extends JsonShape<S>>(
 
     // Recursively process nested objects and arrays
     if (
-      baseSchema.type === "object" &&
+      effectiveSchema.type === "object" &&
       dataObj[fieldName] !== null &&
       dataObj[fieldName] !== undefined
     ) {
-      const objectSchema = baseSchema as JSONSchema.ObjectSchema;
+      const objectSchema = effectiveSchema as JSONSchema.ObjectSchema;
       fillMissingFieldsFromJsonSchema<S>(
         dataObj[fieldName] as S,
         objectSchema,
@@ -250,10 +256,10 @@ function fillMissingFieldsFromJsonSchema<S extends JsonShape<S>>(
         context
       );
     } else if (
-      baseSchema.type === "array" &&
+      effectiveSchema.type === "array" &&
       Array.isArray(dataObj[fieldName])
     ) {
-      const arraySchema = baseSchema as JSONSchema.ArraySchema;
+      const arraySchema = effectiveSchema as JSONSchema.ArraySchema;
       if (
         arraySchema.items &&
         typeof arraySchema.items === "object" &&
@@ -349,15 +355,17 @@ function generateArrayItemMetadata<S extends JsonShape<S>>(
     const fieldPath = [...currentPath, fieldName];
     const pathString = fieldPath.join(".");
     const baseSchema = fieldSchema as JSONSchema.BaseSchema;
+    const { schema: primarySchema } = extractFirstNotNullableSchema(baseSchema);
+    const effectiveSchema = primarySchema ?? baseSchema;
     const isRequired = objectSchema.required?.includes(fieldName) ?? false;
 
     // Generate metadata for this field
     const metadata: FieldSchemaMetadata = {
       isRequired,
       isOptional: !isRequired,
-      schemaType: baseSchema.type || "unknown",
-      title: baseSchema.title,
-      description: baseSchema.description,
+      schemaType: getSchemaType(effectiveSchema),
+      title: (effectiveSchema as JSONSchema.BaseSchema).title,
+      description: (effectiveSchema as JSONSchema.BaseSchema).description,
       wasMissing: false, // Array item fields are schema-defined, not missing
     };
 
