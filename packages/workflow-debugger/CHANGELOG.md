@@ -1,5 +1,11 @@
 # @llamaindex/workflow-debugger
 
+## 0.0.2
+
+### Patch Changes
+
+- 1d5b72c: use cloudflare as cdn
+
 ## 0.1.9
 
 ### Patch Changes
