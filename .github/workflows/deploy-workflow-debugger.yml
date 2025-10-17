@@ -47,9 +47,11 @@ jobs:
         if: steps.version.outputs.changed == 'true'
         run: pnpm --filter @llamaindex/workflow-debugger build
 
-      - name: Install AWS CLI
+      - name: Setup AWS CLI
         if: steps.version.outputs.changed == 'true'
-        run: sudo apt-get update && sudo apt-get install -y awscli
+        uses: aws-actions/setup-aws-cli@v4
+        with:
+          version: '2'
 
       - name: Generate GitHub App Token
         if: steps.version.outputs.changed == 'true'
