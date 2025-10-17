@@ -43,7 +43,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps
+        run: pnpm --filter @llamaindex/ui exec playwright install --with-deps
 
       - name: Run linting
         run: pnpm run lint
