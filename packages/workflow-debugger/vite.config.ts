@@ -11,7 +11,7 @@ export default defineConfig({
         inlineDynamicImports: true,
         entryFileNames: "app.js",
         chunkFileNames: "app.js",
-        assetFileNames: (assetInfo) => {
+        assetFileNames(assetInfo) {
           if (
             assetInfo.names.length &&
             assetInfo.names.some((name) => name.endsWith(".css"))
