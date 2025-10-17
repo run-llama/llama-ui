@@ -49,7 +49,7 @@ export const RequiredFieldValidation: Story = {
     await dialogScope.findByText("validation.pdf");
     expect(submitButton).toBeDisabled();
 
-    const partNumberInput = dialogScope.getByLabelText("Part Number");
+    const partNumberInput = dialogScope.getByLabelText(/Part Number/i);
     await userEvent.type(partNumberInput, "PN-12345");
 
     await waitFor(() => {

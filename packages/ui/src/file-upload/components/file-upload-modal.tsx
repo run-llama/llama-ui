@@ -308,7 +308,7 @@ export function FileUploader({
             <Button variant="outline" onClick={handleClose}>
               Cancel
             </Button>
-            <Button onClick={handleUpload} disabled={!canSubmit}>
+            <Button onClick={handleUpload} disabled={!canSubmit()}>
               {selectedFiles.length > 1
                 ? `Upload ${selectedFiles.length} Files & Process`
                 : "Upload & Process"}
