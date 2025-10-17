@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import { Loader2, Upload } from "lucide-react";
 
 import { Button } from "@/base/button";
@@ -11,42 +11,19 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/base/dialog";
-import { FileUpload } from "../file-upload/file-upload";
-import { FileDropzone } from "../file-upload/dropzone";
-import { validateFile, FileType } from "./file-utils";
-import { useFileUpload, type FileUploadData } from "./use-file-upload";
+import { FileUpload } from "./file-upload";
+import { FileDropzone } from "./dropzone";
+import type { FileUploaderProps } from "./types";
+import { validateFile, type FileType } from "./file-utils";
+import { useFileUpload } from "./use-file-upload";
 import { useUploadProgress } from "./use-upload-progress";
 import { UploadProgress } from "./upload-progress";
-
-export interface InputField {
-  key: string;
-  label: string;
-  placeholder?: string;
-  required?: boolean;
-  validation?: (value: string) => string | null;
-}
-
-export interface FileUploaderProps {
-  title?: string;
-  description?: string;
-  inputFields?: InputField[];
-  allowedFileTypes?: FileType[];
-  maxFileSizeBytes?: number;
-  multiple?: boolean;
-  onSuccess: (
-    data: FileUploadData[],
-    fieldValues: Record<string, string>
-  ) => Promise<void>;
-  trigger?: ReactNode;
-  /** Set to true while processing the file after a callback, in order to show a spinner */
-  isProcessing?: boolean;
-}
 
 export function FileUploader({
   title,
   description,
   inputFields,
-  allowedFileTypes = [],
+  allowedFileTypes = [] as FileType[],
   maxFileSizeBytes = 100 * 1024 * 1024, // 100MB default
   multiple = false,
   onSuccess,
@@ -218,8 +195,6 @@ export function FileUploader({
 
   const singleUploadContent = selectedFiles[0] ?? (fileUrl ? fileUrl : null);
 
-  const maxSizeMb = Math.round(maxFileSizeBytes / 1000 / 1000);
-
   const canSubmit = () => {
     const requiredFieldsSatisfied =
       !inputFields ||
@@ -298,7 +273,7 @@ export function FileUploader({
                   onFilesSelected={handleFileSelect}
                   onRemoveFile={removeFile}
                   allowedFileTypes={allowedFileTypes}
-                  maxSizeMb={maxSizeMb}
+                  maxFileSizeBytes={maxFileSizeBytes}
                   listFooter={
                     <div className="border-t border-muted-foreground/20 pt-2 text-xs text-muted-foreground">
                       Click to add more files or drag and drop
@@ -314,10 +289,9 @@ export function FileUploader({
                   allowFileRemoval
                   showHeader={false}
                   allowedFileTypes={allowedFileTypes}
-                  maxFileSizeMb={maxSizeMb}
+                  maxFileSizeBytes={maxFileSizeBytes}
                   disableWhenFileSelected
                   disableWhenUrlProvided
-                  fileUrlPlaceholder="Paste the file link here"
                   footer={null}
                 />
               )}

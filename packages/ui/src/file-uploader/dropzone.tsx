@@ -1,24 +1,9 @@
-import type { ReactNode } from "react";
-
 import { Button } from "@/base/button";
 import { cn } from "@/lib/utils";
 import { Upload, X } from "lucide-react";
 
+import type { FileDropzoneProps } from "./types";
 import { useFileDropzone } from "./use-file-dropzone";
-
-export interface FileDropzoneProps {
-  multiple?: boolean;
-  selectedFiles?: File[];
-  onFilesSelected: (files: File[]) => void;
-  onRemoveFile?: (file: File) => void;
-  className?: string;
-  allowedFileTypes?: string[];
-  maxSizeMb?: number;
-  listFooter?: ReactNode;
-  footer?: ReactNode;
-  showRemoveButton?: boolean;
-  disabled?: boolean;
-}
 
 const unitLabels = ["B", "KB", "MB", "GB"];
 
@@ -44,7 +29,7 @@ export function FileDropzone({
   onRemoveFile,
   className,
   allowedFileTypes,
-  maxSizeMb,
+  maxFileSizeBytes,
   listFooter,
   footer,
   showRemoveButton = true,
@@ -69,9 +54,10 @@ export function FileDropzone({
   });
 
   const hasFiles = selectedFiles.length > 0;
-  const dropzoneInstructions = multiple
+  const uploadDescription = multiple
     ? "Upload files (drag or click)"
     : "Upload file (drag or click)";
+  const maxSizeMb = maxFileSizeBytes && Math.round(maxFileSizeBytes / 1000 / 1000);
 
   const renderFileRow = (file: File) => (
     <div className="flex items-center justify-between rounded-md bg-muted/30 px-3 py-2">
@@ -106,9 +92,11 @@ export function FileDropzone({
             <Upload className="h-8 w-8" />
           </div>
           <div className="space-y-1">
-            <p className="text-sm font-semibold text-gray-600">{dropzoneInstructions}</p>
+            <p className="text-sm font-semibold text-gray-600">
+              {uploadDescription}
+            </p>
           </div>
-          {(allowedFileTypes?.length || maxSizeMb) && (
+          {(allowedFileTypes?.length || maxFileSizeBytes) && (
             <div className="space-y-1 text-xs text-muted-foreground">
               {allowedFileTypes?.length && !footer ? (
                 <p>Supported: {allowedFileTypes.join(", ")}</p>
@@ -141,7 +129,7 @@ export function FileDropzone({
       <div
         className={cn(
           "flex flex-col gap-4 rounded-lg border-2 border-dotted p-8 transition-colors",
-          disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer",
+          disabled ? "opacity-60" : "cursor-pointer",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           !disabled && isDragging
             ? "border-primary bg-primary/5"

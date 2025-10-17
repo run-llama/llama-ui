@@ -3,26 +3,10 @@
 import { Input } from "@/base/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/base/tabs";
 import { cn } from "@/lib/utils";
-import type { ReactNode } from "react";
-import { FileText } from 'lucide-react'
+import { FileText } from "lucide-react";
 
 import { FileDropzone } from "./dropzone";
-
-export interface FileUploadProps {
-  className?: string;
-  heading: string;
-  content: File | string | null;
-  onContentChange: (content: File | string | null) => void;
-  allowFileRemoval?: boolean;
-  showHeader?: boolean;
-  allowedFileTypes?: string[];
-  maxFileSizeMb?: number;
-  uploadDescription?: string;
-  fileUrlPlaceholder?: string;
-  disableWhenFileSelected?: boolean;
-  disableWhenUrlProvided?: boolean;
-  footer?: ReactNode;
-}
+import { FileUploadProps } from "./types/index";
 
 const defaultFooter = (
   <div className="mt-6 rounded-md bg-gray-100 p-4 text-center text-xs text-gray-500">
@@ -46,10 +30,9 @@ export function FileUpload({
   allowFileRemoval = false,
   showHeader = true,
   allowedFileTypes = [],
-  maxFileSizeMb,
+  maxFileSizeBytes,
   disableWhenFileSelected = false,
   disableWhenUrlProvided = false,
-  fileUrlPlaceholder = "Paste the file link here",
   footer = defaultFooter,
 }: FileUploadProps) {
   const selectedFile = content instanceof File ? content : null;
@@ -110,7 +93,7 @@ export function FileUpload({
             onFilesSelected={handleFilesSelected}
             onRemoveFile={allowFileRemoval ? handleRemoveFile : undefined}
             allowedFileTypes={allowedFileTypes}
-            maxSizeMb={maxFileSizeMb}
+            maxFileSizeBytes={maxFileSizeBytes}
             showRemoveButton={allowFileRemoval}
             disabled={
               disableWhenUrlProvided &&
@@ -125,7 +108,7 @@ export function FileUpload({
             <Input
               type="url"
               className="w-full"
-              placeholder={fileUrlPlaceholder}
+              placeholder={"Paste the file link here"}
               value={typeof content === "string" ? content : ""}
               onChange={(event) => onContentChange(event.target.value)}
               disabled={disableWhenFileSelected && selectedFile !== null}

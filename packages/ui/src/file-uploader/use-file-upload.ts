@@ -6,6 +6,14 @@ import {
   uploadFileFromUrlApiV1FilesUploadFromUrlPut,
 } from "llama-cloud-services/api";
 
+import type {
+  FileUploadData,
+  UploadResult,
+  UploadFromUrlOptions,
+  UseFileUploadOptions,
+  UseFileUploadReturn,
+} from "./types";
+
 function deriveFileNameFromUrl(url: string): string {
   try {
     const parsed = new URL(url);
@@ -20,38 +28,6 @@ function deriveFileNameFromUrl(url: string): string {
   return url.replace(/[^a-z0-9_.-]/gi, "-") || "remote-file";
 }
 
-export interface FileUploadData {
-  file: File;
-  fileId: string;
-  url?: string;
-}
-
-export interface UploadResult {
-  success: boolean;
-  data: FileUploadData | null;
-  error: Error | null;
-}
-
-export interface UseFileUploadOptions {
-  onProgress?: (file: File, progress: number) => void;
-  onUploadStart?: (file: File) => void;
-  onUploadComplete?: (file: File) => void;
-  onUploadError?: (file: File, error: string) => void;
-}
-
-export interface UseFileUploadReturn {
-  isUploading: boolean;
-  uploadFromUrl: (
-    url: string,
-    options?: {
-      name?: string;
-      proxyUrl?: string;
-      requestHeaders?: Record<string, string>;
-    }
-  ) => Promise<UploadResult>;
-  uploadAndReturn: (file: File) => Promise<UploadResult>;
-}
-
 export function useFileUpload({
   onProgress,
   onUploadStart,
@@ -60,7 +36,7 @@ export function useFileUpload({
 }: UseFileUploadOptions = {}): UseFileUploadReturn {
   const [isUploading, setIsUploading] = useState(false);
 
-  const uploadAndReturn = async (file: File): Promise<UploadResult> => {
+  const uploadFile = async (file: File): Promise<UploadResult> => {
     setIsUploading(true);
     onUploadStart?.(file);
 
@@ -126,11 +102,7 @@ export function useFileUpload({
 
   const uploadFromUrl = async (
     url: string,
-    options: {
-      name?: string;
-      proxyUrl?: string;
-      requestHeaders?: Record<string, string>;
-    } = {}
+    options: UploadFromUrlOptions = {}
   ): Promise<UploadResult> => {
     const filename = options.name || deriveFileNameFromUrl(url);
     const virtualFile = new File([""], filename, {
@@ -194,7 +166,16 @@ export function useFileUpload({
 
   return {
     isUploading,
-    uploadAndReturn,
+    uploadFile,
     uploadFromUrl,
+    uploadAndReturn: uploadFile,
   };
 }
+
+export type {
+  FileUploadData,
+  UploadResult,
+  UploadFromUrlOptions,
+  UseFileUploadOptions,
+  UseFileUploadReturn,
+} from "./types";
