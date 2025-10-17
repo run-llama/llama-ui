@@ -31,13 +31,12 @@ export default defineConfig(({ mode }) => ({
       external: [],
       output: {
         inlineDynamicImports: true,
-        chunkFileNames: "app.js",
         assetFileNames: (assetInfo) => {
-          if (
-            assetInfo.names.length &&
-            assetInfo.names.some((name) => name.endsWith(".css"))
-          ) {
-            return "app.css";
+          // Force CSS to use versioned filename as well
+          const name =
+            assetInfo.name || (assetInfo.names && assetInfo.names[0]) || "";
+          if (typeof name === "string" && name.endsWith(".css")) {
+            return `debugger.v${version}.css`;
           }
           return "assets/[name][extname]";
         },
