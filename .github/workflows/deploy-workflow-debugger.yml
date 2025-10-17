@@ -49,7 +49,7 @@ jobs:
 
       - name: Setup AWS CLI
         if: steps.version.outputs.changed == 'true'
-        uses: aws-actions/setup-aws-cli@v4
+        uses: aws-actions/setup-aws-cli@v4.0.1
         with:
           version: '2'
 
