@@ -1,5 +1,4 @@
 import { http, HttpResponse, delay } from "msw";
-import { defaultWorkflowHandlers } from "./workflow-handlers";
 
 // Mock the LlamaCloud file upload API
 let taskCounter = 1;
@@ -100,9 +99,6 @@ export const handlers = {
       return new HttpResponse("Internal Server Error", { status: 500 });
     }),
   ],
-
-  // Workflow Task handlers (using factory functions)
-  workflowTask: defaultWorkflowHandlers,
 
   // Agent Data handlers for ItemGrid
   agentData: [

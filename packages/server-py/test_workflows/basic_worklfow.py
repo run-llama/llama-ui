@@ -1,7 +1,11 @@
+import asyncio
 from workflows.context import Context
 from workflows import Workflow, step
 from workflows.events import Event, StartEvent, StopEvent
 from enum import Enum
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 class Operation(Enum):
     SUM = "sum"
@@ -13,9 +17,6 @@ class CalculatorInput(StartEvent):
     a: int
     b: int
     operation: Operation
-
-class CalculatorOutput(StopEvent):
-    result: int
 
 class ProgressEvent(Event):
     step: str
@@ -29,9 +30,13 @@ class CalculateRequestEvent(Event):
 class CalculateResponseEvent(Event):
     result: int
 
+class CalculatorOutput(StopEvent):
+    results: int
+
 class CalculatorWorkflow(Workflow):
     @step
     async def initialize(self, ctx: Context, ev: CalculatorInput) -> CalculateRequestEvent:
+        logger.info("Starting sum workflow")
         ctx.write_event_to_stream(
             ProgressEvent(
                 step="start",
@@ -39,9 +44,13 @@ class CalculatorWorkflow(Workflow):
                 message="Starting sum workflow"
             )
         )
+        await asyncio.sleep(1.0)
+        return CalculateRequestEvent(a=ev.a, b=ev.b, operation=ev.operation)
     
     @step
     async def sum(self, ctx: Context, ev: CalculateRequestEvent) -> CalculateResponseEvent:
+        logger.info("Calculating result")
+        await asyncio.sleep(1.0)
         ctx.write_event_to_stream(
             ProgressEvent(
                 step="calculate",
@@ -61,4 +70,6 @@ class CalculatorWorkflow(Workflow):
 
     @step
     async def finalize(self, ctx: Context, ev: CalculateResponseEvent) -> CalculatorOutput:
-        return CalculatorOutput(result=ev.result)
+        logger.info("Finalizing result")
+        await asyncio.sleep(1.0)
+        return CalculatorOutput(results=ev.result)

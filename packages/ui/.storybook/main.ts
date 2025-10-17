@@ -10,7 +10,6 @@ const config: StorybookConfig = {
     "@storybook/addon-a11y",
     "@storybook/addon-vitest",
     "msw-storybook-addon",
-    resolve(__dirname, "./addons/workflows-server-addon"),
   ],
   framework: {
     name: "@storybook/react-vite",

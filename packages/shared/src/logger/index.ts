@@ -49,7 +49,7 @@ class NoOpLogger implements ILogger {
   }
 }
 
-const isDevelopment = process?.env?.NODE_ENV === "development";
+const isDevelopment = import.meta.env.MODE === "development";
 
 export const logger: ILogger = isDevelopment
   ? new ConsoleLogger("llama-ui")
