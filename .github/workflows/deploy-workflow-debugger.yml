@@ -47,11 +47,17 @@ jobs:
         if: steps.version.outputs.changed == 'true'
         run: pnpm --filter @llamaindex/workflow-debugger build
 
-      - name: Setup AWS CLI
+      - name: Install AWS CLI v2
         if: steps.version.outputs.changed == 'true'
-        uses: aws-actions/setup-aws-cli@v4.0.1
-        with:
-          version: '2'
+        run: |
+          set -euo pipefail
+          curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          if command -v sudo >/dev/null 2>&1; then SUDO=sudo; else SUDO=; fi
+          $SUDO apt-get update
+          $SUDO apt-get install -y unzip
+          unzip -q awscliv2.zip
+          $SUDO ./aws/install --update
+          aws --version
 
       - name: Generate GitHub App Token
         if: steps.version.outputs.changed == 'true'
