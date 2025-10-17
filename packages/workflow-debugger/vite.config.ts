@@ -7,12 +7,15 @@ const require = createRequire(import.meta.url);
 const { version } = require("./package.json");
 
 // Build as a library that emits only JS/CSS assets with versioned filenames
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react()],
   resolve: {
     alias: {
       "@shared": path.resolve(__dirname, "../shared"),
     },
+  },
+  define: {
+    'process.env.NODE_ENV': JSON.stringify(mode === 'production' ? 'production' : 'development'),
   },
   build: {
     lib: {
@@ -38,4 +41,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));
