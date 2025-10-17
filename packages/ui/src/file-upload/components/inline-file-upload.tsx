@@ -7,20 +7,7 @@ import { FileText } from "lucide-react";
 
 import { FileDropzone } from "./dropzone";
 import type { FileUploadProps } from "../types";
-
-const defaultFooter = (
-  <div className="mt-6 rounded-md bg-gray-100 p-4 text-center text-xs text-gray-500">
-    Supported file formats: PDF, TXT, CSV, JSON, XLS, XLSX, and{" "}
-    <a
-      href="https://developers.llamaindex.ai/python/cloud/llamaparse/features/supported_document_types/"
-      className="underline"
-      target="_blank"
-      rel="noreferrer"
-    >
-      more
-    </a>
-  </div>
-);
+import { fa } from "zod/v4/locales";
 
 export function FileUpload({
   className,
@@ -33,9 +20,8 @@ export function FileUpload({
   maxFileSizeBytes,
   uploadDescription = "Upload file (drag or click)",
   fileUrlPlaceholder = "Paste the file link here",
-  disableWhenFileSelected = false,
-  disableWhenUrlProvided = false,
-  footer = defaultFooter,
+  disableWhenHasSelection = false,
+  footer,
 }: FileUploadProps) {
   const selectedFile = content instanceof File ? content : null;
 
@@ -99,7 +85,7 @@ export function FileUpload({
             emptyTitle={uploadDescription}
             showRemoveButton={allowFileRemoval}
             disabled={
-              disableWhenUrlProvided &&
+              disableWhenHasSelection &&
               typeof content === "string" &&
               content.trim().length > 0
             }
@@ -114,7 +100,7 @@ export function FileUpload({
               placeholder={fileUrlPlaceholder}
               value={typeof content === "string" ? content : ""}
               onChange={(event) => onContentChange(event.target.value)}
-              disabled={disableWhenFileSelected && selectedFile !== null}
+              disabled={disableWhenHasSelection && selectedFile !== null}
             />
           </div>
         </TabsContent>

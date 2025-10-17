@@ -18,6 +18,7 @@ import { validateFile, type FileType } from "../utils/file-utils";
 import { useFileUpload } from "../hooks/use-file-upload";
 import { useUploadProgress } from "../hooks/use-upload-progress";
 import { UploadProgress } from "./upload-progress";
+import { logger } from "@shared/logger";
 
 export function FileUploader({
   title,
@@ -164,8 +165,11 @@ export function FileUploader({
         if (successfulData.length > 0) {
           await onSuccess(successfulData, currentFieldValues);
         }
-      } catch {
-        // Error is already handled in the hook/progress panel
+      }  catch (error) {
+        logger.error("FileUploader uploadFiles failed", {
+          error,
+          fileCount: files.length,
+        });
       }
     };
 
@@ -180,8 +184,11 @@ export function FileUploader({
             fileUrl: trimmedUrl,
           });
         }
-      } catch {
-        // Errors are handled by the upload hook
+      } catch (error) {
+        logger.error("FileUploader uploadFromUrl failed", {
+          error,
+          url: trimmedUrl,
+        });
       }
       return;
     }
@@ -290,8 +297,7 @@ export function FileUploader({
                   showHeader={false}
                   allowedFileTypes={allowedFileTypes}
                   maxFileSizeBytes={maxFileSizeBytes}
-                  disableWhenFileSelected
-                  disableWhenUrlProvided
+                  disableWhenHasSelection
                   footer={null}
                 />
               )}

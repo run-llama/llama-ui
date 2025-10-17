@@ -31,7 +31,6 @@ export default defineConfig(({ mode }) => ({
       external: [],
       output: {
         inlineDynamicImports: true,
-        entryFileNames: "app.js",
         chunkFileNames: "app.js",
         assetFileNames: (assetInfo) => {
           if (

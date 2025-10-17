@@ -4,6 +4,7 @@ import { Upload, X } from "lucide-react";
 
 import type { FileDropzoneProps } from "../types";
 import { useFileDropzone } from "../hooks/use-file-dropzone";
+import { Input } from "@/base/input";
 
 const unitLabels = ["B", "KB", "MB", "GB"];
 
@@ -169,7 +170,7 @@ export function FileDropzone({
               }
         }
       >
-        <input
+        <Input
           ref={inputRef}
           type="file"
           className="hidden"
