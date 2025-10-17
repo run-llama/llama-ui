@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import { createRequire } from "module";
+import path from "path";
 
 const require = createRequire(import.meta.url);
 const { version } = require("./package.json");
@@ -8,6 +9,11 @@ const { version } = require("./package.json");
 // Build as a library that emits only JS/CSS assets with versioned filenames
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      "@shared": path.resolve(__dirname, "../shared"),
+    },
+  },
   build: {
     lib: {
       entry: "src/main.tsx",
