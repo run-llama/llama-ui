@@ -1,5 +1,31 @@
 # @llamaindex/workflow-debugger
 
+## 0.0.4
+
+### Patch Changes
+
+- 762c881: bump version
+
+## 0.0.3
+
+### Patch Changes
+
+- 1d776f7: bump version
+
+## 0.0.2
+
+### Patch Changes
+
+- 1d5b72c: use cloudflare as cdn
+
+## 0.1.9
+
+### Patch Changes
+
+- Updated dependencies [db491f1]
+  - @llamaindex/workflows-client@1.6.1
+  - @llamaindex/ui@2.1.8
+
 ## 0.1.8
 
 ### Patch Changes

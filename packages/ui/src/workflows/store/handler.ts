@@ -11,7 +11,7 @@ import {
   StreamSubscriber,
   workflowStreamingManager,
 } from "../../lib/shared-streaming";
-import { logger } from "@llamaindex/shared";
+import { logger } from "@shared/logger";
 import { StopEvent, WorkflowEvent, WorkflowEventType } from "./workflow-event";
 
 /**
@@ -179,7 +179,7 @@ function streamByEventSource(
   },
   callbacks: StreamSubscriber<WorkflowEvent>
 ) {
-  return new Promise<WorkflowEvent[]>((resolve, reject) => {
+  return new Promise<WorkflowEvent[]>((resolve) => {
     const baseUrl = (params.client.getConfig().baseUrl ?? "").replace(
       /\/$/,
       ""
@@ -199,8 +199,6 @@ function streamByEventSource(
     if (params.abortSignal) {
       params.abortSignal.addEventListener("abort", () => {
         eventSource.close();
-        callbacks.onError?.(new Error("AbortSignal"));
-        reject(new Error("AbortSignal"));
       });
     }
 
@@ -220,11 +218,12 @@ function streamByEventSource(
         resolve(accumulatedEvents);
       }
     });
-    eventSource.addEventListener("error", () => {
+    eventSource.addEventListener("error", (event) => {
       // Ignore error for now due to EventSource limitations.
       // 1. Now py server close sse connection and will always trigger error event even readyState is 2 (CLOSED)
       // 2. The error event isself is a general event without any error information
       // TODO: swtich to more fetch + stream approach
+      logger.warn("[streamByEventSource] error", event);
       return;
     });
     eventSource.addEventListener("open", () => {

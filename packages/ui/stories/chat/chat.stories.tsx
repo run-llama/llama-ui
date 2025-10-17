@@ -6,10 +6,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useChat } from "../../src/chat/hooks/use-chat";
 import { ApiProvider } from "../../src/lib/api-provider";
-import {
-  createWorkflowHandlers,
-  chatEventGenerator,
-} from "../../.storybook/mocks";
 import { createWorkflowsClient } from "../../src/lib/clients";
 import ChatSection from "../../src/chat/components/chat-section";
 
@@ -72,15 +68,6 @@ export const Default: Story = {
   args: {
     storyId: "default",
   },
-  parameters: {
-    msw: {
-      handlers: createWorkflowHandlers({
-        eventGenerator: chatEventGenerator,
-        eventDelay: 300,
-        initialDelay: 500,
-      }),
-    },
-  },
 };
 
 /**
@@ -90,75 +77,6 @@ export const WithXMLMarkers: Story = {
   args: {
     storyId: "with-xml-markers",
   },
-  parameters: {
-    msw: {
-      handlers: createWorkflowHandlers({
-        eventGenerator: (): Array<{ type: string; data: unknown }> => [
-          {
-            type: "workflows.events.ChatDeltaEvent",
-            data: { delta: "Let me search for that information.\n\n" },
-          },
-          {
-            type: "workflows.events.ChatDeltaEvent",
-            data: { delta: "<event>\n" },
-          },
-          {
-            type: "workflows.events.ChatDeltaEvent",
-            data: {
-              delta: '{"title": "Searching database", "status": "success"}\n',
-            },
-          },
-          {
-            type: "workflows.events.ChatDeltaEvent",
-            data: { delta: "</event>\n\n" },
-          },
-          {
-            type: "workflows.events.ChatDeltaEvent",
-            data: {
-              delta: "I found the following results [citation:node-1].\n\n",
-            },
-          },
-          {
-            type: "workflows.events.ChatDeltaEvent",
-            data: { delta: "<sources>\n" },
-          },
-          {
-            type: "workflows.events.ChatDeltaEvent",
-            data: {
-              delta:
-                '{"nodes": [{"id": "node-1", "text": "Result 1", "metadata": {"title": "Document 1"}, "url": "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf"}]}\n',
-            },
-          },
-          {
-            type: "workflows.events.ChatDeltaEvent",
-            data: { delta: "</sources>\n\n" },
-          },
-          {
-            type: "workflows.events.ChatDeltaEvent",
-            data: { delta: "Is there anything else you'd like to know?\n\n" },
-          },
-          {
-            type: "workflows.events.ChatDeltaEvent",
-            data: { delta: "<suggested_questions>\n" },
-          },
-          {
-            type: "workflows.events.ChatDeltaEvent",
-            data: { delta: '["Tell me more", "What are the details?"]\n' },
-          },
-          {
-            type: "workflows.events.ChatDeltaEvent",
-            data: { delta: "</suggested_questions>" },
-          },
-          {
-            type: "workflows.events.InputRequiredEvent",
-            data: { prefix: "waiting" },
-          },
-        ],
-        eventDelay: 200,
-        initialDelay: 500,
-      }),
-    },
-  },
 };
 
 /**
@@ -167,44 +85,5 @@ export const WithXMLMarkers: Story = {
 export const WithCodeBlock: Story = {
   args: {
     storyId: "with-code-block",
-  },
-  parameters: {
-    msw: {
-      handlers: createWorkflowHandlers({
-        eventGenerator: (): Array<{ type: string; data: unknown }> => [
-          {
-            type: "workflows.events.ChatDeltaEvent",
-            data: { delta: "Here's a Python example:\n\n" },
-          },
-          { type: "workflows.events.ChatDeltaEvent", data: { delta: "```py" } },
-          {
-            type: "workflows.events.ChatDeltaEvent",
-            data: { delta: "thon\n" },
-          },
-          {
-            type: "workflows.events.ChatDeltaEvent",
-            data: { delta: "def hello():\n" },
-          },
-          {
-            type: "workflows.events.ChatDeltaEvent",
-            data: { delta: "    print('Hello, World!')\n" },
-          },
-          {
-            type: "workflows.events.ChatDeltaEvent",
-            data: { delta: "```\n\n" },
-          },
-          {
-            type: "workflows.events.ChatDeltaEvent",
-            data: { delta: "This function prints a greeting." },
-          },
-          {
-            type: "workflows.events.InputRequiredEvent",
-            data: { prefix: "waiting" },
-          },
-        ],
-        eventDelay: 150,
-        initialDelay: 500,
-      }),
-    },
   },
 };
