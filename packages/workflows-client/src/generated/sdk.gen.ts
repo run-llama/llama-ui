@@ -20,6 +20,7 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 
 /**
  * List workflows
+ *
  * Returns the list of registered workflow names.
  */
 export const getWorkflows = <ThrowOnError extends boolean = false>(options?: Options<GetWorkflowsData, ThrowOnError>) => {
@@ -31,6 +32,7 @@ export const getWorkflows = <ThrowOnError extends boolean = false>(options?: Opt
 
 /**
  * Run workflow (wait)
+ *
  * Runs the specified workflow synchronously and returns the final result.
  * The request body may include an optional serialized start event, an optional
  * context object, and optional keyword arguments passed to the workflow run.
@@ -49,6 +51,7 @@ export const postWorkflowsByNameRun = <ThrowOnError extends boolean = false>(opt
 
 /**
  * Run workflow (no-wait)
+ *
  * Starts the specified workflow asynchronously and returns a handler identifier
  * which can be used to query results or stream events.
  *
@@ -66,6 +69,7 @@ export const postWorkflowsByNameRunNowait = <ThrowOnError extends boolean = fals
 
 /**
  * Get JSON schema for start event
+ *
  * Gets the JSON schema of the start and stop events from the specified workflow and returns it under "start" (start event) and "stop" (stop event)
  *
  */
@@ -78,6 +82,7 @@ export const getWorkflowsByNameSchema = <ThrowOnError extends boolean = false>(o
 
 /**
  * Get workflow result
+ *
  * Returns the final result of an asynchronously started workflow, if available
  */
 export const getResultsByHandlerId = <ThrowOnError extends boolean = false>(options: Options<GetResultsByHandlerIdData, ThrowOnError>) => {
@@ -89,6 +94,7 @@ export const getResultsByHandlerId = <ThrowOnError extends boolean = false>(opti
 
 /**
  * Stream workflow events
+ *
  * Streams events produced by a workflow execution. Events are emitted as
  * newline-delimited JSON by default, or as Server-Sent Events when `sse=true`.
  * Event data is returned as an envelope that preserves backward-compatible fields
@@ -114,6 +120,7 @@ export const getEventsByHandlerId = <ThrowOnError extends boolean = false>(optio
 
 /**
  * Send event to workflow
+ *
  * Sends an event to a running workflow's context.
  */
 export const postEventsByHandlerId = <ThrowOnError extends boolean = false>(options: Options<PostEventsByHandlerIdData, ThrowOnError>) => {
@@ -129,6 +136,7 @@ export const postEventsByHandlerId = <ThrowOnError extends boolean = false>(opti
 
 /**
  * Health check
+ *
  * Returns the server health status.
  */
 export const getHealth = <ThrowOnError extends boolean = false>(options?: Options<GetHealthData, ThrowOnError>) => {
@@ -140,6 +148,7 @@ export const getHealth = <ThrowOnError extends boolean = false>(options?: Option
 
 /**
  * Get handlers
+ *
  * Returns all workflow handlers.
  */
 export const getHandlers = <ThrowOnError extends boolean = false>(options?: Options<GetHandlersData, ThrowOnError>) => {
@@ -151,6 +160,7 @@ export const getHandlers = <ThrowOnError extends boolean = false>(options?: Opti
 
 /**
  * Stop and delete handler
+ *
  * Stops a running workflow handler by cancelling its tasks. Optionally removes the
  * handler from the persistence store if purge=true.
  *
@@ -164,6 +174,7 @@ export const postHandlersByHandlerIdCancel = <ThrowOnError extends boolean = fal
 
 /**
  * Get the representation of the workflow
+ *
  * Get the representation of the workflow as a directed graph in JSON format
  *
  */
@@ -176,6 +187,7 @@ export const getWorkflowsByNameRepresentation = <ThrowOnError extends boolean = 
 
 /**
  * List workflow events
+ *
  * Returns the list of registered workflow event schemas.
  */
 export const getWorkflowsByNameEvents = <ThrowOnError extends boolean = false>(options: Options<GetWorkflowsByNameEventsData, ThrowOnError>) => {
