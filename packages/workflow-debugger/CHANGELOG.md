@@ -1,5 +1,11 @@
 # @llamaindex/workflow-debugger
 
+## 0.0.4
+
+### Patch Changes
+
+- 762c881: bump version
+
 ## 0.0.3
 
 ### Patch Changes
