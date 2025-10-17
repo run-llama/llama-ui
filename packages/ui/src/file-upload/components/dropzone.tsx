@@ -2,8 +2,8 @@ import { Button } from "@/base/button";
 import { cn } from "@/lib/utils";
 import { Upload, X } from "lucide-react";
 
-import type { FileDropzoneProps } from "./types";
-import { useFileDropzone } from "./use-file-dropzone";
+import type { FileDropzoneProps } from "../types";
+import { useFileDropzone } from "../hooks/use-file-dropzone";
 
 const unitLabels = ["B", "KB", "MB", "GB"];
 
@@ -34,6 +34,10 @@ export function FileDropzone({
   footer,
   showRemoveButton = true,
   disabled = false,
+  emptyTitle = multiple
+    ? "Upload files (drag or click)"
+    : "Upload file (drag or click)",
+  emptyDescription,
 }: FileDropzoneProps) {
   const {
     inputRef,
@@ -54,10 +58,14 @@ export function FileDropzone({
   });
 
   const hasFiles = selectedFiles.length > 0;
-  const uploadDescription = multiple
-    ? "Upload files (drag or click)"
-    : "Upload file (drag or click)";
-  const maxSizeMb = maxFileSizeBytes && Math.round(maxFileSizeBytes / 1000 / 1000);
+  const acceptValue = allowedFileTypes?.length
+    ? allowedFileTypes.map((type) => `.${type}`).join(",")
+    : undefined;
+  const displayAllowedTypes = allowedFileTypes?.length
+    ? allowedFileTypes.map((type) => type.toUpperCase()).join(", ")
+    : undefined;
+  const maxSizeMb =
+    maxFileSizeBytes && Math.round(maxFileSizeBytes / 1000 / 1000);
 
   const renderFileRow = (file: File) => (
     <div className="flex items-center justify-between rounded-md bg-muted/30 px-3 py-2">
@@ -92,14 +100,17 @@ export function FileDropzone({
             <Upload className="h-8 w-8" />
           </div>
           <div className="space-y-1">
-            <p className="text-sm font-semibold text-gray-600">
-              {uploadDescription}
-            </p>
+            <p className="text-sm font-semibold text-gray-600">{emptyTitle}</p>
+            {emptyDescription ? (
+              <p className="text-xs text-muted-foreground">
+                {emptyDescription}
+              </p>
+            ) : null}
           </div>
-          {(allowedFileTypes?.length || maxFileSizeBytes) && (
+          {(displayAllowedTypes || maxSizeMb) && (
             <div className="space-y-1 text-xs text-muted-foreground">
-              {allowedFileTypes?.length && !footer ? (
-                <p>Supported: {allowedFileTypes.join(", ")}</p>
+              {displayAllowedTypes && !footer ? (
+                <p>Supported: {displayAllowedTypes}</p>
               ) : null}
               {maxSizeMb ? <p>Max size: {maxSizeMb}MB</p> : null}
             </div>
@@ -163,9 +174,7 @@ export function FileDropzone({
           type="file"
           className="hidden"
           onChange={disabled ? undefined : handleFileInputChange}
-          accept={
-            allowedFileTypes?.length ? allowedFileTypes.join(",") : undefined
-          }
+          accept={acceptValue}
           multiple={multiple}
           disabled={disabled}
         />

@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { FileText } from "lucide-react";
 
 import { FileDropzone } from "./dropzone";
-import { FileUploadProps } from "./types/index";
+import type { FileUploadProps } from "../types";
 
 const defaultFooter = (
   <div className="mt-6 rounded-md bg-gray-100 p-4 text-center text-xs text-gray-500">
@@ -31,6 +31,8 @@ export function FileUpload({
   showHeader = true,
   allowedFileTypes = [],
   maxFileSizeBytes,
+  uploadDescription = "Upload file (drag or click)",
+  fileUrlPlaceholder = "Paste the file link here",
   disableWhenFileSelected = false,
   disableWhenUrlProvided = false,
   footer = defaultFooter,
@@ -94,6 +96,7 @@ export function FileUpload({
             onRemoveFile={allowFileRemoval ? handleRemoveFile : undefined}
             allowedFileTypes={allowedFileTypes}
             maxFileSizeBytes={maxFileSizeBytes}
+            emptyTitle={uploadDescription}
             showRemoveButton={allowFileRemoval}
             disabled={
               disableWhenUrlProvided &&
@@ -108,7 +111,7 @@ export function FileUpload({
             <Input
               type="url"
               className="w-full"
-              placeholder={"Paste the file link here"}
+              placeholder={fileUrlPlaceholder}
               value={typeof content === "string" ? content : ""}
               onChange={(event) => onContentChange(event.target.value)}
               disabled={disableWhenFileSelected && selectedFile !== null}

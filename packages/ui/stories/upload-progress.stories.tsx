@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { UploadProgress, type FileUploadProgress } from "../src/file-uploader";
+import { UploadProgress, type FileUploadProgress } from "../src/file-upload";
 
 const meta: Meta<typeof UploadProgress> = {
   title: "Components/UploadProgress",

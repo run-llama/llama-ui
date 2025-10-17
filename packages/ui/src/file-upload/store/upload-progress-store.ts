@@ -1,18 +1,7 @@
-import type { FileUploadProgress } from "./upload-progress";
+import type { FileUploadProgress } from "../types";
 
-/**
- * Utility functions for managing upload progress state
- * These pure functions are easier to test and reason about
- */
-
-/**
- * Threshold for showing overall progress UI and enabling compact mode
- */
 export const PROGRESS_THRESHOLD = 3;
 
-/**
- * Determine display modes based on number of files and threshold
- */
 export function getDisplayModes(fileCount: number) {
   return {
     showOverallProgress: fileCount > PROGRESS_THRESHOLD,
@@ -20,9 +9,6 @@ export function getDisplayModes(fileCount: number) {
   };
 }
 
-/**
- * Add or replace a file upload in the progress list
- */
 export function addUploadToQueue(
   uploads: FileUploadProgress[],
   file: File
@@ -33,14 +19,10 @@ export function addUploadToQueue(
     status: "uploading",
   };
 
-  // Remove existing upload for the same file if any
   const filtered = uploads.filter((upload) => upload.file.name !== file.name);
   return [...filtered, newUpload];
 }
 
-/**
- * Update progress for a specific file
- */
 export function updateFileProgress(
   uploads: FileUploadProgress[],
   file: File,
@@ -53,9 +35,6 @@ export function updateFileProgress(
   );
 }
 
-/**
- * Mark a file as completed
- */
 export function completeFileUpload(
   uploads: FileUploadProgress[],
   file: File
@@ -67,9 +46,6 @@ export function completeFileUpload(
   );
 }
 
-/**
- * Mark a file as failed with error message
- */
 export function failFileUpload(
   uploads: FileUploadProgress[],
   file: File,
@@ -82,9 +58,6 @@ export function failFileUpload(
   );
 }
 
-/**
- * Cancel a specific file upload
- */
 export function cancelFileUpload(
   uploads: FileUploadProgress[],
   file: File
@@ -96,9 +69,6 @@ export function cancelFileUpload(
   );
 }
 
-/**
- * Cancel all uploading files
- */
 export function cancelAllUploads(
   uploads: FileUploadProgress[]
 ): FileUploadProgress[] {
@@ -109,9 +79,6 @@ export function cancelAllUploads(
   );
 }
 
-/**
- * Remove a specific file from the upload list
- */
 export function removeFileUpload(
   uploads: FileUploadProgress[],
   file: File
@@ -119,18 +86,12 @@ export function removeFileUpload(
   return uploads.filter((upload) => upload.file.name !== file.name);
 }
 
-/**
- * Remove completed uploads from the list
- */
 export function removeCompletedUploads(
   uploads: FileUploadProgress[]
 ): FileUploadProgress[] {
   return uploads.filter((upload) => upload.status !== "completed");
 }
 
-/**
- * Calculate upload statistics
- */
 export interface UploadStats {
   total: number;
   uploading: number;
@@ -158,16 +119,10 @@ export function calculateUploadStats(
   };
 }
 
-/**
- * Check if there are any active uploads that require showing the progress UI
- */
 export function hasActiveUploads(uploads: FileUploadProgress[]): boolean {
   return uploads.length > 0;
 }
 
-/**
- * Determine which files to show based on collapsed state and limit
- */
 export function getVisibleFiles(
   uploads: FileUploadProgress[],
   showAll: boolean,

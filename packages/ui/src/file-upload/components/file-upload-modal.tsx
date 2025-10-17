@@ -11,12 +11,12 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/base/dialog";
-import { FileUpload } from "./file-upload";
+import { FileUpload } from "./inline-file-upload";
 import { FileDropzone } from "./dropzone";
-import type { FileUploaderProps } from "./types";
-import { validateFile, type FileType } from "./file-utils";
-import { useFileUpload } from "./use-file-upload";
-import { useUploadProgress } from "./use-upload-progress";
+import type { FileUploaderProps } from "../types";
+import { validateFile, type FileType } from "../utils/file-utils";
+import { useFileUpload } from "../hooks/use-file-upload";
+import { useUploadProgress } from "../hooks/use-upload-progress";
 import { UploadProgress } from "./upload-progress";
 
 export function FileUploader({

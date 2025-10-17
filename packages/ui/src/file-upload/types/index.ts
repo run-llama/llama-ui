@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import type { FileType } from "../file-utils";
+import type { FileType } from "../utils/file-utils";
 
 interface BaseFileUploadProps {
   allowedFileTypes?: FileType[];
@@ -13,7 +13,8 @@ export interface FileDropzoneProps extends BaseFileUploadProps {
   onFilesSelected: (files: File[]) => void;
   onRemoveFile?: (file: File) => void;
   className?: string;
-  accept?: string;
+  emptyTitle?: string;
+  emptyDescription?: string;
   listFooter?: ReactNode;
   footer?: ReactNode;
   showRemoveButton?: boolean;
@@ -70,6 +71,8 @@ export interface FileUploadProps extends BaseFileUploadProps {
   onContentChange: (content: File | string | null) => void;
   allowFileRemoval?: boolean;
   showHeader?: boolean;
+  uploadDescription?: string;
+  fileUrlPlaceholder?: string;
   disableWhenFileSelected?: boolean;
   disableWhenUrlProvided?: boolean;
   footer?: ReactNode;
@@ -87,3 +90,5 @@ export interface FileUploaderProps extends BaseFileUploadProps {
   trigger?: ReactNode;
   isProcessing?: boolean;
 }
+
+export type { FileUploadProgress } from "./upload-progress";

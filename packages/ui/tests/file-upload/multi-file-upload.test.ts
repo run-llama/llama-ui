@@ -6,8 +6,8 @@ import {
   cancelFileUpload,
   cancelAllUploads,
   calculateUploadStats,
-} from "@/src/file-uploader/upload-progress-utils";
-import type { FileUploadProgress } from "@/src/file-uploader/upload-progress";
+} from "@/src/file-upload";
+import type { FileUploadProgress } from "@/src/file-upload";
 
 /**
  * Tests specifically for multi-file upload scenarios

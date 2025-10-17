@@ -1,8 +1,8 @@
 import type { ComponentProps } from "react";
 
-import { FileUpload } from "./file-upload";
-import { FileUploader } from "./file-uploader";
-import type { FileUploaderProps } from "./types";
+import { FileUpload } from "./inline-file-upload";
+import { FileUploader } from "./file-upload-modal";
+import type { FileUploaderProps } from "../types";
 
 type FileUploadProps = ComponentProps<typeof FileUpload>;
 

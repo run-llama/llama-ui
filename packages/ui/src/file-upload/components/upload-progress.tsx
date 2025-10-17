@@ -2,19 +2,13 @@ import { useState } from "react";
 import { X, ChevronDown } from "lucide-react";
 import { Button } from "@/base/button";
 import { Progress } from "@/base/progress";
-import { formatFileSize } from "./file-utils";
+import type { FileUploadProgress } from "../types";
+import { formatFileSize } from "../utils/file-utils";
 import {
   calculateUploadStats,
   getVisibleFiles,
   getDisplayModes,
-} from "./upload-progress-utils";
-
-export interface FileUploadProgress {
-  file: File;
-  progress: number; // 0-100
-  status: "uploading" | "completed" | "error" | "canceled";
-  error?: string;
-}
+} from "../store";
 
 export interface UploadProgressProps {
   files: FileUploadProgress[];

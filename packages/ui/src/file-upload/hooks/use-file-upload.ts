@@ -12,7 +12,7 @@ import type {
   UploadFromUrlOptions,
   UseFileUploadOptions,
   UseFileUploadReturn,
-} from "./types";
+} from "../types";
 
 function deriveFileNameFromUrl(url: string): string {
   try {
@@ -178,4 +178,4 @@ export type {
   UploadFromUrlOptions,
   UseFileUploadOptions,
   UseFileUploadReturn,
-} from "./types";
+} from "../types";

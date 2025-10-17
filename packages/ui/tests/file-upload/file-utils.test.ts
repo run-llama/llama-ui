@@ -12,7 +12,7 @@ import {
   FILE_TYPE_GROUPS,
   getFileTypesByCategory,
   createFileTypeValidator,
-} from "@/src/file-uploader/file-utils";
+} from "@/src/file-upload/utils/file-utils";
 
 // Mock crypto.subtle for testing
 const mockCrypto = {

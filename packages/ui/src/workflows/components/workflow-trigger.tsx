@@ -5,8 +5,11 @@
 
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
-import { FileUploader, type FileUploaderProps } from "../../file-uploader";
-import type { FileUploadData } from "../../file-uploader/use-file-upload";
+import {
+  FileUploader,
+  type FileUploaderProps,
+  type FileUploadData,
+} from "../../file-upload";
 import { useHandlerStore } from "../hooks/use-handler-store";
 import { Handler } from "../store/handler";
 import { JSONValue } from "../types";

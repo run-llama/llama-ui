@@ -5,8 +5,8 @@ import {
   completeFileUpload,
   failFileUpload,
   calculateUploadStats,
-} from "@/src/file-uploader/upload-progress-utils";
-import type { FileUploadProgress } from "@/src/file-uploader/upload-progress";
+} from "@/src/file-upload";
+import type { FileUploadProgress } from "@/src/file-upload";
 
 /**
  * Tests for parallel upload behavior
