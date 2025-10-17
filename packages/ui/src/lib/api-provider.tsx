@@ -11,6 +11,7 @@ import {
   WorkflowsClient,
   workflowsClient,
   createCloudAgentClient,
+  createWorkflowsClient,
 } from "./clients";
 
 export interface ApiClients {
@@ -75,7 +76,7 @@ export function createMockClients(): ApiClients {
  * - Agent client options are required via function params
  */
 export function createRealClientsForTests(params: {
-  apiKey: string;
+  apiKey?: string;
   baseUrl?: string;
   agent?: {
     agentUrlId: string;
@@ -111,6 +112,14 @@ export function createRealClientsForTests(params: {
       windowUrl:
         typeof window !== "undefined" ? window.location.href : undefined,
       collection: params.agent?.collection,
+    }),
+  };
+}
+
+export function createLocalWorkflowsClientForTests(): ApiClients {
+  return {
+    workflowsClient: createWorkflowsClient({
+      baseUrl: "http://localhost:8000",
     }),
   };
 }

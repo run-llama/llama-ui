@@ -1,0 +1,83 @@
+name: Deploy workflow-debugger
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/workflow-debugger/**"
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Detect version bump
+        id: version
+        run: |
+          CUR=$(jq -r .version packages/workflow-debugger/package.json)
+          PREV=$(git show HEAD^:packages/workflow-debugger/package.json 2>/dev/null | jq -r .version || echo "")
+          echo "current=$CUR previous=$PREV"
+          if [ "$CUR" = "$PREV" ] || [ -z "$PREV" ]; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+          echo "version=$CUR" >> $GITHUB_OUTPUT
+
+      - name: Build
+        if: steps.version.outputs.changed == 'true'
+        run: pnpm --filter @llamaindex/workflow-debugger build
+
+      - name: Install AWS CLI
+        if: steps.version.outputs.changed == 'true'
+        run: sudo apt-get update && sudo apt-get install -y awscli
+
+      - name: Generate GitHub App Token
+        if: steps.version.outputs.changed == 'true'
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.CI_BOT_APP_ID }}
+          private-key: ${{ secrets.CI_BOT_PRIVATE_KEY }}
+          owner: run-llama
+
+      - name: Upload assets to Cloudflare R2
+        if: steps.version.outputs.changed == 'true'
+        id: upload
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL }}
+        run: bash packages/workflow-debugger/scripts/upload-to-r2.sh
+
+      - name: Dispatch to workflows-py
+        if: steps.version.outputs.changed == 'true'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          repository: run-llama/workflows-py
+          event-type: debugger-assets-update
+          client-payload: |
+            {"js_url": "${{ steps.upload.outputs.js_url }}", "css_url": "${{ steps.upload.outputs.css_url }}"}
+

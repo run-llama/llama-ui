@@ -39,3 +39,15 @@ test-results
 .env
 .env.local
 .env.development.local
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+*.pywz
+*.pyzw
+*.pyzwz
+*.pyzwzw

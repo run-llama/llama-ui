@@ -1,6 +1,7 @@
 {
   "name": "@llamaindex/workflow-debugger",
-  "version": "0.1.9",
+  "version": "0.0.1",
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,14 +12,7 @@
     "coverage": "vitest run -c vitest.config.ts --coverage",
     "preview": "vite preview",
     "format": "prettier --write .",
-    "format-check": "prettier --check .",
-    "prepublishOnly": "pnpm --filter @llamaindex/workflow-debugger build"
-  },
-  "files": [
-    "dist/*"
-  ],
-  "publishConfig": {
-    "access": "public"
+    "format-check": "prettier --check ."
   },
   "dependencies": {
     "@llamaindex/ui": "workspace:*",
