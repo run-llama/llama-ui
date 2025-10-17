@@ -1,5 +1,11 @@
 # @llamaindex/workflows-client
 
+## 1.6.1
+
+### Patch Changes
+
+- db491f1:
+
 ## 1.6.0
 
 ### Minor Changes
