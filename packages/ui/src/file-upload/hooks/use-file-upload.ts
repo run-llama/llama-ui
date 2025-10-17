@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { logger } from "@llamaindex/shared";
+import { logger } from "@shared/logger";
 import {
   uploadFileApiV1FilesPost,
   readFileContentApiV1FilesIdContentGet,
