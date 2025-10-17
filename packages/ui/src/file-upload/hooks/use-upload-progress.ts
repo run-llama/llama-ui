@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import type { FileUploadProgress } from "./upload-progress";
+import type { FileUploadProgress } from "../types";
 import {
   addUploadToQueue,
   updateFileProgress,
@@ -7,7 +7,7 @@ import {
   failFileUpload,
   removeFileUpload,
   hasActiveUploads,
-} from "./upload-progress-utils";
+} from "../store";
 
 export interface UseUploadProgressReturn {
   uploadProgressFiles: FileUploadProgress[];

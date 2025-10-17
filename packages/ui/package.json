@@ -45,10 +45,10 @@
       "import": "./dist/lib.mjs",
       "require": "./dist/lib.cjs"
     },
-    "./file-uploader": {
-      "types": "./dist/file-uploader.d.ts",
-      "import": "./dist/file-uploader.mjs",
-      "require": "./dist/file-uploader.cjs"
+    "./file-upload": {
+      "types": "./dist/file-upload.d.ts",
+      "import": "./dist/file-upload.mjs",
+      "require": "./dist/file-upload.cjs"
     },
     "./extracted-data": {
       "types": "./dist/extracted-data.d.ts",

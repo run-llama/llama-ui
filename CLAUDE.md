@@ -43,7 +43,7 @@ This is `@llamaindex/ui`, a React component library built with TypeScript, Vite,
 - `src/lib/` - Utility functions and JSON schema handling
 - `src/ui/extracted-data/` - Data extraction and display components
 - `src/ui/file-preview/` - File preview components (PDF, images)
-- `src/ui/file-uploader/` - File upload functionality
+- `src/ui/file-upload/` - File upload functionality
 - `src/ui/item-grid/` - Data grid components
 - `src/ui/processing-steps/` - Processing workflow components
 - `stories/` - Storybook stories
@@ -101,7 +101,7 @@ import { FileUploader, ExtractedDataDisplay } from '@llamaindex/ui'
 ### shadcn/ui Individual Component Installation
 ```bash
 # Install individual components
-npx shadcn@latest add github:llamaindex/ui/file-uploader
+npx shadcn@latest add github:llamaindex/ui/file-upload
 npx shadcn@latest add github:llamaindex/ui/extracted-data
 npx shadcn@latest add github:llamaindex/ui/pdf-viewer
 ```
