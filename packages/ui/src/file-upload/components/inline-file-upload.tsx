@@ -7,7 +7,6 @@ import { FileText } from "lucide-react";
 
 import { FileDropzone } from "./dropzone";
 import type { FileUploadProps } from "../types";
-import { fa } from "zod/v4/locales";
 
 export function FileUpload({
   className,
