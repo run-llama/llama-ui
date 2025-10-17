@@ -26,6 +26,7 @@ class ProgressEvent(Event):
 class CalculateRequestEvent(Event):
     a: int
     b: int
+    operation: Operation
 
 class CalculateResponseEvent(Event):
     result: int

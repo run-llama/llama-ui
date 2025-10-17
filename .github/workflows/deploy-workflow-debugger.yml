@@ -43,17 +43,16 @@ jobs:
           fi
           echo "version=$CUR" >> $GITHUB_OUTPUT
 
-      - name: Stop if version not changed
-        if: steps.version.outputs.changed != 'true'
-        run: echo "Version not changed. Skip deploy." && exit 0
-
       - name: Build
+        if: steps.version.outputs.changed == 'true'
         run: pnpm --filter @llamaindex/workflow-debugger build
 
       - name: Install AWS CLI
+        if: steps.version.outputs.changed == 'true'
         run: sudo apt-get update && sudo apt-get install -y awscli
 
       - name: Generate GitHub App Token
+        if: steps.version.outputs.changed == 'true'
         id: app-token
         uses: actions/create-github-app-token@v1
         with:
@@ -62,6 +61,7 @@ jobs:
           owner: run-llama
 
       - name: Upload assets to Cloudflare R2
+        if: steps.version.outputs.changed == 'true'
         id: upload
         env:
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
@@ -72,6 +72,7 @@ jobs:
         run: bash packages/workflow-debugger/scripts/upload-to-r2.sh
 
       - name: Dispatch to workflows-py
+        if: steps.version.outputs.changed == 'true'
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ steps.app-token.outputs.token }}

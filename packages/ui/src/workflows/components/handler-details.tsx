@@ -24,21 +24,24 @@ export function HandlerDetails({ handler, onBack }: HandlerDetailsProps) {
     // Subscribe to events when component mounts
     if (handler.status === "running") {
       setIsStreaming(true);
-      const { disconnect } = handler.subscribeToEvents({
-        onData: (event) => {
-          setEvents((prev) => [...prev, event]);
+      const { disconnect } = handler.subscribeToEvents(
+        {
+          onData: (event) => {
+            setEvents((prev) => [...prev, event]);
+          },
+          onSuccess: (allEvents) => {
+            setEvents(allEvents);
+            setIsStreaming(false);
+          },
+          onError: () => {
+            setIsStreaming(false);
+          },
+          onComplete: () => {
+            setIsStreaming(false);
+          },
         },
-        onSuccess: (allEvents) => {
-          setEvents(allEvents);
-          setIsStreaming(false);
-        },
-        onError: () => {
-          setIsStreaming(false);
-        },
-        onComplete: () => {
-          setIsStreaming(false);
-        },
-      }, true);
+        true
+      );
 
       return () => disconnect();
     }

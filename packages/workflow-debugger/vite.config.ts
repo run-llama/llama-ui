@@ -22,7 +22,8 @@ export default defineConfig({
         inlineDynamicImports: true,
         assetFileNames: (assetInfo) => {
           // Force CSS to use versioned filename as well
-          const name = (assetInfo.name || (assetInfo.names && assetInfo.names[0]) || "");
+          const name =
+            assetInfo.name || (assetInfo.names && assetInfo.names[0]) || "";
           if (typeof name === "string" && name.endsWith(".css")) {
             return `debugger.v${version}.css`;
           }

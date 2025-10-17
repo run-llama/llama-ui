@@ -14,7 +14,6 @@
     "format": "prettier --write .",
     "format-check": "prettier --check ."
   },
-  
   "dependencies": {
     "@llamaindex/ui": "workspace:*",
     "@llamaindex/workflows-client": "workspace:*",
