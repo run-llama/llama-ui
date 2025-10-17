@@ -33,20 +33,27 @@ export const RequiredFieldValidation: Story = {
     const submitButton = dialogScope.getByRole("button", {
       name: /upload & process/i,
     });
-    await userEvent.click(submitButton);
+    expect(submitButton).toBeDisabled();
 
-    const errorMessage = await dialogScope.findByText(
-      "Part Number is required"
-    );
-    await expect(errorMessage).toBeInTheDocument();
+    const fileInput =
+      dialog.querySelector<HTMLInputElement>('input[type="file"]');
+    if (!fileInput) {
+      throw new Error("Expected hidden file input to exist");
+    }
+
+    const sampleFile = new File(["file"], "validation.pdf", {
+      type: "application/pdf",
+    });
+    await userEvent.upload(fileInput, sampleFile);
+
+    await dialogScope.findByText("validation.pdf");
+    expect(submitButton).toBeDisabled();
 
     const partNumberInput = dialogScope.getByLabelText("Part Number");
     await userEvent.type(partNumberInput, "PN-12345");
 
     await waitFor(() => {
-      expect(
-        dialogScope.queryByText("Part Number is required")
-      ).not.toBeInTheDocument();
+      expect(submitButton).toBeEnabled();
     });
 
     await userEvent.click(dialogScope.getByRole("button", { name: /cancel/i }));
@@ -73,7 +80,7 @@ export const UrlEntryDisablesDropzone: Story = {
       dialogScope.getByRole("tab", { name: /upload file/i })
     );
 
-    const dropzone = dialogScope.getByRole("button", {
+    const dropzone = await dialogScope.findByRole("button", {
       name: /upload file \(drag or click\)/i,
     });
 
@@ -82,14 +89,22 @@ export const UrlEntryDisablesDropzone: Story = {
     });
 
     await userEvent.click(dialogScope.getByRole("tab", { name: /file url/i }));
-    await userEvent.clear(urlInput);
+    const refreshedUrlInput = await dialogScope.findByPlaceholderText(
+      "Paste the file link here"
+    );
+    expect(refreshedUrlInput).toHaveValue("https://example.com/manual.pdf");
+    await userEvent.clear(refreshedUrlInput);
 
     await userEvent.click(
       dialogScope.getByRole("tab", { name: /upload file/i })
     );
 
+    const reenabledDropzone = await dialogScope.findByRole("button", {
+      name: /upload file \(drag or click\)/i,
+    });
+
     await waitFor(() => {
-      expect(dropzone).toHaveAttribute("aria-disabled", "false");
+      expect(reenabledDropzone).toHaveAttribute("aria-disabled", "false");
     });
 
     await userEvent.click(dialogScope.getByRole("button", { name: /cancel/i }));
@@ -167,7 +182,7 @@ export const MultipleFileUploads: Story = {
     const submitButton = await dialogScope.findByRole("button", {
       name: /upload 2 files & process/i,
     });
-    await expect(submitButton).toBeEnabled();
+    expect(submitButton).toBeEnabled();
 
     await userEvent.click(dialogScope.getByRole("button", { name: /cancel/i }));
   },
