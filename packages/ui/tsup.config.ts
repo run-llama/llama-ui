@@ -46,6 +46,7 @@ export default defineConfig({
   esbuildOptions(options) {
     options.alias = {
       "@": process.cwd(),
+      "@shared": path.resolve(process.cwd(), "../../shared"),
     };
   },
 });

@@ -1,7 +1,3 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./packages/ui" },
-    { "path": "./packages/workflows-client" }
-  ]
+  "extends": "./tsconfig.base.json",
 }

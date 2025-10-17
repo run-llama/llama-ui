@@ -285,7 +285,6 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
-    "@llamaindex/shared": "workspace:*",
     "@codemirror/lang-css": "^6.3.1",
     "@codemirror/lang-html": "^6.4.9",
     "@codemirror/lang-javascript": "^6.2.3",
@@ -364,10 +363,10 @@
     "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^14.5.2",
     "@types/glob": "^9.0.0",
-    "@types/node": "^20.19.8",
+    "@types/node": "^20.0.0",
     "@types/react": "18.3.23",
     "@types/react-dom": "18.3.7",
-    "@vitejs/plugin-react": "^4.4.1",
+    "@vitejs/plugin-react-swc": "^4.1.0",
     "@vitest/browser": "^3.2.4",
     "@vitest/coverage-v8": "^3.2.3",
     "eslint": "^9",

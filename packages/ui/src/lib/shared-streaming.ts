@@ -6,7 +6,7 @@
  * improving performance and reducing server load.
  */
 
-import { logger } from "@llamaindex/shared";
+import { logger } from "@shared/logger";
 
 export interface StreamSubscriber<TEvent> {
   onStart?: () => void;

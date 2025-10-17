@@ -1,4 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { isDevelopment } from "../env";
+
 interface ILogger {
   debug(message: string, ...args: any[]): void;
   info(message: string, ...args: any[]): void;
@@ -49,8 +52,6 @@ class NoOpLogger implements ILogger {
   }
 }
 
-const isDevelopment = import.meta.env.MODE === "development";
-
-export const logger: ILogger = isDevelopment
+export const logger: ILogger = isDevelopment()
   ? new ConsoleLogger("llama-ui")
   : new NoOpLogger();

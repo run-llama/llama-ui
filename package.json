@@ -36,5 +36,10 @@
     "vitest": "^3.2.4",
     "@types/node": "^20.0.0"
   },
+  "overrides": {
+    "@types/node": "20.19.22",
+    "vite": "6.4.0",
+    "@vitejs/plugin-react-swc": "^4.1.0"
+  },
   "packageManager": "pnpm@10.11.1+sha512.e519b9f7639869dc8d5c3c5dfef73b3f091094b0a006d7317353c72b124e80e1afd429732e28705ad6bfa1ee879c1fce46c128ccebd3192101f43dd67c667912"
 }

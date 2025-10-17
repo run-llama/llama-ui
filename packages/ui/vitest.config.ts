@@ -47,6 +47,7 @@ export default defineConfig({
               __dirname,
               "../workflows-client/src"
             ),
+            "@shared": path.resolve(__dirname, "../../shared"),
           },
         },
         test: {
@@ -90,6 +91,7 @@ export default defineConfig({
         __dirname,
         "../workflows-client/src"
       ),
+      "@shared": path.resolve(__dirname, "../../shared"),
     },
   },
   define: {
