@@ -45,7 +45,7 @@ jobs:
 
       - name: Build
         if: steps.version.outputs.changed == 'true'
-        run: pnpm --filter @llamaindex/workflow-debugger build
+        run: pnpm build:all
 
       - name: Install AWS CLI v2
         if: steps.version.outputs.changed == 'true'
