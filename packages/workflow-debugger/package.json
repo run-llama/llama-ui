@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "prebuild": "pnpm -w -r --filter @llamaindex/workflow-debugger^... build",
     "dev": "vite",
     "build": "tsc -p tsconfig.build.json --noEmit && vite build",
     "typecheck": "tsc --noEmit",
