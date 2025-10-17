@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { logger } from "@llamaindex/shared";
 import {
   uploadFileApiV1FilesPost,
   readFileContentApiV1FilesIdContentGet,
@@ -13,8 +14,8 @@ function deriveFileNameFromUrl(url: string): string {
     if (lastSegment) {
       return decodeURIComponent(lastSegment);
     }
-  } catch {
-    // Ignore parsing errors and fall back
+  } catch (error) {
+    logger.error("failed to parse filename from url", { error, url });
   }
   return url.replace(/[^a-z0-9_.-]/gi, "-") || "remote-file";
 }
@@ -108,8 +109,7 @@ export function useFileUpload({
         error: null,
       };
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error("Upload error:", error);
+      logger.error("uploadFile failed", { error });
       const errorMessage =
         error instanceof Error ? error.message : "Upload failed";
       onUploadError?.(file, errorMessage);
@@ -181,8 +181,7 @@ export function useFileUpload({
 
       return { success: true, data: fileData, error: null };
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error("Upload error:", error);
+      logger.error("uploadFromUrl failed", { error });
       const errorMessage =
         error instanceof Error ? error.message : "Upload failed";
       onUploadError?.(virtualFile, errorMessage);

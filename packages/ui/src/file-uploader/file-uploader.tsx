@@ -317,7 +317,6 @@ export function FileUploader({
                   maxFileSizeMb={maxSizeMb}
                   disableWhenFileSelected
                   disableWhenUrlProvided
-                  uploadDescription="Upload file (drag or click)"
                   fileUrlPlaceholder="Paste the file link here"
                   footer={null}
                 />

@@ -12,11 +12,8 @@ export interface FileDropzoneProps {
   onFilesSelected: (files: File[]) => void;
   onRemoveFile?: (file: File) => void;
   className?: string;
-  emptyTitle?: string;
-  emptyDescription?: string;
   allowedFileTypes?: string[];
   maxSizeMb?: number;
-  accept?: string;
   listFooter?: ReactNode;
   footer?: ReactNode;
   showRemoveButton?: boolean;
@@ -46,10 +43,6 @@ export function FileDropzone({
   onFilesSelected,
   onRemoveFile,
   className,
-  emptyTitle = multiple
-    ? "Upload files (drag or click)"
-    : "Upload file (drag or click)",
-  emptyDescription,
   allowedFileTypes,
   maxSizeMb,
   listFooter,
@@ -76,6 +69,9 @@ export function FileDropzone({
   });
 
   const hasFiles = selectedFiles.length > 0;
+  const dropzoneInstructions = multiple
+    ? "Upload files (drag or click)"
+    : "Upload file (drag or click)";
 
   const renderFileRow = (file: File) => (
     <div className="flex items-center justify-between rounded-md bg-muted/30 px-3 py-2">
@@ -110,12 +106,7 @@ export function FileDropzone({
             <Upload className="h-8 w-8" />
           </div>
           <div className="space-y-1">
-            <p className="text-sm font-semibold text-gray-600">{emptyTitle}</p>
-            {emptyDescription && (
-              <p className="text-xs text-muted-foreground">
-                {emptyDescription}
-              </p>
-            )}
+            <p className="text-sm font-semibold text-gray-600">{dropzoneInstructions}</p>
           </div>
           {(allowedFileTypes?.length || maxSizeMb) && (
             <div className="space-y-1 text-xs text-muted-foreground">

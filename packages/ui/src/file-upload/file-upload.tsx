@@ -4,6 +4,7 @@ import { Input } from "@/base/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/base/tabs";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
+import { FileText } from 'lucide-react'
 
 import { FileDropzone } from "./dropzone";
 
@@ -17,7 +18,6 @@ export interface FileUploadProps {
   allowedFileTypes?: string[];
   maxFileSizeMb?: number;
   uploadDescription?: string;
-  uploadHelpText?: string;
   fileUrlPlaceholder?: string;
   disableWhenFileSelected?: boolean;
   disableWhenUrlProvided?: boolean;
@@ -49,8 +49,6 @@ export function FileUpload({
   maxFileSizeMb,
   disableWhenFileSelected = false,
   disableWhenUrlProvided = false,
-  uploadDescription = "Upload file (drag or click)",
-  uploadHelpText,
   fileUrlPlaceholder = "Paste the file link here",
   footer = defaultFooter,
 }: FileUploadProps) {
@@ -83,49 +81,7 @@ export function FileUpload({
               className="flex h-12 w-12 items-center justify-center rounded-full"
               style={{ backgroundColor: "#F3F0FF", color: "#8B5CF6" }}
             >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M14 2V8H20"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M16 13H8"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M16 17H8"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M10 9H9H8"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <FileText />
             </div>
           </div>
           <h1 className="mb-8 text-sm font-semibold">{heading}</h1>
@@ -155,8 +111,6 @@ export function FileUpload({
             onRemoveFile={allowFileRemoval ? handleRemoveFile : undefined}
             allowedFileTypes={allowedFileTypes}
             maxSizeMb={maxFileSizeMb}
-            emptyTitle={uploadDescription}
-            emptyDescription={uploadHelpText}
             showRemoveButton={allowFileRemoval}
             disabled={
               disableWhenUrlProvided &&
