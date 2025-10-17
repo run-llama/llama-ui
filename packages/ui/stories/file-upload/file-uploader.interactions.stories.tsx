@@ -49,9 +49,7 @@ export const RequiredFieldValidation: Story = {
       ).not.toBeInTheDocument();
     });
 
-    await userEvent.click(
-      dialogScope.getByRole("button", { name: /cancel/i })
-    );
+    await userEvent.click(dialogScope.getByRole("button", { name: /cancel/i }));
   },
 };
 
@@ -83,9 +81,7 @@ export const UrlEntryDisablesDropzone: Story = {
       expect(dropzone).toHaveAttribute("aria-disabled", "true");
     });
 
-    await userEvent.click(
-      dialogScope.getByRole("tab", { name: /file url/i })
-    );
+    await userEvent.click(dialogScope.getByRole("tab", { name: /file url/i }));
     await userEvent.clear(urlInput);
 
     await userEvent.click(
@@ -96,9 +92,7 @@ export const UrlEntryDisablesDropzone: Story = {
       expect(dropzone).toHaveAttribute("aria-disabled", "false");
     });
 
-    await userEvent.click(
-      dialogScope.getByRole("button", { name: /cancel/i })
-    );
+    await userEvent.click(dialogScope.getByRole("button", { name: /cancel/i }));
   },
 };
 
@@ -133,9 +127,7 @@ export const FileSelectionDisablesUrl: Story = {
       expect(urlInput).toBeDisabled();
     });
 
-    await userEvent.click(
-      dialogScope.getByRole("button", { name: /cancel/i })
-    );
+    await userEvent.click(dialogScope.getByRole("button", { name: /cancel/i }));
   },
 };
 
@@ -177,8 +169,6 @@ export const MultipleFileUploads: Story = {
     });
     await expect(submitButton).toBeEnabled();
 
-    await userEvent.click(
-      dialogScope.getByRole("button", { name: /cancel/i })
-    );
+    await userEvent.click(dialogScope.getByRole("button", { name: /cancel/i }));
   },
 };

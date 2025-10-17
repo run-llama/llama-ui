@@ -165,7 +165,7 @@ export function FileUploader({
         if (successfulData.length > 0) {
           await onSuccess(successfulData, currentFieldValues);
         }
-      }  catch (error) {
+      } catch (error) {
         logger.error("FileUploader uploadFiles failed", {
           error,
           fileCount: files.length,

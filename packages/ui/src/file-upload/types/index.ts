@@ -73,7 +73,7 @@ export interface FileUploadProps extends BaseFileUploadProps {
   showHeader?: boolean;
   uploadDescription?: string;
   fileUrlPlaceholder?: string;
-  disableWhenHasSelection?: boolean
+  disableWhenHasSelection?: boolean;
   footer?: ReactNode;
 }
 
