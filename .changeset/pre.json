@@ -3,7 +3,6 @@
   "tag": "alpha",
   "initialVersions": {
     "@llamaindex/ui": "2.1.8",
-    "@llamaindex/workflow-debugger": "0.0.5",
     "@llamaindex/workflows-client": "1.6.2"
   },
   "changesets": [
