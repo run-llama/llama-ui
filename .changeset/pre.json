@@ -1,0 +1,10 @@
+{
+  "mode": "pre",
+  "tag": "alpha",
+  "initialVersions": {
+    "@llamaindex/ui": "2.1.8",
+  },
+  "changesets": [
+    "witty-dancers-itch"
+  ]
+}

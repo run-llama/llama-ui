@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 3.0.0-alpha.0
+
+### Major Changes
+
+- 659ebae: Updates file upload UI to conform to new platform standards. Transfer tabs/input from platfrom to UI library. Add ability for file upload in UI. File upload is broken up into modular components and util files. Be sure to check and update current imports.
+
 ## 2.1.8
 
 ### Patch Changes
