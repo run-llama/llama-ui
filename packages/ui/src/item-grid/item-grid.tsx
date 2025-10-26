@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, type CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import {
   Table,
@@ -37,6 +37,9 @@ export interface ItemGridProp<T = unknown> {
   defaultPageSize?: number;
   // Optional root filter passed through directly to the search API
   filter?: Record<string, FilterOperation>;
+  // Styling (outermost container only)
+  className?: string;
+  style?: CSSProperties;
 }
 
 // Main Business Component
@@ -45,6 +48,8 @@ export function ItemGrid<T = unknown>({
   onRowClick,
   defaultPageSize = 20,
   filter,
+  className,
+  style,
 }: ItemGridProp<T>) {
   const [paginationState, setPaginationState] = useState<PaginationState>({
     page: 0,
@@ -173,7 +178,7 @@ export function ItemGrid<T = unknown>({
   }
 
   return (
-    <div className="w-full space-y-4">
+    <div className={cn("w-full space-y-4", className)} style={style}>
       <div className="rounded-md border">
         <Table className="table-fixed">
           <TableHeader>
