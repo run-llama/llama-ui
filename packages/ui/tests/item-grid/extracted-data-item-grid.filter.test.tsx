@@ -10,11 +10,14 @@ function renderWithProvider(ui: ReactNode, clients = createMockClients()) {
 }
 
 describe("ExtractedDataItemGrid baseFilter", () => {
-  it("passes baseFilter through to search API", async () => {
+  it("passes filter through to search API", async () => {
     const clients = createMockClients();
+    if (!clients.agentDataClient) {
+      throw new Error("AgentDataClient not found");
+    }
     const spy = vi.spyOn(clients.agentDataClient, "search");
 
-    const baseFilter: Record<string, FilterOperation> = {
+    const filter: Record<string, FilterOperation> = {
       status: { includes: ["approved"] },
     };
 
@@ -23,7 +26,7 @@ describe("ExtractedDataItemGrid baseFilter", () => {
         customColumns={[]}
         builtInColumns={{}}
         defaultPageSize={5}
-        baseFilter={baseFilter}
+        filter={filter}
       />,
       clients
     );
@@ -33,6 +36,6 @@ describe("ExtractedDataItemGrid baseFilter", () => {
 
     expect(spy).toHaveBeenCalled();
     const call = spy.mock.calls.at(-1) as any[];
-    expect(call?.[0]?.filter).toMatchObject(baseFilter);
+    expect(call?.[0]?.filter).toMatchObject(filter);
   });
 });

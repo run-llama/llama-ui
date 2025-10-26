@@ -35,8 +35,8 @@ export interface ItemGridProp<T = unknown> {
   onRowClick?: (item: TypedAgentData<T>) => void;
   // Other configurations
   defaultPageSize?: number;
-  // Optional base filter passed through to the underlying search API
-  baseFilter?: Record<string, FilterOperation>;
+  // Optional root filter passed through directly to the search API
+  filter?: Record<string, FilterOperation>;
 }
 
 // Main Business Component
@@ -44,7 +44,7 @@ export function ItemGrid<T = unknown>({
   customColumns = [],
   onRowClick,
   defaultPageSize = 20,
-  baseFilter,
+  filter,
 }: ItemGridProp<T>) {
   const [paginationState, setPaginationState] = useState<PaginationState>({
     page: 0,
@@ -57,7 +57,7 @@ export function ItemGrid<T = unknown>({
     direction: "desc",
   });
 
-  const [filters, setFilters] = useState<Record<string, string[]>>({});
+  const [uiFilters, setUiFilters] = useState<Record<string, string[]>>({});
 
   // Generate final columns array
   const columns = useMemo(() => {
@@ -70,19 +70,19 @@ export function ItemGrid<T = unknown>({
   }, [customColumns]);
 
   // Convert frontend filter state to API format
-  const apiFilters = useMemo(() => {
+  const searchFilter = useMemo(() => {
     const result: Record<string, FilterOperation> = {
-      ...(baseFilter || {}),
+      ...(filter || {}),
     };
 
-    Object.entries(filters).forEach(([columnKey, filterValues]) => {
+    Object.entries(uiFilters).forEach(([columnKey, filterValues]) => {
       if (filterValues.length > 0) {
         result[columnKey] = { includes: filterValues };
       }
     });
 
     return result;
-  }, [filters, baseFilter]);
+  }, [uiFilters, filter]);
 
   // Convert frontend sort state to API format
   const apiSort = useMemo(() => {
@@ -96,7 +96,7 @@ export function ItemGrid<T = unknown>({
   }, [sortState]);
 
   const { data, loading, error, totalSize, deleteItem, fetchData } =
-    useItemGridData<T>(paginationState, apiFilters, apiSort);
+    useItemGridData<T>(paginationState, searchFilter, apiSort);
 
   // Create hooks object for passing to renderCell
   const hooks = useMemo(
@@ -127,7 +127,7 @@ export function ItemGrid<T = unknown>({
 
   // Handle filtering
   const handleFilterChange = (columnKey: string, values: string[]) => {
-    setFilters((prev) => ({
+    setUiFilters((prev) => ({
       ...prev,
       [columnKey]: values,
     }));
@@ -191,7 +191,7 @@ export function ItemGrid<T = unknown>({
                     sortState={sortState}
                     onSort={handleSort}
                     filterOptions={getFilterOptions(column.key)}
-                    selectedFilters={filters[column.key]}
+                    selectedFilters={uiFilters[column.key]}
                     onFilterChange={handleFilterChange}
                   />
                 </TableHead>

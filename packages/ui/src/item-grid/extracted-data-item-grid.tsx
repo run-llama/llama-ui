@@ -21,7 +21,7 @@ export interface ExtractedDataItemGridProps<T> {
   // Other configurations
   defaultPageSize?: number;
   // Optional base filter to be passed to search API
-  baseFilter?: Record<string, FilterOperation>;
+  filter?: Record<string, FilterOperation>;
 }
 
 export function ExtractedDataItemGrid<T>({
@@ -29,7 +29,7 @@ export function ExtractedDataItemGrid<T>({
   builtInColumns = {},
   onRowClick,
   defaultPageSize = 20,
-  baseFilter,
+  filter,
 }: ExtractedDataItemGridProps<T>) {
   const confidenceThreshold = useUIConfigStore(
     (state) => state.confidenceThreshold
@@ -62,7 +62,7 @@ export function ExtractedDataItemGrid<T>({
       customColumns={columns}
       onRowClick={onRowClick}
       defaultPageSize={defaultPageSize}
-      baseFilter={baseFilter}
+      filter={filter}
     />
   );
 }
