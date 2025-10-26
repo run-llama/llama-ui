@@ -30,6 +30,7 @@ export class Handler {
   _disconnect?: () => void;
   _unsubscribe?: () => void;
   _canceler?: () => Promise<void>;
+  private readonly changeListeners: Set<() => void> = new Set();
 
   constructor(
     rawHandler: RawHandler,
@@ -51,6 +52,23 @@ export class Handler {
       : null;
   }
 
+  onChange(listener: () => void): () => void {
+    this.changeListeners.add(listener);
+    return () => {
+      this.changeListeners.delete(listener);
+    };
+  }
+
+  private notifyChange() {
+    for (const listener of this.changeListeners) {
+      try {
+        listener();
+      } catch (err) {
+        // noop: listeners should be best-effort
+      }
+    }
+  }
+
   async sendEvent<E extends WorkflowEvent>(event: E, step?: string) {
     const rawEvent = event.toRawEvent(); // convert to raw event before sending
     const data = await postEventsByHandlerId({
@@ -70,9 +88,24 @@ export class Handler {
       client: this.client,
       path: { handler_id: this.handlerId },
     });
-    return data.data?.result
-      ? (WorkflowEvent.fromRawEvent(data.data.result as RawEvent) as StopEvent)
-      : undefined;
+    const server = data.data as unknown as RawHandler | undefined;
+
+    // Prefer server as source of truth for all fields
+    if (server) {
+      this.status = server.status;
+      this.startedAt = new Date(server.started_at);
+      this.updatedAt = server.updated_at ? new Date(server.updated_at) : null;
+      this.completedAt = server.completed_at
+        ? new Date(server.completed_at)
+        : null;
+      this.error = server.error;
+      this.result = server.result
+        ? (WorkflowEvent.fromRawEvent(server.result as RawEvent) as StopEvent)
+        : null;
+      this.notifyChange();
+    }
+
+    return this.result ?? undefined;
   }
 
   subscribeToEvents(
@@ -86,10 +119,12 @@ export class Handler {
     const subscriber: StreamSubscriber<WorkflowEvent> = {
       onStart: () => {
         this.status = "running";
+        this.notifyChange();
         callbacks?.onStart?.();
       },
       onData: (event) => {
         this.updatedAt = new Date();
+        this.notifyChange();
         callbacks?.onData?.(event);
       },
       onError: (error) => {
@@ -97,18 +132,33 @@ export class Handler {
         this.completedAt = new Date();
         this.updatedAt = new Date();
         this.error = error.message;
+        this.notifyChange();
         callbacks?.onError?.(error);
       },
       onSuccess: (events) => {
-        this.status = "completed";
-        this.completedAt = new Date();
-        this.updatedAt = new Date();
-        this.result = events[events.length - 1] as StopEvent;
-        callbacks?.onSuccess?.(events);
+        // Stop event received – hydrate final state from server, then decide which callback to fire
+        void (async () => {
+          try {
+            await this.getResult();
+          } catch {
+            // ignore fetch errors, fall back to local
+          }
+
+          if (this.status === "completed") {
+            callbacks?.onSuccess?.(events);
+          } else if (this.status === "failed" || this.status === "cancelled") {
+            const message = this.error || `Workflow ${this.status}`;
+            callbacks?.onError?.(new Error(message));
+          } else {
+            // Unknown terminal state, default to success for backward compatibility
+            callbacks?.onSuccess?.(events);
+          }
+        })();
       },
       onComplete: () => {
         this.completedAt = new Date();
         this.updatedAt = new Date();
+        this.notifyChange();
         callbacks?.onComplete?.();
       },
     };

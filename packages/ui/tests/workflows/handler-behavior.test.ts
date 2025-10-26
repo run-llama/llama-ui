@@ -20,6 +20,7 @@ import {
   __setHandlerStoreState,
 } from "../../src/workflows/hooks/use-handler-store";
 import { renderHookWithProvider } from "../test-utils";
+import { useObservedHandler } from "../../src/workflows/hooks/use-observed-handler";
 
 // Mocks
 vi.mock("@llamaindex/workflows-client", async () => {
@@ -180,6 +181,40 @@ describe("Handler + Store behavior (failing tests to reproduce issues)", () => {
 
     rerender();
     expect(selected.current.target?.status).toBe("completed");
+  });
+
+  it("useObservedHandler should re-render when a locally held Handler updates", async () => {
+    const client = createTestClient();
+    const handler = new Handler(createRawHandler({ handler_id: "h-local" }), client);
+
+    // Mock server result so getResult triggers notifyChange
+    vi.mocked(getResultsByHandlerId).mockResolvedValue({
+      data: {
+        result: {
+          type: "MyStopEvent",
+          qualified_name: "my.pkg.MyStopEvent",
+          types: [WorkflowEventType.StopEvent],
+          value: { result: { ok: true } },
+        },
+      } as any,
+      error: undefined,
+      request: {} as Request,
+      response: {} as Response,
+    });
+
+    const { result } = renderHook(() => {
+      const observed = useObservedHandler(handler);
+      return observed?.status;
+    });
+
+    expect(result.current).toBe("running");
+
+    await (async () => {
+      await handler.getResult();
+    })();
+
+    // After getResult, hook should have re-rendered reflecting updated status
+    expect(result.current).toBe("completed");
   });
 });
 

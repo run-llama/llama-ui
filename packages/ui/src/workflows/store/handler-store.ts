@@ -23,7 +23,26 @@ export interface HandlerStoreState {
 }
 
 export const createHandlerStore = (client: Client) =>
-  create<HandlerStoreState>()((set) => ({
+  create<HandlerStoreState>()((set, get) => {
+    // Track listener disposers for each handler to avoid leaks on replacement
+    const handlerDisposers = new Map<string, () => void>();
+
+    function attachHandlerListener(handler: Handler) {
+      // Detach any existing listener for this id
+      const prev = handlerDisposers.get(handler.handlerId);
+      if (prev) {
+        try {
+          prev();
+        } catch {}
+      }
+      const dispose = handler.onChange(() => {
+        // Force new object reference so selectors re-run
+        set((state) => ({ handlers: { ...state.handlers } }));
+      });
+      handlerDisposers.set(handler.handlerId, dispose);
+    }
+
+    return ({
     // Initial state
     handlers: {},
 
@@ -38,12 +57,17 @@ export const createHandlerStore = (client: Client) =>
         .filter((handler) => handler.status === "running")
         .map((handler) => new Handler(handler, client));
 
-      set((state) => ({
-        handlers: {
+      set((state) => {
+        const nextHandlers = {
           ...state.handlers,
           ...Object.fromEntries(runningHandlers.map((h) => [h.handlerId, h])),
-        },
-      }));
+        };
+
+        // Attach per-handler change listeners to force store updates on internal mutation
+        for (const h of runningHandlers) attachHandlerListener(h);
+
+        return { handlers: nextHandlers };
+      });
 
       return runningHandlers;
     },
@@ -62,6 +86,8 @@ export const createHandlerStore = (client: Client) =>
       }
 
       const handler = new Handler(data.data, client);
+      // Attach change listener to propagate internal mutations to store subscribers
+      attachHandlerListener(handler);
 
       // Internal method to set handler
       set((state) => ({
@@ -69,4 +95,5 @@ export const createHandlerStore = (client: Client) =>
       }));
       return handler;
     },
-  }));
+    });
+  });
