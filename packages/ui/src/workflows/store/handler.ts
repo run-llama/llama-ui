@@ -63,7 +63,7 @@ export class Handler {
     for (const listener of this.changeListeners) {
       try {
         listener();
-      } catch (err) {
+      } catch {
         // noop: listeners should be best-effort
       }
     }

@@ -32,6 +32,7 @@ vi.mock("../../../src/workflows/store/handler", () => ({
       ? new Date(rawHandler.completed_at)
       : null,
     error: rawHandler.error,
+    onChange: vi.fn(() => vi.fn()),
     subscribeToEvents: vi.fn(),
     sendEvent: vi.fn(),
     disconnect: vi.fn(),

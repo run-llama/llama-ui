@@ -23,7 +23,7 @@ export interface HandlerStoreState {
 }
 
 export const createHandlerStore = (client: Client) =>
-  create<HandlerStoreState>()((set, get) => {
+  create<HandlerStoreState>()((set) => {
     // Track listener disposers for each handler to avoid leaks on replacement
     const handlerDisposers = new Map<string, () => void>();
 
@@ -42,58 +42,58 @@ export const createHandlerStore = (client: Client) =>
       handlerDisposers.set(handler.handlerId, dispose);
     }
 
-    return ({
-    // Initial state
-    handlers: {},
+    return {
+      // Initial state
+      handlers: {},
 
-    // TODO: after workflow-py remove completed handlers from memory, this needs to be updated to fetch all handlers
-    fetchRunningHandlers: async () => {
-      const resp = await getHandlers({
-        client,
-      });
-      const allHandlers = resp.data?.handlers ?? [];
+      // TODO: after workflow-py remove completed handlers from memory, this needs to be updated to fetch all handlers
+      fetchRunningHandlers: async () => {
+        const resp = await getHandlers({
+          client,
+        });
+        const allHandlers = resp.data?.handlers ?? [];
 
-      const runningHandlers = allHandlers
-        .filter((handler) => handler.status === "running")
-        .map((handler) => new Handler(handler, client));
+        const runningHandlers = allHandlers
+          .filter((handler) => handler.status === "running")
+          .map((handler) => new Handler(handler, client));
 
-      set((state) => {
-        const nextHandlers = {
-          ...state.handlers,
-          ...Object.fromEntries(runningHandlers.map((h) => [h.handlerId, h])),
-        };
+        set((state) => {
+          const nextHandlers = {
+            ...state.handlers,
+            ...Object.fromEntries(runningHandlers.map((h) => [h.handlerId, h])),
+          };
 
-        // Attach per-handler change listeners to force store updates on internal mutation
-        for (const h of runningHandlers) attachHandlerListener(h);
+          // Attach per-handler change listeners to force store updates on internal mutation
+          for (const h of runningHandlers) attachHandlerListener(h);
 
-        return { handlers: nextHandlers };
-      });
+          return { handlers: nextHandlers };
+        });
 
-      return runningHandlers;
-    },
+        return runningHandlers;
+      },
 
-    createHandler: async (workflowName: string, input: JSONValue) => {
-      const data = await postWorkflowsByNameRunNowait({
-        client,
-        path: { name: workflowName },
-        body: {
-          start_event: input as { [key: string]: unknown } | undefined,
-        },
-      });
+      createHandler: async (workflowName: string, input: JSONValue) => {
+        const data = await postWorkflowsByNameRunNowait({
+          client,
+          path: { name: workflowName },
+          body: {
+            start_event: input as { [key: string]: unknown } | undefined,
+          },
+        });
 
-      if (!data.data) {
-        throw new Error("Handler creation failed");
-      }
+        if (!data.data) {
+          throw new Error("Handler creation failed");
+        }
 
-      const handler = new Handler(data.data, client);
-      // Attach change listener to propagate internal mutations to store subscribers
-      attachHandlerListener(handler);
+        const handler = new Handler(data.data, client);
+        // Attach change listener to propagate internal mutations to store subscribers
+        attachHandlerListener(handler);
 
-      // Internal method to set handler
-      set((state) => ({
-        handlers: { ...state.handlers, [handler.handlerId]: handler },
-      }));
-      return handler;
-    },
-    });
+        // Internal method to set handler
+        set((state) => ({
+          handlers: { ...state.handlers, [handler.handlerId]: handler },
+        }));
+        return handler;
+      },
+    };
   });

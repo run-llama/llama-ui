@@ -6,6 +6,7 @@ import {
   createConfig,
   type Client,
   getResultsByHandlerId,
+  getHandlers,
 } from "@llamaindex/workflows-client";
 import {
   StopEvent,
@@ -24,19 +25,22 @@ import { useObservedHandler } from "../../src/workflows/hooks/use-observed-handl
 
 // Mocks
 vi.mock("@llamaindex/workflows-client", async () => {
-  const actual = await vi.importActual<typeof import("@llamaindex/workflows-client")>(
-    "@llamaindex/workflows-client"
-  );
+  const actual = await vi.importActual<
+    typeof import("@llamaindex/workflows-client")
+  >("@llamaindex/workflows-client");
   return {
     ...actual,
     getResultsByHandlerId: vi.fn(),
+    getHandlers: vi.fn(),
   };
 });
 
 // Shared helpers
 function createTestClient(): Client {
   return createClient(
-    createConfig({ baseUrl: "http://localhost:8000" as unknown as `${string}://${string}` })
+    createConfig({
+      baseUrl: "http://localhost:8000" as unknown as `${string}://${string}`,
+    })
   );
 }
 
@@ -63,7 +67,7 @@ function emitSseMessage(instance: any, payload: unknown): void {
   }
 }
 
-describe("Handler + Store behavior (failing tests to reproduce issues)", () => {
+describe("Handler + Store behavior", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     __resetHandlerStore();
@@ -71,7 +75,10 @@ describe("Handler + Store behavior (failing tests to reproduce issues)", () => {
 
   it("custom StopEvent subclass should complete and call onSuccess", async () => {
     const client = createTestClient();
-    const handler = new Handler(createRawHandler({ handler_id: "h-sub" }), client);
+    const handler = new Handler(
+      createRawHandler({ handler_id: "h-sub" }),
+      client
+    );
 
     const onStart = vi.fn();
     const onData = vi.fn();
@@ -85,10 +92,26 @@ describe("Handler + Store behavior (failing tests to reproduce issues)", () => {
       types: [WorkflowEventType.StopEvent],
       value: { result: { ok: true } },
     };
+    // Hydration from server upon stop
+    vi.mocked(getResultsByHandlerId).mockResolvedValue({
+      data: {
+        handler_id: "h-sub",
+        workflow_name: "wf",
+        status: "completed",
+        started_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        completed_at: new Date().toISOString(),
+        error: null,
+        result: customStopEvent,
+      } as any,
+      error: undefined,
+      request: {} as Request,
+      response: {} as Response,
+    });
     emitSseMessage(es, customStopEvent);
 
     expect(onData).toHaveBeenCalledTimes(1);
-    // Expected behavior (fails today if subclass not recognized properly)
+    await new Promise((r) => setTimeout(r, 0));
     expect(onSuccess).toHaveBeenCalledTimes(1);
     expect(handler.status).toBe("completed");
     expect(handler.result).toBeInstanceOf(StopEvent);
@@ -96,7 +119,10 @@ describe("Handler + Store behavior (failing tests to reproduce issues)", () => {
 
   it("empty StopEvent (cancel/error) should not call onSuccess and should surface error", async () => {
     const client = createTestClient();
-    const handler = new Handler(createRawHandler({ handler_id: "h-err" }), client);
+    const handler = new Handler(
+      createRawHandler({ handler_id: "h-err" }),
+      client
+    );
 
     const onSuccess = vi.fn();
     const onError = vi.fn();
@@ -109,21 +135,46 @@ describe("Handler + Store behavior (failing tests to reproduce issues)", () => {
       types: [WorkflowEventType.StopEvent],
       value: {},
     };
+    // Server says failed
+    vi.mocked(getResultsByHandlerId).mockResolvedValue({
+      data: {
+        handler_id: "h-err",
+        workflow_name: "wf",
+        status: "failed",
+        started_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        completed_at: new Date().toISOString(),
+        error: "Boom",
+        result: null,
+      } as any,
+      error: undefined,
+      request: {} as Request,
+      response: {} as Response,
+    });
     emitSseMessage(es, emptyStopEvent);
 
-    // Expected behavior (fails today): not success
+    await new Promise((r) => setTimeout(r, 0));
     expect(onSuccess).not.toHaveBeenCalled();
-    // and error surfaced + status failed
     expect(onError).toHaveBeenCalledTimes(1);
     expect(handler.status).toBe("failed");
   });
 
   it("getResult should update handler instance fields (status, timestamps, result)", async () => {
     const client = createTestClient();
-    const handler = new Handler(createRawHandler({ handler_id: "h-get" }), client);
+    const handler = new Handler(
+      createRawHandler({ handler_id: "h-get" }),
+      client
+    );
 
     vi.mocked(getResultsByHandlerId).mockResolvedValue({
       data: {
+        handler_id: "h-get",
+        workflow_name: "wf",
+        status: "completed",
+        started_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        completed_at: new Date().toISOString(),
+        error: null,
         result: {
           type: "MyStopEvent",
           qualified_name: "my.pkg.MyStopEvent",
@@ -148,48 +199,80 @@ describe("Handler + Store behavior (failing tests to reproduce issues)", () => {
   it("useHandlerStore should re-render when internal handler updates occur", async () => {
     const clients = createMockClients();
 
-    // Initialize the store by rendering once
-    const { result } = renderHookWithProvider(() => useHandlerStore((s) => s), {
-      apiClients: clients,
+    // Mount a hook to obtain store API and initialize context
+    const { result: storeHook } = renderHookWithProvider(
+      () => useHandlerStore((s) => s),
+      { apiClients: clients }
+    );
+
+    // Populate store via fetchRunningHandlers so listeners are attached
+    const raw = createRawHandler({ handler_id: "h-react" });
+    vi.mocked(getHandlers).mockResolvedValue({
+      data: { handlers: [raw] } as any,
+      error: undefined,
+      request: {} as Request,
+      response: {} as Response,
     });
 
-    const handler = new Handler(createRawHandler({ handler_id: "h-react" }), clients.workflowsClient!);
-
-    act(() => {
-      __setHandlerStoreState((s) => ({ handlers: { ...s.handlers, [handler.handlerId]: handler } }));
+    await act(async () => {
+      await storeHook.current.fetchRunningHandlers();
     });
 
-    const { result: selected, rerender } = renderHook(
-      () =>
-        useHandlerStore((s) => ({
-          count: Object.keys(s.handlers).length,
-          target: s.handlers["h-react"],
-        })),
+    const { result: selected } = renderHook(
+      () => useHandlerStore((s) => s.handlers["h-react"]?.status ?? "none"),
       {
-        wrapper: ({ children }) => React.createElement(ApiProvider as any, { clients }, children as any),
+        wrapper: ({ children }) =>
+          React.createElement(ApiProvider as any, { clients }, children as any),
       }
     );
 
-    expect(selected.current.count).toBe(1);
-    expect(selected.current.target?.status).toBe("running");
+    expect(selected.current).toBe("running");
 
-    act(() => {
-      // Simulate internal mutation as would happen after getResult
-      handler.status = "completed" as any;
-      handler.completedAt = new Date();
+    vi.mocked(getResultsByHandlerId).mockResolvedValue({
+      data: {
+        handler_id: "h-react",
+        workflow_name: "wf",
+        status: "completed",
+        started_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        completed_at: new Date().toISOString(),
+        error: null,
+        result: {
+          type: "StopEvent",
+          qualified_name: "llama_index.workflows.core.StopEvent",
+          types: [WorkflowEventType.StopEvent],
+          value: { result: { ok: true } },
+        },
+      } as any,
+      error: undefined,
+      request: {} as Request,
+      response: {} as Response,
     });
 
-    rerender();
-    expect(selected.current.target?.status).toBe("completed");
+    const storeHandler = storeHook.current.handlers["h-react"]!;
+    await act(async () => {
+      await storeHandler.getResult();
+    });
+    expect(selected.current).toBe("completed");
   });
 
   it("useObservedHandler should re-render when a locally held Handler updates", async () => {
     const client = createTestClient();
-    const handler = new Handler(createRawHandler({ handler_id: "h-local" }), client);
+    const handler = new Handler(
+      createRawHandler({ handler_id: "h-local" }),
+      client
+    );
 
     // Mock server result so getResult triggers notifyChange
     vi.mocked(getResultsByHandlerId).mockResolvedValue({
       data: {
+        handler_id: "h-local",
+        workflow_name: "wf",
+        status: "completed",
+        started_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        completed_at: new Date().toISOString(),
+        error: null,
         result: {
           type: "MyStopEvent",
           qualified_name: "my.pkg.MyStopEvent",
@@ -209,13 +292,9 @@ describe("Handler + Store behavior (failing tests to reproduce issues)", () => {
 
     expect(result.current).toBe("running");
 
-    await (async () => {
+    await act(async () => {
       await handler.getResult();
-    })();
-
-    // After getResult, hook should have re-rendered reflecting updated status
+    });
     expect(result.current).toBe("completed");
   });
 });
-
-

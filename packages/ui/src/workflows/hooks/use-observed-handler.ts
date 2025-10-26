@@ -8,7 +8,9 @@ import type { Handler } from "../store/handler";
  * Useful when a component stores a Handler instance directly in local state
  * (outside of the Zustand store selector lifecycle).
  */
-export function useObservedHandler(handler: Handler | null | undefined): Handler | null | undefined {
+export function useObservedHandler(
+  handler: Handler | null | undefined
+): Handler | null | undefined {
   const [, setTick] = useState(0);
 
   useEffect(() => {
@@ -22,5 +24,3 @@ export function useObservedHandler(handler: Handler | null | undefined): Handler
 
   return handler ?? null;
 }
-
-
