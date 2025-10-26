@@ -1,6 +1,7 @@
 import type {
   TypedAgentData,
   ExtractedData,
+  FilterOperation,
 } from "llama-cloud-services/beta/agent";
 import { ItemGrid } from "./item-grid";
 import {
@@ -19,6 +20,8 @@ export interface ExtractedDataItemGridProps<T> {
   onRowClick?: (item: TypedAgentData<ExtractedData<T>>) => void;
   // Other configurations
   defaultPageSize?: number;
+  // Optional base filter to be passed to search API
+  baseFilter?: Record<string, FilterOperation>;
 }
 
 export function ExtractedDataItemGrid<T>({
@@ -26,6 +29,7 @@ export function ExtractedDataItemGrid<T>({
   builtInColumns = {},
   onRowClick,
   defaultPageSize = 20,
+  baseFilter,
 }: ExtractedDataItemGridProps<T>) {
   const confidenceThreshold = useUIConfigStore(
     (state) => state.confidenceThreshold
@@ -58,6 +62,7 @@ export function ExtractedDataItemGrid<T>({
       customColumns={columns}
       onRowClick={onRowClick}
       defaultPageSize={defaultPageSize}
+      baseFilter={baseFilter}
     />
   );
 }

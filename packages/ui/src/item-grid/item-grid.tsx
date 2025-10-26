@@ -35,6 +35,8 @@ export interface ItemGridProp<T = unknown> {
   onRowClick?: (item: TypedAgentData<T>) => void;
   // Other configurations
   defaultPageSize?: number;
+  // Optional base filter passed through to the underlying search API
+  baseFilter?: Record<string, FilterOperation>;
 }
 
 // Main Business Component
@@ -42,6 +44,7 @@ export function ItemGrid<T = unknown>({
   customColumns = [],
   onRowClick,
   defaultPageSize = 20,
+  baseFilter,
 }: ItemGridProp<T>) {
   const [paginationState, setPaginationState] = useState<PaginationState>({
     page: 0,
@@ -68,7 +71,9 @@ export function ItemGrid<T = unknown>({
 
   // Convert frontend filter state to API format
   const apiFilters = useMemo(() => {
-    const result: Record<string, FilterOperation> = {};
+    const result: Record<string, FilterOperation> = {
+      ...(baseFilter || {}),
+    };
 
     Object.entries(filters).forEach(([columnKey, filterValues]) => {
       if (filterValues.length > 0) {
@@ -77,7 +82,7 @@ export function ItemGrid<T = unknown>({
     });
 
     return result;
-  }, [filters]);
+  }, [filters, baseFilter]);
 
   // Convert frontend sort state to API format
   const apiSort = useMemo(() => {
