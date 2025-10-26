@@ -209,7 +209,10 @@ function streamByEventSource(
       );
       callbacks.onData?.(workflowEvent);
       accumulatedEvents.push(workflowEvent);
-      if (workflowEvent.type === WorkflowEventType.StopEvent) {
+      if (
+        workflowEvent.type === WorkflowEventType.StopEvent ||
+        workflowEvent.types?.includes(WorkflowEventType.StopEvent)
+      ) {
         callbacks.onSuccess?.(accumulatedEvents);
         logger.debug(
           "[streamByEventSource] stop event received, closing event source"
