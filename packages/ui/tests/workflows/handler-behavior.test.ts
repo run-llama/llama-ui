@@ -8,10 +8,7 @@ import {
   getResultsByHandlerId,
   getHandlers,
 } from "@llamaindex/workflows-client";
-import {
-  StopEvent,
-  WorkflowEventType,
-} from "../../src/workflows/store/workflow-event";
+import { StopEvent } from "../../src/workflows/store/workflow-event";
 import React from "react";
 import { renderHook, act } from "@testing-library/react";
 import { ApiProvider, createMockClients } from "../../src/lib";
@@ -20,7 +17,11 @@ import {
   __resetHandlerStore,
   __setHandlerStoreState,
 } from "../../src/workflows/hooks/use-handler-store";
-import { renderHookWithProvider } from "../test-utils";
+import {
+  renderHookWithProvider,
+  createRawHandler,
+  createStopEvent,
+} from "../test-utils";
 import { useObservedHandler } from "../../src/workflows/hooks/use-observed-handler";
 
 // Mocks
@@ -44,17 +45,7 @@ function createTestClient(): Client {
   );
 }
 
-function createRawHandler(overrides: Partial<RawHandler> = {}): RawHandler {
-  return {
-    handler_id: overrides.handler_id ?? "h-1",
-    workflow_name: overrides.workflow_name ?? "wf",
-    status: overrides.status ?? "running",
-    started_at: overrides.started_at ?? new Date().toISOString(),
-    updated_at: overrides.updated_at ?? null,
-    completed_at: overrides.completed_at ?? null,
-    error: overrides.error ?? null,
-  } as RawHandler;
-}
+// local createRawHandler removed in favor of tests/test-utils.ts
 
 function getLatestEventSourceInstance(): any {
   const ES: any = (globalThis as any).EventSource;
@@ -86,24 +77,17 @@ describe("Handler + Store behavior", () => {
     handler.subscribeToEvents({ onStart, onData, onSuccess });
 
     const es = getLatestEventSourceInstance();
-    const customStopEvent = {
+    const customStopEvent = createStopEvent({
       type: "MyStopEvent",
       qualified_name: "some.package.MyStopEvent",
-      types: [WorkflowEventType.StopEvent],
       value: { result: { ok: true } },
-    };
+    });
     // Hydration from server upon stop
     vi.mocked(getResultsByHandlerId).mockResolvedValue({
       data: {
-        handler_id: "h-sub",
-        workflow_name: "wf",
-        status: "completed",
-        started_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        completed_at: new Date().toISOString(),
-        error: null,
+        ...createRawHandler({ handler_id: "h-sub", status: "completed" }),
         result: customStopEvent,
-      } as any,
+      },
       error: undefined,
       request: {} as Request,
       response: {} as Response,
@@ -129,24 +113,14 @@ describe("Handler + Store behavior", () => {
     handler.subscribeToEvents({ onSuccess, onError });
 
     const es = getLatestEventSourceInstance();
-    const emptyStopEvent = {
-      type: "StopEvent",
-      qualified_name: "llama_index.workflows.core.StopEvent",
-      types: [WorkflowEventType.StopEvent],
-      value: {},
-    };
+    const emptyStopEvent = createStopEvent({ value: {} });
     // Server says failed
     vi.mocked(getResultsByHandlerId).mockResolvedValue({
       data: {
-        handler_id: "h-err",
-        workflow_name: "wf",
-        status: "failed",
-        started_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        completed_at: new Date().toISOString(),
+        ...createRawHandler({ handler_id: "h-err", status: "failed" }),
         error: "Boom",
         result: null,
-      } as any,
+      },
       error: undefined,
       request: {} as Request,
       response: {} as Response,
@@ -168,20 +142,12 @@ describe("Handler + Store behavior", () => {
 
     vi.mocked(getResultsByHandlerId).mockResolvedValue({
       data: {
-        handler_id: "h-get",
-        workflow_name: "wf",
-        status: "completed",
-        started_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        completed_at: new Date().toISOString(),
-        error: null,
-        result: {
+        ...createRawHandler({ handler_id: "h-get", status: "completed" }),
+        result: createStopEvent({
           type: "MyStopEvent",
-          qualified_name: "my.pkg.MyStopEvent",
-          types: [WorkflowEventType.StopEvent],
           value: { result: { ok: true } },
-        },
-      } as any,
+        }),
+      },
       error: undefined,
       request: {} as Request,
       response: {} as Response,
@@ -208,7 +174,7 @@ describe("Handler + Store behavior", () => {
     // Populate store via fetchRunningHandlers so listeners are attached
     const raw = createRawHandler({ handler_id: "h-react" });
     vi.mocked(getHandlers).mockResolvedValue({
-      data: { handlers: [raw] } as any,
+      data: { handlers: [raw] },
       error: undefined,
       request: {} as Request,
       response: {} as Response,
@@ -230,20 +196,9 @@ describe("Handler + Store behavior", () => {
 
     vi.mocked(getResultsByHandlerId).mockResolvedValue({
       data: {
-        handler_id: "h-react",
-        workflow_name: "wf",
-        status: "completed",
-        started_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        completed_at: new Date().toISOString(),
-        error: null,
-        result: {
-          type: "StopEvent",
-          qualified_name: "llama_index.workflows.core.StopEvent",
-          types: [WorkflowEventType.StopEvent],
-          value: { result: { ok: true } },
-        },
-      } as any,
+        ...createRawHandler({ handler_id: "h-react", status: "completed" }),
+        result: createStopEvent({ value: { result: { ok: true } } }),
+      },
       error: undefined,
       request: {} as Request,
       response: {} as Response,
@@ -266,20 +221,12 @@ describe("Handler + Store behavior", () => {
     // Mock server result so getResult triggers notifyChange
     vi.mocked(getResultsByHandlerId).mockResolvedValue({
       data: {
-        handler_id: "h-local",
-        workflow_name: "wf",
-        status: "completed",
-        started_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        completed_at: new Date().toISOString(),
-        error: null,
-        result: {
+        ...createRawHandler({ handler_id: "h-local", status: "completed" }),
+        result: createStopEvent({
           type: "MyStopEvent",
-          qualified_name: "my.pkg.MyStopEvent",
-          types: [WorkflowEventType.StopEvent],
           value: { result: { ok: true } },
-        },
-      } as any,
+        }),
+      },
       error: undefined,
       request: {} as Request,
       response: {} as Response,
