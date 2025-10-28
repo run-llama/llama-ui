@@ -12,9 +12,7 @@ import { DocumentInfo } from "./document-info";
 
 const MemoizedReactMarkdown: FC<Options> = memo(
   ReactMarkdown,
-  (prevProps, nextProps) =>
-    prevProps.children === nextProps.children &&
-    prevProps.className === nextProps.className
+  (prevProps, nextProps) => prevProps.children === nextProps.children
 );
 
 // Inspired by https://github.com/remarkjs/react-markdown/issues/785#issuecomment-2307567823
@@ -143,12 +141,13 @@ export function Markdown({
   const processedContent = preprocessContent(content);
 
   return (
-    <div>
+    <div
+      className={cn(
+        "prose dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 custom-markdown break-words",
+        customClassName
+      )}
+    >
       <MemoizedReactMarkdown
-        className={cn(
-          "prose dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 custom-markdown break-words",
-          customClassName
-        )}
         remarkPlugins={[remarkGfm, remarkMath]}
         rehypePlugins={[rehypeKatex as unknown as never]}
         components={{
@@ -238,54 +237,58 @@ export function Markdown({
               {children}
             </td>
           )),
+          // Inline code renderer (block code is handled by `pre` below in react-markdown v10)
           code: combineComponent(
             components?.code,
-            ({ inline, className, children, ...props }) => {
-              if (children.length) {
-                if (children[0] === "▍") {
-                  return (
-                    <span className="mt-1 animate-pulse cursor-default">▍</span>
-                  );
-                }
-
-                children[0] = (children[0] as string).replace("`▍`", "▍");
-              }
-
-              const match = /language-(\w+)/.exec(className || "");
-              const language = (match && match[1]) || "";
-              const codeValue = String(children).replace(/\n$/, "");
-
-              if (inline) {
-                return (
-                  <code
-                    className={cn(
-                      "rounded bg-secondary px-1 py-0.5 font-mono text-[0.85em]",
-                      className
-                    )}
-                    {...props}
-                  >
-                    {children}
-                  </code>
-                );
-              }
-
-              // Check for custom language renderer
-              if (languageRenderers?.[language]) {
-                const CustomRenderer = languageRenderers[language];
-                return <CustomRenderer code={codeValue} className="mb-2" />;
-              }
-
+            ({ className, children, ...props }) => {
               return (
-                <CodeBlock
-                  key={Math.random()}
-                  language={language}
-                  value={codeValue}
-                  className="mb-2"
+                <code
+                  className={cn(
+                    "rounded bg-secondary px-1 py-0.5 font-mono text-[0.85em]",
+                    className
+                  )}
                   {...props}
-                />
+                >
+                  {children}
+                </code>
               );
             }
           ),
+          // Fenced/block code renderer via wrapping `pre` element
+          pre: ({ children, ...rest }) => {
+            const child = Array.isArray(children) ? children[0] : children;
+            const codeElement = child as unknown as {
+              props?: { className?: string; children?: unknown };
+            };
+
+            const codeClassName = codeElement?.props?.className ?? "";
+            const match = /language-(\w+)/.exec(codeClassName);
+            const language = match?.[1] ?? "";
+
+            const rawCode = codeElement?.props?.children;
+            const codeValue =
+              typeof rawCode === "string" ? rawCode : String(rawCode ?? "");
+
+            // Check for custom language renderer
+            if (languageRenderers?.[language]) {
+              const CustomRenderer = languageRenderers[language];
+              return (
+                <CustomRenderer
+                  code={codeValue.replace(/\n$/, "")}
+                  className="mb-2"
+                />
+              );
+            }
+
+            return (
+              <CodeBlock
+                language={language}
+                value={codeValue.replace(/\n$/, "")}
+                className="mb-2"
+                {...rest}
+              />
+            );
+          },
           a: combineComponent(components?.a, ({ href, children }) => {
             // If href starts with `{backend}/api/files`, then it's a local document and we use DocumentInfo for rendering
             if (href?.startsWith(`${backend}/api/files`)) {

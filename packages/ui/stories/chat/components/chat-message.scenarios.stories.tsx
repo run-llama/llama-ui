@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, waitFor } from "@storybook/test";
 import ChatMessage from "@/src/chat/components/chat-message";
 import { WithBasicHandler } from "../decorators/chat-decorators";
 import { sampleSources } from "../fixtures";
@@ -26,9 +27,11 @@ const meta: Meta<typeof ChatMessage> = {
           className="flex min-h-0 flex-1 h-screen flex-col overflow-hidden"
         >
           <ChatMessages>
-            <div className="flex flex-col gap-4">
-              <Story />
-            </div>
+            <ChatMessages.List>
+              <div className="flex flex-col gap-4">
+                <Story />
+              </div>
+            </ChatMessages.List>
           </ChatMessages>
         </div>
         <div className="flex-1 min-w-0 h-screen">
@@ -66,6 +69,30 @@ export const MarkdownMessage: Story = {
         },
       ],
     },
+  },
+  play: async ({ canvasElement }) => {
+    // Wait for markdown container to mount (short timeout), then do sync checks
+    const root = await waitFor(
+      () => {
+        const el = canvasElement.querySelector(
+          ".custom-markdown"
+        ) as HTMLElement | null;
+        expect(el).toBeTruthy();
+        return el as HTMLElement;
+      },
+      { timeout: 5000 }
+    );
+
+    const h1 = root.querySelector("h1");
+    expect(h1 && /Heading 1/i.test(h1.textContent || "")).toBeTruthy();
+
+    const codeHasGreet = /export\s+function\s+greet/i.test(
+      root.textContent || ""
+    );
+    expect(codeHasGreet).toBeTruthy();
+
+    const checkboxes = root.querySelectorAll('input[type="checkbox"]');
+    expect(checkboxes.length).toBeGreaterThan(0);
   },
 };
 
