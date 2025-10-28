@@ -32,7 +32,7 @@ export interface ItemHookData<T extends JsonShape<T>> {
 export interface UseItemDataOptions<T extends JsonShape<T>> {
   jsonSchema: JSONSchema.ObjectSchema;
   itemId: string;
-  isMock: boolean;
+  isMock?: boolean;
 }
 
 export function useItemData<T extends JsonShape<T>>({
