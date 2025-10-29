@@ -364,7 +364,7 @@
     "@testing-library/user-event": "^14.5.2",
     "@types/glob": "^9.0.0",
     "@types/node": "^20.0.0",
-    "@types/react": "18.3.23",
+    "@types/react": "19.2.2",
     "@types/react-dom": "18.3.7",
     "@vitejs/plugin-react-swc": "^4.1.0",
     "@vitest/browser": "^3.2.4",
