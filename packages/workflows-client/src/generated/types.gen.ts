@@ -255,6 +255,10 @@ export type GetEventsByHandlerIdData = {
          * Timeout for acquiring the lock to iterate over the events.
          */
         acquire_timeout?: number;
+        /**
+         * If true, include the qualified name of the event in the response body.
+         */
+        include_qualified_name?: boolean;
     };
     url: '/events/{handler_id}';
 };
@@ -278,9 +282,17 @@ export type GetEventsByHandlerIdResponses = {
             [key: string]: unknown;
         };
         /**
+         * The class name of the event.
+         */
+        type: string;
+        /**
+         * Superclass names from MRO (excluding the event class and base Event).
+         */
+        types?: Array<string>;
+        /**
          * The qualified name of the event.
          */
-        qualified_name: string;
+        qualified_name?: string;
     };
 };
 
@@ -289,9 +301,23 @@ export type GetEventsByHandlerIdResponse = GetEventsByHandlerIdResponses[keyof G
 export type PostEventsByHandlerIdData = {
     body: {
         /**
-         * Serialized event in JSON format.
+         * Serialized event. Accepts object or JSON-encoded string for backward compatibility.
          */
-        event: string;
+        event: string | {
+            /**
+             * The class name of the event.
+             */
+            type?: string;
+            /**
+             * The event value object (preferred over data).
+             */
+            value?: {
+                [key: string]: unknown;
+            };
+            [key: string]: unknown | string | {
+                [key: string]: unknown;
+            } | undefined;
+        };
         /**
          * Optional target step name. If not provided, event is sent to all steps.
          */

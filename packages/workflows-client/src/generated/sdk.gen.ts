@@ -100,11 +100,10 @@ export const getResultsByHandlerId = <ThrowOnError extends boolean = false>(opti
  * Event data is returned as an envelope that preserves backward-compatible fields
  * and adds metadata for type-safety on the client:
  * {
- * "__is_pydantic": true,
  * "value": <pydantic serialized value>,
- * "qualified_name": <python path to pydantic class>,  # deprecated, prefer `mro`
- * "mro": [<qualified class names from most to least specific>],
- * "origin": "builtin" | "user"
+ * "types": [<class names from MRO excluding the event class and base Event>],
+ * "type": <class name>,
+ * "qualified_name": <python module path + class name>,
  * }
  *
  * Event queue is mutable. Elements are added to the queue by the workflow handler, and removed by any consumer of the queue.
