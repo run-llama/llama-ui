@@ -77,8 +77,11 @@ export const MarkdownMessage: Story = {
         const el = canvasElement.querySelector(
           ".custom-markdown"
         ) as HTMLElement | null;
-        expect(el).toBeTruthy();
-        return el as HTMLElement;
+        if (!el) {
+          expect(el).toBeTruthy();
+          throw new Error("Markdown container not found");
+        }
+        return el;
       },
       { timeout: 5000 }
     );

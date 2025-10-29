@@ -8,8 +8,6 @@ setProjectAnnotations([
   {
     parameters: {
       play: { disable: false },
-      // Increase default timeout for story play functions in CI
-      testTimeout: 30000,
     },
   },
 ]);

@@ -323,7 +323,7 @@ export function TableRenderer<Row extends JsonObject>({
 
     // Add delete column header to the first row if onDeleteRow is provided
     if (onDeleteRow && rows.length > 0) {
-      const firstRow = rows[0] as React.ReactElement;
+      const firstRow = rows[0] as React.ReactElement<React.PropsWithChildren>;
       const modifiedFirstRow = React.cloneElement(firstRow, {
         children: [
           ...React.Children.toArray(firstRow.props.children),

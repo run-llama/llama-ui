@@ -35,7 +35,7 @@ interface ChatMessagesContext {
   showStop?: boolean;
   messageLength: number;
   lastMessage: Message | undefined;
-  chatMessagesRef: RefObject<HTMLDivElement>;
+  chatMessagesRef: RefObject<HTMLDivElement | null>;
 }
 
 const chatMessagesContext = createContext<ChatMessagesContext | null>(null);
@@ -54,7 +54,7 @@ export const useChatMessages = () => {
 
 function ChatMessages(props: ChatMessagesProps) {
   const { messages, regenerate, stop, isLoading } = useChatUI();
-  const chatMessagesRef = useRef<HTMLDivElement>(null);
+  const chatMessagesRef = useRef<HTMLDivElement | null>(null);
 
   const messageLength = messages.length;
   const lastMessage = messages[messageLength - 1];
