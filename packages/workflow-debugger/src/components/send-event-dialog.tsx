@@ -62,7 +62,7 @@ export function SendEventDialog({
   useEffect(() => {
     if (!open || !workflowName) return;
 
-    const fetchEventSchemas = async () => {
+    const fetchEventSchemas = async (): Promise<void> => {
       setLoading(true);
       setSendError(null);
       try {
