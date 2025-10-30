@@ -1,0 +1,49 @@
+name: UI Prerelease
+
+on:
+  workflow_dispatch:
+    inputs:
+      preid:
+        description: Pre identifier (e.g. alpha, beta, rc)
+        default: alpha
+        required: true
+
+env:
+  CI: true
+  PNPM_CACHE_FOLDER: .pnpm-store
+
+jobs:
+  prerelease-ui:
+    name: Prerelease @llamaindex/ui
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build UI package
+        run: pnpm --filter @llamaindex/ui run build
+
+      - name: Bump prerelease version for UI (no git tag)
+        run: pnpm --filter @llamaindex/ui version prerelease --preid ${{ github.event.inputs.preid }} --no-git-tag-version
+
+      - name: Publish UI prerelease to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm --filter @llamaindex/ui publish --access public --tag ${{ github.event.inputs.preid }}
+
+
