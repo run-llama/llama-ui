@@ -1,5 +1,15 @@
 # @llamaindex/ui
 
+## 3.0.0-alpha.1
+
+### Patch Changes
+
+- ee7de57: Make useItemData isMock optional
+- 1d56861: Add filter/styles to grid
+- d3423fd: Upgrade to better support react 19
+- Updated dependencies [31a2a69]
+  - @llamaindex/workflows-client@1.7.0-alpha.0
+
 ## 3.0.0-alpha.0
 
 ### Major Changes

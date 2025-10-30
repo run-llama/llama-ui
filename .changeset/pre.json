@@ -2,9 +2,15 @@
   "mode": "pre",
   "tag": "alpha",
   "initialVersions": {
-    "@llamaindex/ui": "2.1.8"
+    "@llamaindex/ui": "2.1.8",
+    "@llamaindex/workflow-debugger": "0.0.5",
+    "@llamaindex/workflows-client": "1.6.2"
   },
   "changesets": [
+    "curly-roses-hear",
+    "silent-maps-kick",
+    "ten-nails-cough",
+    "update-workflows-sdk",
     "witty-dancers-itch"
   ]
 }
