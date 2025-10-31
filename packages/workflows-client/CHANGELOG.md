@@ -1,5 +1,12 @@
 # @llamaindex/workflows-client
 
+## 1.7.0-alpha.0
+
+### Minor Changes
+
+- acb31b5: Add new endpoint
+- 31a2a69:
+
 ## 1.6.2
 
 ### Patch Changes

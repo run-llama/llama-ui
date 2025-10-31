@@ -1,6 +1,6 @@
 {
   "name": "@llamaindex/ui",
-  "version": "3.0.0-alpha.0",
+  "version": "3.0.0-alpha.1",
   "description": "A comprehensive UI component library built with React, TypeScript, and Tailwind CSS for LlamaIndex applications",
   "keywords": [
     "react",
@@ -343,7 +343,7 @@
     "zustand": "^5.0.6"
   },
   "peerDependencies": {
-    "@llamaindex/workflows-client": "^1.2.0",
+    "@llamaindex/workflows-client": "^1.7.0-alpha.0",
     "llama-cloud-services": "^0.3.6",
     "react": ">=18 <20",
     "react-dom": ">=18 <20"

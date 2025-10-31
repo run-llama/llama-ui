@@ -1,5 +1,18 @@
 # @llamaindex/workflow-debugger
 
+## 0.0.6-alpha.0
+
+### Patch Changes
+
+- d3423fd: Upgrade to better support react 19
+- Updated dependencies [acb31b5]
+- Updated dependencies [ee7de57]
+- Updated dependencies [1d56861]
+- Updated dependencies [d3423fd]
+- Updated dependencies [31a2a69]
+  - @llamaindex/workflows-client@1.7.0-alpha.0
+  - @llamaindex/ui@3.0.0-alpha.1
+
 ## 0.0.5
 
 ### Patch Changes
