@@ -15,24 +15,25 @@ type PdfNavigatorPropsLoading = PdfNavigatorPropsBase & {
 
 type PdfNavigatorPropsLoaded = PdfNavigatorPropsBase &
   PdfToolbarProps & {
-    isLoading: false;
+    isLoading?: false | undefined;
   };
 
 type PdfNavigatorProps = PdfNavigatorPropsLoading | PdfNavigatorPropsLoaded;
 
 export const PdfNavigator = (props: PdfNavigatorProps) => {
-  const { fileName, onRemove, className, isLoading } = props;
+  const { fileName, onRemove, className } = props;
 
-  const toolbarProps: PdfToolbarProps | null = !isLoading
-    ? (() => {
-        // remove non-toolbar props from props
-        // and return the remaining props as toolbarProps
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { fileName, onRemove, className, isLoading, ...rest } =
-          props satisfies PdfNavigatorPropsLoaded;
-        return rest;
-      })()
-    : null;
+  const toolbarProps: PdfToolbarProps | null =
+    props.isLoading === true
+      ? null
+      : (() => {
+          // remove non-toolbar props from props
+          // and return the remaining props as toolbarProps
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { fileName, onRemove, className, isLoading, ...rest } =
+            props satisfies PdfNavigatorPropsLoaded;
+          return rest;
+        })();
 
   return (
     <div className={cn("sticky top-0 w-full z-50 text-xs", className)}>
