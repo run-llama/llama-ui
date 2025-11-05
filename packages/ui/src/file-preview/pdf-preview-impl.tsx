@@ -13,10 +13,10 @@ if (typeof window !== "undefined") {
 
 // Side-effect CSS imports – ignore TypeScript complaints. Also inconsistent checking between projects. Whatever
 // eslint-disable-next-line
-// @ts-ignore react-pdf CSS import has no types
+// @ts-expect-error react-pdf CSS import has no types
 import("react-pdf/dist/Page/AnnotationLayer.css");
 // eslint-disable-next-line
-// @ts-ignore react-pdf CSS import has no types
+// @ts-expect-error react-pdf CSS import has no types
 import("react-pdf/dist/Page/TextLayer.css");
 
 export interface PdfPreviewImplProps {
@@ -314,10 +314,19 @@ export const PdfPreviewImpl = ({
 
   if (isLoading) {
     return (
-      <div className="relative h-full flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-2"></div>
-          <p className="text-gray-600">Loading PDF...</p>
+      <div className="relative h-full flex flex-col">
+        <PdfNavigator
+          fileName={fileName ?? DEFAULT_FILE_NAME}
+          onRemove={onRemove}
+          className={toolbarClassName}
+          isLoading={true}
+        />
+        <div className="h-3 bg-[#F3F3F3]"></div>
+        <div className="relative flex-1 flex items-center justify-center bg-gray-50">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-2"></div>
+            <p className="text-gray-600">Loading PDF...</p>
+          </div>
         </div>
       </div>
     );
