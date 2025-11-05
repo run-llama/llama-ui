@@ -24,7 +24,7 @@ export interface PdfPreviewImplProps {
   url: string;
   onDownload?: () => void;
   onRemove?: () => void;
-  highlight?: Highlight;
+  highlights?: Highlight[];
   toolbarClassName?: string;
   maxPages?: number;
   maxPagesWarning?: string;
@@ -49,7 +49,7 @@ export const PdfPreviewImpl = ({
   url,
   onDownload,
   onRemove,
-  highlight,
+  highlights,
   toolbarClassName,
   maxPages,
   maxPagesWarning,
@@ -66,7 +66,7 @@ export const PdfPreviewImpl = ({
   const isInitialScaleSet = useRef(false);
 
   const [pageBaseDims, setPageBaseDims] = useState<PageBaseDims>({}); // store page viewport to use for bounding box overlay
-  const [showHighlight, setShowHighlight] = useState<boolean>(false); // whether to show the highlight
+  const [showHighlights, setShowHighlights] = useState<boolean>(true); // whether to show the highlights
 
   const hasPageLimit =
     typeof maxPages === "number" && Number.isFinite(maxPages) && maxPages > 0;
@@ -83,17 +83,28 @@ export const PdfPreviewImpl = ({
     !!numPages &&
     numPages > (maxPages ?? 0);
 
-  // bounding box from highlight (only 1 highlight at a time for now)
-  const boundingBoxes: BoundingBox[] = [
-    {
-      id: "highlight",
-      x: highlight?.x || 0,
-      y: highlight?.y || 0,
-      width: highlight?.width || 0,
-      height: highlight?.height || 0,
-      color: "rgba(255, 215, 0, 0.25)",
-    },
-  ];
+  // Convert highlights to bounding boxes grouped by page
+  const highlightsByPage = useMemo(() => {
+    if (!highlights || highlights.length === 0) {
+      return {} as { [page: number]: BoundingBox[] };
+    }
+
+    const grouped: { [page: number]: BoundingBox[] } = {};
+    highlights.forEach((highlight, idx) => {
+      if (!grouped[highlight.page]) {
+        grouped[highlight.page] = [];
+      }
+      grouped[highlight.page].push({
+        id: `highlight-${highlight.page}-${idx}`,
+        x: highlight.x,
+        y: highlight.y,
+        width: highlight.width,
+        height: highlight.height,
+        color: "rgba(255, 215, 0, 0.25)",
+      });
+    });
+    return grouped;
+  }, [highlights]);
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }): void {
     setNumPages(numPages);
@@ -128,17 +139,19 @@ export const PdfPreviewImpl = ({
     [effectiveNumPages]
   );
 
-  // when highlight is set, go to the page and show the highlight
+  // when highlights are set, navigate to the first highlight's page
   useEffect(() => {
-    if (!highlight) return;
+    if (!highlights || highlights.length === 0) return;
     if (!effectiveNumPages) return;
-    if (highlight.page > effectiveNumPages) return;
-    const pageEl = pageRefs.current[highlight.page];
+
+    const firstHighlight = highlights[0];
+    if (firstHighlight.page > effectiveNumPages) return;
+    const pageEl = pageRefs.current[firstHighlight.page];
     if (pageEl) {
-      goToPage(highlight.page);
-      setShowHighlight(true);
+      goToPage(firstHighlight.page);
+      setShowHighlights(true);
     }
-  }, [highlight, effectiveNumPages, goToPage]);
+  }, [highlights, effectiveNumPages, goToPage]);
 
   useEffect(() => {
     // Clamp any pre-existing currentPage so it never points past the capped render range.
@@ -172,10 +185,10 @@ export const PdfPreviewImpl = ({
     }
   };
 
-  // click anywhere on the page to hide the highlight
+  // click anywhere on the page to hide the highlights
   const handleClickOnPage = () => {
-    if (showHighlight) {
-      setShowHighlight(false);
+    if (showHighlights) {
+      setShowHighlights(false);
     }
   };
 
@@ -389,12 +402,11 @@ export const PdfPreviewImpl = ({
                   onClick={handleClickOnPage}
                   onRenderSuccess={handlePageRenderSuccess}
                 />
-                {highlight &&
-                  showHighlight &&
-                  highlight.page === index + 1 &&
+                {showHighlights &&
+                  highlightsByPage[index + 1] &&
                   pageBaseDims[index + 1] && (
                     <BoundingBoxOverlay
-                      boundingBoxes={boundingBoxes}
+                      boundingBoxes={highlightsByPage[index + 1]}
                       zoom={scale}
                       containerWidth={pageBaseDims[index + 1].width}
                       containerHeight={pageBaseDims[index + 1].height}

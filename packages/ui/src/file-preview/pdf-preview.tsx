@@ -8,7 +8,7 @@ import type { PdfPreviewImplProps } from "./pdf-preview-impl";
 const PdfPreview = memo(
   ({
     url,
-    highlight,
+    highlights,
     fileName,
     toolbarClassName,
     onRemove,
@@ -16,7 +16,7 @@ const PdfPreview = memo(
     maxPagesWarning,
   }: {
     url: string;
-    highlight?: Highlight;
+    highlights?: Highlight[];
     fileName?: string;
     toolbarClassName?: string;
     onRemove?: () => void;
@@ -42,7 +42,7 @@ const PdfPreview = memo(
       >
         <PdfPreviewLazy
           url={url}
-          highlight={highlight}
+          highlights={highlights}
           fileName={fileName}
           toolbarClassName={toolbarClassName}
           onRemove={onRemove}

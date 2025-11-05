@@ -104,7 +104,12 @@ export function FilePreview({
 
   if (fileType === "pdf") {
     // Use dynamic import for PDF preview to avoid SSR issues
-    return <PdfPreview url={data?.url || ""} highlight={highlight} />;
+    return (
+      <PdfPreview
+        url={data?.url || ""}
+        highlights={highlight ? [highlight] : undefined}
+      />
+    );
   }
 
   return null;

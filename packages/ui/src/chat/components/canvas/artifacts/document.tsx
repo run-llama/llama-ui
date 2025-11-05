@@ -36,7 +36,7 @@ export function DocumentArtifactViewer({
       <div className="relative mx-6 flex min-h-0 flex-1 flex-col items-stretch py-2">
         {children ?? (
           <div className="h-full w-full overflow-hidden">
-            <PdfPreview url={url} highlight={highlight} />
+            <PdfPreview url={url} highlights={highlight ? [highlight] : undefined} />
           </div>
         )}
       </div>

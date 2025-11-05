@@ -14,10 +14,10 @@ const meta: Meta<typeof PdfPreview> = {
       control: "text",
       description: "URL of the PDF file to preview",
     },
-    highlight: {
+    highlights: {
       control: "object",
       description:
-        "Optional highlight: { page, x, y, width, height } in PDF page coordinates",
+        "Optional array of highlights: [{ page, x, y, width, height }] in PDF page coordinates",
     },
     onRemove: {
       action: "remove",
@@ -71,27 +71,29 @@ export const InteractiveHighlight: Story = {
 };
 
 function InteractiveHighlightExample({ url }: { url: string }) {
-  const [highlight, setHighlight] = useState({
-    page: 1,
-    x: 50,
-    y: 350,
-    width: 250,
-    height: 140,
-  });
+  const [highlights, setHighlights] = useState([
+    { page: 1, x: 100, y: 350, width: 250, height: 140 },
+    { page: 2, x: 150, y: 300, width: 200, height: 80 },
+  ]);
 
   const goToFirstPage = () => {
-    setHighlight({ page: 1, x: 200, y: 205, width: 200, height: 80 });
+    setHighlights([
+      { page: 1, x: 200, y: 205, width: 200, height: 80 },
+      { page: 2, x: 150, y: 300, width: 200, height: 80 },
+    ]);
   };
 
   const randomizeArea = () =>
-    setHighlight((prev) => ({
-      ...prev,
-      page: Math.floor(Math.random() * 5) + 1,
-      x: 50,
-      y: Math.max(10, Math.floor(Math.random() * 500)),
-      width: 250,
-      height: 250,
-    }));
+    setHighlights([
+      {
+        page: Math.floor(Math.random() * 5) + 1,
+        x: 50,
+        y: Math.max(10, Math.floor(Math.random() * 500)),
+        width: 250,
+        height: 250,
+      },
+      { page: 2, x: 150, y: 300, width: 200, height: 80 },
+    ]);
 
   return (
     <div className="h-screen flex">
@@ -111,7 +113,7 @@ function InteractiveHighlightExample({ url }: { url: string }) {
         </button>
       </div>
       <div className="flex-1">
-        <PdfPreview url={url} highlight={highlight} />
+        <PdfPreview url={url} highlights={highlights} />
       </div>
     </div>
   );
@@ -394,7 +396,7 @@ function PdfHighlightTestsComponent() {
       <div style={{ flex: 1 }}>
         <PdfPreview
           url={url}
-          highlight={highlight.width > 0 ? highlight : undefined}
+          highlights={highlight.width > 0 ? [highlight] : undefined}
         />
       </div>
     </div>
