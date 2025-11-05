@@ -1,7 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, userEvent, waitFor, within } from "@storybook/test";
 import { useState } from "react";
-import { expect, within, userEvent, waitFor } from "@storybook/test";
-import { PdfNavigator } from "../../src/file-preview/pdf-navigator";
+import {
+  PdfNavigator,
+  type PdfNavigatorProps,
+} from "../../src/file-preview/pdf-navigator";
 
 const meta: Meta<typeof PdfNavigator> = {
   title: "Components/FilePreview/PdfNavigator",
@@ -62,10 +65,10 @@ export const Default: Story = {
     currentPage: 1,
     totalPages: 10,
     scale: 1.0,
-  },
+  } as never,
   render: (args) => (
     <div className="h-screen p-4">
-      <PdfNavigator {...args} />
+      <PdfNavigator {...(args as PdfNavigatorProps)} />
     </div>
   ),
 };
@@ -76,10 +79,10 @@ export const WithDownload: Story = {
     currentPage: 5,
     totalPages: 25,
     scale: 1.5,
-  },
+  } as never,
   render: (args) => (
     <div className="h-screen p-4">
-      <PdfNavigator {...args} />
+      <PdfNavigator {...(args as PdfNavigatorProps)} />
     </div>
   ),
 };
@@ -90,10 +93,10 @@ export const FirstPage: Story = {
     currentPage: 1,
     totalPages: 15,
     scale: 0.75,
-  },
+  } as never,
   render: (args) => (
     <div className="h-screen p-4">
-      <PdfNavigator {...args} />
+      <PdfNavigator {...(args as PdfNavigatorProps)} />
     </div>
   ),
 };
@@ -104,10 +107,10 @@ export const LastPage: Story = {
     currentPage: 20,
     totalPages: 20,
     scale: 2.0,
-  },
+  } as never,
   render: (args) => (
     <div className="h-screen p-4">
-      <PdfNavigator {...args} />
+      <PdfNavigator {...(args as PdfNavigatorProps)} />
     </div>
   ),
 };
@@ -118,10 +121,10 @@ export const MinScale: Story = {
     currentPage: 3,
     totalPages: 8,
     scale: 0.5,
-  },
+  } as never,
   render: (args) => (
     <div className="h-screen p-4">
-      <PdfNavigator {...args} />
+      <PdfNavigator {...(args as PdfNavigatorProps)} />
     </div>
   ),
 };
@@ -132,10 +135,10 @@ export const MaxScale: Story = {
     currentPage: 7,
     totalPages: 12,
     scale: 3.0,
-  },
+  } as never,
   render: (args) => (
     <div className="h-screen p-4">
-      <PdfNavigator {...args} />
+      <PdfNavigator {...(args as PdfNavigatorProps)} />
     </div>
   ),
 };
@@ -146,10 +149,10 @@ export const SinglePage: Story = {
     currentPage: 1,
     totalPages: 1,
     scale: 1.0,
-  },
+  } as never,
   render: (args) => (
     <div className="h-screen p-4">
-      <PdfNavigator {...args} />
+      <PdfNavigator {...(args as PdfNavigatorProps)} />
     </div>
   ),
 };
@@ -160,10 +163,10 @@ export const LongFileName: Story = {
     currentPage: 10,
     totalPages: 50,
     scale: 1.25,
-  },
+  } as never,
   render: (args) => (
     <div className="h-screen p-4">
-      <PdfNavigator {...args} />
+      <PdfNavigator {...(args as PdfNavigatorProps)} />
     </div>
   ),
 };
@@ -538,6 +541,7 @@ function PdfNavigatorTestsComponent() {
 }
 
 export const InteractiveTests: Story = {
+  args: {} as never,
   render: () => <PdfNavigatorTestsComponent />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -861,11 +865,21 @@ export const WithRemoveButton: Story = {
     currentPage: 3,
     totalPages: 15,
     scale: 1.2,
-  },
-  render: (args) => <WithRemoveNavigatorExample {...args} />,
+  } as never,
+  render: (args) => (
+    <WithRemoveNavigatorExample
+      {...(args as {
+        fileName: string;
+        currentPage: number;
+        totalPages: number;
+        scale: number;
+      })}
+    />
+  ),
 };
 
 export const DirectInteractionTests: Story = {
+  args: {} as never,
   render: () => <DirectNavigatorTestsComponent />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);

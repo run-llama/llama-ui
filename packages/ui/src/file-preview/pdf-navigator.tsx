@@ -18,7 +18,9 @@ type PdfNavigatorPropsLoaded = PdfNavigatorPropsBase &
     isLoading?: false | undefined;
   };
 
-type PdfNavigatorProps = PdfNavigatorPropsLoading | PdfNavigatorPropsLoaded;
+export type PdfNavigatorProps =
+  | PdfNavigatorPropsLoading
+  | PdfNavigatorPropsLoaded;
 
 export const PdfNavigator = (props: PdfNavigatorProps) => {
   const { fileName, onRemove, className } = props;
