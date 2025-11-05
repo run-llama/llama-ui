@@ -5,6 +5,12 @@ import { lazy, memo, Suspense } from "react";
 import { Highlight } from "./types";
 import type { PdfPreviewImplProps } from "./pdf-preview-impl";
 
+const PdfPreviewLazy = lazy<React.ComponentType<PdfPreviewImplProps>>(() =>
+  import("./pdf-preview-impl").then((module) => ({
+    default: module.PdfPreviewImpl,
+  }))
+);
+
 const PdfPreview = memo(
   ({
     url,
@@ -26,11 +32,6 @@ const PdfPreview = memo(
     if (typeof window === "undefined") {
       return null;
     }
-    const PdfPreviewLazy = lazy<React.ComponentType<PdfPreviewImplProps>>(() =>
-      import("./pdf-preview-impl").then((module) => ({
-        default: module.PdfPreviewImpl,
-      }))
-    );
     return (
       <Suspense
         fallback={
