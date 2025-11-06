@@ -21,3 +21,20 @@ export function renderHookWithProvider<T>(
 
   return renderHook(hook, { wrapper });
 }
+
+// Variant that supports hooks receiving props
+export function renderHookWithProviderProps<P, T>(
+  hook: (props: P) => T,
+  options: {
+    apiClients?: Parameters<typeof ApiProvider>[0]["clients"];
+    initialProps: P;
+  }
+): ReturnType<typeof renderHook<T, P>> {
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <ApiProvider clients={options?.apiClients || createMockClients()}>
+      {children}
+    </ApiProvider>
+  );
+
+  return renderHook(hook, { wrapper, initialProps: options.initialProps });
+}

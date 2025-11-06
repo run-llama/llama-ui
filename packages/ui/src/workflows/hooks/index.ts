@@ -65,7 +65,7 @@ export function useWorkflow(name: string) {
   };
 }
 
-export function useHandler(handlerId: string) {
+export function useHandler(handlerId: string | null) {
   const client = useWorkflowsClient();
   const state = getOrCreate<HandlerState>(`handler:${handlerId}`, () =>
     createHandlerState()

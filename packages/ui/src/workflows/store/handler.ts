@@ -66,6 +66,9 @@ export const createState = (rawHandler?: RawHandler): HandlerState => {
 export function createActions(state: HandlerState, client: Client) {
   const actions = {
     async sendEvent(event: WorkflowEvent, step?: string) {
+      if (!state.handler_id) {
+        throw new Error("Handler ID is not yet initialized");
+      }
       const rawEvent = event.toRawEvent(); // convert to raw event before sending
       const data = await postEventsByHandlerId({
         client: client,
@@ -79,9 +82,12 @@ export function createActions(state: HandlerState, client: Client) {
       return data.data;
     },
     async sync(handlerId?: string) {
+      const resolvedHandlerId = handlerId ?? state.handler_id;
+      if (!resolvedHandlerId) return;
+
       const data = await getHandlersByHandlerId({
         client: client,
-        path: { handler_id: handlerId ?? state.handler_id },
+        path: { handler_id: resolvedHandlerId },
       });
 
       Object.assign(state, data.data, {
@@ -102,6 +108,9 @@ export function createActions(state: HandlerState, client: Client) {
       callbacks?: StreamSubscriber<WorkflowEvent>,
       includeInternal = false
     ): StreamOperation<WorkflowEvent> {
+      if (!state.handler_id) {
+        throw new Error("Handler ID is not yet initialized");
+      }
       const streamKey = `handler:${state.handler_id}`;
 
       // Convert callback to SharedStreamingManager subscriber
