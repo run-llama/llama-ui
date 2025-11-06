@@ -1,5 +1,16 @@
 # @llamaindex/ui
 
+## 3.1.0
+
+### Minor Changes
+
+- ac461c9: Update PdfPreview to display multiple highlights
+
+### Patch Changes
+
+- ac461c9: Fix reloading issue on PdfPreview
+- 3658344: Show toolbar while PDF is loading (so user can remove file)
+
 ## 3.0.0
 
 ### Major Changes
