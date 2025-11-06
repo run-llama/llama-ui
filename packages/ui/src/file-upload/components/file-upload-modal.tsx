@@ -38,7 +38,7 @@ export function FileUploader({
   const [fileUrl, setFileUrl] = useState("");
 
   // Dynamic title and description based on multiple setting
-  const modalTitle = title || (multiple ? "Upload Files" : "Upload File");
+  const titleOrDefault = title || (multiple ? "Upload Files" : "Upload File");
   const modalDescription =
     description ||
     (multiple
@@ -232,13 +232,13 @@ export function FileUploader({
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               )}
               <Upload className="h-4 w-4" />
-              {multiple ? "Upload Files" : "Upload File"}
+              {titleOrDefault}
             </Button>
           )}
         </DialogTrigger>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{modalTitle}</DialogTitle>
+            <DialogTitle>{titleOrDefault}</DialogTitle>
             <p className="text-sm text-muted-foreground">{modalDescription}</p>
           </DialogHeader>
 
@@ -290,7 +290,7 @@ export function FileUploader({
               ) : (
                 <FileUpload
                   className="mt-0"
-                  heading={modalTitle}
+                  heading={titleOrDefault}
                   content={singleUploadContent}
                   onContentChange={handleContentChange}
                   allowFileRemoval
