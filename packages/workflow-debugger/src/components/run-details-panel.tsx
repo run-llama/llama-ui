@@ -37,7 +37,7 @@ export function RunDetailsPanel({
   handlerId,
   selectedWorkflow,
 }: RunDetailsPanelProps) {
-  const { state, sync, subscribeToEvents } = useHandler(handlerId);
+  const { state, subscribeToEvents } = useHandler(handlerId);
   const [compactJson, setCompactJson] = useState(false);
   const [hideInternal, setHideInternal] = useState(true);
   const [finalResult, setFinalResult] = useState<JSONValue | null>(null);
@@ -66,13 +66,6 @@ export function RunDetailsPanel({
     const ms = String(d.getMilliseconds()).padStart(3, "0");
     return `${base}.${ms}`;
   };
-
-  useEffect(() => {
-    async function syncHandler() {
-      await sync(handlerId);
-    }
-    syncHandler();
-  }, [sync, handlerId]);
 
   useEffect(() => {
     if (state.status === "running") {
