@@ -1,5 +1,5 @@
 import { useWorkflowsClient } from "@/src/lib/api-provider";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useSnapshot } from "valtio";
 import {
   createActions,
@@ -65,15 +65,37 @@ export function useWorkflow(name: string) {
   };
 }
 
-export function useHandler(handlerId: string | null) {
+/**
+ *
+ * @param handlerId - The handler ID to use. If null, the handler will be initialized with an empty state.
+ * @param sync - Whether to sync the handler state. If true, the handler will be synced when the handler ID
+ *              is changed. You can set to false and manually call sync if this is not the desired behavior.
+ *              Default is `true`.
+ * @returns A hook that returns the handler state and actions.
+ */
+export function useHandler(
+  handlerId: string | null,
+  { sync = true }: { sync?: boolean } = {}
+) {
   const client = useWorkflowsClient();
   const state = getOrCreate<HandlerState>(`handler:${handlerId}`, () =>
-    createHandlerState()
+    createHandlerState({ handler_id: handlerId ?? undefined })
   );
   const actions = useMemo(
     () => createHandlerActions(state, client),
     [state, client]
   );
+  // avoid React Strict Mode double double useEffect calls
+  const hasRun = useRef<string | null>(null);
+  useEffect(() => {
+    if (
+      sync &&
+      ((handlerId && !hasRun.current) || hasRun.current !== handlerId)
+    ) {
+      hasRun.current = handlerId;
+      actions.sync();
+    }
+  }, [handlerId]);
   return {
     state: useSnapshot(state),
     ...actions,

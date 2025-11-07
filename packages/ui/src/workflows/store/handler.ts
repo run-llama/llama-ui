@@ -38,27 +38,27 @@ const emptyState: HandlerState = {
   result: undefined,
 };
 
-export const createState = (rawHandler?: RawHandler): HandlerState => {
-  const state = rawHandler
-    ? {
-        handler_id: rawHandler.handler_id,
-        workflow_name: rawHandler.workflow_name,
-        status: rawHandler.status,
-        started_at: rawHandler.started_at,
-        updated_at: rawHandler.updated_at
-          ? new Date(rawHandler.updated_at)
-          : undefined,
-        completed_at: rawHandler.completed_at
-          ? new Date(rawHandler.completed_at)
-          : undefined,
-        error: rawHandler.error,
-        result: rawHandler.result
-          ? (StopEvent.fromRawEvent(
-              rawHandler.result as EventEnvelopeWithMetadata
-            ) as StopEvent)
-          : undefined,
-      }
-    : emptyState;
+export const createState = (
+  rawHandler: Partial<RawHandler> = {}
+): HandlerState => {
+  const state = {
+    handler_id: rawHandler.handler_id ?? emptyState.handler_id,
+    workflow_name: rawHandler.workflow_name ?? emptyState.workflow_name,
+    status: rawHandler.status ?? emptyState.status,
+    started_at: rawHandler.started_at ?? emptyState.started_at,
+    updated_at: rawHandler.updated_at
+      ? new Date(rawHandler.updated_at)
+      : emptyState.updated_at,
+    completed_at: rawHandler.completed_at
+      ? new Date(rawHandler.completed_at)
+      : emptyState.completed_at,
+    error: rawHandler.error,
+    result: rawHandler.result
+      ? (StopEvent.fromRawEvent(
+          rawHandler.result as EventEnvelopeWithMetadata
+        ) as StopEvent)
+      : emptyState.result,
+  };
 
   return proxy(state);
 };
@@ -81,8 +81,8 @@ export function createActions(state: HandlerState, client: Client) {
 
       return data.data;
     },
-    async sync(handlerId?: string) {
-      const resolvedHandlerId = handlerId ?? state.handler_id;
+    async sync() {
+      const resolvedHandlerId = state.handler_id;
       if (!resolvedHandlerId) return;
 
       const data = await getHandlersByHandlerId({

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { act } from "@testing-library/react";
+import { act, waitFor } from "@testing-library/react";
 import { useHandler } from "../../src/workflows/hooks";
 import { renderHookWithProviderProps } from "../test-utils";
 import {
@@ -54,11 +54,11 @@ describe("useHandler can initialize after null/empty handlerId", () => {
       error: undefined,
     });
 
-    // Re-render hook with a real handlerId (control via props)
+    // Re-render hook with a real handlerId (control via props) - auto-sync should run
     rerender({ id: "h-1" });
-    await act(async () => {
-      // initialize state for the new handler id
-      await result.current.sync("h-1");
+    // allow useEffect-triggered sync to complete
+    await waitFor(() => {
+      expect(result.current.state.workflow_name).toBe("wf-1");
     });
 
     // After sync with explicit handler id, state should be initialized
@@ -81,6 +81,37 @@ describe("useHandler can initialize after null/empty handlerId", () => {
     expect(workflowsClient.postEventsByHandlerId).toHaveBeenCalledWith(
       expect.objectContaining({
         path: { handler_id: "h-1" },
+      })
+    );
+  });
+
+  it("immediately exposes handler_id when provided without needing sync", async () => {
+    const { result } = renderHookWithProviderProps<{ id: string | null }, any>(
+      ({ id }: { id: string | null }) => useHandler(id),
+      {
+        initialProps: { id: "h-imm" },
+      }
+    );
+
+    // handler_id should be set from the passed prop immediately
+    expect(result.current.state.handler_id).toBe("h-imm");
+    expect(result.current.state.status).toBe("not_started");
+
+    // Sending an event should be allowed without calling sync
+    (workflowsClient.postEventsByHandlerId as any).mockResolvedValue({
+      data: { ok: true },
+      error: undefined,
+    });
+
+    await act(async () => {
+      await result.current.sendEvent(
+        new WorkflowEvent(WorkflowEventType.StartEvent, {})
+      );
+    });
+
+    expect(workflowsClient.postEventsByHandlerId).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: { handler_id: "h-imm" },
       })
     );
   });
