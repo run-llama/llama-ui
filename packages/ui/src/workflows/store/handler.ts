@@ -25,6 +25,10 @@ export interface HandlerState
   updated_at?: Date;
   completed_at?: Date;
   result?: StopEvent;
+  // indicates that there is a current sync operation to query the handler state.
+  loading: boolean;
+  // indicates an error loading the actual handler state. See status "failed" and the error field for actual workflow run errors.
+  loadingError?: string;
 }
 
 const emptyState: HandlerState = {
@@ -36,6 +40,8 @@ const emptyState: HandlerState = {
   completed_at: undefined,
   error: "",
   result: undefined,
+  loading: true,
+  loadingError: undefined,
 };
 
 export const createState = (
@@ -58,6 +64,9 @@ export const createState = (
           rawHandler.result as EventEnvelopeWithMetadata
         ) as StopEvent)
       : emptyState.result,
+    // use "status" field as a canary to indicate that this is a real response
+    loading: rawHandler.status ? false : emptyState.loading,
+    loadingError: undefined,
   };
 
   return proxy(state);
@@ -82,27 +91,36 @@ export function createActions(state: HandlerState, client: Client) {
       return data.data;
     },
     async sync() {
+      state.loading = true;
+      state.loadingError = undefined;
       const resolvedHandlerId = state.handler_id;
       if (!resolvedHandlerId) return;
 
-      const data = await getHandlersByHandlerId({
-        client: client,
-        path: { handler_id: resolvedHandlerId },
-      });
+      try {
+        const data = await getHandlersByHandlerId({
+          client: client,
+          path: { handler_id: resolvedHandlerId },
+        });
 
-      Object.assign(state, data.data, {
-        updated_at: data.data?.updated_at
-          ? new Date(data.data.updated_at)
-          : undefined,
-        completed_at: data.data?.completed_at
-          ? new Date(data.data.completed_at)
-          : undefined,
-        result: data.data?.result
-          ? (StopEvent.fromRawEvent(
-              data.data.result as EventEnvelopeWithMetadata
-            ) as StopEvent)
-          : undefined,
-      });
+        Object.assign(state, data.data, {
+          updated_at: data.data?.updated_at
+            ? new Date(data.data.updated_at)
+            : undefined,
+          completed_at: data.data?.completed_at
+            ? new Date(data.data.completed_at)
+            : undefined,
+          result: data.data?.result
+            ? (StopEvent.fromRawEvent(
+                data.data.result as EventEnvelopeWithMetadata
+              ) as StopEvent)
+            : undefined,
+        });
+      } catch (error) {
+        state.loadingError =
+          error instanceof Error ? error.message : String(error);
+      } finally {
+        state.loading = false;
+      }
     },
     subscribeToEvents(
       callbacks?: StreamSubscriber<WorkflowEvent>,

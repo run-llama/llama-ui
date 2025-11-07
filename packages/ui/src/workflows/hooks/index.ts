@@ -5,6 +5,7 @@ import {
   createActions,
   HandlersState,
   createState as createHandlersState,
+  HandlersQuery,
 } from "../store/handlers";
 import { getOrCreate } from "@/src/shared/store";
 import {
@@ -23,19 +24,31 @@ import {
   HandlerState,
 } from "../store/handler";
 
-export function useHandlers() {
+export function useHandlers({
+  query,
+  sync = true,
+}: {
+  query?: HandlersQuery;
+  sync?: boolean;
+} = {}) {
   const client = useWorkflowsClient();
-  const state = getOrCreate<HandlersState>("handlers", () =>
-    createHandlersState()
+  const state = getOrCreate<HandlersState>(
+    `handlers:${JSON.stringify(query)}`,
+    () => createHandlersState({ query: query ?? {} })
   );
   const actions = useMemo(() => createActions(state, client), [state, client]);
+  useEffect(() => {
+    if (sync) {
+      actions.sync();
+    }
+  }, [state, sync]);
   return {
     state: useSnapshot(state),
     ...actions,
   };
 }
 
-export function useWorkflows() {
+export function useWorkflows({ sync = true }: { sync?: boolean } = {}) {
   const client = useWorkflowsClient();
   const state = getOrCreate<WorkflowsState>("workflows", () =>
     createWorkflowsState()
@@ -44,6 +57,11 @@ export function useWorkflows() {
     () => createWorkflowsActions(state, client),
     [state, client]
   );
+  useEffect(() => {
+    if (sync) {
+      actions.sync();
+    }
+  }, [state, sync]);
   return {
     state: useSnapshot(state),
     ...actions,

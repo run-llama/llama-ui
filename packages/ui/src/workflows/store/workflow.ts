@@ -11,23 +11,36 @@ export interface WorkflowState {
   name: string;
   // TODO: add graph type
   graph: unknown | null;
+  loading: boolean;
+  loadingError?: string;
 }
 
 export function createState(name: string): WorkflowState {
   return proxy({
     name,
     graph: null,
+    loading: true,
+    loadingError: undefined,
   });
 }
 
 export function createActions(state: WorkflowState, client: Client) {
   return {
     async sync() {
-      const data = await getWorkflowsByNameRepresentation({
-        client: client,
-        path: { name: state.name },
-      });
-      state.graph = data.data?.graph ?? null;
+      state.loading = true;
+      state.loadingError = undefined;
+      try {
+        const data = await getWorkflowsByNameRepresentation({
+          client: client,
+          path: { name: state.name },
+        });
+        state.graph = data.data?.graph ?? null;
+      } catch (error) {
+        state.loadingError =
+          error instanceof Error ? error.message : String(error);
+      } finally {
+        state.loading = false;
+      }
     },
 
     async createHandler(input: JSONValue, handlerId?: string) {
