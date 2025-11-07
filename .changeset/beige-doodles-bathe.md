@@ -1,6 +1,6 @@
 ---
-"@llamaindex/workflow-debugger": patch
-"@llamaindex/ui": patch
+"@llamaindex/workflow-debugger": minor
+"@llamaindex/ui": minor
 ---
 
 Add more functionality to workflow hooks
