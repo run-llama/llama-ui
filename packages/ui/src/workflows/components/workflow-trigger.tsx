@@ -34,7 +34,7 @@ export function WorkflowTrigger({
   customWorkflowInput,
   onSuccess,
   onError,
-  title = "Trigger Workflow",
+  title,
   description = "Upload files to start workflow processing",
   ...fileUploaderProps
 }: WorkflowTriggerProps) {
@@ -44,39 +44,30 @@ export function WorkflowTrigger({
   const handleFileUpload = useCallback(
     async (data: FileUploadData[], fieldValues: Record<string, string>) => {
       try {
-        setIsCreating(true);
-        // If customWorkflowInput is provided, use it to create the workflow input
-        if (customWorkflowInput) {
-          const workflowInput = customWorkflowInput(data, fieldValues);
-          const handler = await createHandler(workflowInput);
-          toast.success("Workflow task created successfully!");
-          onSuccess?.(handler);
-          return;
-        }
-
         // Create workflow input from uploaded file and form fields
-        const workflowInput = {
-          files: data.map((file) => ({
-            fileId: file.fileId,
-            url: file.url,
-            name: file.file.name,
-            type: file.file.type,
-          })),
-          ...fieldValues,
-        } as JSONValue;
+        const workflowInput = customWorkflowInput
+          ? customWorkflowInput(data, fieldValues)
+          : ({
+              files: data.map((file) => ({
+                fileId: file.fileId,
+                url: file.url,
+                name: file.file.name,
+                type: file.file.type,
+              })),
+              ...fieldValues,
+            } as JSONValue);
 
         // Create workflow task
+        setIsCreating(true);
         const handler = await createHandler(workflowInput);
-
-        toast.success("Workflow task created successfully!");
         onSuccess?.(handler);
-        setIsCreating(false);
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
         toast.error(`Failed to create workflow task: ${error.message}`);
         onError?.(error);
-        setIsCreating(false);
         throw error; // Re-throw to let FileUploader handle UI state
+      } finally {
+        setIsCreating(false);
       }
     },
     [createHandler, onSuccess, onError, customWorkflowInput]

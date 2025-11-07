@@ -15,6 +15,7 @@ import {
 import { logger } from "@shared/logger";
 import { isStopEvent, StopEvent, WorkflowEvent } from "./workflow-event";
 import { proxy } from "valtio";
+import { getOrCreate } from "../../shared/store";
 
 export interface HandlerState
   extends Omit<
@@ -74,11 +75,16 @@ export const createState = (
 
 export function createActions(state: HandlerState, client: Client) {
   const actions = {
-    async sendEvent(event: WorkflowEvent, step?: string) {
+    async sendEvent(
+      event: WorkflowEvent | EventEnvelopeWithMetadata,
+      step?: string
+    ) {
       if (!state.handler_id) {
         throw new Error("Handler ID is not yet initialized");
       }
-      const rawEvent = event.toRawEvent(); // convert to raw event before sending
+      // convert to raw event before sending
+      const rawEvent =
+        event instanceof WorkflowEvent ? event.toRawEvent() : event;
       const data = await postEventsByHandlerId({
         client: client,
         path: { handler_id: state.handler_id },
@@ -101,20 +107,9 @@ export function createActions(state: HandlerState, client: Client) {
           client: client,
           path: { handler_id: resolvedHandlerId },
         });
+        const updated = createState(data.data ?? {});
 
-        Object.assign(state, data.data, {
-          updated_at: data.data?.updated_at
-            ? new Date(data.data.updated_at)
-            : undefined,
-          completed_at: data.data?.completed_at
-            ? new Date(data.data.completed_at)
-            : undefined,
-          result: data.data?.result
-            ? (StopEvent.fromRawEvent(
-                data.data.result as EventEnvelopeWithMetadata
-              ) as StopEvent)
-            : undefined,
-        });
+        Object.assign(state, updated);
       } catch (error) {
         state.loadingError =
           error instanceof Error ? error.message : String(error);
@@ -277,4 +272,18 @@ function streamByEventSource(
       resolve(accumulatedEvents);
     });
   });
+}
+/**
+ * Get's the handler state from the global store or creates a new one if it doesn't exist, and optionally applies an update
+ * @param update
+ * @returns The updated handler state
+ */
+export function getOrCreateHandler(update: Partial<RawHandler>): HandlerState {
+  const current = getOrCreate(`handler:${update.handler_id}`, () =>
+    createState(update)
+  );
+  const updated = createState(update);
+  // mutate existing state instead of creating a new one to maintain global singleton
+  Object.assign(current, updated);
+  return current;
 }

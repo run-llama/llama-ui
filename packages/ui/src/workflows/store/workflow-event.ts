@@ -99,9 +99,8 @@ export class WorkflowEvent {
 }
 
 export class StopEvent extends WorkflowEvent {
-  declare data: { result: JSONValue };
-
-  constructor(type: string, data: { result: JSONValue }, types?: string[]) {
+  declare data: Record<string, unknown>;
+  constructor(type: string, data: Record<string, unknown>, types?: string[]) {
     super(type, data, types);
   }
 }

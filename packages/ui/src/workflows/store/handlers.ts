@@ -1,11 +1,10 @@
-import {
-  Client,
-  EventEnvelopeWithMetadata,
-  getHandlers,
-} from "@llamaindex/workflows-client";
-import { HandlerState } from "./handler";
+import { Client, getHandlers } from "@llamaindex/workflows-client";
 import { proxy } from "valtio";
-import { StopEvent } from "./workflow-event";
+import {
+  createActions as createHandlerActions,
+  getOrCreateHandler,
+  HandlerState,
+} from "./handler";
 
 export interface HandlersQuery {
   workflow_name?: string[];
@@ -43,24 +42,18 @@ export function createActions(state: HandlersState, client: Client) {
         });
 
         const allHandlers = resp.data?.handlers ?? [];
-        allHandlers.forEach((h) => {
-          state.handlers[h.handler_id] = {
-            handler_id: h.handler_id,
-            workflow_name: h.workflow_name,
-            status: h.status,
-            started_at: h.started_at,
-            updated_at: h.updated_at ? new Date(h.updated_at) : undefined,
-            completed_at: h.completed_at ? new Date(h.completed_at) : undefined,
-            error: h.error,
-            result: h.result
-              ? (StopEvent.fromRawEvent(
-                  h.result as EventEnvelopeWithMetadata
-                ) as StopEvent)
-              : undefined,
-            loading: false,
-            loadingError: undefined,
-          };
-        });
+        const newIds = new Set(allHandlers.map((h) => h.handler_id));
+        const oldIds = new Set(Object.keys(state.handlers));
+        // reset handlers server state - remove stale
+        for (const id of oldIds) {
+          if (!newIds.has(id)) {
+            delete state.handlers[id];
+          }
+        }
+        // update
+        for (const h of allHandlers) {
+          state.handlers[h.handler_id] = getOrCreateHandler(h);
+        }
       } catch (error) {
         state.loadingError =
           error instanceof Error ? error.message : String(error);
@@ -70,6 +63,9 @@ export function createActions(state: HandlersState, client: Client) {
     },
     setHandler(handler: HandlerState) {
       state.handlers[handler.handler_id] = handler;
+    },
+    actions(handlerId: string): ReturnType<typeof createHandlerActions> {
+      return createHandlerActions(state.handlers[handlerId], client);
     },
   };
 }

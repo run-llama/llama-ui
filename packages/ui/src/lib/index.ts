@@ -14,6 +14,13 @@ export {
 } from "./api-provider";
 
 export {
+  type StreamOperation,
+  type StreamSubscriber,
+  type StreamExecutor,
+  type SharedStreamingManager,
+} from "./shared-streaming";
+
+export {
   createCloudAgentClient,
   workflowsClient,
   cloudApiClient,

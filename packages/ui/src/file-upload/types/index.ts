@@ -88,6 +88,7 @@ export interface FileUploaderProps extends BaseFileUploadProps {
   ) => Promise<void>;
   trigger?: ReactNode;
   isProcessing?: boolean;
+  disabled?: boolean;
 }
 
 export type { FileUploadProgress } from "./upload-progress";

@@ -37,11 +37,17 @@ export function useHandlers({
     () => createHandlersState({ query: query ?? {} })
   );
   const actions = useMemo(() => createActions(state, client), [state, client]);
+  // avoid React Strict Mode double double useEffect calls
+  const hasRun = useRef<string | null>(null);
   useEffect(() => {
-    if (sync) {
+    if (
+      sync &&
+      ((query && !hasRun.current) || hasRun.current !== JSON.stringify(query))
+    ) {
+      hasRun.current = JSON.stringify(query);
       actions.sync();
     }
-  }, [state, sync]);
+  }, [query, sync]);
   return {
     state: useSnapshot(state),
     ...actions,

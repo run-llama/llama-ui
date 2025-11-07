@@ -37,7 +37,7 @@ export function RunDetailsPanel({
   handlerId,
   selectedWorkflow,
 }: RunDetailsPanelProps) {
-  const { state, subscribeToEvents } = useHandler(handlerId);
+  const { state, sync, subscribeToEvents } = useHandler(handlerId);
   const [compactJson, setCompactJson] = useState(false);
   const [hideInternal, setHideInternal] = useState(true);
   const [finalResult, setFinalResult] = useState<JSONValue | null>(null);
@@ -74,22 +74,23 @@ export function RunDetailsPanel({
           onData: (event: WorkflowEvent) => {
             setEvents((prev: WorkflowEvent[]) => {
               return [...prev, event].sort(
-                (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+                (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
               );
             });
           },
           onSuccess(allEvents) {
             setEvents(allEvents);
             setFinalResult(
-              (allEvents[allEvents.length - 1] as StopEvent)?.data?.result ??
-                null,
+              ((allEvents[allEvents.length - 1] as StopEvent)?.data?.[
+                "result"
+              ] ?? null) as JSONValue | null
             );
           },
           onError(error) {
             setFinalResultError(error.message);
           },
         },
-        true,
+        true
       );
       return () => {
         disconnect();
@@ -107,7 +108,7 @@ export function RunDetailsPanel({
   const displayedEvents: WorkflowEvent[] = useMemo(
     () =>
       hideInternal ? events.filter((event) => !isBuiltInEvent(event)) : events,
-    [events, hideInternal],
+    [events, hideInternal]
   );
 
   return (

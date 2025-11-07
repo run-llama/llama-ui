@@ -69,10 +69,13 @@ export class StreamingMessage {
     if (isStopEvent(event)) {
       return;
     }
+    // typescript seems to think that event is "never" after isStopEvent,
+    // which doesn't make sense. Widen the type back out.
+    const workflowEvent: WorkflowEvent = event;
 
     // Handle delta events: accumulate in buffer
-    if (isChatDeltaEvent(event)) {
-      const delta = event.data.delta;
+    if (isChatDeltaEvent(workflowEvent)) {
+      const delta = workflowEvent.data.delta;
       if (delta) {
         this.currentTextBuffer += delta;
         // Re-parse the current buffer to update preview
@@ -88,8 +91,8 @@ export class StreamingMessage {
 
     // Then append the non-delta event to finalized parts
     this.finalizedParts.push({
-      type: event.type,
-      data: event.data,
+      type: workflowEvent.type,
+      data: workflowEvent.data,
     } as MessagePart);
   }
 

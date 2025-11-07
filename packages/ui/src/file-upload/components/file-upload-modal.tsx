@@ -30,6 +30,7 @@ export function FileUploader({
   onSuccess,
   trigger,
   isProcessing = false,
+  disabled = false,
 }: FileUploaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
@@ -227,7 +228,7 @@ export function FileUploader({
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
           {trigger || (
-            <Button className="cursor-pointer" disabled={isProcessing}>
+            <Button className="cursor-pointer" disabled={disabled}>
               {isProcessing && (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               )}

@@ -2,9 +2,10 @@ import {
   Client,
   postWorkflowsByNameRunNowait,
   getWorkflowsByNameRepresentation,
+  postWorkflowsByNameRun,
 } from "@llamaindex/workflows-client";
 import { proxy } from "valtio";
-import { createState as createHandlerState } from "./handler";
+import { getOrCreateHandler, HandlerState } from "./handler";
 import { JSONValue } from "../types";
 
 export interface WorkflowState {
@@ -43,6 +44,22 @@ export function createActions(state: WorkflowState, client: Client) {
       }
     },
 
+    async runToCompletion(input: JSONValue): Promise<HandlerState> {
+      const data = await postWorkflowsByNameRun({
+        client: client,
+        path: { name: state.name },
+        body: {
+          start_event: input as { [key: string]: unknown } | undefined,
+        },
+      });
+
+      if (!data.data) {
+        throw new Error(`Workflow run empty, response ${JSON.stringify(data)}`);
+      }
+
+      return getOrCreateHandler(data.data);
+    },
+
     async createHandler(input: JSONValue, handlerId?: string) {
       const data = await postWorkflowsByNameRunNowait({
         client: client,
@@ -56,8 +73,7 @@ export function createActions(state: WorkflowState, client: Client) {
       if (!data.data) {
         throw new Error("Handler creation failed");
       }
-
-      return createHandlerState(data.data);
+      return getOrCreateHandler(data.data);
     },
   };
 }

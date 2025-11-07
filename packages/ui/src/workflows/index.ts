@@ -29,4 +29,4 @@ export type {
 export { useWorkflow, useHandler, useHandlers, useWorkflows } from "./hooks";
 
 // Components
-export { WorkflowTrigger } from "./components";
+export * from "./components";
