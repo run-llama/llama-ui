@@ -1,5 +1,18 @@
 # @llamaindex/workflow-debugger
 
+## 0.1.0
+
+### Minor Changes
+
+- 8544bc4: Add more functionality to workflow hooks
+
+### Patch Changes
+
+- Updated dependencies [8544bc4]
+- Updated dependencies [2641426]
+  - @llamaindex/ui@3.2.0
+  - @llamaindex/workflows-client@1.8.1
+
 ## 0.0.8
 
 ### Patch Changes

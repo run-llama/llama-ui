@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 3.2.0
+
+### Minor Changes
+
+- 8544bc4: Add more functionality to workflow hooks
+
 ## 3.1.1
 
 ### Patch Changes
