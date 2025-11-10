@@ -1,5 +1,5 @@
 import { useWorkflowsClient } from "@/src/lib/api-provider";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo } from "react";
 import { useSnapshot } from "valtio";
 import {
   createActions,
@@ -37,17 +37,11 @@ export function useHandlers({
     () => createHandlersState({ query: query ?? {} })
   );
   const actions = useMemo(() => createActions(state, client), [state, client]);
-  // avoid React Strict Mode double double useEffect calls
-  const hasRun = useRef<string | null>(null);
   useEffect(() => {
-    if (
-      sync &&
-      ((query && !hasRun.current) || hasRun.current !== JSON.stringify(query))
-    ) {
-      hasRun.current = JSON.stringify(query);
+    if (sync) {
       actions.sync();
     }
-  }, [query, sync]);
+  }, [actions, sync]);
   return {
     state: useSnapshot(state),
     ...actions,
@@ -67,7 +61,7 @@ export function useWorkflows({ sync = true }: { sync?: boolean } = {}) {
     if (sync) {
       actions.sync();
     }
-  }, [state, sync]);
+  }, [actions, sync]);
   return {
     state: useSnapshot(state),
     ...actions,
@@ -109,17 +103,12 @@ export function useHandler(
     () => createHandlerActions(state, client),
     [state, client]
   );
-  // avoid React Strict Mode double double useEffect calls
-  const hasRun = useRef<string | null>(null);
+
   useEffect(() => {
-    if (
-      sync &&
-      ((handlerId && !hasRun.current) || hasRun.current !== handlerId)
-    ) {
-      hasRun.current = handlerId;
+    if (sync) {
       actions.sync();
     }
-  }, [handlerId]);
+  }, [actions, sync, handlerId]);
   return {
     state: useSnapshot(state),
     ...actions,

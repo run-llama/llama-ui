@@ -5,7 +5,7 @@ import {
   postWorkflowsByNameRun,
 } from "@llamaindex/workflows-client";
 import { proxy } from "valtio";
-import { getOrCreateHandler, HandlerState } from "./handler";
+import { createState as createHandlerState, HandlerState } from "./handler";
 import { JSONValue } from "../types";
 
 export interface WorkflowState {
@@ -57,7 +57,7 @@ export function createActions(state: WorkflowState, client: Client) {
         throw new Error(`Workflow run empty, response ${JSON.stringify(data)}`);
       }
 
-      return getOrCreateHandler(data.data);
+      return createHandlerState(data.data);
     },
 
     async createHandler(input: JSONValue, handlerId?: string) {
@@ -73,7 +73,7 @@ export function createActions(state: WorkflowState, client: Client) {
       if (!data.data) {
         throw new Error("Handler creation failed");
       }
-      return getOrCreateHandler(data.data);
+      return createHandlerState(data.data);
     },
   };
 }

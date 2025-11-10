@@ -282,8 +282,15 @@ export function getOrCreateHandler(update: Partial<RawHandler>): HandlerState {
   const current = getOrCreate(`handler:${update.handler_id}`, () =>
     createState(update)
   );
+  return applyUpdateToHandler(current, update);
+}
+
+export function applyUpdateToHandler(
+  state: HandlerState,
+  update: Partial<RawHandler>
+): HandlerState {
   const updated = createState(update);
   // mutate existing state instead of creating a new one to maintain global singleton
-  Object.assign(current, updated);
-  return current;
+  Object.assign(state, updated);
+  return state;
 }

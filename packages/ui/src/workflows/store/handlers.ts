@@ -2,8 +2,9 @@ import { Client, getHandlers } from "@llamaindex/workflows-client";
 import { proxy } from "valtio";
 import {
   createActions as createHandlerActions,
-  getOrCreateHandler,
   HandlerState,
+  createState as createHandlerState,
+  applyUpdateToHandler,
 } from "./handler";
 
 export interface HandlersQuery {
@@ -52,7 +53,9 @@ export function createActions(state: HandlersState, client: Client) {
         }
         // update
         for (const h of allHandlers) {
-          state.handlers[h.handler_id] = getOrCreateHandler(h);
+          state.handlers[h.handler_id] = state.handlers[h.handler_id]
+            ? applyUpdateToHandler(state.handlers[h.handler_id], h)
+            : createHandlerState(h);
         }
       } catch (error) {
         state.loadingError =
