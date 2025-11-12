@@ -696,7 +696,12 @@ export const ReadOnlyTable: Story = {
 
 export const NestedJSONTable: Story = {
   args: {
+    editable: false,
     data: [
+      {
+        city_name: "LEIPZIG",
+        city_hospitals: ["HOSPITAL 1", "HOSPITAL 2"],
+      },
       {
         city_name: "ADAMANTINA",
         city_hospitals: [
@@ -873,69 +878,5 @@ export const NestedJSONTable: Story = {
         ],
       },
     ],
-  },
-  render: function Render(args) {
-    const [data, setData] = useState(args.data);
-    const [changedPaths, setChangedPaths] = useState<Set<string>>(new Set());
-
-    const handleUpdate = (
-      index: number,
-      key: string,
-      value: unknown,
-      affectedPaths?: string[]
-    ) => {
-      // noop for test
-      const newData = [...data];
-      if (typeof value === "object" && value !== null) {
-        newData[index] = { ...newData[index], [key]: value } as Record<
-          string,
-          JsonObject
-        >;
-      } else {
-        newData[index] = { ...newData[index], [key]: value } as Record<
-          string,
-          JsonObject
-        >;
-      }
-      setData(newData);
-
-      // Use the affectedPaths provided by handleUpdate
-      if (affectedPaths && affectedPaths.length > 0) {
-        setChangedPaths((prev) => new Set([...prev, ...affectedPaths]));
-      } else {
-        // Fallback for backward compatibility
-        const cellPath = `${index}.${key}`;
-        setChangedPaths((prev) => new Set([...prev, cellPath]));
-      }
-    };
-
-    const handleAddRow = (newRow: Record<string, unknown>) => {
-      // noop for test
-      const newData = [...data, newRow] as Record<string, JsonObject>[];
-      setData(newData);
-
-      const rowPath = `${data.length}`;
-      setChangedPaths((prev) => new Set([...prev, rowPath]));
-    };
-
-    const handleDeleteRow = (index: number) => {
-      // noop for test
-      const newData = data.filter((_, i) => i !== index);
-      setData(newData);
-
-      setChangedPaths((prev) => new Set([...prev, "table"]));
-    };
-
-    return (
-      <TableRenderer
-        data={data}
-        onUpdate={handleUpdate}
-        onAddRow={handleAddRow}
-        onDeleteRow={handleDeleteRow}
-        changedPaths={changedPaths}
-        keyPath={args.keyPath}
-        metadata={args.metadata ?? { schema: {}, extracted: {} }}
-      />
-    );
   },
 };

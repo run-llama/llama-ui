@@ -38,3 +38,5 @@ export type {
   JsonObject,
   JsonShape,
 } from "./json-types";
+
+export { arrayToCsv } from "./csv-utils";
