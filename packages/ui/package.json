@@ -324,7 +324,9 @@
     "highlight.js": "^11.10.0",
     "katex": "^0.16.22",
     "lucide-react": "^0.514.0",
+    "motion": "^12.23.24",
     "react-day-picker": "^9.8.0",
+    "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.60.0",
     "react-markdown": "^10.1.0",
     "react-pdf": "^10.0.1",
@@ -340,6 +342,7 @@
     "uuid": "^13.0.0",
     "valtio": "^2.1.8",
     "vaul": "^1.1.2",
+    "xlsx": "^0.18.5",
     "zod": "^3.25.76",
     "zustand": "^5.0.6"
   },
