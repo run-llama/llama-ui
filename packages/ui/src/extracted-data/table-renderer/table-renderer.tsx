@@ -397,7 +397,7 @@ export function TableRenderer<Row extends JsonObject>({
                       key={colIndex}
                       className="p-0 border-r border-gray-100 min-w-[160px] max-w-[360px]"
                     >
-                      <div className="p-2 border-b border-gray-200 ">
+                      <div className="p-2">
                         <TableRenderer<JsonObject>
                           data={value as JsonObject[]}
                           editable={false}
