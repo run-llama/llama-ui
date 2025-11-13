@@ -170,7 +170,7 @@ export function SheetPreview({
     <div className={cn("relative flex h-full flex-col", className)}>
       <FileToolbar
         fileName={fileName}
-        onFullscreen={() => downloadFile(contentUrl, fileName)}
+        onDownload={() => downloadFile(contentUrl, fileName)}
         scale={scale}
         onScaleChange={handleScaleChange}
         onRemove={onRemove}

@@ -137,7 +137,7 @@ function DocumentPreviewItem({
       <PdfPreview
         url={resolvedUrl}
         onRemove={removalHandler}
-        fileName={fileName ?? undefined}
+        fileName={fileName}
         highlights={highlights}
         toolbarClassName="[&>div]:border-t-0 [&>div]:border-r-0 [&>div]:border-l-0"
         maxPages={DEFAULT_MAX_PAGES}

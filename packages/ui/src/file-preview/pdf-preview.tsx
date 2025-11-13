@@ -2,8 +2,8 @@
 
 import { Clock } from "lucide-react";
 import { lazy, memo, Suspense } from "react";
-import { Highlight } from "./types";
 import type { PdfPreviewImplProps } from "./pdf-preview-impl";
+import type { Highlight } from "./types";
 
 const PdfPreviewLazy = lazy<React.ComponentType<PdfPreviewImplProps>>(() =>
   import("./pdf-preview-impl").then((module) => ({
@@ -23,7 +23,7 @@ const PdfPreview = memo(
   }: {
     url: string;
     highlights?: Highlight[];
-    fileName?: string;
+    fileName?: string | null;
     toolbarClassName?: string;
     onRemove?: () => void;
     maxPages?: number;

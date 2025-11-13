@@ -20,7 +20,7 @@ import("react-pdf/dist/Page/AnnotationLayer.css");
 import("react-pdf/dist/Page/TextLayer.css");
 
 export interface PdfPreviewImplProps {
-  fileName?: string;
+  fileName?: string | null;
   url: string;
   onDownload?: () => void;
   onRemove?: () => void;
@@ -42,7 +42,6 @@ const pdfOptions = {
 
 // show rendering progress bar for files larger than this
 const FILE_SIZE_THRESHOLD = 10 * 1024 * 1024; // 10MB
-const DEFAULT_FILE_NAME = "document.pdf";
 
 export const PdfPreviewImpl = ({
   fileName,
@@ -240,14 +239,18 @@ export const PdfPreviewImpl = ({
       setIsLoading(true);
       const response = await fetch(url);
       const blob = await response.blob();
-      setFile(new File([blob], DEFAULT_FILE_NAME, { type: "application/pdf" }));
+      setFile(
+        new File([blob], fileName ?? "document.pdf", {
+          type: "application/pdf",
+        })
+      );
       setIsLoading(false);
     };
     fetchFile();
     return () => {
       setFile(null);
     };
-  }, [url]);
+  }, [url, fileName]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -329,7 +332,7 @@ export const PdfPreviewImpl = ({
     return (
       <div className="relative h-full flex flex-col">
         <FileToolbar
-          fileName={fileName ?? DEFAULT_FILE_NAME}
+          fileName={fileName}
           onRemove={onRemove}
           className={toolbarClassName}
         />
@@ -358,7 +361,7 @@ export const PdfPreviewImpl = ({
       {effectiveNumPages && effectiveNumPages > 0 && (
         <>
           <FileToolbar
-            fileName={fileName ?? file?.name ?? DEFAULT_FILE_NAME}
+            fileName={fileName}
             currentPage={currentPage}
             totalPages={effectiveNumPages}
             scale={scale}
@@ -369,6 +372,7 @@ export const PdfPreviewImpl = ({
             onReset={handleReset}
             onFullscreen={toggleFullscreen}
             className={toolbarClassName}
+            isOverlay
           />
           {showMaxPagesWarning && (
             <div
