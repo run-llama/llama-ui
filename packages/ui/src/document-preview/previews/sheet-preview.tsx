@@ -115,7 +115,7 @@ export function SheetPreview({
         }
       } catch (err) {
         if (isMounted) {
-          logger.error(err, undefined, "[XlsxPreview] Failed to load workbook");
+          logger.error("[XlsxPreview] Failed to load workbook", err);
           setError(
             err instanceof Error
               ? err.message
