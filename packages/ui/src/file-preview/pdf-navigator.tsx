@@ -1,7 +1,10 @@
 import { File, Trash2 } from "lucide-react";
 import { Button } from "@/base/button";
 import { cn } from "@/lib/utils";
-import { PdfToolbar, type PdfToolbarProps } from "./pdf-toolbar";
+import {
+  FileToolbar,
+  type FileToolbarProps,
+} from "../document-preview/file-tool-bar";
 
 type PdfNavigatorPropsBase = {
   fileName: string;
@@ -14,7 +17,7 @@ type PdfNavigatorPropsLoading = PdfNavigatorPropsBase & {
 };
 
 type PdfNavigatorPropsLoaded = PdfNavigatorPropsBase &
-  PdfToolbarProps & {
+  FileToolbarProps & {
     isLoading?: false | undefined;
   };
 
@@ -25,7 +28,7 @@ export type PdfNavigatorProps =
 export const PdfNavigator = (props: PdfNavigatorProps) => {
   const { fileName, onRemove, className } = props;
 
-  const toolbarProps: PdfToolbarProps | null =
+  const toolbarProps: FileToolbarProps | null =
     props.isLoading === true
       ? null
       : (() => {
@@ -55,7 +58,7 @@ export const PdfNavigator = (props: PdfNavigatorProps) => {
             </Button>
           )}
         </div>
-        {toolbarProps && <PdfToolbar {...toolbarProps} />}
+        {toolbarProps && <FileToolbar {...toolbarProps} />}
       </div>
     </div>
   );

@@ -11,7 +11,7 @@ export const FileObjectPreview = ({
   onRemove?: () => void;
 }) => {
   const containerRef = useRef<HTMLObjectElement>(null);
-  const [zoom, setZoom] = useState(1);
+  const [scale, setScale] = useState(1);
 
   const toggleFullscreen = () => {
     window.open(contentUrl, "_blank");
@@ -21,12 +21,8 @@ export const FileObjectPreview = ({
     toggleFullscreen();
   };
 
-  const handleZoomIn = () => {
-    setZoom((z) => z + 0.1);
-  };
-
-  const handleZoomOut = () => {
-    setZoom((z) => Math.max(0.1, z - 0.1));
+  const handleScaleChange = (newScale: number) => {
+    setScale(newScale);
   };
 
   const isImage = fileName?.match(/\.(jpg|jpeg|png|gif|bmp|tiff|ico|webp)$/i);
@@ -36,9 +32,8 @@ export const FileObjectPreview = ({
       <FileToolbar
         fileName={fileName}
         onFullscreen={onFullscreen}
-        zoom={zoom}
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
+        scale={scale}
+        onScaleChange={handleScaleChange}
         onRemove={onRemove}
         isOverlay
       />
@@ -49,7 +44,7 @@ export const FileObjectPreview = ({
             alt={fileName ?? "uploaded_file"}
             className="h-full w-full rounded-none object-contain p-4"
             style={{
-              transform: `scale(${zoom})`,
+              transform: `scale(${scale})`,
               transformOrigin: "top left",
             }}
           />
@@ -59,7 +54,7 @@ export const FileObjectPreview = ({
             data={contentUrl}
             className="h-full w-full bg-white"
             style={{
-              transform: `scale(${zoom})`,
+              transform: `scale(${scale})`,
               transformOrigin: "top left",
             }}
           >

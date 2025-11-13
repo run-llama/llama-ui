@@ -1,5 +1,6 @@
 "use client";
 
+import { logger } from "@shared/logger";
 import { Loader2, TriangleAlert } from "lucide-react";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { Button } from "@/base/button";
@@ -62,7 +63,7 @@ export function SheetPreview({
   const [activeSheetIndex, setActiveSheetIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [zoom, setZoom] = useState(1);
+  const [scale, setScale] = useState(1);
 
   useEffect(() => {
     let isMounted = true;
@@ -145,8 +146,9 @@ export function SheetPreview({
     );
   }, [activeSheet]);
 
-  const handleZoomIn = () => setZoom((value) => Math.min(3, value + 0.1));
-  const handleZoomOut = () => setZoom((value) => Math.max(0.2, value - 0.1));
+  const handleScaleChange = (newScale: number) => {
+    setScale(newScale);
+  };
 
   const sheetTabs = sheets.map((sheet, index) => (
     <button
@@ -169,9 +171,8 @@ export function SheetPreview({
       <FileToolbar
         fileName={fileName}
         onFullscreen={() => downloadFile(contentUrl, fileName)}
-        zoom={zoom}
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
+        scale={scale}
+        onScaleChange={handleScaleChange}
         onRemove={onRemove}
         isOverlay
       />
@@ -192,7 +193,7 @@ export function SheetPreview({
         ) : (
           <div
             className="inline-block origin-top-left p-4"
-            style={{ transform: `scale(${zoom})` }}
+            style={{ transform: `scale(${scale})` }}
           >
             <table className="border-collapse rounded-md bg-white text-xs shadow-sm">
               <thead>
