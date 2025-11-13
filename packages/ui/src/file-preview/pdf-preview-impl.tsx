@@ -13,10 +13,8 @@ if (typeof window !== "undefined") {
 
 // Side-effect CSS imports – ignore TypeScript complaints. Also inconsistent checking between projects. Whatever
 // eslint-disable-next-line
-// @ts-expect-error react-pdf CSS import has no types
 import("react-pdf/dist/Page/AnnotationLayer.css");
 // eslint-disable-next-line
-// @ts-expect-error react-pdf CSS import has no types
 import("react-pdf/dist/Page/TextLayer.css");
 
 export interface PdfPreviewImplProps {
