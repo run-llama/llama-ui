@@ -48,6 +48,7 @@ export const FileToolbar = ({
     currentPage?.toString() ?? "1"
   );
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [isHovered, setIsHovered] = useState<boolean>(false);
 
   const showZoomControls =
     typeof scale === "number" && typeof onScaleChange === "function";
@@ -149,10 +150,16 @@ export const FileToolbar = ({
       className={cn(
         "flex h-10 items-center justify-between gap-3 px-6 transition",
         isOverlay
-          ? "absolute left-0 right-0 top-0 z-10 border-b bg-white/70"
+          ? [
+              "absolute left-0 right-0 top-0 z-10 border-b bg-white/70",
+              isHovered ? "opacity-100" : "opacity-20",
+              "transition-opacity duration-300 ease-in-out",
+            ]
           : "border-b bg-white",
         className
       )}
+      onMouseEnter={() => isOverlay && setIsHovered(true)}
+      onMouseLeave={() => isOverlay && setIsHovered(false)}
     >
       <div className="flex items-center gap-2">
         {fileName && (
