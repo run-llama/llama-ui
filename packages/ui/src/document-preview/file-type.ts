@@ -65,48 +65,88 @@ function extractExtension(candidate: string | null | undefined) {
   return extension ? extension.toLowerCase() : null;
 }
 
-export function determinePreviewType({
-  content,
-  fileName,
-}: {
-  content: File | string | null;
-  fileName?: string | null;
-}): PreviewType {
-  const mimeCandidate = content instanceof File ? content.type : null;
+export function determinePreviewType(content: File | string): PreviewType {
+  // Handle File objects
+  if (content instanceof File) {
+    // First check mime type
+    if (content.type) {
+      const normalized = content.type.split(";")[0]?.trim().toLowerCase();
+      if (normalized && hasMimePreview(normalized)) {
+        return MIME_TYPE_PREVIEW_MAP[normalized];
+      }
+      if (normalized && hasUnsupportedMime(normalized)) {
+        return "unsupported";
+      }
+    }
 
-  if (mimeCandidate) {
-    const normalized = mimeCandidate.split(";")[0]?.trim().toLowerCase();
-    if (normalized && hasMimePreview(normalized)) {
-      return MIME_TYPE_PREVIEW_MAP[normalized];
+    // Fall back to file name extension
+    if (content.name) {
+      const extension = extractExtension(content.name);
+      if (extension) {
+        if (hasExtensionPreview(extension)) {
+          return EXTENSION_PREVIEW_MAP[extension];
+        }
+        if (hasUnsupportedExtension(extension)) {
+          return "unsupported";
+        }
+      }
     }
-    if (normalized && hasUnsupportedMime(normalized)) {
-      return "unsupported";
-    }
+
+    return "file-object";
   }
 
-  const extensionCandidates = [
-    fileName ?? null,
-    content instanceof File ? content.name : null,
-  ].filter(Boolean) as string[];
+  // Handle string URLs (including data URLs)
+  if (typeof content === "string") {
+    // Check for data URL format: data:mime/type;base64,...
+    if (content.startsWith("data:")) {
+      const mimeMatch = content.match(/^data:([^;]+)/);
+      if (mimeMatch) {
+        const normalized = mimeMatch[1].trim().toLowerCase();
+        if (normalized && hasMimePreview(normalized)) {
+          return MIME_TYPE_PREVIEW_MAP[normalized];
+        }
+        if (normalized && hasUnsupportedMime(normalized)) {
+          return "unsupported";
+        }
+      }
+      // If data URL doesn't have a recognized mime type, fall through to extension check
+    }
 
-  for (const candidate of extensionCandidates) {
-    const extension = extractExtension(candidate);
-    if (!extension) continue;
-    if (hasExtensionPreview(extension)) {
-      return EXTENSION_PREVIEW_MAP[extension];
+    // Extract extension from URL pathname
+    try {
+      const urlObj = new URL(content);
+      const extension = extractExtension(urlObj.pathname);
+      if (extension) {
+        if (hasExtensionPreview(extension)) {
+          return EXTENSION_PREVIEW_MAP[extension];
+        }
+        if (hasUnsupportedExtension(extension)) {
+          return "unsupported";
+        }
+      }
+    } catch {
+      // Invalid URL, try to extract extension from the string directly
+      const extension = extractExtension(content);
+      if (extension) {
+        if (hasExtensionPreview(extension)) {
+          return EXTENSION_PREVIEW_MAP[extension];
+        }
+        if (hasUnsupportedExtension(extension)) {
+          return "unsupported";
+        }
+      }
     }
-    if (hasUnsupportedExtension(extension)) {
-      return "unsupported";
-    }
+
+    return "file-object";
   }
 
   return "file-object";
 }
+
 /**
  * Resolves file name from content.
  * Extracts filename from File objects or URL strings.
  */
-
 export const resolveFileName = (content: File | string): string | null => {
   if (content instanceof File) return content.name;
   if (typeof content === "string") {

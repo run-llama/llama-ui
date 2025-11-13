@@ -2,6 +2,10 @@
 
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import type { DropzoneProps } from "react-dropzone";
+import { cn } from "@/lib/utils";
+import { EaseInDiv } from "../animation/ease-in-div";
+import { PdfPreview } from "../file-preview";
+import type { Highlight } from "../file-preview/types";
 import { FileObjectPreview } from "./file-object-preview";
 import { determinePreviewType, resolveFileName } from "./file-type";
 import { FileUpload } from "./file-upload";
@@ -10,10 +14,6 @@ import { SheetPreview } from "./sheet-preview";
 import { TextPreview } from "./text-preview";
 import { UnsupportedPreview } from "./unsupported-preview";
 import { UploadSkeleton } from "./upload-skeleton";
-import { PdfPreview } from "../file-preview";
-import { EaseInDiv } from "../animation/ease-in-div";
-import { cn } from "@/lib/utils";
-import type { Highlight } from "../file-preview/types";
 
 type UploadableContent = File | string;
 
@@ -85,31 +85,30 @@ function DocumentPreviewItem({
   fileName,
   highlights,
 }: DocumentPreviewItemProps) {
-  const content = value ?? null;
 
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
 
   useEffect(() => {
     // XXX: Don't separate this into a useMemo calling URL.createObjectURL
     // Doesn't work with multiple instances of DocumentPreviewItem
-    if (!(content instanceof File)) {
+    if (!(value instanceof File)) {
       setBlobUrl(null);
       return;
     }
 
-    const objectUrl = URL.createObjectURL(content);
+    const objectUrl = URL.createObjectURL(value);
     setBlobUrl(objectUrl);
 
     return () => {
       URL.revokeObjectURL(objectUrl);
     };
-  }, [content]);
+  }, [value]);
 
   const resolvedUrl = useMemo(() => {
-    if (content instanceof File) return blobUrl;
-    if (typeof content === "string") {
+    if (value instanceof File) return blobUrl;
+    if (typeof value === "string") {
       try {
-        return new URL(content).toString();
+        return new URL(value).toString();
       } catch (error: unknown) {
         // eslint-disable-next-line no-console
         console.error(error);
@@ -117,16 +116,13 @@ function DocumentPreviewItem({
       }
     }
     return null;
-  }, [content, blobUrl]);
+  }, [value, blobUrl]);
 
   if (!resolvedUrl) {
     return <UploadSkeleton />;
   }
 
-  const previewType = determinePreviewType({
-    content,
-    fileName,
-  });
+  const previewType = determinePreviewType(value);
 
   const removalHandler = allowRemoval ? onRemove : undefined;
 
@@ -362,6 +358,7 @@ export function DocumentPreview(props: DocumentPreviewProps) {
         {currentValue && (
           <DocumentPreviewItem
             value={currentValue}
+            // don't show file name for multiple files (as we're showing select file bar)
             fileName={allowMultiple ? undefined : currentFileName}
             onRemove={() => handleRemoveAt(currentPreviewIndex)}
             allowRemoval={allowRemoval && !allowMultiple}

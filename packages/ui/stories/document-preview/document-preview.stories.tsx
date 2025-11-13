@@ -136,6 +136,11 @@ export const MultipleFiles: Story = {
         fileName: "sample.pdf",
         content: SAMPLE_PDF_DATA_URL,
       },
+      {
+        fileName: "tracemonkey-pldi-09.pdf",
+        content:
+          "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf",
+      },
     ],
   },
   render: (args) => <UploadStateContainer {...args} />,
