@@ -60,6 +60,11 @@
       "import": "./dist/file-preview.mjs",
       "require": "./dist/file-preview.cjs"
     },
+    "./document-preview": {
+      "types": "./dist/document-preview/index.d.ts",
+      "import": "./dist/document-preview/index.mjs",
+      "require": "./dist/document-preview/index.cjs"
+    },
     "./item-grid": {
       "types": "./dist/item-grid.d.ts",
       "import": "./dist/item-grid.mjs",

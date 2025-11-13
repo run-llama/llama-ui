@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 // @ts-expect-error react-pdf types have no declarations
 import type { PageCallback } from "react-pdf/dist/shared/types";
+import { FileToolbar } from "../document-preview/file-tool-bar";
 import { BoundingBoxOverlay } from "./bounding-box-overlay";
-import { PdfNavigator } from "./pdf-navigator";
 import type { BoundingBox, Highlight } from "./types";
 
 // Configure worker path for PDF.js
@@ -13,10 +13,10 @@ if (typeof window !== "undefined") {
 
 // Side-effect CSS imports – ignore TypeScript complaints. Also inconsistent checking between projects. Whatever
 // eslint-disable-next-line
-// @ts-ignore react-pdf CSS import has no types
+// @ts-expect-error react-pdf CSS import has no types
 import("react-pdf/dist/Page/AnnotationLayer.css");
 // eslint-disable-next-line
-// @ts-ignore react-pdf CSS import has no types
+// @ts-expect-error react-pdf CSS import has no types
 import("react-pdf/dist/Page/TextLayer.css");
 
 export interface PdfPreviewImplProps {
@@ -328,11 +328,10 @@ export const PdfPreviewImpl = ({
   if (isLoading) {
     return (
       <div className="relative h-full flex flex-col">
-        <PdfNavigator
+        <FileToolbar
           fileName={fileName ?? DEFAULT_FILE_NAME}
           onRemove={onRemove}
           className={toolbarClassName}
-          isLoading={true}
         />
         <div className="h-3 bg-[#F3F3F3]"></div>
         <div className="relative flex-1 flex items-center justify-center bg-gray-50">
@@ -358,7 +357,7 @@ export const PdfPreviewImpl = ({
       {/* Navigation Component */}
       {effectiveNumPages && effectiveNumPages > 0 && (
         <>
-          <PdfNavigator
+          <FileToolbar
             fileName={fileName ?? file?.name ?? DEFAULT_FILE_NAME}
             currentPage={currentPage}
             totalPages={effectiveNumPages}

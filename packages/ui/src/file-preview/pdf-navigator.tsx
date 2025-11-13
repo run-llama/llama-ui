@@ -21,11 +21,43 @@ type PdfNavigatorPropsLoaded = PdfNavigatorPropsBase &
     isLoading?: false | undefined;
   };
 
+/**
+ * @deprecated Use `FileToolbar` from `@llamaindex/ui/document-preview` directly instead.
+ * This component is kept for backward compatibility and will be removed in a future version.
+ *
+ * PdfNavigator is now a wrapper around FileToolbar. For new code, use FileToolbar directly:
+ *
+ * ```tsx
+ * import { FileToolbar } from "@llamaindex/ui/document-preview";
+ *
+ * <FileToolbar
+ *   fileName="document.pdf"
+ *   currentPage={1}
+ *   totalPages={10}
+ *   scale={1.0}
+ *   onPageChange={handlePageChange}
+ *   onScaleChange={handleScaleChange}
+ *   onFullscreen={handleFullscreen}
+ *   onRemove={handleRemove}
+ * />
+ * ```
+ */
 export type PdfNavigatorProps =
   | PdfNavigatorPropsLoading
   | PdfNavigatorPropsLoaded;
 
+/**
+ * @deprecated Use `FileToolbar` from `@llamaindex/ui/document-preview` directly instead.
+ * This component is kept for backward compatibility and will be removed in a future version.
+ */
 export const PdfNavigator = (props: PdfNavigatorProps) => {
+  if (process.env.NODE_ENV !== "production") {
+    // eslint-disable-next-line no-console
+    console.warn(
+      "PdfNavigator is deprecated. Use FileToolbar from @llamaindex/ui/document-preview directly instead."
+    );
+  }
+
   const { fileName, onRemove, className } = props;
 
   const toolbarProps: FileToolbarProps | null =
