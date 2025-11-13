@@ -15,6 +15,7 @@ import {
 } from "@llamaindex/ui";
 import { useHandler, type WorkflowEvent } from "@llamaindex/ui";
 import { CodeBlock } from "./code-block";
+import { useStreamEventBatcher } from "@llamaindex/ui";
 import { WorkflowVisualization } from "./workflow-visualization";
 import { SendEventDialog } from "./send-event-dialog";
 
@@ -42,7 +43,7 @@ export function RunDetailsPanel({
   const [hideInternal, setHideInternal] = useState(true);
   const [finalResult, setFinalResult] = useState<JSONValue | null>(null);
   const [finalResultError, setFinalResultError] = useState<string | null>(null);
-  const [events, setEvents] = useState<WorkflowEvent[]>([]);
+  const { items: events, push, clear } = useStreamEventBatcher<WorkflowEvent>(100, (a, b) => a.timestamp.getTime() - b.timestamp.getTime());
 
   const formatJsonData = (data: unknown) => {
     if (typeof data === "string") {
@@ -79,14 +80,9 @@ export function RunDetailsPanel({
       const { disconnect } = subscribeToEvents(
         {
           onData: (event: WorkflowEvent) => {
-            setEvents((prev: WorkflowEvent[]) => {
-              return [...prev, event].sort(
-                (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
-              );
-            });
+            push(event);
           },
           onSuccess(allEvents) {
-            setEvents(allEvents);
             setFinalResult(
               (allEvents[allEvents.length - 1] as StopEvent)?.data?.result ??
                 null,
@@ -102,14 +98,14 @@ export function RunDetailsPanel({
         disconnect();
       };
     }
-  }, [subscribeToEvents, state.status]);
+  }, [subscribeToEvents, state.status, push]);
 
   // Reset events, timestamps and result when switching handlers
   useEffect(() => {
-    setEvents([]);
+    clear();
     setFinalResult(null);
     setFinalResultError(null);
-  }, [handlerId]);
+  }, [handlerId, clear]);
 
   const displayedEvents: WorkflowEvent[] = useMemo(
     () =>

@@ -5,6 +5,16 @@ import {
   oneLight,
 } from "react-syntax-highlighter/dist/esm/styles/prism";
 
+const customStyle: CSSProperties = {
+  margin: 0,
+  fontSize: "12px",
+  padding: "12px",
+  borderRadius: "6px",
+  width: "100%",
+  boxSizing: "border-box",
+  maxHeight: "none",
+  overflow: "visible",
+};
 export interface CodeBlockProps {
   language: string;
   value: string;
@@ -21,17 +31,6 @@ export function CodeBlock({
   const isDark =
     typeof document !== "undefined" &&
     document.documentElement.classList.contains("dark");
-
-  const customStyle: CSSProperties = {
-    margin: 0,
-    fontSize: "12px",
-    padding: "12px",
-    borderRadius: "6px",
-    width: "100%",
-    boxSizing: "border-box",
-    maxHeight: "none",
-    overflow: "visible",
-  };
 
   return (
     <div className={className}>

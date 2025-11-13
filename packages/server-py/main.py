@@ -3,6 +3,7 @@ import logging
 from workflows.server import WorkflowServer
 from test_workflows.sum import SumWorkflow
 from test_workflows.subtract import SubtractWorkflow
+from agents.basic_chat_agent_workflow import BasicChatAgentWorkflow
 
 # Configure logging to output to stdout
 logging.basicConfig(
@@ -18,6 +19,7 @@ async def main() -> None:
     # Register workflows
     server.add_workflow("sum", SumWorkflow())
     server.add_workflow("subtract", SubtractWorkflow())
+    server.add_workflow("basic_chat_agent_workflow", BasicChatAgentWorkflow())
 
     # Enable auto-reload for development
     await server.serve(

@@ -10,7 +10,7 @@ import { logger } from "@shared/logger";
 
 export interface StreamSubscriber<TEvent> {
   onStart?: () => void;
-  onData?: (event: TEvent) => void;
+  onData?: (events: TEvent) => void;
   onError?: (error: Error) => void;
   onCancel?: () => void;
   onSuccess?: (allEvents: TEvent[]) => void;
@@ -66,7 +66,8 @@ export class SharedStreamingManager<TEvent = any> {
     streamKey: string,
     subscriber: StreamSubscriber<TEvent>,
     executor: StreamExecutor<TEvent>,
-    canceler: () => Promise<void>
+    canceler: () => Promise<void>,
+
   ): StreamOperation<TEvent> {
     const existingStream = this.activeStreams.get(streamKey);
     if (existingStream) {
