@@ -1,4 +1,4 @@
-import { FileToolbar } from "./file-tool-bar";
+import { FileToolbar } from "../file-tool-bar";
 
 export function UnsupportedPreview({
   fileName,

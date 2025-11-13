@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FileToolbar } from "./file-tool-bar";
+import { FileToolbar } from "../file-tool-bar";
 
 interface TextPreviewProps {
   fileName?: string | null;

@@ -5,7 +5,7 @@ import { Loader2, TriangleAlert } from "lucide-react";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { Button } from "@/base/button";
 import { cn } from "@/lib/utils";
-import { FileToolbar } from "./file-tool-bar";
+import { FileToolbar } from "../file-tool-bar";
 
 type SheetRow = Array<string | number | boolean | Date | null>;
 

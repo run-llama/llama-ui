@@ -6,13 +6,13 @@ import { cn } from "@/lib/utils";
 import { EaseInDiv } from "../animation/ease-in-div";
 import { PdfPreview } from "../file-preview";
 import type { Highlight } from "../file-preview/types";
-import { FileObjectPreview } from "./file-object-preview";
+import { FileObjectPreview } from "./previews/file-object-preview";
 import { checkUrl, determinePreviewType, resolveFileName } from "./file-type";
 import { FileUpload } from "./file-upload";
 import { SelectFileBar } from "./select-file-bar";
-import { SheetPreview } from "./sheet-preview";
-import { TextPreview } from "./text-preview";
-import { UnsupportedPreview } from "./unsupported-preview";
+import { SheetPreview } from "./previews/sheet-preview";
+import { TextPreview } from "./previews/text-preview";
+import { UnsupportedPreview } from "./previews/unsupported-preview";
 import { UploadSkeleton } from "./upload-skeleton";
 
 type UploadableContent = File | string;

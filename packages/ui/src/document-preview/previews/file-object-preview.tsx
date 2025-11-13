@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { FileToolbar } from "./file-tool-bar";
+import { FileToolbar } from "../file-tool-bar";
 
 export const FileObjectPreview = ({
   fileName,
