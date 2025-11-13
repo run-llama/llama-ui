@@ -144,6 +144,35 @@ export function determinePreviewType(content: File | string): PreviewType {
 }
 
 /**
+ * Checks if a string is a valid URL format (data URL, absolute URL, or relative URL).
+ *
+ * @param value - The URL string to check
+ * @returns The string if it's a valid URL format, null otherwise
+ */
+export function checkUrl(value: string): string | null {
+  // Handle data URLs
+  if (value.startsWith("data:")) {
+    return value;
+  }
+  // Handle absolute URLs
+  try {
+    new URL(value);
+    return value;
+  } catch {
+    // Check if it's a relative URL (starts with /, ./, or ../)
+    if (
+      value.startsWith("/") ||
+      value.startsWith("./") ||
+      value.startsWith("../")
+    ) {
+      return value;
+    }
+    // Not a valid URL format
+    return null;
+  }
+}
+
+/**
  * Resolves file name from content.
  * Extracts filename from File objects or URL strings.
  */

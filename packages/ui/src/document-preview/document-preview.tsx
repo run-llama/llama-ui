@@ -7,7 +7,7 @@ import { EaseInDiv } from "../animation/ease-in-div";
 import { PdfPreview } from "../file-preview";
 import type { Highlight } from "../file-preview/types";
 import { FileObjectPreview } from "./file-object-preview";
-import { determinePreviewType, resolveFileName } from "./file-type";
+import { checkUrl, determinePreviewType, resolveFileName } from "./file-type";
 import { FileUpload } from "./file-upload";
 import { SelectFileBar } from "./select-file-bar";
 import { SheetPreview } from "./sheet-preview";
@@ -85,7 +85,6 @@ function DocumentPreviewItem({
   fileName,
   highlights,
 }: DocumentPreviewItemProps) {
-
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -107,13 +106,7 @@ function DocumentPreviewItem({
   const resolvedUrl = useMemo(() => {
     if (value instanceof File) return blobUrl;
     if (typeof value === "string") {
-      try {
-        return new URL(value).toString();
-      } catch (error: unknown) {
-        // eslint-disable-next-line no-console
-        console.error(error);
-        return null;
-      }
+      return checkUrl(value);
     }
     return null;
   }, [value, blobUrl]);

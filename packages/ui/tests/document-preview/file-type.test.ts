@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  checkUrl,
   determinePreviewType,
   resolveFileName,
 } from "../../src/document-preview/file-type";
@@ -97,7 +98,8 @@ describe("determinePreviewType", () => {
   });
 
   it("returns pdf when data URL has pdf mime type", () => {
-    const dataUrl = "data:application/pdf;base64,JVBERi0xLjQKJdPr6eEKMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDwKL1R5cGUgL1BhZ2VzCi9LaWRzIFszIDAgUl0KL0NvdW50IDEKPD4KZW5kb2JqCjMgMCBvYmoKPDwKL1R5cGUgL1BhZ2UKL1BhcmVudCAyIDAgUgovTWVkaWFCb3ggWzAgMCA2MTIgNzkyXQo+PgplbmRvYmoKeHJlZgowIDQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDE1IDAwMDAwIG4gCjAwMDAwMDAwNjEgMDAwMDAgbiAKMDAwMDAwMDExMyAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9TaXplIDQKL1Jvb3QgMSAwIFIKPj4Kc3RhcnR4cmVmCjE3MQolJUVPRgo=";
+    const dataUrl =
+      "data:application/pdf;base64,JVBERi0xLjQKJdPr6eEKMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDwKL1R5cGUgL1BhZ2VzCi9LaWRzIFszIDAgUl0KL0NvdW50IDEKPD4KZW5kb2JqCjMgMCBvYmoKPDwKL1R5cGUgL1BhZ2UKL1BhcmVudCAyIDAgUgovTWVkaWFCb3ggWzAgMCA2MTIgNzkyXQo+PgplbmRvYmoKeHJlZgowIDQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDE1IDAwMDAwIG4gCjAwMDAwMDAwNjEgMDAwMDAgbiAKMDAwMDAwMDExMyAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9TaXplIDQKL1Jvb3QgMSAwIFIKPj4Kc3RhcnR4cmVmCjE3MQolJUVPRgo=";
 
     const result = determinePreviewType(dataUrl);
 
@@ -241,5 +243,72 @@ describe("resolveFileName", () => {
     const result = resolveFileName(url);
 
     expect(result).toBe("filename.txt");
+  });
+});
+
+describe("checkUrl", () => {
+  it("returns data URL as-is", () => {
+    const dataUrl =
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=";
+
+    const result = checkUrl(dataUrl);
+
+    expect(result).toBe(dataUrl);
+  });
+
+  it("returns absolute URL as-is", () => {
+    const absoluteUrl = "https://example.com/image.png";
+
+    const result = checkUrl(absoluteUrl);
+
+    expect(result).toBe("https://example.com/image.png");
+  });
+
+  it("returns relative URL starting with / as-is", () => {
+    const relativeUrl = "/image.png";
+
+    const result = checkUrl(relativeUrl);
+
+    expect(result).toBe("/image.png");
+  });
+
+  it("returns relative URL starting with ./ as-is", () => {
+    const relativeUrl = "./image.png";
+
+    const result = checkUrl(relativeUrl);
+
+    expect(result).toBe("./image.png");
+  });
+
+  it("returns relative URL starting with ../ as-is", () => {
+    const relativeUrl = "../image.png";
+
+    const result = checkUrl(relativeUrl);
+
+    expect(result).toBe("../image.png");
+  });
+
+  it("handles URL with query parameters", () => {
+    const url = "https://example.com/image.png?foo=bar&baz=qux";
+
+    const result = checkUrl(url);
+
+    expect(result).toBe("https://example.com/image.png?foo=bar&baz=qux");
+  });
+
+  it("returns null for invalid URL that is not relative", () => {
+    const invalidUrl = "not-a-valid-url";
+
+    const result = checkUrl(invalidUrl);
+
+    expect(result).toBeNull();
+  });
+
+  it("returns null for empty string", () => {
+    const emptyUrl = "";
+
+    const result = checkUrl(emptyUrl);
+
+    expect(result).toBeNull();
   });
 });
