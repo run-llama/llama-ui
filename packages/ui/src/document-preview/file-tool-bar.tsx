@@ -255,6 +255,7 @@ export const FileToolbar = ({
                       onClick={handleZoomOut}
                       disabled={scale !== undefined && scale <= 0.5}
                       className="size-6 p-0"
+                      aria-label="Zoom Out"
                     >
                       <Minus className="size-4" />
                     </Button>
@@ -272,6 +273,7 @@ export const FileToolbar = ({
                       onClick={handleZoomIn}
                       disabled={scale !== undefined && scale >= 3.0}
                       className="size-6 p-0"
+                      aria-label="Zoom In"
                     >
                       <Plus className="size-4" />
                     </Button>
@@ -285,6 +287,7 @@ export const FileToolbar = ({
                       size="sm"
                       onClick={handleReset}
                       className="size-6 p-0"
+                      aria-label="Reset Zoom"
                     >
                       <RotateCcw className="size-4" />
                     </Button>
@@ -309,6 +312,7 @@ export const FileToolbar = ({
                     size="sm"
                     onClick={onDownload}
                     className="size-6 p-0"
+                    aria-label="Download PDF"
                   >
                     <Download className="size-4" />
                   </Button>
@@ -328,6 +332,7 @@ export const FileToolbar = ({
                   size="sm"
                   onClick={onFullscreen}
                   className="size-6 p-0"
+                  aria-label="Fullscreen"
                 >
                   <Maximize className="size-4" />
                 </Button>

@@ -924,7 +924,7 @@ export const DirectInteractionTests: Story = {
     });
 
     // Test zoom in button
-    const zoomInButton = canvas.getByTitle("Zoom In");
+    const zoomInButton = canvas.getByRole("button", { name: "Zoom In" });
     await userEvent.click(zoomInButton);
 
     await waitFor(() => {
@@ -934,7 +934,7 @@ export const DirectInteractionTests: Story = {
     });
 
     // Test zoom out button
-    const zoomOutButton = canvas.getByTitle("Zoom Out");
+    const zoomOutButton = canvas.getByRole("button", { name: "Zoom Out" });
     await userEvent.click(zoomOutButton);
 
     await waitFor(() => {
@@ -944,7 +944,7 @@ export const DirectInteractionTests: Story = {
     });
 
     // Test reset button
-    const resetButton = canvas.getByTitle("Reset Zoom");
+    const resetButton = canvas.getByRole("button", { name: "Reset Zoom" });
     await userEvent.click(resetButton);
 
     await waitFor(() => {
@@ -957,7 +957,7 @@ export const DirectInteractionTests: Story = {
     });
 
     // Test download button
-    const downloadButton = canvas.getByTitle("Download PDF");
+    const downloadButton = canvas.getByRole("button", { name: "Download PDF" });
     await userEvent.click(downloadButton);
 
     await waitFor(() => {
@@ -967,7 +967,7 @@ export const DirectInteractionTests: Story = {
     });
 
     // Test fullscreen button
-    const fullscreenButton = canvas.getByTitle("Fullscreen");
+    const fullscreenButton = canvas.getByRole("button", { name: "Fullscreen" });
     await userEvent.click(fullscreenButton);
 
     await waitFor(() => {
