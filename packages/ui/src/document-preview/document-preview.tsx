@@ -26,10 +26,7 @@ export type UploadableItem = {
 };
 
 interface DocumentPreviewBaseProps
-  extends Omit<
-    DocumentPreviewItemProps,
-    "fileName" | "value" | "highlights" | "onRemove"
-  > {
+  extends Omit<DocumentPreviewItemProps, "fileName" | "value" | "onRemove"> {
   isLoading?: boolean;
   heading?: string;
   className?: string;
@@ -43,7 +40,6 @@ export interface DocumentPreviewSingleProps extends DocumentPreviewBaseProps {
   onChange?: (content: UploadableContent | null) => void;
   onRemove?: () => void;
   fileName?: string | null;
-  highlights?: Highlight[];
 }
 
 export interface DocumentPreviewMultiProps extends DocumentPreviewBaseProps {
@@ -355,11 +351,7 @@ export function DocumentPreview(props: DocumentPreviewProps) {
             fileName={allowMultiple ? undefined : currentFileName}
             onRemove={() => handleRemoveAt(currentPreviewIndex)}
             allowRemoval={allowRemoval && !allowMultiple}
-            highlights={
-              allowMultiple
-                ? undefined // Only single preview supports highlights
-                : singleProps?.highlights
-            }
+            highlights={props.highlights}
           />
         )}
       </div>
