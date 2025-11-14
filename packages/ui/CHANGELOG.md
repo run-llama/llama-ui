@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 3.2.1
+
+### Patch Changes
+
+- 5c395e6: Add document-preview component
+
 ## 3.2.0
 
 ### Minor Changes
