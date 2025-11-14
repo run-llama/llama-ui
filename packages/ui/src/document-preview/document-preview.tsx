@@ -3,7 +3,6 @@
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import type { DropzoneProps } from "react-dropzone";
 import { cn } from "@/lib/utils";
-import { EaseInDiv } from "../animation/ease-in-div";
 import { PdfPreview } from "../file-preview";
 import type { Highlight } from "../file-preview/types";
 import { FileObjectPreview } from "./previews/file-object-preview";
@@ -289,7 +288,7 @@ export function DocumentPreview(props: DocumentPreviewProps) {
     }
 
     return (
-      <EaseInDiv className="flex flex-col items-center justify-start px-20 py-8">
+      <div className="flex flex-col items-center justify-start px-20 py-8">
         <FileUpload
           className="max-w-4xl"
           heading={heading ?? "File Upload"}
@@ -302,7 +301,7 @@ export function DocumentPreview(props: DocumentPreviewProps) {
           footer={footer}
           accept={accept}
         />
-      </EaseInDiv>
+      </div>
     );
   };
 
