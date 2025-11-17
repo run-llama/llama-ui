@@ -10,7 +10,7 @@ import { logger } from "@shared/logger";
 
 export interface StreamSubscriber<TEvent> {
   onStart?: () => void;
-  onData?: (event: TEvent) => void;
+  onData?: (events: TEvent) => void;
   onError?: (error: Error) => void;
   onCancel?: () => void;
   onSuccess?: (allEvents: TEvent[]) => void;
