@@ -66,8 +66,7 @@ export class SharedStreamingManager<TEvent = any> {
     streamKey: string,
     subscriber: StreamSubscriber<TEvent>,
     executor: StreamExecutor<TEvent>,
-    canceler: () => Promise<void>,
-
+    canceler: () => Promise<void>
   ): StreamOperation<TEvent> {
     const existingStream = this.activeStreams.get(streamKey);
     if (existingStream) {

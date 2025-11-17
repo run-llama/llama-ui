@@ -43,7 +43,14 @@ export function RunDetailsPanel({
   const [hideInternal, setHideInternal] = useState(true);
   const [finalResult, setFinalResult] = useState<JSONValue | null>(null);
   const [finalResultError, setFinalResultError] = useState<string | null>(null);
-  const { items: events, push, clear } = useStreamEventBatcher<WorkflowEvent>(100, (a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+  const {
+    items: events,
+    push,
+    clear,
+  } = useStreamEventBatcher<WorkflowEvent>(
+    100,
+    (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+  );
 
   const formatJsonData = (data: unknown) => {
     if (typeof data === "string") {

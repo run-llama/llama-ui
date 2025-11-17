@@ -100,7 +100,7 @@ export function createActions(state: HandlerState, client: Client) {
     },
     subscribeToEvents(
       callbacks?: StreamSubscriber<WorkflowEvent>,
-      includeInternal = false,
+      includeInternal = false
     ): StreamOperation<WorkflowEvent> {
       const streamKey = `handler:${state.handler_id}`;
 
