@@ -1,5 +1,13 @@
 # @llamaindex/workflow-debugger
 
+## 0.1.3
+
+### Patch Changes
+
+- bf1f472: Add support for agent workflow in debugger
+- Updated dependencies [bf1f472]
+  - @llamaindex/ui@3.3.0
+
 ## 0.1.2
 
 ### Patch Changes
