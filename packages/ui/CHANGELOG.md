@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 3.3.0
+
+### Minor Changes
+
+- bf1f472: Add support for agent workflow in debugger
+
 ## 3.2.2
 
 ### Patch Changes
