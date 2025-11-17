@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 3.2.2
+
+### Patch Changes
+
+- accf7eb: Fix export for document-preview
+
 ## 3.2.1
 
 ### Patch Changes
