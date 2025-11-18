@@ -1,9 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect } from "@storybook/test";
-import { within, userEvent, screen } from "@storybook/test";
+import { expect, screen, userEvent, within } from "@storybook/test";
 import { useState } from "react";
 import { TableRenderer } from "../../src/extracted-data/table-renderer";
-import { type JsonObject } from "../../src/extracted-data/types";
+import type { JsonObject } from "../../src/extracted-data/types";
 
 const meta: Meta<typeof TableRenderer> = {
   title: "Components/ExtractedData/TableRenderer",
@@ -692,5 +691,192 @@ export const ReadOnlyTable: Story = {
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     expect(canvas.getByText("Updated Item 1")).toBeInTheDocument();
+  },
+};
+
+export const NestedJSONTable: Story = {
+  args: {
+    editable: false,
+    data: [
+      {
+        city_name: "LEIPZIG",
+        city_hospitals: ["HOSPITAL 1", "HOSPITAL 2"],
+      },
+      {
+        city_name: "ADAMANTINA",
+        city_hospitals: [
+          {
+            nome_do_referenciado: "SANTA CASA",
+            plan: [
+              {
+                plan_name: "EFETIVO",
+                enfermaria: "H/P.S/M",
+                quarto: "H/P.S/M",
+              },
+              {
+                plan_name: "FLEX",
+                enfermaria: "H/P.S/M/A",
+                quarto: "H/P.S/M/A",
+              },
+              {
+                plan_name: "IDEAL",
+                enfermaria: null,
+                quarto: null,
+              },
+              {
+                plan_name: "NACIONAL II",
+                enfermaria: "H/P.S/M/A",
+                quarto: null,
+              },
+              {
+                plan_name: "NACIONAL III",
+                enfermaria: null,
+                quarto: "H/P.S/M/A",
+              },
+              {
+                plan_name: "NACIONAL PLUS",
+                enfermaria: null,
+                quarto: "H/P.S/M/A",
+              },
+              {
+                plan_name: "PREMIUM",
+                enfermaria: null,
+                quarto: "H/P.S/M/A",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        city_name: "AMERICANA",
+        city_hospitals: [
+          {
+            nome_do_referenciado: "CLINICA SAO LUCAS",
+            plan: [
+              {
+                plan_name: "EFETIVO",
+                enfermaria: null,
+                quarto: null,
+              },
+              {
+                plan_name: "FLEX",
+                enfermaria: "H/P.S/M/A",
+                quarto: "H/P.S/M/A",
+              },
+              {
+                plan_name: "IDEAL",
+                enfermaria: "H/M",
+                quarto: "H/M",
+              },
+              {
+                plan_name: "NACIONAL II",
+                enfermaria: "H/P.S/M/A",
+                quarto: null,
+              },
+              {
+                plan_name: "NACIONAL III",
+                enfermaria: null,
+                quarto: "H/P.S/M/A",
+              },
+              {
+                plan_name: "NACIONAL PLUS",
+                enfermaria: null,
+                quarto: "H/P.S/M/A",
+              },
+              {
+                plan_name: "PREMIUM",
+                enfermaria: null,
+                quarto: "H/P.S/M/A",
+              },
+            ],
+          },
+          {
+            nome_do_referenciado: "HOSPITAL SAO FRANCISCO",
+            plan: [
+              {
+                plan_name: "EFETIVO",
+                enfermaria: "H/P.S/M/A",
+                quarto: "H/P.S/M/A",
+              },
+              {
+                plan_name: "FLEX",
+                enfermaria: "H/P.S/M/A",
+                quarto: "H/P.S/M/A",
+              },
+              {
+                plan_name: "IDEAL",
+                enfermaria: null,
+                quarto: null,
+              },
+              {
+                plan_name: "NACIONAL II",
+                enfermaria: "H/P.S/M/A",
+                quarto: null,
+              },
+              {
+                plan_name: "NACIONAL III",
+                enfermaria: null,
+                quarto: "H/P.S/M/A",
+              },
+              {
+                plan_name: "NACIONAL PLUS",
+                enfermaria: null,
+                quarto: "H/P.S/M/A",
+              },
+              {
+                plan_name: "PREMIUM",
+                enfermaria: null,
+                quarto: "H/P.S/M/A",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        city_name: "AMPARO",
+        city_hospitals: [
+          {
+            nome_do_referenciado: "BENEF PORTUGUESA DE AMPARO",
+            plan: [
+              {
+                plan_name: "EFETIVO",
+                enfermaria: "H/P.S",
+                quarto: "H/P.S",
+              },
+              {
+                plan_name: "FLEX",
+                enfermaria: "H/P.S",
+                quarto: "H/P.S",
+              },
+              {
+                plan_name: "IDEAL",
+                enfermaria: "H/P.S",
+                quarto: "H/P.S",
+              },
+              {
+                plan_name: "NACIONAL II",
+                enfermaria: "H/P.S",
+                quarto: null,
+              },
+              {
+                plan_name: "NACIONAL III",
+                enfermaria: null,
+                quarto: "H/P.S",
+              },
+              {
+                plan_name: "NACIONAL PLUS",
+                enfermaria: null,
+                quarto: "H/P.S",
+              },
+              {
+                plan_name: "PREMIUM",
+                enfermaria: null,
+                quarto: "H/P.S",
+              },
+            ],
+          },
+        ],
+      },
+    ],
   },
 };

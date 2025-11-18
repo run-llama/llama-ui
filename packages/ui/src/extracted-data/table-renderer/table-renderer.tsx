@@ -1,5 +1,6 @@
+import type { ExtractedFieldMetadata } from "llama-cloud-services/beta/agent";
+import { Plus, Trash2 } from "lucide-react";
 import React, { useMemo, useState } from "react";
-import { EditableField } from "../editable-field";
 import { Button } from "@/base/button";
 import {
   Table,
@@ -9,34 +10,39 @@ import {
   TableHeader,
   TableRow,
 } from "@/base/table";
-import {
-  type ColumnDef,
-  flattenObject,
-  getValue,
-  handleUpdate,
-  isTableCellChanged,
-  getTableRowDefaultValue,
-} from "./table-renderer-utils";
-import type {
-  FieldSchemaMetadata,
-  ValidationError,
-} from "../schema-reconciliation";
-import type { RendererMetadata } from "../types";
-import type { ExtractedFieldMetadata } from "llama-cloud-services/beta/agent";
+import { arrayToCsv } from "@/src/lib/csv-utils";
+import { DataPagination } from "../data-pagination";
+import { EditableField } from "../editable-field";
 import { getFieldDisplayInfo, getFieldLabelText } from "../field-display-utils";
+import { findExtractedFieldMetadata } from "../metadata-lookup";
 import {
   buildTableHeaderMetadataPath,
   findFieldSchemaMetadata,
 } from "../metadata-path-utils";
-import { findExtractedFieldMetadata } from "../metadata-lookup";
-import { Plus, Trash2 } from "lucide-react";
 import { PrimitiveType, toPrimitiveType } from "../primitive-validation";
-import type { PrimitiveValue, JsonValue, JsonObject } from "../types";
-import { DataPagination } from "../data-pagination";
+import { isArrayOfObjects } from "../property-renderer/property-renderer-utils";
+import type {
+  FieldSchemaMetadata,
+  ValidationError,
+} from "../schema-reconciliation";
+import type {
+  JsonObject,
+  JsonValue,
+  PrimitiveValue,
+  RendererMetadata,
+} from "../types";
+import {
+  type ColumnDef,
+  flattenObject,
+  getTableRowDefaultValue,
+  getValue,
+  handleUpdate,
+  isTableCellChanged,
+} from "./table-renderer-utils";
 
 export interface TableRendererProps<Row extends JsonObject> {
   data: Row[];
-  onUpdate: (
+  onUpdate?: (
     index: number,
     key: string,
     value: JsonObject,
@@ -371,15 +377,48 @@ export function TableRenderer<Row extends JsonObject>({
                   column.key
                 );
 
-                // If the value is an array, show a non-interactive warning placeholder
-                if (Array.isArray(value)) {
+                if (editable && Array.isArray(value)) {
                   return (
                     <TableCell
                       key={colIndex}
                       className="p-0 border-r border-gray-100 min-w-[160px] max-w-[360px] align-top"
                     >
                       <div className="px-2 py-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-sm m-1">
-                        Nested list/table is not supported.
+                        Editing nested lists/tables is not supported.
+                      </div>
+                    </TableCell>
+                  );
+                }
+
+                // If the value is an array of objects, render it recursively as a nested table
+                if (Array.isArray(value) && isArrayOfObjects(value)) {
+                  return (
+                    <TableCell
+                      key={colIndex}
+                      className="p-0 border-r border-gray-100 min-w-[160px] max-w-[360px]"
+                    >
+                      <div className="p-2">
+                        <TableRenderer<JsonObject>
+                          data={value as JsonObject[]}
+                          editable={false}
+                          tableRowsPerPage={tableRowsPerPage}
+                        />
+                      </div>
+                    </TableCell>
+                  );
+                }
+
+                // If the value is an array but not of objects, render as CSV
+                if (Array.isArray(value)) {
+                  const csvValue = arrayToCsv(value);
+
+                  return (
+                    <TableCell
+                      key={colIndex}
+                      className="p-0 border-r border-gray-100 min-w-[80px] max-w-[200px]"
+                    >
+                      <div className="border-b border-gray-200 p-2">
+                        {csvValue}
                       </div>
                     </TableCell>
                   );
@@ -415,7 +454,7 @@ export function TableRenderer<Row extends JsonObject>({
                           newValue,
                           data,
                           (idx, key, val, paths) =>
-                            onUpdate(idx, key, val as JsonObject, paths)
+                            onUpdate?.(idx, key, val as JsonObject, paths)
                         )
                       }
                       metadata={getMetadata(cellPath)}

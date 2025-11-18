@@ -39,4 +39,6 @@ export type {
   JsonShape,
 } from "./json-types";
 
+export { arrayToCsv } from "./csv-utils";
+
 export { useStreamEventBatcher } from "./use-stream-event-batcher";
