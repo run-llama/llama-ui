@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 // @ts-expect-error react-pdf types have no declarations
 import type { PageCallback } from "react-pdf/dist/shared/types";
+import { FileToolbar } from "../document-preview/file-tool-bar";
 import { BoundingBoxOverlay } from "./bounding-box-overlay";
-import { PdfNavigator } from "./pdf-navigator";
 import type { BoundingBox, Highlight } from "./types";
 
 // Configure worker path for PDF.js
@@ -20,7 +20,7 @@ import("react-pdf/dist/Page/AnnotationLayer.css");
 import("react-pdf/dist/Page/TextLayer.css");
 
 export interface PdfPreviewImplProps {
-  fileName?: string;
+  fileName?: string | null;
   url: string;
   onDownload?: () => void;
   onRemove?: () => void;
@@ -42,7 +42,6 @@ const pdfOptions = {
 
 // show rendering progress bar for files larger than this
 const FILE_SIZE_THRESHOLD = 10 * 1024 * 1024; // 10MB
-const DEFAULT_FILE_NAME = "document.pdf";
 
 export const PdfPreviewImpl = ({
   fileName,
@@ -240,14 +239,18 @@ export const PdfPreviewImpl = ({
       setIsLoading(true);
       const response = await fetch(url);
       const blob = await response.blob();
-      setFile(new File([blob], DEFAULT_FILE_NAME, { type: "application/pdf" }));
+      setFile(
+        new File([blob], fileName ?? "document.pdf", {
+          type: "application/pdf",
+        })
+      );
       setIsLoading(false);
     };
     fetchFile();
     return () => {
       setFile(null);
     };
-  }, [url]);
+  }, [url, fileName]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -328,11 +331,10 @@ export const PdfPreviewImpl = ({
   if (isLoading) {
     return (
       <div className="relative h-full flex flex-col">
-        <PdfNavigator
-          fileName={fileName ?? DEFAULT_FILE_NAME}
+        <FileToolbar
+          fileName={fileName}
           onRemove={onRemove}
           className={toolbarClassName}
-          isLoading={true}
         />
         <div className="h-3 bg-[#F3F3F3]"></div>
         <div className="relative flex-1 flex items-center justify-center bg-gray-50">
@@ -358,8 +360,8 @@ export const PdfPreviewImpl = ({
       {/* Navigation Component */}
       {effectiveNumPages && effectiveNumPages > 0 && (
         <>
-          <PdfNavigator
-            fileName={fileName ?? file?.name ?? DEFAULT_FILE_NAME}
+          <FileToolbar
+            fileName={fileName}
             currentPage={currentPage}
             totalPages={effectiveNumPages}
             scale={scale}
@@ -370,6 +372,7 @@ export const PdfPreviewImpl = ({
             onReset={handleReset}
             onFullscreen={toggleFullscreen}
             className={toolbarClassName}
+            isOverlay
           />
           {showMaxPagesWarning && (
             <div

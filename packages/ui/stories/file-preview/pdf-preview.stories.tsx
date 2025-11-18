@@ -503,7 +503,9 @@ export const WithRemoveButton: Story = {
     url: "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf",
     fileName: "sample-document.pdf",
   },
-  render: (args) => <WithRemoveExample {...args} />,
+  render: (args) => (
+    <WithRemoveExample {...args} fileName={args.fileName ?? undefined} />
+  ),
 };
 
 export const UploadAndPreview: Story = {

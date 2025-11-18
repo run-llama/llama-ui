@@ -1,6 +1,6 @@
 {
   "name": "@llamaindex/ui",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "A comprehensive UI component library built with React, TypeScript, and Tailwind CSS for LlamaIndex applications",
   "keywords": [
     "react",
@@ -59,6 +59,11 @@
       "types": "./dist/file-preview.d.ts",
       "import": "./dist/file-preview.mjs",
       "require": "./dist/file-preview.cjs"
+    },
+    "./document-preview": {
+      "types": "./dist/document-preview/index.d.ts",
+      "import": "./dist/document-preview/index.mjs",
+      "require": "./dist/document-preview/index.cjs"
     },
     "./item-grid": {
       "types": "./dist/item-grid.d.ts",
@@ -325,6 +330,7 @@
     "katex": "^0.16.22",
     "lucide-react": "^0.514.0",
     "react-day-picker": "^9.8.0",
+    "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.60.0",
     "react-markdown": "^10.1.0",
     "react-pdf": "^10.0.1",
@@ -340,6 +346,7 @@
     "uuid": "^13.0.0",
     "valtio": "^2.1.8",
     "vaul": "^1.1.2",
+    "xlsx": "^0.18.5",
     "zod": "^3.25.76",
     "zustand": "^5.0.6"
   },

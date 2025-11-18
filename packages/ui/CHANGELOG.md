@@ -1,5 +1,23 @@
 # @llamaindex/ui
 
+## 3.3.0
+
+### Minor Changes
+
+- bf1f472: Add support for agent workflow in debugger
+
+## 3.2.2
+
+### Patch Changes
+
+- accf7eb: Fix export for document-preview
+
+## 3.2.1
+
+### Patch Changes
+
+- 5c395e6: Add document-preview component
+
 ## 3.2.0
 
 ### Minor Changes

@@ -2,13 +2,13 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, waitFor, within } from "@storybook/test";
 import { useState } from "react";
 import {
-  PdfNavigator,
-  type PdfNavigatorProps,
-} from "../../src/file-preview/pdf-navigator";
+  FileToolbar,
+  type FileToolbarProps,
+} from "../../src/document-preview/file-tool-bar";
 
-const meta: Meta<typeof PdfNavigator> = {
-  title: "Components/FilePreview/PdfNavigator",
-  component: PdfNavigator,
+const meta: Meta<typeof FileToolbar> = {
+  title: "Components/DocumentPreview/FileToolbar",
+  component: FileToolbar,
   parameters: {
     layout: "fullscreen",
   },
@@ -65,10 +65,12 @@ export const Default: Story = {
     currentPage: 1,
     totalPages: 10,
     scale: 1.0,
+    onPageChange: () => {},
+    onScaleChange: () => {},
   } as never,
   render: (args) => (
     <div className="h-screen p-4">
-      <PdfNavigator {...(args as PdfNavigatorProps)} />
+      <FileToolbar {...(args as FileToolbarProps)} />
     </div>
   ),
 };
@@ -79,10 +81,14 @@ export const WithDownload: Story = {
     currentPage: 5,
     totalPages: 25,
     scale: 1.5,
+    onPageChange: () => {},
+    onScaleChange: () => {},
+    onFullscreen: () => {},
+    onDownload: () => {},
   } as never,
   render: (args) => (
     <div className="h-screen p-4">
-      <PdfNavigator {...(args as PdfNavigatorProps)} />
+      <FileToolbar {...(args as FileToolbarProps)} />
     </div>
   ),
 };
@@ -93,10 +99,13 @@ export const FirstPage: Story = {
     currentPage: 1,
     totalPages: 15,
     scale: 0.75,
+    onPageChange: () => {},
+    onScaleChange: () => {},
+    onFullscreen: () => {},
   } as never,
   render: (args) => (
     <div className="h-screen p-4">
-      <PdfNavigator {...(args as PdfNavigatorProps)} />
+      <FileToolbar {...(args as FileToolbarProps)} />
     </div>
   ),
 };
@@ -107,10 +116,13 @@ export const LastPage: Story = {
     currentPage: 20,
     totalPages: 20,
     scale: 2.0,
+    onPageChange: () => {},
+    onScaleChange: () => {},
+    onFullscreen: () => {},
   } as never,
   render: (args) => (
     <div className="h-screen p-4">
-      <PdfNavigator {...(args as PdfNavigatorProps)} />
+      <FileToolbar {...(args as FileToolbarProps)} />
     </div>
   ),
 };
@@ -121,10 +133,13 @@ export const MinScale: Story = {
     currentPage: 3,
     totalPages: 8,
     scale: 0.5,
+    onPageChange: () => {},
+    onScaleChange: () => {},
+    onFullscreen: () => {},
   } as never,
   render: (args) => (
     <div className="h-screen p-4">
-      <PdfNavigator {...(args as PdfNavigatorProps)} />
+      <FileToolbar {...(args as FileToolbarProps)} />
     </div>
   ),
 };
@@ -135,10 +150,13 @@ export const MaxScale: Story = {
     currentPage: 7,
     totalPages: 12,
     scale: 3.0,
+    onPageChange: () => {},
+    onScaleChange: () => {},
+    onFullscreen: () => {},
   } as never,
   render: (args) => (
     <div className="h-screen p-4">
-      <PdfNavigator {...(args as PdfNavigatorProps)} />
+      <FileToolbar {...(args as FileToolbarProps)} />
     </div>
   ),
 };
@@ -149,10 +167,13 @@ export const SinglePage: Story = {
     currentPage: 1,
     totalPages: 1,
     scale: 1.0,
+    onPageChange: () => {},
+    onScaleChange: () => {},
+    onFullscreen: () => {},
   } as never,
   render: (args) => (
     <div className="h-screen p-4">
-      <PdfNavigator {...(args as PdfNavigatorProps)} />
+      <FileToolbar {...(args as FileToolbarProps)} />
     </div>
   ),
 };
@@ -163,16 +184,19 @@ export const LongFileName: Story = {
     currentPage: 10,
     totalPages: 50,
     scale: 1.25,
+    onPageChange: () => {},
+    onScaleChange: () => {},
+    onFullscreen: () => {},
   } as never,
   render: (args) => (
     <div className="h-screen p-4">
-      <PdfNavigator {...(args as PdfNavigatorProps)} />
+      <FileToolbar {...(args as FileToolbarProps)} />
     </div>
   ),
 };
 
 // Interactive Test Component
-function PdfNavigatorTestsComponent() {
+function FileToolbarTestsComponent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages] = useState(15);
   const [scale, setScale] = useState(1.0);
@@ -269,7 +293,7 @@ function PdfNavigatorTestsComponent() {
               margin: "0 0 8px 0",
             }}
           >
-            PDF Navigator Interactive Tests
+            FileToolbar Interactive Tests
           </h3>
           <div
             data-testid="update-counter"
@@ -508,9 +532,9 @@ function PdfNavigatorTestsComponent() {
         </div>
       </div>
 
-      {/* Right panel: PDF Navigator */}
+      {/* Right panel: FileToolbar */}
       <div style={{ flex: 1, padding: "16px" }}>
-        <PdfNavigator
+        <FileToolbar
           fileName="test-document.pdf"
           currentPage={currentPage}
           totalPages={totalPages}
@@ -531,7 +555,7 @@ function PdfNavigatorTestsComponent() {
             color: "#666",
           }}
         >
-          PDF Navigator Component
+          FileToolbar Component
           <br />
           <small>This is where the PDF content would be displayed</small>
         </div>
@@ -542,7 +566,7 @@ function PdfNavigatorTestsComponent() {
 
 export const InteractiveTests: Story = {
   args: {} as never,
-  render: () => <PdfNavigatorTestsComponent />,
+  render: () => <FileToolbarTestsComponent />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
@@ -648,8 +672,8 @@ export const InteractiveTests: Story = {
   },
 };
 
-// Component to demonstrate the remove functionality for PdfNavigator
-function WithRemoveNavigatorExample({
+// Component to demonstrate the remove functionality for FileToolbar
+function WithRemoveFileToolbarExample({
   fileName,
   currentPage,
   totalPages,
@@ -705,7 +729,7 @@ function WithRemoveNavigatorExample({
 
   return (
     <div className="h-screen p-4">
-      <PdfNavigator
+      <FileToolbar
         fileName={fileName}
         currentPage={currentPage}
         totalPages={totalPages}
@@ -727,8 +751,8 @@ function WithRemoveNavigatorExample({
   );
 }
 
-// Test component for direct navigator interaction
-function DirectNavigatorTestsComponent() {
+// Test component for direct FileToolbar interaction
+function DirectFileToolbarTestsComponent() {
   const [currentPage, setCurrentPage] = useState(5);
   const [totalPages] = useState(20);
   const [scale, setScale] = useState(1.5);
@@ -779,7 +803,7 @@ function DirectNavigatorTestsComponent() {
         <h3
           style={{ fontSize: "16px", fontWeight: "bold", margin: "0 0 16px 0" }}
         >
-          Direct Navigator Tests
+          Direct FileToolbar Tests
         </h3>
         <div style={{ marginBottom: "16px" }}>
           <div
@@ -829,9 +853,9 @@ function DirectNavigatorTestsComponent() {
         </div>
       </div>
 
-      {/* Right panel: PDF Navigator */}
+      {/* Right panel: FileToolbar */}
       <div style={{ flex: 1, padding: "16px" }}>
-        <PdfNavigator
+        <FileToolbar
           fileName="interactive-test.pdf"
           currentPage={currentPage}
           totalPages={totalPages}
@@ -867,7 +891,7 @@ export const WithRemoveButton: Story = {
     scale: 1.2,
   } as never,
   render: (args) => (
-    <WithRemoveNavigatorExample
+    <WithRemoveFileToolbarExample
       {...(args as {
         fileName: string;
         currentPage: number;
@@ -880,7 +904,7 @@ export const WithRemoveButton: Story = {
 
 export const DirectInteractionTests: Story = {
   args: {} as never,
-  render: () => <DirectNavigatorTestsComponent />,
+  render: () => <DirectFileToolbarTestsComponent />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
@@ -900,7 +924,7 @@ export const DirectInteractionTests: Story = {
     });
 
     // Test zoom in button
-    const zoomInButton = canvas.getByTitle("Zoom In");
+    const zoomInButton = canvas.getByRole("button", { name: "Zoom In" });
     await userEvent.click(zoomInButton);
 
     await waitFor(() => {
@@ -910,7 +934,7 @@ export const DirectInteractionTests: Story = {
     });
 
     // Test zoom out button
-    const zoomOutButton = canvas.getByTitle("Zoom Out");
+    const zoomOutButton = canvas.getByRole("button", { name: "Zoom Out" });
     await userEvent.click(zoomOutButton);
 
     await waitFor(() => {
@@ -920,7 +944,7 @@ export const DirectInteractionTests: Story = {
     });
 
     // Test reset button
-    const resetButton = canvas.getByTitle("Reset Zoom");
+    const resetButton = canvas.getByRole("button", { name: "Reset Zoom" });
     await userEvent.click(resetButton);
 
     await waitFor(() => {
@@ -933,7 +957,7 @@ export const DirectInteractionTests: Story = {
     });
 
     // Test download button
-    const downloadButton = canvas.getByTitle("Download PDF");
+    const downloadButton = canvas.getByRole("button", { name: "Download PDF" });
     await userEvent.click(downloadButton);
 
     await waitFor(() => {
@@ -943,7 +967,7 @@ export const DirectInteractionTests: Story = {
     });
 
     // Test fullscreen button
-    const fullscreenButton = canvas.getByTitle("Fullscreen");
+    const fullscreenButton = canvas.getByRole("button", { name: "Fullscreen" });
     await userEvent.click(fullscreenButton);
 
     await waitFor(() => {
