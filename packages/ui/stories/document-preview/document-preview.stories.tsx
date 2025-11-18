@@ -100,3 +100,18 @@ export const MultipleFiles: Story = {
   },
   render: (args) => <UploadStateContainer {...args} />,
 };
+
+export const ExcelOnly: Story = {
+  name: "Excel Files Only",
+  args: {
+    heading: "Upload an Excel file",
+    allowMultiple: true,
+    value: [],
+    accept: {
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
+        ".xlsx",
+      ],
+    },
+  },
+  render: (args) => <UploadStateContainer {...args} />,
+};

@@ -1,6 +1,8 @@
 import type { Preview } from "@storybook/react-vite";
 import { initialize, mswLoader } from "msw-storybook-addon";
+import React from "react";
 import "../src/styles.css";
+import { Toaster } from "../base/sonner";
 import { handlers } from "./mocks/handlers";
 
 // Initialize MSW
@@ -30,6 +32,15 @@ const preview: Preview = {
     },
   },
   loaders: [mswLoader],
+  decorators: [
+    (Story) =>
+      React.createElement(
+        React.Fragment,
+        null,
+        React.createElement(Story),
+        React.createElement(Toaster)
+      ),
+  ],
 };
 
 export default preview;

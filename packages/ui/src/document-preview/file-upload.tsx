@@ -53,9 +53,31 @@ export function FileUpload({
       return;
     }
 
+    if (accept && typeof accept === "object") {
+      const allowedExtensions = Object.values(accept).flat();
+      if (allowedExtensions.length > 0) {
+        const urlPath = new URL(trimmedUrl).pathname.toLowerCase();
+        const lastDotIndex = urlPath.lastIndexOf(".");
+        if (lastDotIndex === -1 || lastDotIndex === urlPath.length - 1) {
+          toast.error("This file is not supported.");
+          return;
+        }
+
+        const urlExtension = urlPath.slice(lastDotIndex).toLowerCase();
+        const isValidExtension = allowedExtensions.some(
+          (ext) => ext.toLowerCase() === urlExtension
+        );
+
+        if (!isValidExtension) {
+          toast.error("This file is not supported.");
+          return;
+        }
+      }
+    }
+
     onContentChange(trimmedUrl);
     setFileUrlInput("");
-  }, [fileUrlInput, onContentChange]);
+  }, [fileUrlInput, onContentChange, accept]);
 
   const defaultFooter = useMemo(() => {
     if (!accept || typeof accept !== "object") return null;
