@@ -5,8 +5,9 @@ import { Loader2, TriangleAlert } from "lucide-react";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { Button } from "@/base/button";
 import { cn } from "@/lib/utils";
-import { FileToolbar } from "../file-tool-bar";
-import { FullscreenDialog } from "../fullscreen-dialog";
+import type { PreviewComponentProps } from "../../src/document-preview/document-preview";
+import { FileToolbar } from "../../src/document-preview/file-tool-bar";
+import { FullscreenDialog } from "./fullscreen-dialog";
 
 type SheetRow = Array<string | number | boolean | Date | null>;
 
@@ -14,13 +15,6 @@ type SheetData = {
   name: string;
   rows: SheetRow[];
 };
-
-export interface SheetPreviewProps {
-  fileName?: string | null;
-  contentUrl: string;
-  onRemove?: () => void;
-  className?: string;
-}
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
@@ -59,7 +53,7 @@ export function SheetPreview({
   contentUrl,
   onRemove,
   className,
-}: SheetPreviewProps) {
+}: PreviewComponentProps) {
   const [sheets, setSheets] = useState<SheetData[]>([]);
   const [activeSheetIndex, setActiveSheetIndex] = useState(0);
   const [loading, setLoading] = useState(false);

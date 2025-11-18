@@ -2,4 +2,4 @@
 "@llamaindex/ui": patch
 ---
 
-Improve styling of sheet preview
+Support plugin-defined preview components
