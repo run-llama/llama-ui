@@ -5,13 +5,12 @@ import type { DropzoneProps } from "react-dropzone";
 import { cn } from "@/lib/utils";
 import { PdfPreview } from "../file-preview";
 import type { Highlight } from "../file-preview/types";
-import { FileObjectPreview } from "./previews/file-object-preview";
-import { checkUrl, determinePreviewType, resolveFileName } from "./file-type";
+import { checkUrl, getFileTypeInfo, resolveFileName } from "./file-type";
 import { FileUpload } from "./file-upload";
-import { SelectFileBar } from "./select-file-bar";
-import { SheetPreview } from "./previews/sheet-preview";
+import { FileObjectPreview } from "./previews/file-object-preview";
 import { TextPreview } from "./previews/text-preview";
 import { UnsupportedPreview } from "./previews/unsupported-preview";
+import { SelectFileBar } from "./select-file-bar";
 import { UploadSkeleton } from "./upload-skeleton";
 
 type UploadableContent = File | string;
@@ -22,6 +21,65 @@ export type UploadableItem = {
   content: UploadableContent;
   fileName?: string | null;
   id?: string;
+};
+
+export type PreviewComponentProps = {
+  fileName?: string | null;
+  contentUrl: string;
+  onRemove?: () => void;
+  className?: string;
+  highlights?: Highlight[];
+};
+
+export type PreviewComponent = React.ComponentType<PreviewComponentProps>;
+
+const DEFAULT_MAX_PAGES = 25;
+
+// Internal wrapper for PdfPreview that handles static parameters
+function PdfPreviewWrapper({
+  fileName,
+  contentUrl,
+  onRemove,
+  highlights,
+}: PreviewComponentProps) {
+  return (
+    <PdfPreview
+      url={contentUrl}
+      onRemove={onRemove}
+      fileName={fileName}
+      highlights={highlights}
+      toolbarClassName="[&>div]:border-t-0 [&>div]:border-r-0 [&>div]:border-l-0"
+      maxPages={DEFAULT_MAX_PAGES}
+      maxPagesWarning={`The document has more than ${DEFAULT_MAX_PAGES} pages. Limiting the preview to ${DEFAULT_MAX_PAGES} to increase performance.`}
+    />
+  );
+}
+
+const DEFAULT_MIME_TYPE_MAP: Record<string, PreviewComponent> = {
+  "application/pdf": PdfPreviewWrapper,
+  "text/plain": TextPreview,
+  "text/markdown": TextPreview,
+  "application/json": TextPreview,
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+    UnsupportedPreview,
+  "application/vnd.ms-powerpoint": UnsupportedPreview,
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+    UnsupportedPreview,
+};
+
+const DEFAULT_EXTENSION_MAP: Record<string, PreviewComponent> = {
+  pdf: PdfPreviewWrapper,
+  txt: TextPreview,
+  md: TextPreview,
+  json: TextPreview,
+  docx: UnsupportedPreview,
+  ppt: UnsupportedPreview,
+  pptx: UnsupportedPreview,
+};
+
+export type PreviewsMap = {
+  mimeTypes?: Record<string, PreviewComponent>;
+  extensions?: Record<string, PreviewComponent>;
 };
 
 interface DocumentPreviewBaseProps
@@ -53,8 +111,6 @@ export type DocumentPreviewProps =
   | DocumentPreviewSingleProps
   | DocumentPreviewMultiProps;
 
-const DEFAULT_MAX_PAGES = 25;
-
 const toArray = <T,>(value: T | T[] | null): T[] => {
   if (Array.isArray(value)) {
     return value;
@@ -71,6 +127,7 @@ interface DocumentPreviewItemProps {
   onRemove?: () => void;
   allowRemoval?: boolean;
   highlights?: Highlight[];
+  previews?: PreviewsMap;
 }
 
 function DocumentPreviewItem({
@@ -79,6 +136,7 @@ function DocumentPreviewItem({
   allowRemoval = true,
   fileName,
   highlights,
+  previews,
 }: DocumentPreviewItemProps) {
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
 
@@ -110,57 +168,41 @@ function DocumentPreviewItem({
     return <UploadSkeleton />;
   }
 
-  const previewType = determinePreviewType(value);
-
+  const { mimeType, extension } = getFileTypeInfo(value);
   const removalHandler = allowRemoval ? onRemove : undefined;
 
-  let previewContent: ReactNode;
+  // Merge default maps with overrides
+  const mimeTypeMap = {
+    ...DEFAULT_MIME_TYPE_MAP,
+    ...previews?.mimeTypes,
+  };
+  const extensionMap = {
+    ...DEFAULT_EXTENSION_MAP,
+    ...previews?.extensions,
+  };
 
-  if (previewType === "pdf") {
-    previewContent = (
-      <PdfPreview
-        url={resolvedUrl}
-        onRemove={removalHandler}
-        fileName={fileName}
-        highlights={highlights}
-        toolbarClassName="[&>div]:border-t-0 [&>div]:border-r-0 [&>div]:border-l-0"
-        maxPages={DEFAULT_MAX_PAGES}
-        maxPagesWarning={`The document has more than ${DEFAULT_MAX_PAGES} pages. Limiting the preview to ${DEFAULT_MAX_PAGES} to increase performance.`}
-      />
-    );
-  } else if (previewType === "sheet") {
-    previewContent = (
-      <SheetPreview
-        fileName={fileName}
-        contentUrl={resolvedUrl}
-        onRemove={removalHandler}
-      />
-    );
-  } else if (previewType === "text") {
-    previewContent = (
-      <TextPreview
-        fileName={fileName}
-        contentUrl={resolvedUrl}
-        onRemove={removalHandler}
-      />
-    );
-  } else if (previewType === "unsupported") {
-    return (
-      <UnsupportedPreview
-        fileName={fileName}
-        contentUrl={resolvedUrl}
-        onRemove={removalHandler}
-      />
-    );
-  } else {
-    previewContent = (
-      <FileObjectPreview
-        fileName={fileName}
-        contentUrl={resolvedUrl}
-        onRemove={removalHandler}
-      />
-    );
+  // Determine preview component: mime types take precedence over extensions
+  let PreviewComponent: PreviewComponent | undefined;
+  if (mimeType && mimeTypeMap[mimeType]) {
+    PreviewComponent = mimeTypeMap[mimeType];
+  } else if (extension && extensionMap[extension]) {
+    PreviewComponent = extensionMap[extension];
   }
+
+  // Default to file-object preview if no match found
+  if (!PreviewComponent) {
+    PreviewComponent = FileObjectPreview;
+  }
+
+  // Render the preview component
+  const previewContent = (
+    <PreviewComponent
+      fileName={fileName}
+      contentUrl={resolvedUrl}
+      onRemove={removalHandler}
+      highlights={highlights}
+    />
+  );
 
   return (
     <div className="relative size-full">
@@ -179,6 +221,7 @@ export function DocumentPreview(props: DocumentPreviewProps) {
     className = "h-full w-full flex-1",
     footer,
     accept,
+    previews,
   } = props;
 
   // Track which index should show the preview (defaults to last index)
@@ -351,6 +394,7 @@ export function DocumentPreview(props: DocumentPreviewProps) {
             onRemove={() => handleRemoveAt(currentPreviewIndex)}
             allowRemoval={allowRemoval && !allowMultiple}
             highlights={props.highlights}
+            previews={previews}
           />
         )}
       </div>

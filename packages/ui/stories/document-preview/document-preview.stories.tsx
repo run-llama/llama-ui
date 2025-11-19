@@ -100,3 +100,16 @@ export const MultipleFiles: Story = {
   },
   render: (args) => <UploadStateContainer {...args} />,
 };
+
+export const PdfOnly: Story = {
+  name: "PDF Files Only",
+  args: {
+    heading: "Upload a PDF file",
+    allowMultiple: true,
+    value: [],
+    accept: {
+      "application/pdf": [".pdf"],
+    },
+  },
+  render: (args) => <UploadStateContainer {...args} />,
+};

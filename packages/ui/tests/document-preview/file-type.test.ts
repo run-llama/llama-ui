@@ -2,140 +2,176 @@ import { describe, expect, it } from "vitest";
 
 import {
   checkUrl,
-  determinePreviewType,
+  getFileTypeInfo,
   resolveFileName,
 } from "../../src/document-preview/file-type";
 
-describe("determinePreviewType", () => {
-  it("returns mapped preview when mime type matches", () => {
+describe("getFileTypeInfo", () => {
+  it("extracts mime type and extension from File object", () => {
     const file = new File(["dummy"], "report.pdf", {
       type: "application/pdf",
     });
 
-    const result = determinePreviewType(file);
+    const result = getFileTypeInfo(file);
 
-    expect(result).toBe("pdf");
+    expect(result).toEqual({
+      mimeType: "application/pdf",
+      extension: "pdf",
+    });
   });
 
-  it("returns sheet when URL has xls extension", () => {
-    const url = "https://example.com/path/to/budget.XLS";
-
-    const result = determinePreviewType(url);
-
-    expect(result).toBe("sheet");
-  });
-
-  it("uses the File name when mime type is unavailable", () => {
+  it("extracts extension from File when mime type is missing", () => {
     const file = new File(["dummy"], "ledger.xlsx");
 
-    const result = determinePreviewType(file);
+    const result = getFileTypeInfo(file);
 
-    expect(result).toBe("sheet");
+    expect(result).toEqual({
+      mimeType: null,
+      extension: "xlsx",
+    });
   });
 
-  it("sanitizes URLs containing query parameters", () => {
-    const url = "https://example.com/download/path/document.pdf?foo=bar";
+  it("handles File with mime type but no extension in name", () => {
+    const file = new File(["dummy"], "document", {
+      type: "application/pdf",
+    });
 
-    const result = determinePreviewType(url);
+    const result = getFileTypeInfo(file);
 
-    expect(result).toBe("pdf");
+    expect(result).toEqual({
+      mimeType: "application/pdf",
+      extension: null,
+    });
   });
 
-  it("returns text when file has text mime type", () => {
-    const file = new File(["dummy"], "notes.txt", { type: "text/plain" });
+  it("normalizes mime type by removing parameters", () => {
+    const file = new File(["dummy"], "file.pdf", {
+      type: "application/pdf; charset=utf-8",
+    });
 
-    const result = determinePreviewType(file);
+    const result = getFileTypeInfo(file);
 
-    expect(result).toBe("text");
+    expect(result.mimeType).toBe("application/pdf");
   });
 
-  it("returns text when file has text extension", () => {
-    const file = new File(["dummy"], "data.json");
-
-    const result = determinePreviewType(file);
-
-    expect(result).toBe("text");
-  });
-
-  it("returns sheet when file has csv extension", () => {
-    const file = new File(["dummy"], "data.csv");
-
-    const result = determinePreviewType(file);
-
-    expect(result).toBe("sheet");
-  });
-
-  it("returns file-object when no preview type matches", () => {
-    const file = new File(["dummy"], "notes.unknown");
-
-    const result = determinePreviewType(file);
-
-    expect(result).toBe("file-object");
-  });
-
-  it("returns pdf when URL has pdf extension", () => {
+  it("extracts mime type and extension from absolute URL", () => {
     const url = "https://example.com/document.pdf";
 
-    const result = determinePreviewType(url);
+    const result = getFileTypeInfo(url);
 
-    expect(result).toBe("pdf");
+    expect(result).toEqual({
+      mimeType: null,
+      extension: "pdf",
+    });
   });
 
-  it("returns sheet when URL has xlsx extension", () => {
-    const url = "https://example.com/spreadsheet.xlsx";
+  it("extracts extension from URL with query parameters", () => {
+    const url = "https://example.com/download/path/document.pdf?foo=bar";
 
-    const result = determinePreviewType(url);
+    const result = getFileTypeInfo(url);
 
-    expect(result).toBe("sheet");
+    expect(result).toEqual({
+      mimeType: null,
+      extension: "pdf",
+    });
   });
 
-  it("returns text when URL has json extension", () => {
-    const url = "https://example.com/data.json";
-
-    const result = determinePreviewType(url);
-
-    expect(result).toBe("text");
-  });
-
-  it("returns pdf when data URL has pdf mime type", () => {
+  it("extracts mime type from data URL", () => {
     const dataUrl =
       "data:application/pdf;base64,JVBERi0xLjQKJdPr6eEKMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDwKL1R5cGUgL1BhZ2VzCi9LaWRzIFszIDAgUl0KL0NvdW50IDEKPD4KZW5kb2JqCjMgMCBvYmoKPDwKL1R5cGUgL1BhZ2UKL1BhcmVudCAyIDAgUgovTWVkaWFCb3ggWzAgMCA2MTIgNzkyXQo+PgplbmRvYmoKeHJlZgowIDQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDE1IDAwMDAwIG4gCjAwMDAwMDAwNjEgMDAwMDAgbiAKMDAwMDAwMDExMyAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9TaXplIDQKL1Jvb3QgMSAwIFIKPj4Kc3RhcnR4cmVmCjE3MQolJUVPRgo=";
 
-    const result = determinePreviewType(dataUrl);
+    const result = getFileTypeInfo(dataUrl);
 
-    expect(result).toBe("pdf");
+    expect(result).toEqual({
+      mimeType: "application/pdf",
+      extension: null,
+    });
   });
 
-  it("returns text when data URL has text/plain mime type", () => {
+  it("extracts mime type from data URL with text/plain", () => {
     const dataUrl = "data:text/plain;base64,SGVsbG8gV29ybGQ=";
 
-    const result = determinePreviewType(dataUrl);
+    const result = getFileTypeInfo(dataUrl);
 
-    expect(result).toBe("text");
+    expect(result).toEqual({
+      mimeType: "text/plain",
+      extension: null,
+    });
   });
 
-  it("returns sheet when data URL has csv mime type", () => {
-    const dataUrl = "data:text/csv;base64,MSwyLDMKNCw1LDY=";
-
-    const result = determinePreviewType(dataUrl);
-
-    expect(result).toBe("sheet");
-  });
-
-  it("returns file-object when URL has no extension", () => {
+  it("handles URL with no extension", () => {
     const url = "https://example.com/path/to/file";
 
-    const result = determinePreviewType(url);
+    const result = getFileTypeInfo(url);
 
-    expect(result).toBe("file-object");
+    expect(result).toEqual({
+      mimeType: null,
+      extension: null,
+    });
   });
 
-  it("returns file-object when URL has unknown extension", () => {
-    const url = "https://example.com/document.unknown";
+  it("handles invalid URL string by extracting extension directly", () => {
+    const url = "not-a-valid-url.xlsx";
 
-    const result = determinePreviewType(url);
+    const result = getFileTypeInfo(url);
 
-    expect(result).toBe("file-object");
+    expect(result).toEqual({
+      mimeType: null,
+      extension: "xlsx",
+    });
+  });
+
+  it("handles case-insensitive extensions", () => {
+    const file = new File(["dummy"], "document.PDF");
+
+    const result = getFileTypeInfo(file);
+
+    expect(result.extension).toBe("pdf");
+  });
+
+  it("handles URL with uppercase extension", () => {
+    const url = "https://example.com/document.XLSX";
+
+    const result = getFileTypeInfo(url);
+
+    expect(result.extension).toBe("xlsx");
+  });
+
+  it("handles mime type with whitespace", () => {
+    const file = new File(["dummy"], "file.pdf", {
+      type: " application/pdf ",
+    });
+
+    const result = getFileTypeInfo(file);
+
+    expect(result.mimeType).toBe("application/pdf");
+  });
+
+  it("returns null for both when File has no type and no name", () => {
+    const file = new File(["dummy"], "");
+
+    const result = getFileTypeInfo(file);
+
+    expect(result).toEqual({
+      mimeType: null,
+      extension: null,
+    });
+  });
+
+  it("handles URL with hash fragment", () => {
+    const url = "https://example.com/document.pdf#section1";
+
+    const result = getFileTypeInfo(url);
+
+    expect(result.extension).toBe("pdf");
+  });
+
+  it("handles relative URL", () => {
+    const url = "./document.pdf";
+
+    const result = getFileTypeInfo(url);
+
+    expect(result.extension).toBe("pdf");
   });
 });
 

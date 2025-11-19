@@ -5,7 +5,9 @@ import { Loader2, TriangleAlert } from "lucide-react";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { Button } from "@/base/button";
 import { cn } from "@/lib/utils";
-import { FileToolbar } from "../file-tool-bar";
+import type { PreviewComponentProps } from "../../src/document-preview/document-preview";
+import { FileToolbar } from "../../src/document-preview/file-tool-bar";
+import { FullscreenDialog } from "./fullscreen-dialog";
 
 type SheetRow = Array<string | number | boolean | Date | null>;
 
@@ -13,13 +15,6 @@ type SheetData = {
   name: string;
   rows: SheetRow[];
 };
-
-export interface SheetPreviewProps {
-  fileName?: string | null;
-  contentUrl: string;
-  onRemove?: () => void;
-  className?: string;
-}
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
@@ -58,12 +53,13 @@ export function SheetPreview({
   contentUrl,
   onRemove,
   className,
-}: SheetPreviewProps) {
+}: PreviewComponentProps) {
   const [sheets, setSheets] = useState<SheetData[]>([]);
   const [activeSheetIndex, setActiveSheetIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scale, setScale] = useState(1);
+  const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -71,6 +67,8 @@ export function SheetPreview({
     const loadWorkbook = async () => {
       setLoading(true);
       setError(null);
+      setSheets([]);
+      setActiveSheetIndex(0);
       try {
         const response = await fetch(contentUrl);
         if (!response.ok) {
@@ -150,6 +148,10 @@ export function SheetPreview({
     setScale(newScale);
   };
 
+  const handleFullscreen = () => {
+    setIsFullscreenOpen(true);
+  };
+
   const sheetTabs = sheets.map((sheet, index) => (
     <button
       key={sheet.name}
@@ -166,75 +168,109 @@ export function SheetPreview({
     </button>
   ));
 
-  return (
-    <div className={cn("relative flex h-full flex-col", className)}>
-      <FileToolbar
-        fileName={fileName}
-        onDownload={() => downloadFile(contentUrl, fileName)}
-        scale={scale}
-        onScaleChange={handleScaleChange}
-        onRemove={onRemove}
-        isOverlay
-      />
-      {sheets.length > 1 && (
-        <div className="flex items-center justify-between gap-2 border-b px-4 py-2">
-          <div className="flex flex-wrap gap-2">{sheetTabs}</div>
-        </div>
-      )}
-      <div className="relative flex-1 overflow-auto bg-gray-50">
-        {loading ? (
-          <LoadingState>Loading spreadsheet…</LoadingState>
-        ) : error ? (
-          <ErrorState onDownload={() => downloadFile(contentUrl, fileName)}>
-            {error}
-          </ErrorState>
-        ) : !activeSheet || columnCount === 0 ? (
-          <EmptyState onDownload={() => downloadFile(contentUrl, fileName)} />
-        ) : (
-          <div
-            className="inline-block origin-top-left p-4"
-            style={{ transform: `scale(${scale})` }}
-          >
-            <table className="border-collapse rounded-md bg-white text-xs shadow-sm">
-              <thead>
-                <tr>
-                  <th className="bg-muted/60 sticky left-0 top-0 border border-border p-2 font-medium text-muted-foreground">
-                    #
-                  </th>
-                  {Array.from({ length: columnCount }).map((_, columnIndex) => (
-                    <th
-                      key={columnIndex}
-                      className="bg-muted/60 border border-border px-3 py-2 font-medium text-muted-foreground"
-                    >
-                      {columnIndexToLabel(columnIndex)}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {activeSheet.rows.map((row, rowIndex) => (
-                  <tr key={rowIndex}>
-                    <th className="bg-muted/40 sticky left-0 border border-border px-2 py-1 text-right font-medium text-muted-foreground">
-                      {rowIndex + 1}
+  const renderSheetContent = (fullscreenZoom?: number) => {
+    const currentZoom = fullscreenZoom ?? scale;
+    return (
+      <>
+        {sheets.length > 1 && (
+          <div className="flex items-center justify-between gap-2 border-b px-4 py-2">
+            <div className="flex flex-wrap gap-2">{sheetTabs}</div>
+          </div>
+        )}
+        <div className="relative flex-1 overflow-auto bg-gray-50">
+          {loading ? (
+            <LoadingState>Loading spreadsheet…</LoadingState>
+          ) : error ? (
+            <ErrorState onDownload={() => downloadFile(contentUrl, fileName)}>
+              {error}
+            </ErrorState>
+          ) : !activeSheet || columnCount === 0 ? (
+            <EmptyState onDownload={() => downloadFile(contentUrl, fileName)} />
+          ) : (
+            <div
+              className="inline-block origin-top-left p-4"
+              style={{ transform: `scale(${currentZoom})` }}
+            >
+              <table className="border-collapse rounded-md bg-white text-xs shadow-sm">
+                <thead>
+                  <tr>
+                    <th className="bg-muted/60 sticky left-0 top-0 border border-border p-2 font-medium text-muted-foreground">
+                      #
                     </th>
                     {Array.from({ length: columnCount }).map(
                       (_, columnIndex) => (
-                        <td
+                        <th
                           key={columnIndex}
-                          className="border border-border px-3 py-1 text-left align-top text-slate-700"
+                          className="bg-muted/60 border border-border px-3 py-2 font-medium text-muted-foreground"
                         >
-                          {formatCellValue(row[columnIndex] ?? "")}
-                        </td>
+                          {columnIndexToLabel(columnIndex)}
+                        </th>
                       )
                     )}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody>
+                  {activeSheet.rows.map((row, rowIndex) => (
+                    <tr key={rowIndex}>
+                      <th className="bg-muted/40 sticky left-0 border border-border px-2 py-1 text-right font-medium text-muted-foreground">
+                        {rowIndex + 1}
+                      </th>
+                      {Array.from({ length: columnCount }).map(
+                        (_, columnIndex) => (
+                          <td
+                            key={columnIndex}
+                            className="border border-border px-3 py-1 text-left align-top text-slate-700"
+                          >
+                            {formatCellValue(row[columnIndex] ?? "")}
+                          </td>
+                        )
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </>
+    );
+  };
+
+  const [fullscreenScale, setFullscreenScale] = useState(1);
+  const handleFullscreenScaleChange = (newScale: number) => {
+    setFullscreenScale(newScale);
+  };
+
+  return (
+    <>
+      <div className={cn("flex h-full flex-col", className)}>
+        <FileToolbar
+          fileName={fileName ?? "spreadsheet.xlsx"}
+          onFullscreen={handleFullscreen}
+          scale={scale}
+          onScaleChange={handleScaleChange}
+          onRemove={onRemove}
+        />
+        {renderSheetContent()}
       </div>
-    </div>
+      <FullscreenDialog
+        open={isFullscreenOpen}
+        onOpenChange={setIsFullscreenOpen}
+        title={fileName ?? "spreadsheet.xlsx"}
+        maxWidth="max-w-[95vw]"
+      >
+        <div className="flex h-full flex-col">
+          <FileToolbar
+            fileName={fileName ?? "spreadsheet.xlsx"}
+            onFullscreen={undefined}
+            scale={fullscreenScale}
+            onScaleChange={handleFullscreenScaleChange}
+            onRemove={undefined}
+          />
+          {renderSheetContent(fullscreenScale)}
+        </div>
+      </FullscreenDialog>
+    </>
   );
 }
 

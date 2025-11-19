@@ -346,7 +346,6 @@
     "uuid": "^13.0.0",
     "valtio": "^2.1.8",
     "vaul": "^1.1.2",
-    "xlsx": "^0.18.5",
     "zod": "^3.25.76",
     "zustand": "^5.0.6"
   },
@@ -396,6 +395,7 @@
     "tsup": "^8.5.0",
     "typescript": "^5",
     "typescript-eslint": "^8",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^5.1.4",
+    "xlsx": "^0.18.5"
   }
 }
