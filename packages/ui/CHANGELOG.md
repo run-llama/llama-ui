@@ -1,5 +1,13 @@
 # @llamaindex/ui
 
+## 3.3.1
+
+### Patch Changes
+
+- e2481f0: Support plugin-defined preview components
+- e2481f0: Check allowed extension for URL file uploads
+- 8c994a5: Add read/only renderer for nested list/tables
+
 ## 3.3.0
 
 ### Minor Changes
