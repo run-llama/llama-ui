@@ -2,4 +2,4 @@
 "@llamaindex/ui": patch
 ---
 
-Add separate image preview to document preview
+chore: add separate image preview to document preview
