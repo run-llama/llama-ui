@@ -1,7 +1,7 @@
 {
   "name": "@llamaindex/workflow-debugger",
   "version": "0.1.4",
-  "private": true,
+  "private": false,
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -49,3 +49,27 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }} 
+ 
+      - name: Detect debugger publish and extract version
+        if: steps.changesets.outputs.published == 'true'
+        id: debugger_version
+        run: |
+          PACKAGES='${{ steps.changesets.outputs.publishedPackages }}'
+          echo "$PACKAGES" | jq .
+          VERSION=$(echo "$PACKAGES" | jq -r '.[] | select(.name=="@llamaindex/workflows-debugger") | .version')
+          if [ -n "$VERSION" ] && [ "$VERSION" != "null" ]; then
+            echo "published=true" >> $GITHUB_OUTPUT
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "published=false" >> $GITHUB_OUTPUT
+          fi
+ 
+      - name: Trigger deploy-workflow-debugger (self dispatch)
+        if: steps.debugger_version.outputs.published == 'true'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: deploy-workflow-debugger
+          client-payload: |
+            {"version": "${{ steps.debugger_version.outputs.version }}"}
