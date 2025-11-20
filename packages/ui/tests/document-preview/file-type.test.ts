@@ -173,6 +173,15 @@ describe("getFileTypeInfo", () => {
 
     expect(result.extension).toBe("pdf");
   });
+
+  it("extracts extension from S3 URL with filename in query parameter", () => {
+    const url =
+      "https://llama-platform-raw-files.s3.amazonaws.com/files/project_id%347hjfhfh-7b5f-4a66-a804-47238749/c47833-3169-424c-a703-342345abc?response-content-disposition=attachment%3B%20filename%3D%22CornCostReturn.xlsx%22";
+
+    const result = getFileTypeInfo(url);
+
+    expect(result.extension).toBe("xlsx");
+  });
 });
 
 describe("resolveFileName", () => {

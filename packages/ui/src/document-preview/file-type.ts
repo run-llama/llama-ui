@@ -42,6 +42,27 @@ export function getFileTypeInfo(content: File | string): {
     try {
       const urlObj = new URL(content);
       extension = extractExtension(urlObj.pathname);
+
+      // If no extension found in pathname, check contentDisposition for filename (S3 specific)
+      if (!extension) {
+        const contentDisposition = urlObj.searchParams.get(
+          "response-content-disposition"
+        );
+        if (contentDisposition) {
+          // Extract filename from content-disposition header format:
+          // attachment; filename="CornCostReturn.xlsx" or filename="file.xlsx"
+          const filenameMatch = contentDisposition.match(
+            /filename[^;=]*=([^;]+)/
+          );
+          if (filenameMatch) {
+            // Remove quotes and decode URI component
+            const filename = decodeURIComponent(
+              filenameMatch[1].trim().replace(/^["']|["']$/g, "")
+            );
+            extension = extractExtension(filename);
+          }
+        }
+      }
     } catch {
       // Invalid URL, try to extract extension from the string directly
       extension = extractExtension(content);
