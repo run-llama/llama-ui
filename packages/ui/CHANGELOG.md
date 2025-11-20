@@ -1,5 +1,15 @@
 # @llamaindex/ui
 
+## 3.3.2
+
+### Patch Changes
+
+- 68edbac: chore: add separate image preview to document preview
+- 68edbac: fix: download in object and text preview
+- 68edbac: fix: Show file-type specific preview for S3 files (don't just fallback to object)
+- 68edbac: fix: hydration error for select file bar (button inside button)
+- 68edbac: fix: use sonner from consumer
+
 ## 3.3.1
 
 ### Patch Changes

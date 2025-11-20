@@ -1,5 +1,22 @@
 # @llamaindex/workflow-debugger
 
+## 0.2.0
+
+### Minor Changes
+
+- 7538c69: Publish workflow-debugger to npm for serving via jsdelivr
+
+### Patch Changes
+
+- Updated dependencies [68edbac]
+- Updated dependencies [68edbac]
+- Updated dependencies [68edbac]
+- Updated dependencies [68edbac]
+- Updated dependencies [68edbac]
+- Updated dependencies [f67ae7c]
+  - @llamaindex/ui@3.3.2
+  - @llamaindex/workflows-client@1.8.2
+
 ## 0.1.4
 
 ### Patch Changes
