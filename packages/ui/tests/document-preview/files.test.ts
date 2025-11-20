@@ -368,6 +368,8 @@ describe("downloadFile", () => {
   afterEach(() => {
     // Clean up any remaining elements
     document.body.innerHTML = "";
+    // Restore all mocks to prevent test pollution
+    vi.restoreAllMocks();
   });
 
   it("clicks the link element", () => {
