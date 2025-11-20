@@ -1,8 +1,9 @@
 import { File, Minus, Trash2 } from "lucide-react";
-import type { MouseEvent } from "react";
-import { Button } from "@/base/button";
+import type { MouseEvent, KeyboardEvent } from "react";
+import { Button, buttonVariants } from "@/base/button";
 import { ScrollArea, ScrollBar } from "@/base/scroll-area";
 import { ToolTipper } from "@/base/tooltipper";
+import { cn } from "@/lib/utils";
 
 interface SelectFileBarProps {
   files: Array<{ fileName: string | null; index: number }>;
@@ -52,15 +53,22 @@ export const SelectFileBar = ({
           const isCurrent = index === currentIndex;
 
           return (
-            <Button
+            <div
               key={key}
-              type="button"
-              variant="outline"
-              className={`flex shrink-0 items-center gap-2 border-border px-3 hover:bg-muted ${
-                isCurrent ? "bg-accent text-accent-foreground" : "bg-white"
-              }`}
+              role="button"
+              tabIndex={0}
+              className={cn(
+                buttonVariants({ variant: "outline", size: "xs" }),
+                "flex shrink-0 items-center gap-2 border-border px-3 hover:bg-muted cursor-pointer",
+                isCurrent ? "bg-accent" : "bg-white"
+              )}
               onClick={() => onSelect(index)}
-              size="xs"
+              onKeyDown={(e: KeyboardEvent<HTMLDivElement>) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onSelect(index);
+                }
+              }}
             >
               <span
                 className={`whitespace-nowrap text-xs ${
@@ -78,7 +86,7 @@ export const SelectFileBar = ({
                   <Trash2 className="size-3" />
                 </Button>
               </ToolTipper>
-            </Button>
+            </div>
           );
         })}
       </div>

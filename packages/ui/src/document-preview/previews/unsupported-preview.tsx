@@ -9,7 +9,7 @@ export function UnsupportedPreview({
   contentUrl: string;
   onRemove?: () => void;
 }) {
-  const handleFullscreen = () => {
+  const handleDownload = () => {
     window.open(contentUrl, "_blank");
   };
 
@@ -17,9 +17,8 @@ export function UnsupportedPreview({
     <div className="relative flex h-full flex-col">
       <FileToolbar
         fileName={fileName}
-        onFullscreen={handleFullscreen}
+        onDownload={handleDownload}
         onRemove={onRemove}
-        isOverlay
       />
       <div className="h-full flex-1 overflow-auto bg-gray-50">
         <p className="p-4 text-center text-xs text-muted-foreground">

@@ -5,9 +5,10 @@ import type { DropzoneProps } from "react-dropzone";
 import { cn } from "@/lib/utils";
 import { PdfPreview } from "../file-preview";
 import type { Highlight } from "../file-preview/types";
-import { checkUrl, getFileTypeInfo, resolveFileName } from "./file-type";
+import { checkUrl, getFileTypeInfo, resolveFileName } from "./files";
 import { FileUpload } from "./file-upload";
 import { FileObjectPreview } from "./previews/file-object-preview";
+import { ImagePreview } from "./previews/image-preview";
 import { TextPreview } from "./previews/text-preview";
 import { UnsupportedPreview } from "./previews/unsupported-preview";
 import { SelectFileBar } from "./select-file-bar";
@@ -60,6 +61,15 @@ const DEFAULT_MIME_TYPE_MAP: Record<string, PreviewComponent> = {
   "text/plain": TextPreview,
   "text/markdown": TextPreview,
   "application/json": TextPreview,
+  "image/jpeg": ImagePreview,
+  "image/jpg": ImagePreview,
+  "image/png": ImagePreview,
+  "image/gif": ImagePreview,
+  "image/bmp": ImagePreview,
+  "image/tiff": ImagePreview,
+  "image/x-icon": ImagePreview,
+  "image/vnd.microsoft.icon": ImagePreview,
+  "image/webp": ImagePreview,
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
     UnsupportedPreview,
   "application/vnd.ms-powerpoint": UnsupportedPreview,
@@ -72,6 +82,14 @@ const DEFAULT_EXTENSION_MAP: Record<string, PreviewComponent> = {
   txt: TextPreview,
   md: TextPreview,
   json: TextPreview,
+  jpg: ImagePreview,
+  jpeg: ImagePreview,
+  png: ImagePreview,
+  gif: ImagePreview,
+  bmp: ImagePreview,
+  tiff: ImagePreview,
+  ico: ImagePreview,
+  webp: ImagePreview,
   docx: UnsupportedPreview,
   ppt: UnsupportedPreview,
   pptx: UnsupportedPreview,

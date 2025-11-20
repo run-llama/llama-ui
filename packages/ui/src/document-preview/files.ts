@@ -42,6 +42,27 @@ export function getFileTypeInfo(content: File | string): {
     try {
       const urlObj = new URL(content);
       extension = extractExtension(urlObj.pathname);
+
+      // If no extension found in pathname, check contentDisposition for filename (S3 specific)
+      if (!extension) {
+        const contentDisposition = urlObj.searchParams.get(
+          "response-content-disposition"
+        );
+        if (contentDisposition) {
+          // Extract filename from content-disposition header format:
+          // attachment; filename="CornCostReturn.xlsx" or filename="file.xlsx"
+          const filenameMatch = contentDisposition.match(
+            /filename[^;=]*=([^;]+)/
+          );
+          if (filenameMatch) {
+            // Remove quotes and decode URI component
+            const filename = decodeURIComponent(
+              filenameMatch[1].trim().replace(/^["']|["']$/g, "")
+            );
+            extension = extractExtension(filename);
+          }
+        }
+      }
     } catch {
       // Invalid URL, try to extract extension from the string directly
       extension = extractExtension(content);
@@ -105,4 +126,18 @@ export const resolveFileName = (content: File | string): string | null => {
     }
   }
   return null;
+};
+
+/**
+ * Downloads a file by creating a temporary anchor element and triggering a click.
+ * @param contentUrl - The URL of the file to download
+ * @param fileName - Optional filename for the download
+ */
+export const downloadFile = (contentUrl: string, fileName?: string | null) => {
+  const link = document.createElement("a");
+  link.href = contentUrl;
+  link.download = fileName ?? "download";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };

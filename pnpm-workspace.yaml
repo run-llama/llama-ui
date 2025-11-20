@@ -1,8 +1,9 @@
 packages:
-  - 'packages/*'
+  - "packages/*"
 
 catalog:
   react: "19.2.0"
   react-dom: "19.2.0"
   "@types/react": "19.2.2"
   "@types/react-dom": "19.2.2"
+  sonner: "^1.7.2"
