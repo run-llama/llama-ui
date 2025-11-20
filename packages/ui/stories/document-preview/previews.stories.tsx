@@ -25,6 +25,8 @@ const SAMPLE_DOCX_DATA_URL =
 const SAMPLE_HTML_DATA_URL =
   "data:text/html;base64,PGh0bWw+PGhlYWQ+PHRpdGxlPlNhbXBsZSBIVE1MPC90aXRsZT48L2hlYWQ+PGJvZHk+PGgxPkhlbGxvIFdvcmxkPC9oMT48cD5UaGlzIGlzIGEgc2FtcGxlIEhUTUwgZmlsZS48L3A+PC9ib2R5PjwvaHRtbD4=";
 
+const SAMPLE_ZIP_DATA_URL = "data:application/zip;base64,UEsDBBQAAAAIAF";
+
 const meta: Meta<typeof DocumentPreview> = {
   title: "Components/DocumentPreview/Previews",
   component: DocumentPreview,
@@ -118,6 +120,14 @@ export const FileObjectPreview: Story = {
   args: {
     value: SAMPLE_HTML_DATA_URL,
     fileName: "sample.html",
+  },
+};
+
+export const FileObjectPreviewFallback: Story = {
+  name: "ZIP File (Object Preview Fallback)",
+  args: {
+    value: SAMPLE_ZIP_DATA_URL,
+    fileName: "archive.zip",
   },
 };
 

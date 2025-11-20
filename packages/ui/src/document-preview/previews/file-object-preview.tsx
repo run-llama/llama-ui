@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { FileToolbar } from "../file-tool-bar";
+import { downloadFile } from "../files";
 
 export const FileObjectPreview = ({
   fileName,
@@ -13,12 +14,8 @@ export const FileObjectPreview = ({
   const containerRef = useRef<HTMLObjectElement>(null);
   const [scale, setScale] = useState(1);
 
-  const toggleFullscreen = () => {
-    window.open(contentUrl, "_blank");
-  };
-
-  const onFullscreen = () => {
-    toggleFullscreen();
+  const onDownload = () => {
+    downloadFile(contentUrl, fileName);
   };
 
   const handleScaleChange = (newScale: number) => {
@@ -29,11 +26,10 @@ export const FileObjectPreview = ({
     <div className="relative flex h-full flex-col">
       <FileToolbar
         fileName={fileName}
-        onFullscreen={onFullscreen}
+        onDownload={onDownload}
         scale={scale}
         onScaleChange={handleScaleChange}
         onRemove={onRemove}
-        isOverlay
       />
       <div className="h-full flex-1 overflow-auto bg-gray-50">
         <object

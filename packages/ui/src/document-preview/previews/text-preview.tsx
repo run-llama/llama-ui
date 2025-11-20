@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { FileToolbar } from "../file-tool-bar";
+import { downloadFile } from "../files";
 
 interface TextPreviewProps {
   fileName?: string | null;
@@ -45,12 +46,7 @@ export function TextPreview({
   }, [contentUrl]);
 
   const onDownload = () => {
-    const link = document.createElement("a");
-    link.href = contentUrl;
-    link.download = fileName ?? "download";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    downloadFile(contentUrl, fileName);
   };
 
   if (isLoading) {

@@ -1,10 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   checkUrl,
+  downloadFile,
   getFileTypeInfo,
   resolveFileName,
-} from "../../src/document-preview/file-type";
+} from "../../src/document-preview/files";
 
 describe("getFileTypeInfo", () => {
   it("extracts mime type and extension from File object", () => {
@@ -355,5 +356,36 @@ describe("checkUrl", () => {
     const result = checkUrl(emptyUrl);
 
     expect(result).toBeNull();
+  });
+});
+
+describe("downloadFile", () => {
+  beforeEach(() => {
+    // Clear the body before each test
+    document.body.innerHTML = "";
+  });
+
+  afterEach(() => {
+    // Clean up any remaining elements
+    document.body.innerHTML = "";
+  });
+
+  it("clicks the link element", () => {
+    const contentUrl = "https://example.com/document.pdf";
+    const fileName = "document.pdf";
+    const clickSpy = vi.fn();
+
+    const originalCreateElement = document.createElement.bind(document);
+    vi.spyOn(document, "createElement").mockImplementation((tagName) => {
+      const element = originalCreateElement(tagName);
+      if (tagName === "a") {
+        element.click = clickSpy;
+      }
+      return element;
+    });
+
+    downloadFile(contentUrl, fileName);
+
+    expect(clickSpy).toHaveBeenCalled();
   });
 });

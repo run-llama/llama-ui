@@ -5,7 +5,7 @@ import type { DropzoneProps } from "react-dropzone";
 import { cn } from "@/lib/utils";
 import { PdfPreview } from "../file-preview";
 import type { Highlight } from "../file-preview/types";
-import { checkUrl, getFileTypeInfo, resolveFileName } from "./file-type";
+import { checkUrl, getFileTypeInfo, resolveFileName } from "./files";
 import { FileUpload } from "./file-upload";
 import { FileObjectPreview } from "./previews/file-object-preview";
 import { ImagePreview } from "./previews/image-preview";

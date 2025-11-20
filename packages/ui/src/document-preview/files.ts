@@ -127,3 +127,17 @@ export const resolveFileName = (content: File | string): string | null => {
   }
   return null;
 };
+
+/**
+ * Downloads a file by creating a temporary anchor element and triggering a click.
+ * @param contentUrl - The URL of the file to download
+ * @param fileName - Optional filename for the download
+ */
+export const downloadFile = (contentUrl: string, fileName?: string | null) => {
+  const link = document.createElement("a");
+  link.href = contentUrl;
+  link.download = fileName ?? "download";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
