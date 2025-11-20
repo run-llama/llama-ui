@@ -23,12 +23,7 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
  *
  * Returns the list of registered workflow names.
  */
-export const getWorkflows = <ThrowOnError extends boolean = false>(options?: Options<GetWorkflowsData, ThrowOnError>) => {
-    return (options?.client ?? client).get<GetWorkflowsResponses, unknown, ThrowOnError>({
-        url: '/workflows',
-        ...options
-    });
-};
+export const getWorkflows = <ThrowOnError extends boolean = false>(options?: Options<GetWorkflowsData, ThrowOnError>) => (options?.client ?? client).get<GetWorkflowsResponses, unknown, ThrowOnError>({ url: '/workflows', ...options });
 
 /**
  * Run workflow (wait)
@@ -38,16 +33,14 @@ export const getWorkflows = <ThrowOnError extends boolean = false>(options?: Opt
  * context object, and optional keyword arguments passed to the workflow run.
  *
  */
-export const postWorkflowsByNameRun = <ThrowOnError extends boolean = false>(options: Options<PostWorkflowsByNameRunData, ThrowOnError>) => {
-    return (options.client ?? client).post<PostWorkflowsByNameRunResponses, PostWorkflowsByNameRunErrors, ThrowOnError>({
-        url: '/workflows/{name}/run',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const postWorkflowsByNameRun = <ThrowOnError extends boolean = false>(options: Options<PostWorkflowsByNameRunData, ThrowOnError>) => (options.client ?? client).post<PostWorkflowsByNameRunResponses, PostWorkflowsByNameRunErrors, ThrowOnError>({
+    url: '/workflows/{name}/run',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Run workflow (no-wait)
@@ -56,16 +49,14 @@ export const postWorkflowsByNameRun = <ThrowOnError extends boolean = false>(opt
  * which can be used to query results or stream events.
  *
  */
-export const postWorkflowsByNameRunNowait = <ThrowOnError extends boolean = false>(options: Options<PostWorkflowsByNameRunNowaitData, ThrowOnError>) => {
-    return (options.client ?? client).post<PostWorkflowsByNameRunNowaitResponses, PostWorkflowsByNameRunNowaitErrors, ThrowOnError>({
-        url: '/workflows/{name}/run-nowait',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const postWorkflowsByNameRunNowait = <ThrowOnError extends boolean = false>(options: Options<PostWorkflowsByNameRunNowaitData, ThrowOnError>) => (options.client ?? client).post<PostWorkflowsByNameRunNowaitResponses, PostWorkflowsByNameRunNowaitErrors, ThrowOnError>({
+    url: '/workflows/{name}/run-nowait',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Get JSON schema for start event
@@ -73,12 +64,7 @@ export const postWorkflowsByNameRunNowait = <ThrowOnError extends boolean = fals
  * Gets the JSON schema of the start and stop events from the specified workflow and returns it under "start" (start event) and "stop" (stop event)
  *
  */
-export const getWorkflowsByNameSchema = <ThrowOnError extends boolean = false>(options: Options<GetWorkflowsByNameSchemaData, ThrowOnError>) => {
-    return (options.client ?? client).get<GetWorkflowsByNameSchemaResponses, GetWorkflowsByNameSchemaErrors, ThrowOnError>({
-        url: '/workflows/{name}/schema',
-        ...options
-    });
-};
+export const getWorkflowsByNameSchema = <ThrowOnError extends boolean = false>(options: Options<GetWorkflowsByNameSchemaData, ThrowOnError>) => (options.client ?? client).get<GetWorkflowsByNameSchemaResponses, GetWorkflowsByNameSchemaErrors, ThrowOnError>({ url: '/workflows/{name}/schema', ...options });
 
 /**
  * Get workflow result (deprecated)
@@ -88,12 +74,7 @@ export const getWorkflowsByNameSchema = <ThrowOnError extends boolean = false>(o
  *
  * @deprecated
  */
-export const getResultsByHandlerId = <ThrowOnError extends boolean = false>(options: Options<GetResultsByHandlerIdData, ThrowOnError>) => {
-    return (options.client ?? client).get<GetResultsByHandlerIdResponses, GetResultsByHandlerIdErrors, ThrowOnError>({
-        url: '/results/{handler_id}',
-        ...options
-    });
-};
+export const getResultsByHandlerId = <ThrowOnError extends boolean = false>(options: Options<GetResultsByHandlerIdData, ThrowOnError>) => (options.client ?? client).get<GetResultsByHandlerIdResponses, GetResultsByHandlerIdErrors, ThrowOnError>({ url: '/results/{handler_id}', ...options });
 
 /**
  * Stream workflow events
@@ -113,64 +94,42 @@ export const getResultsByHandlerId = <ThrowOnError extends boolean = false>(opti
  * The queue is protected by a lock that is acquired by the consumer, so only one consumer of the queue at a time is allowed.
  *
  */
-export const getEventsByHandlerId = <ThrowOnError extends boolean = false>(options: Options<GetEventsByHandlerIdData, ThrowOnError>) => {
-    return (options.client ?? client).sse.get<GetEventsByHandlerIdResponses, GetEventsByHandlerIdErrors, ThrowOnError>({
-        url: '/events/{handler_id}',
-        ...options
-    });
-};
+export const getEventsByHandlerId = <ThrowOnError extends boolean = false>(options: Options<GetEventsByHandlerIdData, ThrowOnError>) => (options.client ?? client).sse.get<GetEventsByHandlerIdResponses, GetEventsByHandlerIdErrors, ThrowOnError>({ url: '/events/{handler_id}', ...options });
 
 /**
  * Send event to workflow
  *
  * Sends an event to a running workflow's context.
  */
-export const postEventsByHandlerId = <ThrowOnError extends boolean = false>(options: Options<PostEventsByHandlerIdData, ThrowOnError>) => {
-    return (options.client ?? client).post<PostEventsByHandlerIdResponses, PostEventsByHandlerIdErrors, ThrowOnError>({
-        url: '/events/{handler_id}',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const postEventsByHandlerId = <ThrowOnError extends boolean = false>(options: Options<PostEventsByHandlerIdData, ThrowOnError>) => (options.client ?? client).post<PostEventsByHandlerIdResponses, PostEventsByHandlerIdErrors, ThrowOnError>({
+    url: '/events/{handler_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Health check
  *
  * Returns the server health status.
  */
-export const getHealth = <ThrowOnError extends boolean = false>(options?: Options<GetHealthData, ThrowOnError>) => {
-    return (options?.client ?? client).get<GetHealthResponses, unknown, ThrowOnError>({
-        url: '/health',
-        ...options
-    });
-};
+export const getHealth = <ThrowOnError extends boolean = false>(options?: Options<GetHealthData, ThrowOnError>) => (options?.client ?? client).get<GetHealthResponses, unknown, ThrowOnError>({ url: '/health', ...options });
 
 /**
  * Get handlers
  *
  * Returns workflow handlers, optionally filtered by query parameters.
  */
-export const getHandlers = <ThrowOnError extends boolean = false>(options?: Options<GetHandlersData, ThrowOnError>) => {
-    return (options?.client ?? client).get<GetHandlersResponses, unknown, ThrowOnError>({
-        url: '/handlers',
-        ...options
-    });
-};
+export const getHandlers = <ThrowOnError extends boolean = false>(options?: Options<GetHandlersData, ThrowOnError>) => (options?.client ?? client).get<GetHandlersResponses, unknown, ThrowOnError>({ url: '/handlers', ...options });
 
 /**
  * Get workflow handler
  *
  * Returns the final result of an asynchronously started workflow, if available
  */
-export const getHandlersByHandlerId = <ThrowOnError extends boolean = false>(options: Options<GetHandlersByHandlerIdData, ThrowOnError>) => {
-    return (options.client ?? client).get<GetHandlersByHandlerIdResponses, GetHandlersByHandlerIdErrors, ThrowOnError>({
-        url: '/handlers/{handler_id}',
-        ...options
-    });
-};
+export const getHandlersByHandlerId = <ThrowOnError extends boolean = false>(options: Options<GetHandlersByHandlerIdData, ThrowOnError>) => (options.client ?? client).get<GetHandlersByHandlerIdResponses, GetHandlersByHandlerIdErrors, ThrowOnError>({ url: '/handlers/{handler_id}', ...options });
 
 /**
  * Stop and delete handler
@@ -179,12 +138,7 @@ export const getHandlersByHandlerId = <ThrowOnError extends boolean = false>(opt
  * handler from the persistence store if purge=true.
  *
  */
-export const postHandlersByHandlerIdCancel = <ThrowOnError extends boolean = false>(options: Options<PostHandlersByHandlerIdCancelData, ThrowOnError>) => {
-    return (options.client ?? client).post<PostHandlersByHandlerIdCancelResponses, PostHandlersByHandlerIdCancelErrors, ThrowOnError>({
-        url: '/handlers/{handler_id}/cancel',
-        ...options
-    });
-};
+export const postHandlersByHandlerIdCancel = <ThrowOnError extends boolean = false>(options: Options<PostHandlersByHandlerIdCancelData, ThrowOnError>) => (options.client ?? client).post<PostHandlersByHandlerIdCancelResponses, PostHandlersByHandlerIdCancelErrors, ThrowOnError>({ url: '/handlers/{handler_id}/cancel', ...options });
 
 /**
  * Get the representation of the workflow
@@ -192,21 +146,11 @@ export const postHandlersByHandlerIdCancel = <ThrowOnError extends boolean = fal
  * Get the representation of the workflow as a directed graph in JSON format
  *
  */
-export const getWorkflowsByNameRepresentation = <ThrowOnError extends boolean = false>(options: Options<GetWorkflowsByNameRepresentationData, ThrowOnError>) => {
-    return (options.client ?? client).get<GetWorkflowsByNameRepresentationResponses, GetWorkflowsByNameRepresentationErrors, ThrowOnError>({
-        url: '/workflows/{name}/representation',
-        ...options
-    });
-};
+export const getWorkflowsByNameRepresentation = <ThrowOnError extends boolean = false>(options: Options<GetWorkflowsByNameRepresentationData, ThrowOnError>) => (options.client ?? client).get<GetWorkflowsByNameRepresentationResponses, GetWorkflowsByNameRepresentationErrors, ThrowOnError>({ url: '/workflows/{name}/representation', ...options });
 
 /**
  * List workflow events
  *
  * Returns the list of registered workflow event schemas.
  */
-export const getWorkflowsByNameEvents = <ThrowOnError extends boolean = false>(options: Options<GetWorkflowsByNameEventsData, ThrowOnError>) => {
-    return (options.client ?? client).get<GetWorkflowsByNameEventsResponses, unknown, ThrowOnError>({
-        url: '/workflows/{name}/events',
-        ...options
-    });
-};
+export const getWorkflowsByNameEvents = <ThrowOnError extends boolean = false>(options: Options<GetWorkflowsByNameEventsData, ThrowOnError>) => (options.client ?? client).get<GetWorkflowsByNameEventsResponses, unknown, ThrowOnError>({ url: '/workflows/{name}/events', ...options });
