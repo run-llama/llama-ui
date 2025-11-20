@@ -44,12 +44,13 @@ export function TextPreview({
     fetchFileContent();
   }, [contentUrl]);
 
-  const toggleFullscreen = () => {
-    window.open(contentUrl, "_blank");
-  };
-
-  const onFullscreen = () => {
-    toggleFullscreen();
+  const onDownload = () => {
+    const link = document.createElement("a");
+    link.href = contentUrl;
+    link.download = fileName ?? "download";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   if (isLoading) {
@@ -57,7 +58,7 @@ export function TextPreview({
       <div className="relative flex h-full flex-col">
         <FileToolbar
           fileName={fileName}
-          onFullscreen={onFullscreen}
+          onDownload={onDownload}
           onRemove={onRemove}
           isOverlay
         />
@@ -75,9 +76,8 @@ export function TextPreview({
       <div className="relative flex h-full flex-col">
         <FileToolbar
           fileName={fileName}
-          onFullscreen={onFullscreen}
+          onDownload={onDownload}
           onRemove={onRemove}
-          isOverlay
         />
         <div className="flex flex-1 flex-col items-center justify-center gap-2 p-4">
           <p className="text-sm text-destructive">
@@ -86,7 +86,7 @@ export function TextPreview({
           <p className="text-xs text-muted-foreground">{loadError}</p>
           <button
             type="button"
-            onClick={() => window.open(contentUrl, "_blank")}
+            onClick={onDownload}
             className="text-sm text-primary hover:underline"
           >
             Download File
@@ -100,7 +100,7 @@ export function TextPreview({
     <div className={`relative flex h-full flex-col ${className ?? ""}`}>
       <FileToolbar
         fileName={fileName}
-        onFullscreen={onFullscreen}
+        onDownload={onDownload}
         onRemove={onRemove}
         isOverlay
       />
