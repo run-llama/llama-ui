@@ -1,7 +1,7 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { FileToolbar } from "../file-tool-bar";
 
-export const FileObjectPreview = ({
+export const ImagePreview = ({
   fileName,
   contentUrl,
   onRemove,
@@ -10,7 +10,6 @@ export const FileObjectPreview = ({
   contentUrl: string;
   onRemove?: () => void;
 }) => {
-  const containerRef = useRef<HTMLObjectElement>(null);
   const [scale, setScale] = useState(1);
 
   const toggleFullscreen = () => {
@@ -36,27 +35,15 @@ export const FileObjectPreview = ({
         isOverlay
       />
       <div className="h-full flex-1 overflow-auto bg-gray-50">
-        <object
-          ref={containerRef}
-          data={contentUrl}
-          className="h-full w-full bg-white"
+        <img
+          src={contentUrl}
+          alt={fileName ?? "uploaded_file"}
+          className="h-full w-full rounded-none object-contain p-4"
           style={{
             transform: `scale(${scale})`,
             transformOrigin: "top left",
           }}
-        >
-          <p className="p-4 text-center text-xs text-muted-foreground">
-            Your browser doesn&apos;t support file object preview.{" "}
-            <a
-              href={contentUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
-            >
-              Download File
-            </a>
-          </p>
-        </object>
+        />
       </div>
     </div>
   );

@@ -22,6 +22,9 @@ const SAMPLE_JSON_DATA_URL =
 const SAMPLE_DOCX_DATA_URL =
   "data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,UEsDBBQAAAAIAF";
 
+const SAMPLE_HTML_DATA_URL =
+  "data:text/html;base64,PGh0bWw+PGhlYWQ+PHRpdGxlPlNhbXBsZSBIVE1MPC90aXRsZT48L2hlYWQ+PGJvZHk+PGgxPkhlbGxvIFdvcmxkPC9oMT48cD5UaGlzIGlzIGEgc2FtcGxlIEhUTUwgZmlsZS48L3A+PC9ib2R5PjwvaHRtbD4=";
+
 const meta: Meta<typeof DocumentPreview> = {
   title: "Components/DocumentPreview/Previews",
   component: DocumentPreview,
@@ -113,8 +116,8 @@ export const JsonPreview: Story = {
 export const FileObjectPreview: Story = {
   name: "File Object Preview",
   args: {
-    value: SAMPLE_IMAGE_URL,
-    fileName: "image.jpg",
+    value: SAMPLE_HTML_DATA_URL,
+    fileName: "sample.html",
   },
 };
 
