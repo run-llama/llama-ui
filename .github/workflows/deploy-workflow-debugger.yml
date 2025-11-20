@@ -3,10 +3,6 @@ name: Deploy workflow-debugger
 on:
   repository_dispatch:
     types: [deploy-workflow-debugger]
-  push:
-    branches: [main]
-    paths:
-      - "packages/workflow-debugger/**"
   workflow_dispatch: 
     inputs:
       version:
