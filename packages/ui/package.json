@@ -341,7 +341,6 @@
     "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
     "remark-parse": "^11.0.0",
-    "sonner": "^2.0.5",
     "tailwind-merge": "^3.3.1",
     "uuid": "^13.0.0",
     "valtio": "^2.1.8",
@@ -353,7 +352,8 @@
     "@llamaindex/workflows-client": "^1.7.0",
     "llama-cloud-services": "^0.3.6",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "sonner": "catalog:"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^4.0.1",
@@ -389,6 +389,7 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "storybook": "^9.1.3",
+    "sonner": "catalog:",
     "tailwind-classname-prefix-loader": "^1.0.6",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",

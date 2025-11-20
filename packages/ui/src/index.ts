@@ -44,7 +44,6 @@ export * from "../base/separator";
 export * from "../base/sheet";
 export * from "../base/skeleton";
 export * from "../base/slider";
-export * from "../base/sonner";
 export * from "../base/switch";
 export * from "../base/table";
 export * from "../base/tabs";
