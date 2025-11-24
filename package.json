@@ -16,7 +16,7 @@
     "format-check": "pnpm -r --if-present run format-check",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "changeset publish"
+    "release": "pnpm build:all && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.5",
