@@ -1,5 +1,11 @@
 # @llamaindex/workflow-debugger
 
+## 0.2.2
+
+### Patch Changes
+
+- c76243e: Normalize released file name (version in path)
+
 ## 0.2.1
 
 ### Patch Changes
