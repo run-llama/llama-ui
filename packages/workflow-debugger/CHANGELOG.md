@@ -1,5 +1,11 @@
 # @llamaindex/workflow-debugger
 
+## 0.2.1
+
+### Patch Changes
+
+- d36f7c7: Fix published assets
+
 ## 0.2.0
 
 ### Minor Changes
