@@ -24,7 +24,7 @@ export default defineConfig(({ mode }) => ({
       entry: "src/main.tsx",
       name: "WorkflowDebugger",
       formats: ["iife"],
-      fileName: () => `debugger.v${version}.js`,
+      fileName: () => `app.js`,
     },
     cssCodeSplit: false,
     rollupOptions: {
@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => ({
           const name =
             assetInfo.name || (assetInfo.names && assetInfo.names[0]) || "";
           if (typeof name === "string" && name.endsWith(".css")) {
-            return `debugger.v${version}.css`;
+            return `app.css`;
           }
           return "assets/[name][extname]";
         },
