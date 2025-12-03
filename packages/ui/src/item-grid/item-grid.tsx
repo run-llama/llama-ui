@@ -180,16 +180,13 @@ export function ItemGrid<T = unknown>({
   return (
     <div className={cn("w-full space-y-4", className)} style={style}>
       <div className="rounded-md border">
-        <Table className="table-fixed">
+        <Table className="table-fixed [&_td]:break-words [&_td]:whitespace-normal [&_th]:whitespace-normal [&_th]:align-top [&_td]:align-top">
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
                 <TableHead
                   key={column.key}
-                  className={cn(
-                    "font-medium",
-                    column.key === "actions" && "w-15"
-                  )}
+                  className={cn("font-medium align-top", column.headerClassName)}
                 >
                   <ColumnHeader
                     column={column}
@@ -211,7 +208,7 @@ export function ItemGrid<T = unknown>({
                   {columns.map((column) => (
                     <TableCell
                       key={column.key}
-                      className={column.key === "actions" ? "w-15" : undefined}
+                      className={cn(column.cellClassName)}
                     >
                       <div className="h-0 overflow-hidden">placeholder</div>
                     </TableCell>
@@ -241,9 +238,7 @@ export function ItemGrid<T = unknown>({
                     return (
                       <TableCell
                         key={column.key}
-                        className={
-                          column.key === "actions" ? "w-15" : undefined
-                        }
+                        className={cn("align-top", column.cellClassName)}
                       >
                         {column.renderCell ? (
                           column.renderCell(value, hooks)

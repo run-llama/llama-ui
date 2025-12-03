@@ -76,6 +76,9 @@ export function createExtractedDataColumn<T>(
       baseColumn = {
         key: "file_name",
         header: "File Name",
+        headerClassName: "w-[45%] min-w-[280px]",
+        cellClassName:
+          "w-[45%] min-w-[280px] pr-6 break-words break-all whitespace-normal",
         getValue: (item: TypedAgentData<ExtractedData<T>>) =>
           item.data.file_name,
         sortable: true,
@@ -85,6 +88,8 @@ export function createExtractedDataColumn<T>(
       baseColumn = {
         key: "status",
         header: "Status",
+        headerClassName: "w-[18%] min-w-[140px]",
+        cellClassName: "w-[18%] min-w-[140px]",
         getValue: (item: TypedAgentData<ExtractedData<T>>) => item.data.status,
         renderCell: (value: unknown) => (
           <ReviewStatusBadge value={value as string} />
@@ -98,6 +103,8 @@ export function createExtractedDataColumn<T>(
       baseColumn = {
         key: "items_to_review",
         header: "Items to Review",
+        headerClassName: "w-[12%] min-w-[110px]",
+        cellClassName: "w-[12%] min-w-[110px]",
         getValue: (item: TypedAgentData<ExtractedData<T>>) =>
           getExtractedDataItemsToReviewCount(item, confidenceThreshold),
         renderCell: (value: unknown) => {
@@ -115,6 +122,8 @@ export function createExtractedDataColumn<T>(
       baseColumn = {
         key: "created_at",
         header: "Created At",
+        headerClassName: "w-[20%] min-w-[170px]",
+        cellClassName: "w-[20%] min-w-[170px]",
         getValue: (item: TypedAgentData<ExtractedData<T>>) =>
           item.createdAt.toISOString(),
         renderCell: (value: unknown) => (
@@ -127,6 +136,8 @@ export function createExtractedDataColumn<T>(
       baseColumn = {
         key: "actions",
         header: "",
+        headerClassName: "w-[72px] min-w-[72px]",
+        cellClassName: "w-[72px] min-w-[72px]",
         getValue: (item: TypedAgentData<ExtractedData<T>>) => item,
         renderCell: (value: unknown, hooks) => {
           if (!hooks?.deleteItem) {

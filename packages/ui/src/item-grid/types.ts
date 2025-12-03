@@ -32,6 +32,8 @@ export interface Column<T = unknown> {
   sortKey?: string;
   filterable?: boolean;
   filterOptions?: string[];
+  headerClassName?: string;
+  cellClassName?: string;
 }
 
 export interface BuiltInColumnConfig<T = unknown> {
