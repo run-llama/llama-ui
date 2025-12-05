@@ -55,11 +55,8 @@ export function findExtractedFieldMetadata(
       return undefined;
     }
 
-    // If we haven't reached the end yet but found metadata, the path structure is wrong
-    // (metadata shouldn't have nested properties we can traverse)
-    if (isExtractedFieldMetadata(current)) {
-      return undefined;
-    }
+    // Continue traversing even if current is metadata - metadata can have children
+    // The Python backend intentionally cascades metadata down to leaves during parsing
   }
 
   return undefined;
