@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 3.4.0
+
+### Minor Changes
+
+- bd7527d: Updating pdfpreview for allowable max pages. Fix metadata-lookup to include citations
+
 ## 3.3.2
 
 ### Patch Changes
