@@ -255,6 +255,8 @@ export const PdfPreviewImpl = ({
       return;
     }
     lastLoadedUrl.current = url;
+    // Reset displayMaxPages to the maxPages prop when loading a new PDF
+    setDisplayMaxPages(maxPages);
     const fetchFile = async () => {
       setIsLoading(true);
       const response = await fetch(url);
@@ -270,7 +272,7 @@ export const PdfPreviewImpl = ({
     return () => {
       setFile(null);
     };
-  }, [url, fileName]);
+  }, [url, fileName, maxPages]);
 
   // Handle keyboard navigation
   useEffect(() => {
