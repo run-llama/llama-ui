@@ -47,8 +47,19 @@ export function findExtractedFieldMetadata(
     }
 
     // Check if we found metadata at this level
+    // If we've reached the end of the path, check if what we found is metadata
+    if (i === pathArray.length - 1) {
+      if (isExtractedFieldMetadata(current)) {
+        return current;
+      }
+      // If we've consumed all segments but didn't find metadata, return undefined
+      return undefined;
+    }
+
+    // If we haven't reached the end yet but found metadata, the path structure is wrong
+    // (metadata shouldn't have nested properties we can traverse)
     if (isExtractedFieldMetadata(current)) {
-      return current;
+      return undefined;
     }
   }
 
@@ -67,9 +78,16 @@ export function isExtractedFieldMetadata(
 
   const obj = value as Record<string, unknown>;
 
-  // All fields are optional but confidence is actually always there
-  // TODO: change ts sdk to reflect this fact
+  // Check for ExtractedFieldMetadata indicators:
+  // - confidence (numeric) is the primary indicator
+  // - citation (array) is also a strong indicator of metadata
+  // Having either indicates this is metadata rather than a nested object
   if ("confidence" in obj && typeof obj.confidence === "number") {
+    return true;
+  }
+
+  // Also check for citation array as an indicator
+  if ("citation" in obj && Array.isArray(obj.citation)) {
     return true;
   }
 
