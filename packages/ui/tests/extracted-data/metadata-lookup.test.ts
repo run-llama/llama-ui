@@ -165,7 +165,9 @@ describe("findExtractedFieldMetadata", () => {
       );
       expect(result).toBeDefined();
       expect(result?.confidence).toBe(0.9);
-      expect(result?.reasoning).toBe("Contact information extracted from header");
+      expect(result?.reasoning).toBe(
+        "Contact information extracted from header"
+      );
       expect(result?.citation).toEqual([
         { page_number: 1, matching_text: "Contact section" },
       ]);
@@ -179,7 +181,9 @@ describe("findExtractedFieldMetadata", () => {
           citation: [{ page_number: 1, matching_text: "Contact section" }],
           email: {
             confidence: 0.95,
-            citation: [{ page_number: 1, matching_text: "ypark@protonmail.com" }],
+            citation: [
+              { page_number: 1, matching_text: "ypark@protonmail.com" },
+            ],
             // Child doesn't have reasoning, should inherit from parent
           },
         },
@@ -193,7 +197,9 @@ describe("findExtractedFieldMetadata", () => {
       // Child confidence takes precedence
       expect(result?.confidence).toBe(0.95);
       // Parent reasoning cascades down
-      expect(result?.reasoning).toBe("Contact information extracted from header");
+      expect(result?.reasoning).toBe(
+        "Contact information extracted from header"
+      );
       // Child citation takes precedence
       expect(result?.citation).toEqual([
         { page_number: 1, matching_text: "ypark@protonmail.com" },
