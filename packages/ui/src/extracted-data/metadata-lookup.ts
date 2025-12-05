@@ -46,7 +46,6 @@ export function findExtractedFieldMetadata(
       current = (current as Record<string, unknown>)[segment];
     }
 
-    // Check if we found metadata at this level
     // If we've reached the end of the path, check if what we found is metadata
     if (i === pathArray.length - 1) {
       if (isExtractedFieldMetadata(current)) {
