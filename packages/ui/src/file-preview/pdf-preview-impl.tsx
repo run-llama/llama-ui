@@ -396,19 +396,17 @@ export const PdfPreviewImpl = ({
             onReset={handleReset}
             onFullscreen={toggleFullscreen}
             className={toolbarClassName}
-            isOverlay
           />
-          <div className="h-10 flex-shrink-0" />
           {showMaxPagesWarning && (
             <div
               role="alert"
-              className="bg-amber-50 border-b border-amber-200 text-amber-900 px-4 py-2 text-sm flex items-center justify-between gap-2 flex-shrink-0"
+              className="bg-amber-50 border-b border-amber-200 text-amber-900 px-4 py-2 text-xs flex items-center justify-between gap-2 flex-shrink-0"
             >
               <span>{warningMessage}</span>
               {numPages && displayMaxPages && numPages > displayMaxPages && (
                 <button
                   onClick={handleExtendMaxPages}
-                  className="text-amber-700 hover:text-amber-900 underline font-medium text-sm whitespace-nowrap"
+                  className="text-amber-700 hover:text-amber-900 underline font-medium text-xs whitespace-nowrap"
                 >
                   Show more pages
                 </button>
@@ -420,7 +418,7 @@ export const PdfPreviewImpl = ({
 
       <div
         ref={containerRef}
-        className="overflow-auto h-full bg-[#F3F3F3] rounded-lg flex-1 min-h-0"
+        className="overflow-auto h-full bg-[#F3F3F3] flex-1 min-h-0"
       >
         <Document
           file={file}

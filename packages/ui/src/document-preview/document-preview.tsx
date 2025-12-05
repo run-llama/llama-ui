@@ -284,8 +284,8 @@ export function DocumentPreview(props: DocumentPreviewProps) {
   const normalizedFileNames = allowMultiple
     ? multiValues.map((item) => item.fileName ?? resolveFileName(item.content))
     : toArray(singleProps?.value ?? null).map(
-      (content) => singleProps?.fileName ?? resolveFileName(content)
-    );
+        (content) => singleProps?.fileName ?? resolveFileName(content)
+      );
 
   // Wrapper function to update preview index and notify parent
   const setPreviewIndex = (index: number | null) => {
