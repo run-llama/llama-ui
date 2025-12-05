@@ -32,7 +32,6 @@ export const ImagePreview = ({
         scale={scale}
         onScaleChange={handleScaleChange}
         onRemove={onRemove}
-        isOverlay
       />
       <div className="h-full flex-1 overflow-auto bg-gray-50">
         <img

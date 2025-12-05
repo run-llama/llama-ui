@@ -56,7 +56,6 @@ export function TextPreview({
           fileName={fileName}
           onDownload={onDownload}
           onRemove={onRemove}
-          isOverlay
         />
         <div className="flex flex-1 items-center justify-center p-4">
           <p className="text-sm text-muted-foreground">
@@ -98,7 +97,6 @@ export function TextPreview({
         fileName={fileName}
         onDownload={onDownload}
         onRemove={onRemove}
-        isOverlay
       />
       <div className="flex-1 overflow-auto bg-gray-50">
         <div className="relative h-full w-full">
