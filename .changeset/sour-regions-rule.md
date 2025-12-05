@@ -2,4 +2,4 @@
 "@llamaindex/ui": patch
 ---
 
-Add show more pages option in warning message
+Fix layout of max pages warning message
