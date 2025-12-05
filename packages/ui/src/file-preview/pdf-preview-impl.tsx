@@ -69,10 +69,14 @@ export const PdfPreviewImpl = ({
 
   const [pageBaseDims, setPageBaseDims] = useState<PageBaseDims>({}); // store page viewport to use for bounding box overlay
   const [showHighlights, setShowHighlights] = useState<boolean>(true); // whether to show the highlights
-  const [displayMaxPages, setDisplayMaxPages] = useState<number | undefined>(maxPages); // current page limit (can be extended)
+  const [displayMaxPages, setDisplayMaxPages] = useState<number | undefined>(
+    maxPages
+  ); // current page limit (can be extended)
 
   const hasPageLimit =
-    typeof displayMaxPages === "number" && Number.isFinite(displayMaxPages) && displayMaxPages > 0;
+    typeof displayMaxPages === "number" &&
+    Number.isFinite(displayMaxPages) &&
+    displayMaxPages > 0;
 
   const effectiveNumPages = useMemo(() => {
     if (!numPages) return numPages;
@@ -81,16 +85,14 @@ export const PdfPreviewImpl = ({
   }, [numPages, hasPageLimit, displayMaxPages]);
 
   const showMaxPagesWarning =
-    hasPageLimit &&
-    !!numPages &&
-    numPages > (displayMaxPages ?? 0);
+    hasPageLimit && !!numPages && numPages > (displayMaxPages ?? 0);
 
   // Generate dynamic message based on the page limit
   const warningMessage =
     !showMaxPagesWarning || !displayMaxPages
-      ? maxPagesWarning ?? ""
-      : maxPagesWarning ??
-      `The document has ${numPages} pages. Limiting the preview to ${displayMaxPages} pages to increase performance.`;
+      ? (maxPagesWarning ?? "")
+      : (maxPagesWarning ??
+        `The document has ${numPages} pages. Limiting the preview to ${displayMaxPages} pages to increase performance.`);
 
   const handleExtendMaxPages = () => {
     if (!numPages || !displayMaxPages) return;
