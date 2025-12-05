@@ -402,7 +402,7 @@ export const PdfPreviewImpl = ({
               ref={(el) => {
                 pageRefs.current[index + 1] = el;
               }}
-              className="mb-4 flex justify-center"
+              className="mb-4 flex justify-center min-w-max"
             >
               <div className="relative inline-block">
                 <Page
