@@ -30,7 +30,7 @@ export function findExtractedFieldMetadata(
 
   // Direct tree traversal following the exact path structure
   let current: unknown = metadata;
-  let parentMetadata: ExtractedFieldMetadata | undefined = undefined;
+  let accumulatedParentMetadata: ExtractedFieldMetadata | undefined = undefined;
 
   for (let i = 0; i < pathArray.length; i++) {
     const segment = pathArray[i];
@@ -40,9 +40,13 @@ export function findExtractedFieldMetadata(
     }
 
     // Check if current node has metadata before traversing to children
-    // If it does, track it so we can cascade it down (safety measure in case BE misses it)
+    // If it does, merge it with accumulated parent metadata (most recent takes precedence)
+    // This allows earlier parents to provide fallback values for fields later parents don't have
     if (isExtractedFieldMetadata(current)) {
-      parentMetadata = current;
+      accumulatedParentMetadata = mergeMetadata(
+        accumulatedParentMetadata,
+        current
+      );
     }
 
     // Handle array indices
@@ -64,11 +68,11 @@ export function findExtractedFieldMetadata(
     // If we've reached the end of the path, check if what we found is metadata
     if (i === pathArray.length - 1) {
       if (isExtractedFieldMetadata(current)) {
-        // Child has metadata - merge with parent (child takes precedence)
-        return mergeMetadata(parentMetadata, current);
+        // Child has metadata - merge with accumulated parent (child takes precedence)
+        return mergeMetadata(accumulatedParentMetadata, current);
       }
-      // Child doesn't have metadata, but parent might - return parent if it exists
-      return parentMetadata;
+      // Child doesn't have metadata, but accumulated parent might - return it if it exists
+      return accumulatedParentMetadata;
     }
 
     // Continue traversing even if current is metadata - metadata can have children
