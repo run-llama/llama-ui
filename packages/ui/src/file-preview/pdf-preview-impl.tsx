@@ -28,7 +28,6 @@ export interface PdfPreviewImplProps {
   toolbarClassName?: string;
   maxPages?: number;
   maxPagesWarning?: string;
-  onMaxPagesChange?: (newMaxPages: number) => void;
 }
 
 // map of page number to page viewport dimensions
@@ -54,7 +53,6 @@ export const PdfPreviewImpl = ({
   toolbarClassName,
   maxPages,
   maxPagesWarning,
-  onMaxPagesChange,
 }: PdfPreviewImplProps) => {
   const [numPages, setNumPages] = useState<number>();
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -101,7 +99,6 @@ export const PdfPreviewImpl = ({
     const incrementAmount = maxPages ?? DEFAULT_MAX_PAGES_INCREMENT;
     const newMaxPages = Math.min(displayMaxPages + incrementAmount, numPages);
     setDisplayMaxPages(newMaxPages);
-    onMaxPagesChange?.(newMaxPages);
   };
 
   // Convert highlights to bounding boxes grouped by page
