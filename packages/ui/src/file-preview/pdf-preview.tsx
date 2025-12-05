@@ -20,6 +20,7 @@ const PdfPreview = memo(
     onRemove,
     maxPages,
     maxPagesWarning,
+    onMaxPagesChange,
   }: {
     url: string;
     highlights?: Highlight[];
@@ -28,6 +29,7 @@ const PdfPreview = memo(
     onRemove?: () => void;
     maxPages?: number;
     maxPagesWarning?: string;
+    onMaxPagesChange?: (newMaxPages: number) => void;
   }) => {
     if (typeof window === "undefined") {
       return null;
@@ -49,6 +51,7 @@ const PdfPreview = memo(
           onRemove={onRemove}
           maxPages={maxPages}
           maxPagesWarning={maxPagesWarning}
+          onMaxPagesChange={onMaxPagesChange}
         />
       </Suspense>
     );

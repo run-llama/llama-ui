@@ -32,6 +32,7 @@ export type PreviewComponentProps = {
   highlights?: Highlight[];
   maxPages?: number;
   maxPagesWarning?: string;
+  onMaxPagesChange?: (newMaxPages: number) => void;
 };
 
 export type PreviewComponent = React.ComponentType<PreviewComponentProps>;
@@ -46,6 +47,7 @@ function PdfPreviewWrapper({
   highlights,
   maxPages,
   maxPagesWarning,
+  onMaxPagesChange,
 }: PreviewComponentProps) {
   const effectiveMaxPages = maxPages ?? DEFAULT_MAX_PAGES;
   const effectiveMaxPagesWarning =
@@ -61,6 +63,7 @@ function PdfPreviewWrapper({
       toolbarClassName="[&>div]:border-t-0 [&>div]:border-r-0 [&>div]:border-l-0"
       maxPages={effectiveMaxPages}
       maxPagesWarning={effectiveMaxPagesWarning}
+      onMaxPagesChange={onMaxPagesChange}
     />
   );
 }
@@ -157,6 +160,7 @@ interface DocumentPreviewItemProps {
   previews?: PreviewsMap;
   maxPages?: number;
   maxPagesWarning?: string;
+  onMaxPagesChange?: (newMaxPages: number) => void;
 }
 
 function DocumentPreviewItem({
@@ -168,6 +172,7 @@ function DocumentPreviewItem({
   previews,
   maxPages,
   maxPagesWarning,
+  onMaxPagesChange,
 }: DocumentPreviewItemProps) {
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
 
@@ -234,6 +239,7 @@ function DocumentPreviewItem({
       highlights={highlights}
       maxPages={maxPages}
       maxPagesWarning={maxPagesWarning}
+      onMaxPagesChange={onMaxPagesChange}
     />
   );
 
@@ -280,8 +286,8 @@ export function DocumentPreview(props: DocumentPreviewProps) {
   const normalizedFileNames = allowMultiple
     ? multiValues.map((item) => item.fileName ?? resolveFileName(item.content))
     : toArray(singleProps?.value ?? null).map(
-        (content) => singleProps?.fileName ?? resolveFileName(content)
-      );
+      (content) => singleProps?.fileName ?? resolveFileName(content)
+    );
 
   // Wrapper function to update preview index and notify parent
   const setPreviewIndex = (index: number | null) => {
@@ -430,6 +436,7 @@ export function DocumentPreview(props: DocumentPreviewProps) {
             previews={previews}
             maxPages={props.maxPages}
             maxPagesWarning={props.maxPagesWarning}
+            onMaxPagesChange={props.onMaxPagesChange}
           />
         )}
       </div>
