@@ -17,6 +17,7 @@ import { UploadSkeleton } from "./upload-skeleton";
 type UploadableContent = File | string;
 
 const MAX_FILE_COUNT = 20;
+const DEFAULT_MAX_FILE_SIZE = 1024 * 1024 * 315;
 
 export type UploadableItem = {
   content: UploadableContent;
@@ -114,6 +115,8 @@ interface DocumentPreviewBaseProps
   className?: string;
   footer?: ReactNode;
   accept?: DropzoneProps["accept"];
+  maxFileSize?: number;
+  maxFileSizeHelpText?: string;
 }
 
 export interface DocumentPreviewSingleProps extends DocumentPreviewBaseProps {
@@ -253,6 +256,8 @@ export function DocumentPreview(props: DocumentPreviewProps) {
     footer,
     accept,
     previews,
+    maxFileSize = DEFAULT_MAX_FILE_SIZE,
+    maxFileSizeHelpText = `You can upload files up to ${DEFAULT_MAX_FILE_SIZE} MB`,
   } = props;
 
   // Track which index should show the preview (defaults to last index)
@@ -369,9 +374,9 @@ export function DocumentPreview(props: DocumentPreviewProps) {
           variant={options?.variant ?? "normal"}
           onContentChange={handleContentChange}
           maxFileCount={maxFileCount}
-          maxSize={1024 * 1024 * 315} // 315 MB default
+          maxSize={maxFileSize}
           uploadDescription={`Upload ${maxFileCount > 1 ? `up to ${maxFileCount} files` : "file"} (drag or click)`}
-          uploadHelpText="You can upload files up to 315 MB"
+          uploadHelpText={maxFileSizeHelpText}
           footer={footer}
           accept={accept}
         />
