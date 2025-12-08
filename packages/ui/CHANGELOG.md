@@ -1,5 +1,12 @@
 # @llamaindex/ui
 
+## 3.4.1
+
+### Patch Changes
+
+- d5029e4: Fix preview width is cut off issue when enlarging the zoom level
+- d5029e4: Fix layout of max pages warning message
+
 ## 3.4.0
 
 ### Minor Changes
