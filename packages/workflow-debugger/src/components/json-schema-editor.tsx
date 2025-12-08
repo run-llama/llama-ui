@@ -99,15 +99,17 @@ export function JsonSchemaEditor({
 
   // Initialize raw values for complex fields when schema or values change
   useEffect(() => {
-    const nextRaw: Record<string, string> = { ...rawJsonValues };
-    for (const [key, def] of Object.entries(properties)) {
-      if (!isComplexType(def.type)) continue;
-      if (nextRaw[key] === undefined) {
-        const v = values[key];
-        nextRaw[key] = v !== undefined ? JSON.stringify(v, null, 2) : "";
+    setRawJsonValues((prevRaw) => {
+      const nextRaw: Record<string, string> = { ...prevRaw };
+      for (const [key, def] of Object.entries(properties)) {
+        if (!isComplexType(def.type)) continue;
+        if (nextRaw[key] === undefined) {
+          const v = values[key];
+          nextRaw[key] = v !== undefined ? JSON.stringify(v, null, 2) : "";
+        }
       }
-    }
-    setRawJsonValues(nextRaw);
+      return nextRaw;
+    });
   }, [properties, values]);
 
   const handleValueChange = (key: string, newValue: JSONValue) => {
