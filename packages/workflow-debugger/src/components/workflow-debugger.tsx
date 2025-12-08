@@ -50,7 +50,8 @@ function resolveBaseUrl(): string {
     return apiParam.endsWith("/") ? apiParam.slice(0, -1) : apiParam;
   }
 
-  return "http://localhost:8000";
+  // Default to current page origin (same host/port as the UI)
+  return window.location.origin;
 }
 
 export function WorkflowDebugger() {
@@ -104,7 +105,7 @@ export function WorkflowDebugger() {
   };
 
   const handleUrlReset = () => {
-    const defaultUrl = "http://localhost:8000";
+    const defaultUrl = window.location.origin;
     setBaseUrl(defaultUrl);
     setEditingUrl(defaultUrl);
   };
@@ -235,7 +236,7 @@ export function WorkflowDebugger() {
                   <Input
                     value={editingUrl}
                     onChange={(e) => setEditingUrl(e.target.value)}
-                    placeholder="http://localhost:8000"
+                    placeholder={window.location.origin}
                   />
                   <div className="flex gap-2">
                     <Button
