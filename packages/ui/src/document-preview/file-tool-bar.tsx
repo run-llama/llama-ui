@@ -27,7 +27,6 @@ export interface FileToolbarProps {
   totalPages?: number;
   onPageChange?: (page: number) => void;
   className?: string;
-  isOverlay?: boolean;
 }
 
 export const FileToolbar = ({
@@ -42,13 +41,11 @@ export const FileToolbar = ({
   totalPages,
   onPageChange,
   className,
-  isOverlay = false,
 }: FileToolbarProps) => {
   const [pageInput, setPageInput] = useState<string>(
     currentPage?.toString() ?? "1"
   );
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [isHovered, setIsHovered] = useState<boolean>(false);
 
   const showZoomControls =
     typeof scale === "number" && typeof onScaleChange === "function";
@@ -148,107 +145,74 @@ export const FileToolbar = ({
   return (
     <div
       className={cn(
-        "flex h-10 items-center justify-between gap-3 px-6 transition",
-        isOverlay
-          ? [
-              "absolute left-0 right-0 top-0 z-10 border-b bg-white/70",
-              isHovered ? "opacity-100" : "opacity-20",
-              "transition-opacity duration-300 ease-in-out",
-            ]
-          : "border-b bg-white",
+        "flex h-10 items-center justify-between gap-3 px-6 border-b bg-white",
         className
       )}
-      onMouseEnter={() => isOverlay && setIsHovered(true)}
-      onMouseLeave={() => isOverlay && setIsHovered(false)}
     >
-      <div className="flex items-center gap-2">
-        {fileName && (
-          <>
-            <File className="size-4" />
-            <span className="text-xs text-muted-foreground">{fileName}</span>
-          </>
-        )}
-        {onRemove && (
+      {/* Page Navigation - Left Side */}
+      {showPageNavigation && (
+        <div className="flex items-center gap-1">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={onRemove}
+                onClick={handlePrevPage}
+                disabled={currentPage === undefined || currentPage <= 1}
                 className="size-6 p-0"
               >
-                <Trash2 className="size-4" />
+                <ChevronLeft className="size-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Remove file</TooltipContent>
+            <TooltipContent>Previous page</TooltipContent>
           </Tooltip>
-        )}
-      </div>
 
+          <div className="flex items-center justify-center gap-0.5">
+            <Input
+              type="number"
+              value={pageInput}
+              onChange={(e) => handlePageInputChange(e.target.value)}
+              onFocus={handlePageInputFocus}
+              onBlur={handlePageInputSubmit}
+              onKeyDown={handlePageInputKeyDown}
+              className="size-6 px-1 text-center text-xs! rounded-sm [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:m-0 [&::-webkit-outer-spin-button]:m-0 [-moz-appearance:textfield] shadow-none border border-transparent hover:border-gray-300 focus:border-gray-500 focus:outline-none"
+              min={1}
+              max={totalPages}
+            />
+            <span className="text-xs text-muted-foreground">of</span>
+            <span className="flex items-center text-xs text-muted-foreground h-7 ml-1">
+              {totalPages}
+            </span>
+          </div>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleNextPage}
+                disabled={
+                  currentPage === undefined ||
+                  totalPages === undefined ||
+                  currentPage >= totalPages
+                }
+                className="size-6 p-0"
+              >
+                <ChevronRight className="size-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Next page</TooltipContent>
+          </Tooltip>
+        </div>
+      )}
+
+      {/* Controls - Right Side */}
       {hasControls && (
-        <div className="flex items-center gap-3">
-          {/* Page Navigation */}
-          {showPageNavigation && (
-            <>
-              <div className="flex items-center gap-1">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handlePrevPage}
-                      disabled={currentPage === undefined || currentPage <= 1}
-                      className="size-6 p-0"
-                    >
-                      <ChevronLeft className="size-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Previous page</TooltipContent>
-                </Tooltip>
-
-                <div className="flex items-center justify-center gap-0.5">
-                  <Input
-                    type="number"
-                    value={pageInput}
-                    onChange={(e) => handlePageInputChange(e.target.value)}
-                    onFocus={handlePageInputFocus}
-                    onBlur={handlePageInputSubmit}
-                    onKeyDown={handlePageInputKeyDown}
-                    className="size-6 px-1 text-center text-xs! rounded-sm [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:m-0 [&::-webkit-outer-spin-button]:m-0 [-moz-appearance:textfield] shadow-none border border-transparent hover:border-gray-300 focus:border-gray-500 focus:outline-none"
-                    min={1}
-                    max={totalPages}
-                  />
-                  <span className="text-xs text-muted-foreground">/</span>
-                  <span className="flex items-center text-xs text-muted-foreground h-7 ml-1">
-                    {totalPages}
-                  </span>
-                </div>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleNextPage}
-                      disabled={
-                        currentPage === undefined ||
-                        totalPages === undefined ||
-                        currentPage >= totalPages
-                      }
-                      className="size-6 p-0"
-                    >
-                      <ChevronRight className="size-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Next page</TooltipContent>
-                </Tooltip>
-              </div>
-
-              {(showZoomControls || onDownload || onFullscreen || onReset) && (
-                <div className="h-6 w-px bg-border" />
-              )}
-            </>
-          )}
+        <div className="flex items-center gap-3 ml-auto">
+          {showPageNavigation &&
+            (showZoomControls || onDownload || onFullscreen || onReset) && (
+              <div className="h-6 w-px bg-border" />
+            )}
 
           {/* Zoom Controls */}
           {showZoomControls && (
@@ -349,6 +313,31 @@ export const FileToolbar = ({
           )}
         </div>
       )}
+
+      {/* File name and remove button - Right Side */}
+      <div className="flex items-center gap-2">
+        {fileName && (
+          <>
+            <File className="size-4" />
+            <span className="text-xs text-muted-foreground">{fileName}</span>
+          </>
+        )}
+        {onRemove && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onRemove}
+                className="size-6 p-0"
+              >
+                <Trash2 className="size-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Remove file</TooltipContent>
+          </Tooltip>
+        )}
+      </div>
     </div>
   );
 };

@@ -48,9 +48,7 @@ function PdfPreviewWrapper({
   maxPagesWarning,
 }: PreviewComponentProps) {
   const effectiveMaxPages = maxPages ?? DEFAULT_MAX_PAGES;
-  const effectiveMaxPagesWarning =
-    maxPagesWarning ??
-    `The document has more than ${effectiveMaxPages} pages. Limiting the preview to ${effectiveMaxPages} to increase performance.`;
+  const effectiveMaxPagesWarning = maxPagesWarning;
 
   return (
     <PdfPreview

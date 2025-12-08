@@ -30,7 +30,7 @@ export const SelectFileBar = ({
 
   return (
     <ScrollArea className="h-10 border-b" viewportClassName="flex items-center">
-      <div className="flex gap-2 px-6">
+      <div className="flex items-center gap-3 px-6">
         {onToggleFileUpload && (
           <Button size="xs" onClick={onToggleFileUpload}>
             {isFileUploadExpanded ? (
@@ -45,6 +45,11 @@ export const SelectFileBar = ({
               </>
             )}
           </Button>
+        )}
+        {files.length > 0 && (
+          <span className="text-xs text-muted-foreground shrink-0">
+            {files.length} {files.length === 1 ? "file" : "files"}
+          </span>
         )}
         {files.map(({ fileName, index }) => {
           const displayName = fileName ?? `File ${index + 1}`;

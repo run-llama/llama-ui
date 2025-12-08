@@ -42,6 +42,7 @@ const pdfOptions = {
 
 // show rendering progress bar for files larger than this
 const FILE_SIZE_THRESHOLD = 10 * 1024 * 1024; // 10MB
+const DEFAULT_MAX_PAGES_INCREMENT = 25;
 
 export const PdfPreviewImpl = ({
   fileName,
@@ -66,21 +67,39 @@ export const PdfPreviewImpl = ({
 
   const [pageBaseDims, setPageBaseDims] = useState<PageBaseDims>({}); // store page viewport to use for bounding box overlay
   const [showHighlights, setShowHighlights] = useState<boolean>(true); // whether to show the highlights
+  const [displayMaxPages, setDisplayMaxPages] = useState<number | undefined>(
+    maxPages
+  ); // current page limit (can be extended)
 
   const hasPageLimit =
-    typeof maxPages === "number" && Number.isFinite(maxPages) && maxPages > 0;
+    typeof displayMaxPages === "number" &&
+    Number.isFinite(displayMaxPages) &&
+    displayMaxPages > 0;
 
   const effectiveNumPages = useMemo(() => {
     if (!numPages) return numPages;
     if (!hasPageLimit) return numPages;
-    return Math.min(numPages, maxPages ?? numPages);
-  }, [numPages, hasPageLimit, maxPages]);
+    return Math.min(numPages, displayMaxPages ?? numPages);
+  }, [numPages, hasPageLimit, displayMaxPages]);
 
   const showMaxPagesWarning =
-    hasPageLimit &&
-    !!maxPagesWarning &&
-    !!numPages &&
-    numPages > (maxPages ?? 0);
+    hasPageLimit && !!numPages && numPages > (displayMaxPages ?? 0);
+
+  // Generate dynamic message based on the page limit
+  const warningMessage =
+    !showMaxPagesWarning || !displayMaxPages
+      ? (maxPagesWarning ?? "")
+      : (maxPagesWarning ??
+        `The document has ${numPages} pages. Limiting the preview to ${displayMaxPages} pages to increase performance.`);
+
+  const handleExtendMaxPages = () => {
+    if (!numPages || !displayMaxPages) return;
+
+    // Use maxPages prop as increment amount, or default to DEFAULT_MAX_PAGES_INCREMENT if not provided
+    const incrementAmount = maxPages ?? DEFAULT_MAX_PAGES_INCREMENT;
+    const newMaxPages = Math.min(displayMaxPages + incrementAmount, numPages);
+    setDisplayMaxPages(newMaxPages);
+  };
 
   // Convert highlights to bounding boxes grouped by page
   const highlightsByPage = useMemo(() => {
@@ -235,6 +254,8 @@ export const PdfPreviewImpl = ({
       return;
     }
     lastLoadedUrl.current = url;
+    // Reset displayMaxPages to the maxPages prop when loading a new PDF
+    setDisplayMaxPages(maxPages);
     const fetchFile = async () => {
       setIsLoading(true);
       const response = await fetch(url);
@@ -250,7 +271,7 @@ export const PdfPreviewImpl = ({
     return () => {
       setFile(null);
     };
-  }, [url, fileName]);
+  }, [url, fileName, maxPages]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -372,23 +393,29 @@ export const PdfPreviewImpl = ({
             onReset={handleReset}
             onFullscreen={toggleFullscreen}
             className={toolbarClassName}
-            isOverlay
           />
           {showMaxPagesWarning && (
             <div
               role="alert"
-              className="bg-amber-50 border border-amber-200 text-amber-900 px-4 py-2 text-sm"
+              className="bg-amber-50 border-b border-amber-200 text-amber-900 px-4 py-2 text-xs flex items-center justify-between gap-2 flex-shrink-0"
             >
-              {maxPagesWarning ?? ""}
+              <span>{warningMessage}</span>
+              {numPages && displayMaxPages && numPages > displayMaxPages && (
+                <button
+                  onClick={handleExtendMaxPages}
+                  className="text-amber-700 hover:text-amber-900 underline font-medium text-xs whitespace-nowrap"
+                >
+                  Show more pages
+                </button>
+              )}
             </div>
           )}
-          <div className="h-3 bg-[#F3F3F3]"></div>
         </>
       )}
 
       <div
         ref={containerRef}
-        className="overflow-auto h-full bg-[#F3F3F3] rounded-lg flex-1 min-h-0"
+        className="overflow-auto h-full bg-[#F3F3F3] flex-1 min-h-0"
       >
         <Document
           file={file}
@@ -402,7 +429,7 @@ export const PdfPreviewImpl = ({
               ref={(el) => {
                 pageRefs.current[index + 1] = el;
               }}
-              className="mb-4 flex justify-center"
+              className="mb-4 flex justify-center min-w-max"
             >
               <div className="relative inline-block">
                 <Page
