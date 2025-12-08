@@ -31,13 +31,9 @@ export type PreviewComponentProps = {
   onRemove?: () => void;
   className?: string;
   highlights?: Highlight[];
-  maxPages?: number;
-  maxPagesWarning?: string;
 };
 
 export type PreviewComponent = React.ComponentType<PreviewComponentProps>;
-
-const DEFAULT_MAX_PAGES = 25;
 
 // Internal wrapper for PdfPreview that handles static parameters
 function PdfPreviewWrapper({
@@ -45,12 +41,7 @@ function PdfPreviewWrapper({
   contentUrl,
   onRemove,
   highlights,
-  maxPages,
-  maxPagesWarning,
 }: PreviewComponentProps) {
-  const effectiveMaxPages = maxPages ?? DEFAULT_MAX_PAGES;
-  const effectiveMaxPagesWarning = maxPagesWarning;
-
   return (
     <PdfPreview
       url={contentUrl}
@@ -58,8 +49,6 @@ function PdfPreviewWrapper({
       fileName={fileName}
       highlights={highlights}
       toolbarClassName="[&>div]:border-t-0 [&>div]:border-r-0 [&>div]:border-l-0"
-      maxPages={effectiveMaxPages}
-      maxPagesWarning={effectiveMaxPagesWarning}
     />
   );
 }
@@ -156,8 +145,6 @@ interface DocumentPreviewItemProps {
   allowRemoval?: boolean;
   highlights?: Highlight[];
   previews?: PreviewsMap;
-  maxPages?: number;
-  maxPagesWarning?: string;
 }
 
 function DocumentPreviewItem({
@@ -167,8 +154,6 @@ function DocumentPreviewItem({
   fileName,
   highlights,
   previews,
-  maxPages,
-  maxPagesWarning,
 }: DocumentPreviewItemProps) {
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
 
@@ -233,8 +218,6 @@ function DocumentPreviewItem({
       contentUrl={resolvedUrl}
       onRemove={removalHandler}
       highlights={highlights}
-      maxPages={maxPages}
-      maxPagesWarning={maxPagesWarning}
     />
   );
 
@@ -431,8 +414,6 @@ export function DocumentPreview(props: DocumentPreviewProps) {
             allowRemoval={allowRemoval && !allowMultiple}
             highlights={props.highlights}
             previews={previews}
-            maxPages={props.maxPages}
-            maxPagesWarning={props.maxPagesWarning}
           />
         )}
       </div>

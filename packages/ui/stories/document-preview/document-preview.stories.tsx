@@ -86,7 +86,6 @@ export const MultipleFiles: Story = {
   name: "Multiple Files",
   args: {
     allowMultiple: true,
-    maxPages: 2,
     value: [
       {
         fileName: "diagram.png",

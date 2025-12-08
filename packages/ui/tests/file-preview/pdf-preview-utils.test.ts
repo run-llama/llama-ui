@@ -1,50 +1,11 @@
 import { describe, it, expect } from "vitest";
 import {
-  generatePageLimitWarning,
   groupHighlightsByPage,
-  calculateEffectiveNumPages,
-  calculateExtendedMaxPages,
   calculateVisiblePageRange,
   findClosestPage,
   calculateFitToWidthScale,
 } from "@/src/file-preview/pdf-preview-utils";
 import type { Highlight } from "@/src/file-preview/types";
-
-describe("generatePageLimitWarning", () => {
-  it("returns empty string when numPages is undefined", () => {
-    const result = generatePageLimitWarning(undefined, 25, undefined);
-    expect(result).toBe("");
-  });
-
-  it("returns empty string when displayMaxPages is undefined", () => {
-    const result = generatePageLimitWarning(100, undefined, undefined);
-    expect(result).toBe("");
-  });
-
-  it("returns empty string when numPages is within limit", () => {
-    const result = generatePageLimitWarning(20, 25, undefined);
-    expect(result).toBe("");
-  });
-
-  it("returns custom warning when provided and numPages exceeds limit", () => {
-    const customWarning = "Custom warning message";
-    const result = generatePageLimitWarning(100, 25, customWarning);
-    expect(result).toBe(customWarning);
-  });
-
-  it("returns default warning when numPages exceeds limit and no custom warning", () => {
-    const result = generatePageLimitWarning(100, 25, undefined);
-    expect(result).toBe(
-      "The document has 100 pages. Limiting the preview to 25 pages to increase performance."
-    );
-  });
-
-  it("returns custom warning even when within limit", () => {
-    const customWarning = "Custom warning";
-    const result = generatePageLimitWarning(10, 25, customWarning);
-    expect(result).toBe(customWarning);
-  });
-});
 
 describe("groupHighlightsByPage", () => {
   it("returns empty object when highlights is undefined", () => {
@@ -97,70 +58,6 @@ describe("groupHighlightsByPage", () => {
     expect(Object.keys(result)).toHaveLength(2);
     expect(result[1]).toHaveLength(2);
     expect(result[2]).toHaveLength(1);
-  });
-});
-
-describe("calculateEffectiveNumPages", () => {
-  it("returns undefined when numPages is undefined", () => {
-    const result = calculateEffectiveNumPages(undefined, 25);
-    expect(result).toBeUndefined();
-  });
-
-  it("returns numPages when displayMaxPages is undefined", () => {
-    const result = calculateEffectiveNumPages(100, undefined);
-    expect(result).toBe(100);
-  });
-
-  it("returns numPages when displayMaxPages is 0", () => {
-    const result = calculateEffectiveNumPages(100, 0);
-    expect(result).toBe(100);
-  });
-
-  it("returns numPages when displayMaxPages is negative", () => {
-    const result = calculateEffectiveNumPages(100, -5);
-    expect(result).toBe(100);
-  });
-
-  it("returns numPages when displayMaxPages is Infinity", () => {
-    const result = calculateEffectiveNumPages(100, Infinity);
-    expect(result).toBe(100);
-  });
-
-  it("returns numPages when numPages is less than displayMaxPages", () => {
-    const result = calculateEffectiveNumPages(20, 25);
-    expect(result).toBe(20);
-  });
-
-  it("returns displayMaxPages when numPages exceeds limit", () => {
-    const result = calculateEffectiveNumPages(100, 25);
-    expect(result).toBe(25);
-  });
-
-  it("returns numPages when equal to displayMaxPages", () => {
-    const result = calculateEffectiveNumPages(25, 25);
-    expect(result).toBe(25);
-  });
-});
-
-describe("calculateExtendedMaxPages", () => {
-  it("extends max pages by increment amount", () => {
-    const result = calculateExtendedMaxPages(25, 100, 25);
-    expect(result).toBe(50);
-  });
-
-  it("caps at total pages when increment would exceed", () => {
-    const result = calculateExtendedMaxPages(90, 100, 25);
-    expect(result).toBe(100);
-  });
-
-  it("returns total pages when already at max", () => {
-    const result = calculateExtendedMaxPages(100, 100, 25);
-    expect(result).toBe(100);
-  });
-
-  it("handles small increment amounts", () => {
-    const result = calculateExtendedMaxPages(10, 100, 5);
-    expect(result).toBe(15);
   });
 });
 
@@ -305,4 +202,3 @@ describe("calculateFitToWidthScale", () => {
     expect(result).toBe(1);
   });
 });
-
