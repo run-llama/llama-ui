@@ -77,8 +77,14 @@ export function JsonSchemaEditor({
   onErrorsChange,
   className,
 }: JsonSchemaEditorProps) {
-  const properties = schema?.properties || {};
-  const required = new Set(schema?.required || []);
+  const properties = useMemo(
+    () => schema?.properties || {},
+    [schema?.properties],
+  );
+  const required = useMemo(
+    () => new Set(schema?.required || []),
+    [schema?.required],
+  );
 
   const [rawJsonValues, setRawJsonValues] = useState<Record<string, string>>(
     {},
