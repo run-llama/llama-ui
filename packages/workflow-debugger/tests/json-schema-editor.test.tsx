@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { JsonSchemaEditor } from "../src/components/json-schema-editor";
-
+import React from "react";
 describe("JsonSchemaEditor (debugger)", () => {
   const baseSchema = {
     properties: {
