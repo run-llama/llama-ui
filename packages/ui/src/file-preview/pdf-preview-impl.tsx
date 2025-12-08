@@ -309,7 +309,7 @@ export const PdfPreviewImpl = ({
     );
 
     const timeoutId = setTimeout(() => {
-      Object.entries(pageRefs.current).forEach(([pageNumber, element]) => {
+      Object.entries(pageRefs.current).forEach(([_pageNumber, element]) => {
         if (element && observerRef.current) {
           observerRef.current.observe(element);
         }
