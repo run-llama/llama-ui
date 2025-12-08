@@ -18,7 +18,7 @@ export type ChatEvent = {
   title: string;
   description?: string;
   status: "pending" | "success" | "error";
-  data?: any;
+  data?: unknown;
 };
 
 export function ChatEvent({
