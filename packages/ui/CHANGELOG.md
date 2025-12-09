@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 3.5.0
+
+### Minor Changes
+
+- caa4c29: Introduce virtualization for pdfpreview. Remove maxpages for preview
+
 ## 3.4.1
 
 ### Patch Changes
