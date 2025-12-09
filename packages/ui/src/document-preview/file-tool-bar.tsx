@@ -167,7 +167,7 @@ export const FileToolbar = ({
             <TooltipContent>Previous page</TooltipContent>
           </Tooltip>
 
-          <div className="flex items-center justify-center gap-0.5">
+          <div className="flex items-center justify-center gap-1">
             <Input
               type="number"
               value={pageInput}
@@ -175,7 +175,7 @@ export const FileToolbar = ({
               onFocus={handlePageInputFocus}
               onBlur={handlePageInputSubmit}
               onKeyDown={handlePageInputKeyDown}
-              className="size-6 px-1 text-center text-xs! rounded-sm [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:m-0 [&::-webkit-outer-spin-button]:m-0 [-moz-appearance:textfield] shadow-none border border-transparent hover:border-gray-300 focus:border-gray-500 focus:outline-none"
+              className="h-6 w-10 px-1 text-center text-xs! rounded-sm [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:m-0 [&::-webkit-outer-spin-button]:m-0 [-moz-appearance:textfield] shadow-none border border-transparent hover:border-gray-300 focus:border-gray-500 focus:outline-none"
               min={1}
               max={totalPages}
             />

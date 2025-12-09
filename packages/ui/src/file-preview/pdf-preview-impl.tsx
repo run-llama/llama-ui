@@ -2,9 +2,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 // @ts-expect-error react-pdf types have no declarations
 import type { PageCallback } from "react-pdf/dist/shared/types";
+import { logger } from "@shared/logger";
+import { Button } from "@/base/button";
 import { FileToolbar } from "../document-preview/file-tool-bar";
 import { BoundingBoxOverlay } from "./bounding-box-overlay";
 import type { BoundingBox, Highlight } from "./types";
+import {
+  calculateFitToWidthScale,
+  calculateVisiblePageRange,
+  findClosestPage,
+  groupHighlightsByPage,
+} from "./pdf-preview-utils";
 
 // Configure worker path for PDF.js
 if (typeof window !== "undefined") {
@@ -26,8 +34,6 @@ export interface PdfPreviewImplProps {
   onRemove?: () => void;
   highlights?: Highlight[];
   toolbarClassName?: string;
-  maxPages?: number;
-  maxPagesWarning?: string;
 }
 
 // map of page number to page viewport dimensions
@@ -40,9 +46,8 @@ const pdfOptions = {
   wasmUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/wasm/`,
 };
 
-// show rendering progress bar for files larger than this
-const FILE_SIZE_THRESHOLD = 10 * 1024 * 1024; // 10MB
-const DEFAULT_MAX_PAGES_INCREMENT = 25;
+const VIRTUALIZATION_BUFFER = 5;
+const DEFAULT_PAGE_HEIGHT = 800;
 
 export const PdfPreviewImpl = ({
   fileName,
@@ -51,157 +56,145 @@ export const PdfPreviewImpl = ({
   onRemove,
   highlights,
   toolbarClassName,
-  maxPages,
-  maxPagesWarning,
 }: PdfPreviewImplProps) => {
   const [numPages, setNumPages] = useState<number>();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [scale, setScale] = useState<number>(1.0);
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [renderedPages, setRenderedPages] = useState<number>(0);
-  const [isRendering, setIsRendering] = useState<boolean>(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const pageRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const isInitialScaleSet = useRef(false);
 
   const [pageBaseDims, setPageBaseDims] = useState<PageBaseDims>({}); // store page viewport to use for bounding box overlay
   const [showHighlights, setShowHighlights] = useState<boolean>(true); // whether to show the highlights
-  const [displayMaxPages, setDisplayMaxPages] = useState<number | undefined>(
-    maxPages
-  ); // current page limit (can be extended)
+  const [visiblePages, setVisiblePages] = useState<Set<number>>(new Set([1]));
+  const [pageHeights, setPageHeights] = useState<{ [key: number]: number }>({});
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
-  const hasPageLimit =
-    typeof displayMaxPages === "number" &&
-    Number.isFinite(displayMaxPages) &&
-    displayMaxPages > 0;
+  const highlightsByPage = useMemo(
+    () => groupHighlightsByPage(highlights),
+    [highlights]
+  );
 
-  const effectiveNumPages = useMemo(() => {
-    if (!numPages) return numPages;
-    if (!hasPageLimit) return numPages;
-    return Math.min(numPages, displayMaxPages ?? numPages);
-  }, [numPages, hasPageLimit, displayMaxPages]);
+  const onDocumentLoadSuccess = useCallback(
+    ({ numPages }: { numPages: number }) => {
+      setNumPages(numPages);
+      setLoadError(null);
+      const initialPages = calculateVisiblePageRange(
+        1,
+        numPages,
+        VIRTUALIZATION_BUFFER
+      );
+      setVisiblePages(new Set(initialPages));
+    },
+    []
+  );
 
-  const showMaxPagesWarning =
-    hasPageLimit && !!numPages && numPages > (displayMaxPages ?? 0);
-
-  // Generate dynamic message based on the page limit
-  const warningMessage =
-    !showMaxPagesWarning || !displayMaxPages
-      ? (maxPagesWarning ?? "")
-      : (maxPagesWarning ??
-        `The document has ${numPages} pages. Limiting the preview to ${displayMaxPages} pages to increase performance.`);
-
-  const handleExtendMaxPages = () => {
-    if (!numPages || !displayMaxPages) return;
-
-    // Use maxPages prop as increment amount, or default to DEFAULT_MAX_PAGES_INCREMENT if not provided
-    const incrementAmount = maxPages ?? DEFAULT_MAX_PAGES_INCREMENT;
-    const newMaxPages = Math.min(displayMaxPages + incrementAmount, numPages);
-    setDisplayMaxPages(newMaxPages);
-  };
-
-  // Convert highlights to bounding boxes grouped by page
-  const highlightsByPage = useMemo(() => {
-    if (!highlights || highlights.length === 0) {
-      return {} as { [page: number]: BoundingBox[] };
-    }
-
-    const grouped: { [page: number]: BoundingBox[] } = {};
-    highlights.forEach((highlight, idx) => {
-      if (!grouped[highlight.page]) {
-        grouped[highlight.page] = [];
-      }
-      grouped[highlight.page].push({
-        id: `highlight-${highlight.page}-${idx}`,
-        x: highlight.x,
-        y: highlight.y,
-        width: highlight.width,
-        height: highlight.height,
-        color: "rgba(255, 215, 0, 0.25)",
-      });
-    });
-    return grouped;
-  }, [highlights]);
-
-  function onDocumentLoadSuccess({ numPages }: { numPages: number }): void {
-    setNumPages(numPages);
-    setRenderedPages(0);
-    setIsRendering(true);
-  }
-
-  function handlePageRenderSuccess() {
-    setRenderedPages((prev) => {
-      const next = prev + 1;
-      if (effectiveNumPages && next === effectiveNumPages) {
-        setIsRendering(false); // all pages finished
-      }
-      return next;
-    });
-  }
+  const onDocumentLoadError = useCallback((error: Error) => {
+    logger.error("Error loading PDF", error);
+    setLoadError(
+      error.message ||
+        "Failed to load PDF. The file may be corrupted or too large."
+    );
+    setIsLoading(false);
+  }, []);
 
   // Navigate to specific page
   const goToPage = useCallback(
     (pageNumber: number) => {
-      const maxPage = effectiveNumPages ?? 1;
+      const maxPage = numPages ?? 1;
       const targetPage = Math.min(Math.max(pageNumber, 1), maxPage);
       setCurrentPage(targetPage);
-      const pageElement = pageRefs.current[targetPage];
-      if (pageElement && containerRef.current) {
-        pageElement.scrollIntoView({
-          behavior: "instant",
-          block: "center",
-        });
-      }
+
+      const visibleRange = calculateVisiblePageRange(
+        targetPage,
+        maxPage,
+        VIRTUALIZATION_BUFFER
+      );
+      setVisiblePages(new Set(visibleRange));
+
+      setTimeout(() => {
+        const pageElement = pageRefs.current[targetPage];
+        if (pageElement && containerRef.current) {
+          pageElement.scrollIntoView({
+            behavior: "instant",
+            block: "center",
+          });
+        }
+      }, 0);
     },
-    [effectiveNumPages]
+    [numPages]
   );
 
   // when highlights are set, navigate to the first highlight's page
   useEffect(() => {
     if (!highlights || highlights.length === 0) return;
-    if (!effectiveNumPages) return;
+    if (!numPages) return;
 
     const firstHighlight = highlights[0];
-    if (firstHighlight.page > effectiveNumPages) return;
+    if (firstHighlight.page > numPages) return;
     const pageEl = pageRefs.current[firstHighlight.page];
     if (pageEl) {
       goToPage(firstHighlight.page);
       setShowHighlights(true);
     }
-  }, [highlights, effectiveNumPages, goToPage]);
+  }, [highlights, numPages, goToPage]);
 
   useEffect(() => {
-    // Clamp any pre-existing currentPage so it never points past the capped render range.
-    if (!effectiveNumPages) return;
-    setCurrentPage((prev) => Math.min(prev, effectiveNumPages));
-  }, [effectiveNumPages]);
+    if (!numPages) return;
+    setCurrentPage((prev) => Math.min(prev, numPages));
+    setVisiblePages((prev) => {
+      const current = Math.min(prev.size > 0 ? Math.max(...prev) : 1, numPages);
+      const visibleRange = calculateVisiblePageRange(
+        current,
+        numPages,
+        VIRTUALIZATION_BUFFER
+      );
+      return new Set(visibleRange);
+    });
+  }, [numPages]);
+
+  useEffect(() => {
+    setPageHeights({});
+    setVisiblePages((prev) => new Set(prev));
+  }, [scale]);
 
   // store page viewport to use for bounding box overlay
-  const handleLoadPage = (page: PageCallback) => {
-    const viewport = page.getViewport({ scale: 1 });
-    setPageBaseDims((prev) => ({
-      ...prev,
-      [page.pageNumber]: {
-        width: viewport.width,
-        height: viewport.height,
-      },
-    }));
+  const handleLoadPage = useCallback(
+    (page: PageCallback) => {
+      const viewport = page.getViewport({ scale: 1 });
+      setPageBaseDims((prev) => ({
+        ...prev,
+        [page.pageNumber]: {
+          width: viewport.width,
+          height: viewport.height,
+        },
+      }));
 
-    // Auto-scale PDF to fit the container width at the initial load
-    if (
-      !isInitialScaleSet.current &&
-      page.pageNumber === 1 &&
-      containerRef.current
-    ) {
-      const containerWidth = containerRef.current.clientWidth;
-      const padding = 16;
-      const availableWidth = containerWidth - padding;
-      const newScale = availableWidth / viewport.width;
-      setScale(newScale);
-      isInitialScaleSet.current = true;
-    }
-  };
+      const scaledHeight = viewport.height * scale;
+      setPageHeights((prev) => ({
+        ...prev,
+        [page.pageNumber]: scaledHeight,
+      }));
+
+      if (
+        !isInitialScaleSet.current &&
+        page.pageNumber === 1 &&
+        containerRef.current
+      ) {
+        const containerWidth = containerRef.current.clientWidth;
+        const newScale = calculateFitToWidthScale(
+          viewport.width,
+          containerWidth
+        );
+        setScale(newScale);
+        isInitialScaleSet.current = true;
+      }
+    },
+    [scale]
+  );
 
   // click anywhere on the page to hide the highlights
   const handleClickOnPage = () => {
@@ -210,31 +203,76 @@ export const PdfPreviewImpl = ({
     }
   };
 
-  // Detect current visible page on scroll
+  useEffect(() => {
+    if (!numPages || !containerRef.current) return;
+
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        setVisiblePages((prevVisiblePages) => {
+          const newVisiblePages = new Set<number>(prevVisiblePages);
+
+          entries.forEach((entry) => {
+            const pageNumber = parseInt(
+              entry.target.getAttribute("data-page-number") || "0"
+            );
+            if (pageNumber > 0) {
+              if (entry.isIntersecting) {
+                for (
+                  let i = Math.max(1, pageNumber - VIRTUALIZATION_BUFFER);
+                  i <= Math.min(numPages, pageNumber + VIRTUALIZATION_BUFFER);
+                  i++
+                ) {
+                  newVisiblePages.add(i);
+                }
+              } else {
+                const isNearVisible = Array.from(prevVisiblePages).some(
+                  (p) => Math.abs(p - pageNumber) <= VIRTUALIZATION_BUFFER
+                );
+                if (!isNearVisible) {
+                  newVisiblePages.delete(pageNumber);
+                }
+              }
+            }
+          });
+
+          return newVisiblePages;
+        });
+      },
+      {
+        root: containerRef.current,
+        rootMargin: "200px",
+        threshold: 0.01,
+      }
+    );
+
+    const timeoutId = setTimeout(() => {
+      Object.entries(pageRefs.current).forEach(([_pageNumber, element]) => {
+        if (element && observerRef.current) {
+          observerRef.current.observe(element);
+        }
+      });
+    }, 100);
+
+    return () => {
+      clearTimeout(timeoutId);
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [numPages]);
+
   useEffect(() => {
     const handleScroll = () => {
       if (!containerRef.current) return;
 
       const containerRect = containerRef.current.getBoundingClientRect();
-      const containerCenter = containerRect.top + containerRect.height / 2;
+      const closestPage = findClosestPage(pageRefs.current, containerRect);
 
-      let closestPage = 1;
-      let closestDistance = Infinity;
-
-      Object.entries(pageRefs.current).forEach(([pageNumber, element]) => {
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          const pageCenter = rect.top + rect.height / 2;
-          const distance = Math.abs(pageCenter - containerCenter);
-
-          if (distance < closestDistance) {
-            closestDistance = distance;
-            closestPage = parseInt(pageNumber);
-          }
-        }
-      });
-
-      const totalPages = effectiveNumPages ?? closestPage;
+      const totalPages = numPages ?? closestPage;
       const clampedPage = Math.min(Math.max(closestPage, 1), totalPages);
       setCurrentPage(clampedPage);
     };
@@ -244,7 +282,7 @@ export const PdfPreviewImpl = ({
       container.addEventListener("scroll", handleScroll);
       return () => container.removeEventListener("scroll", handleScroll);
     }
-  }, [effectiveNumPages]);
+  }, [numPages]);
 
   const lastLoadedUrl = useRef<string | null>(null);
   useEffect(() => {
@@ -254,24 +292,39 @@ export const PdfPreviewImpl = ({
       return;
     }
     lastLoadedUrl.current = url;
-    // Reset displayMaxPages to the maxPages prop when loading a new PDF
-    setDisplayMaxPages(maxPages);
+    setLoadError(null);
+    setVisiblePages(new Set([1]));
+    setPageHeights({});
     const fetchFile = async () => {
       setIsLoading(true);
-      const response = await fetch(url);
-      const blob = await response.blob();
-      setFile(
-        new File([blob], fileName ?? "document.pdf", {
-          type: "application/pdf",
-        })
-      );
-      setIsLoading(false);
+      setLoadError(null);
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch PDF: ${response.statusText}`);
+        }
+        const blob = await response.blob();
+        setFile(
+          new File([blob], fileName ?? "document.pdf", {
+            type: "application/pdf",
+          })
+        );
+      } catch (error) {
+        logger.error("Error fetching PDF", error);
+        setLoadError(
+          error instanceof Error
+            ? error.message
+            : "Failed to load PDF. Please try again."
+        );
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchFile();
     return () => {
       setFile(null);
     };
-  }, [url, fileName, maxPages]);
+  }, [url, fileName]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -286,7 +339,7 @@ export const PdfPreviewImpl = ({
         }
       } else if (event.key === "ArrowRight") {
         event.preventDefault();
-        const totalPages = effectiveNumPages ?? currentPage;
+        const totalPages = numPages ?? currentPage;
         if (currentPage < totalPages) {
           goToPage(currentPage + 1);
         }
@@ -307,7 +360,7 @@ export const PdfPreviewImpl = ({
     return () => {
       container.removeEventListener("keydown", handleKeyDown);
     };
-  }, [currentPage, effectiveNumPages, goToPage]);
+  }, [currentPage, numPages, goToPage]);
 
   const handleDownload = () => {
     if (onDownload) {
@@ -349,7 +402,46 @@ export const PdfPreviewImpl = ({
     }
   };
 
-  if (isLoading) {
+  const pagesToRender = useMemo((): {
+    pages: number[];
+    estimatedPageHeight: number;
+  } => {
+    if (!numPages)
+      return { pages: [], estimatedPageHeight: DEFAULT_PAGE_HEIGHT * scale };
+
+    const knownHeights = Object.values(pageHeights);
+    const estimatedPageHeight =
+      knownHeights.length > 0
+        ? knownHeights.reduce((a, b) => a + b, 0) / knownHeights.length
+        : DEFAULT_PAGE_HEIGHT * scale;
+
+    const minVisible = Math.min(...visiblePages);
+    const maxVisible = Math.max(...visiblePages);
+
+    const pagesToInclude = new Set<number>();
+
+    for (let i = 1; i <= Math.min(3, numPages); i++) {
+      pagesToInclude.add(i);
+    }
+
+    const bufferSize = 5;
+    for (
+      let i = Math.max(1, minVisible - bufferSize);
+      i <= Math.min(numPages, maxVisible + bufferSize);
+      i++
+    ) {
+      pagesToInclude.add(i);
+    }
+
+    return {
+      pages: Array.from(pagesToInclude).sort((a, b) => a - b),
+      estimatedPageHeight,
+    };
+  }, [numPages, visiblePages, pageHeights, scale]);
+
+  const showLoadingOverlay = isLoading || (file && !numPages);
+
+  if (loadError) {
     return (
       <div className="relative h-full flex flex-col">
         <FileToolbar
@@ -359,9 +451,21 @@ export const PdfPreviewImpl = ({
         />
         <div className="h-3 bg-[#F3F3F3]"></div>
         <div className="relative flex-1 flex items-center justify-center bg-gray-50">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-2"></div>
-            <p className="text-gray-600">Loading PDF...</p>
+          <div className="text-center max-w-md px-4">
+            <div className="text-red-500 text-4xl mb-4">⚠️</div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Failed to Load PDF
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">{loadError}</p>
+            <Button
+              onClick={() => {
+                setLoadError(null);
+                lastLoadedUrl.current = null;
+                setFile(null);
+              }}
+            >
+              Retry
+            </Button>
           </div>
         </div>
       </div>
@@ -370,47 +474,45 @@ export const PdfPreviewImpl = ({
 
   return (
     <div className="relative h-full flex flex-col">
-      {/* Only show rendering progress bar for large files */}
-      {isRendering && file && file.size > FILE_SIZE_THRESHOLD && (
-        <PdfRenderingProgress
-          renderedPages={renderedPages}
-          numPages={effectiveNumPages}
-        />
+      {showLoadingOverlay && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-50 bg-opacity-90 z-50">
+          <div className="bg-white shadow-lg rounded-2xl p-6 w-80 text-center">
+            <div className="flex justify-center mb-4">
+              <div className="animate-spin rounded-full h-10 w-10 border-4 border-primary border-t-transparent"></div>
+            </div>
+
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">
+              Rendering PDF…
+            </h2>
+
+            <p className="text-xs text-gray-500">
+              Large PDFs or those with heavy images may take longer to render.
+            </p>
+          </div>
+        </div>
       )}
 
       {/* Navigation Component */}
-      {effectiveNumPages && effectiveNumPages > 0 && (
-        <>
-          <FileToolbar
-            fileName={fileName}
-            currentPage={currentPage}
-            totalPages={effectiveNumPages}
-            scale={scale}
-            onPageChange={goToPage}
-            onScaleChange={setScale}
-            onDownload={handleDownload}
-            onRemove={onRemove}
-            onReset={handleReset}
-            onFullscreen={toggleFullscreen}
-            className={toolbarClassName}
-          />
-          {showMaxPagesWarning && (
-            <div
-              role="alert"
-              className="bg-amber-50 border-b border-amber-200 text-amber-900 px-4 py-2 text-xs flex items-center justify-between gap-2 flex-shrink-0"
-            >
-              <span>{warningMessage}</span>
-              {numPages && displayMaxPages && numPages > displayMaxPages && (
-                <button
-                  onClick={handleExtendMaxPages}
-                  className="text-amber-700 hover:text-amber-900 underline font-medium text-xs whitespace-nowrap"
-                >
-                  Show more pages
-                </button>
-              )}
-            </div>
-          )}
-        </>
+      {numPages && numPages > 0 ? (
+        <FileToolbar
+          fileName={fileName}
+          currentPage={currentPage}
+          totalPages={numPages}
+          scale={scale}
+          onPageChange={goToPage}
+          onScaleChange={setScale}
+          onDownload={handleDownload}
+          onRemove={onRemove}
+          onReset={handleReset}
+          onFullscreen={toggleFullscreen}
+          className={toolbarClassName}
+        />
+      ) : (
+        <FileToolbar
+          fileName={fileName}
+          onRemove={onRemove}
+          className={toolbarClassName}
+        />
       )}
 
       <div
@@ -420,84 +522,162 @@ export const PdfPreviewImpl = ({
         <Document
           file={file}
           onLoadSuccess={onDocumentLoadSuccess}
-          loading={isLoading}
+          onLoadError={onDocumentLoadError}
+          loading={null}
           options={pdfOptions}
         >
-          {Array.from({ length: effectiveNumPages ?? 0 }, (_, index) => (
-            <div
-              key={`page_${index + 1}`}
-              ref={(el) => {
-                pageRefs.current[index + 1] = el;
-              }}
-              className="mb-4 flex justify-center min-w-max"
-            >
-              <div className="relative inline-block">
-                <Page
-                  pageNumber={index + 1}
-                  scale={scale}
-                  renderTextLayer={true}
-                  renderAnnotationLayer={true}
-                  onLoadSuccess={handleLoadPage}
-                  onClick={handleClickOnPage}
-                  onRenderSuccess={handlePageRenderSuccess}
-                />
-                {showHighlights &&
-                  highlightsByPage[index + 1] &&
-                  pageBaseDims[index + 1] && (
-                    <BoundingBoxOverlay
-                      boundingBoxes={highlightsByPage[index + 1]}
-                      zoom={scale}
-                      containerWidth={pageBaseDims[index + 1].width}
-                      containerHeight={pageBaseDims[index + 1].height}
-                    />
-                  )}
-              </div>
-            </div>
-          ))}
+          {numPages && numPages > 0 && (
+            <VirtualizedPageList
+              numPages={numPages}
+              visiblePages={visiblePages}
+              pagesToRender={pagesToRender.pages}
+              estimatedPageHeight={pagesToRender.estimatedPageHeight}
+              pageHeights={pageHeights}
+              pageRefs={pageRefs}
+              observerRef={observerRef}
+              scale={scale}
+              handleLoadPage={handleLoadPage}
+              handleClickOnPage={handleClickOnPage}
+              showHighlights={showHighlights}
+              highlightsByPage={highlightsByPage}
+              pageBaseDims={pageBaseDims}
+            />
+          )}
         </Document>
       </div>
     </div>
   );
 };
 
-function PdfRenderingProgress({
-  renderedPages,
+function VirtualizedPageList({
   numPages,
+  visiblePages,
+  pagesToRender,
+  estimatedPageHeight,
+  pageHeights,
+  pageRefs,
+  observerRef,
+  scale,
+  handleLoadPage,
+  handleClickOnPage,
+  showHighlights,
+  highlightsByPage,
+  pageBaseDims,
 }: {
-  renderedPages: number;
-  numPages: number | undefined;
+  numPages: number;
+  visiblePages: Set<number>;
+  pagesToRender: number[];
+  estimatedPageHeight: number;
+  pageHeights: { [key: number]: number };
+  pageRefs: React.MutableRefObject<{ [key: number]: HTMLDivElement | null }>;
+  observerRef: React.MutableRefObject<IntersectionObserver | null>;
+  scale: number;
+  handleLoadPage: (page: PageCallback) => void;
+  handleClickOnPage: () => void;
+  showHighlights: boolean;
+  highlightsByPage: { [page: number]: BoundingBox[] };
+  pageBaseDims: PageBaseDims;
 }) {
+  const firstRenderedPage = pagesToRender[0] || 1;
+  const lastRenderedPage = pagesToRender[pagesToRender.length - 1] || numPages;
+
+  const heightBefore = useMemo(() => {
+    let height = 0;
+    for (let i = 1; i < firstRenderedPage; i++) {
+      height += (pageHeights[i] || estimatedPageHeight) + 16;
+    }
+    return height;
+  }, [firstRenderedPage, pageHeights, estimatedPageHeight]);
+
+  const heightAfter = useMemo(() => {
+    let height = 0;
+    for (let i = lastRenderedPage + 1; i <= numPages; i++) {
+      height += (pageHeights[i] || estimatedPageHeight) + 16;
+    }
+    return height;
+  }, [lastRenderedPage, numPages, pageHeights, estimatedPageHeight]);
+
   return (
-    <div className="absolute inset-0 flex items-center justify-center bg-gray-50 bg-opacity-90 z-50">
-      <div className="bg-white shadow-lg rounded-2xl p-6 w-80 text-center">
-        <div className="flex justify-center mb-4">
-          <div className="animate-spin rounded-full h-10 w-10 border-4 border-primary border-t-transparent"></div>
-        </div>
+    <>
+      {heightBefore > 0 && (
+        <div style={{ height: `${heightBefore}px` }} aria-hidden="true" />
+      )}
 
-        <h2 className="text-lg font-semibold text-gray-800 mb-2">
-          Rendering PDF…
-        </h2>
+      {pagesToRender.map((pageNumber) => {
+        const isVisible = visiblePages.has(pageNumber);
+        const pageHeight = pageHeights[pageNumber];
 
-        <p className="text-sm text-gray-600 mb-3">
-          Page {renderedPages} of {numPages ?? "?"}
-        </p>
-
-        <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+        return (
           <div
-            className="bg-primary h-2.5 rounded-full transition-all duration-300"
-            style={{
-              width:
-                numPages && numPages > 0
-                  ? `${Math.round((renderedPages / numPages) * 100)}%`
-                  : "0%",
+            key={`page_${pageNumber}`}
+            ref={(el) => {
+              pageRefs.current[pageNumber] = el;
+              if (el && observerRef.current) {
+                requestAnimationFrame(() => {
+                  if (el && observerRef.current) {
+                    observerRef.current.observe(el);
+                  }
+                });
+              }
             }}
-          />
-        </div>
+            data-page-number={pageNumber}
+            className="mb-4 flex justify-center min-w-max"
+            style={
+              !isVisible && pageHeight
+                ? {
+                    height: `${pageHeight}px`,
+                    minHeight: `${pageHeight}px`,
+                  }
+                : undefined
+            }
+          >
+            {isVisible ? (
+              <div className="relative inline-block">
+                <Page
+                  pageNumber={pageNumber}
+                  scale={scale}
+                  renderTextLayer={true}
+                  renderAnnotationLayer={true}
+                  onLoadSuccess={handleLoadPage}
+                  onClick={handleClickOnPage}
+                  loading=""
+                  noData=""
+                />
+                {showHighlights &&
+                  highlightsByPage[pageNumber] &&
+                  pageBaseDims[pageNumber] && (
+                    <BoundingBoxOverlay
+                      boundingBoxes={highlightsByPage[pageNumber]}
+                      zoom={scale}
+                      containerWidth={pageBaseDims[pageNumber].width}
+                      containerHeight={pageBaseDims[pageNumber].height}
+                    />
+                  )}
+              </div>
+            ) : (
+              <div
+                className="relative inline-block bg-gray-100 flex items-center justify-center"
+                style={
+                  pageHeight
+                    ? {
+                        width: "100%",
+                        height: `${pageHeight}px`,
+                        minHeight: `${pageHeight}px`,
+                      }
+                    : { minHeight: `${estimatedPageHeight}px` }
+                }
+              >
+                <span className="text-gray-400 text-sm">Page {pageNumber}</span>
+              </div>
+            )}
+          </div>
+        );
+      })}
 
-        <p className="text-xs text-gray-500">
-          Large PDFs or those with heavy images may take longer to render.
-        </p>
-      </div>
-    </div>
+      {/* Spacer for pages after rendered range */}
+      {heightAfter > 0 && (
+        <div style={{ height: `${heightAfter}px` }} aria-hidden="true" />
+      )}
+    </>
   );
 }
