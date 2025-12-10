@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 3.5.1
+
+### Patch Changes
+
+- 54fbdf2: fix file upload max size helper text
+
 ## 3.5.0
 
 ### Minor Changes
