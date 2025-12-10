@@ -240,7 +240,7 @@ export function DocumentPreview(props: DocumentPreviewProps) {
     accept,
     previews,
     maxFileSize = DEFAULT_MAX_FILE_SIZE,
-    maxFileSizeHelpText = `You can upload files up to ${DEFAULT_MAX_FILE_SIZE} MB`,
+    maxFileSizeHelpText = `You can upload files up to ${Math.round(DEFAULT_MAX_FILE_SIZE / 1024 / 1024)} MB`,
   } = props;
 
   // Track which index should show the preview (defaults to last index)
