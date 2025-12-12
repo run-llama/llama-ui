@@ -141,13 +141,17 @@ export function PropertyRenderer<S extends JsonShape<S>>({
         <ListRenderer<PrimitiveValue>
           data={value as PrimitiveValue[]}
           onUpdate={() => {}} // Empty array has no items to update
-          onAdd={(newValue) => {
-            const newArray = [newValue];
+          onAdd={
+            editable
+              ? (newValue) => {
+                  const newArray = [newValue];
 
-            // Track the array change and the new item
-            const newItemPath = [...keyPath, "0"];
-            onUpdate(keyPath, newArray, [newItemPath]);
-          }}
+                  // Track the array change and the new item
+                  const newItemPath = [...keyPath, "0"];
+                  onUpdate(keyPath, newArray, [newItemPath]);
+                }
+              : undefined
+          }
           changedPaths={changedPaths}
           keyPath={keyPath}
           metadata={{ schema: effectiveMetadata.schema, extracted: {} }}
