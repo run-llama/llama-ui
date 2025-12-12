@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 3.5.2
+
+### Patch Changes
+
+- 687286c: fix: Updated PropertyRenderer to conditionally show the '+' add button based on the editable prop.
+
 ## 3.5.1
 
 ### Patch Changes
