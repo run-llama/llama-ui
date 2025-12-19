@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 3.5.3
+
+### Patch Changes
+
+- e19e192: update datadisplay to support hover
+
 ## 3.5.2
 
 ### Patch Changes
