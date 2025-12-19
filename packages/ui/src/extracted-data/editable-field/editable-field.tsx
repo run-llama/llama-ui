@@ -34,7 +34,9 @@ interface EditableFieldProps<S extends PrimitiveValue> {
   // metadata and click/hover callbacks
   metadata?: ExtractedFieldMetadata;
   onClick?: (args: { value: S; metadata?: ExtractedFieldMetadata }) => void;
-  onHover?: (args: { value: S; metadata?: ExtractedFieldMetadata } | null) => void;
+  onHover?: (
+    args: { value: S; metadata?: ExtractedFieldMetadata } | null
+  ) => void;
 }
 
 export function EditableField<S extends PrimitiveValue>({

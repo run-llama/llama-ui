@@ -46,11 +46,13 @@ interface PropertyRendererProps<S extends JsonShape<S>> {
     metadata?: ExtractedFieldMetadata;
     path: string[];
   }) => void;
-  onHoverField?: (args: {
-    value: PrimitiveValue;
-    metadata?: ExtractedFieldMetadata;
-    path: string[];
-  } | null) => void;
+  onHoverField?: (
+    args: {
+      value: PrimitiveValue;
+      metadata?: ExtractedFieldMetadata;
+      path: string[];
+    } | null
+  ) => void;
   editable?: boolean;
   tableRowsPerPage?: number;
   listItemsPerPage?: number;
@@ -96,10 +98,12 @@ export function PropertyRenderer<S extends JsonShape<S>>({
     });
   };
 
-  const handleFieldHover = (args: {
-    value: PrimitiveValue;
-    metadata?: ExtractedFieldMetadata;
-  } | null) => {
+  const handleFieldHover = (
+    args: {
+      value: PrimitiveValue;
+      metadata?: ExtractedFieldMetadata;
+    } | null
+  ) => {
     if (args === null) {
       onHoverField?.(null);
     } else {

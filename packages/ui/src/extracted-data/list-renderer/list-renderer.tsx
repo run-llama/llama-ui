@@ -31,11 +31,13 @@ interface ListRendererProps<S extends PrimitiveValue> {
     metadata?: ExtractedFieldMetadata;
     path: string[];
   }) => void;
-  onHoverField?: (args: {
-    value: PrimitiveValue;
-    metadata?: ExtractedFieldMetadata;
-    path: string[];
-  } | null) => void;
+  onHoverField?: (
+    args: {
+      value: PrimitiveValue;
+      metadata?: ExtractedFieldMetadata;
+      path: string[];
+    } | null
+  ) => void;
   editable?: boolean;
   listItemsPerPage?: number;
 }
@@ -160,10 +162,12 @@ export function ListRenderer<S extends PrimitiveValue>({
               handleFieldClick(args, index);
             };
 
-            const handleItemFieldHover = (args: {
-              value: PrimitiveValue;
-              metadata?: ExtractedFieldMetadata;
-            } | null) => {
+            const handleItemFieldHover = (
+              args: {
+                value: PrimitiveValue;
+                metadata?: ExtractedFieldMetadata;
+              } | null
+            ) => {
               handleFieldHover(args, index);
             };
 
