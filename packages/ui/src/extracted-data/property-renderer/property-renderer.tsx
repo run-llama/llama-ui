@@ -46,6 +46,13 @@ interface PropertyRendererProps<S extends JsonShape<S>> {
     metadata?: ExtractedFieldMetadata;
     path: string[];
   }) => void;
+  onHoverField?: (
+    args: {
+      value: PrimitiveValue;
+      metadata?: ExtractedFieldMetadata;
+      path: string[];
+    } | null
+  ) => void;
   editable?: boolean;
   tableRowsPerPage?: number;
   listItemsPerPage?: number;
@@ -59,6 +66,7 @@ export function PropertyRenderer<S extends JsonShape<S>>({
   metadata,
   validationErrors = [],
   onClickField,
+  onHoverField,
   editable = true,
   tableRowsPerPage = 10,
   listItemsPerPage = 10,
@@ -88,6 +96,23 @@ export function PropertyRenderer<S extends JsonShape<S>>({
       metadata: args.metadata,
       path: keyPath,
     });
+  };
+
+  const handleFieldHover = (
+    args: {
+      value: PrimitiveValue;
+      metadata?: ExtractedFieldMetadata;
+    } | null
+  ) => {
+    if (args === null) {
+      onHoverField?.(null);
+    } else {
+      onHoverField?.({
+        value: args.value,
+        metadata: args.metadata,
+        path: keyPath,
+      });
+    }
   };
 
   // Helper function to render field labels with schema info
@@ -129,6 +154,7 @@ export function PropertyRenderer<S extends JsonShape<S>>({
         expectedType={expectedType}
         required={isRequired}
         onClick={handleFieldClick}
+        onHover={handleFieldHover}
         editable={editable}
       />
     );
@@ -213,6 +239,7 @@ export function PropertyRenderer<S extends JsonShape<S>>({
           }}
           validationErrors={validationErrors}
           onClickField={onClickField}
+          onHoverField={onHoverField}
           editable={editable}
           tableRowsPerPage={tableRowsPerPage}
         />
@@ -250,6 +277,7 @@ export function PropertyRenderer<S extends JsonShape<S>>({
             extracted: effectiveMetadata.extracted,
           }}
           onClickField={onClickField}
+          onHoverField={onHoverField}
           editable={editable}
           listItemsPerPage={listItemsPerPage}
         />
@@ -276,6 +304,7 @@ export function PropertyRenderer<S extends JsonShape<S>>({
                       metadata={effectiveMetadata}
                       validationErrors={validationErrors}
                       onClickField={onClickField}
+                      onHoverField={onHoverField}
                       editable={editable}
                       listItemsPerPage={listItemsPerPage}
                     />
@@ -301,6 +330,7 @@ export function PropertyRenderer<S extends JsonShape<S>>({
                         metadata={effectiveMetadata}
                         validationErrors={validationErrors}
                         onClickField={onClickField}
+                        onHoverField={onHoverField}
                         editable={editable}
                         listItemsPerPage={listItemsPerPage}
                       />
@@ -331,6 +361,7 @@ export function PropertyRenderer<S extends JsonShape<S>>({
       expectedType={expectedType}
       required={isRequired}
       onClick={handleFieldClick}
+      onHover={handleFieldHover}
       editable={editable}
     />
   );

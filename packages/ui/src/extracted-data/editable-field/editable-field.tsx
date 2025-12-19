@@ -31,9 +31,12 @@ interface EditableFieldProps<S extends PrimitiveValue> {
   showBorder?: boolean;
   className?: string;
   editable?: boolean;
-  // metadata and click callback
+  // metadata and click/hover callbacks
   metadata?: ExtractedFieldMetadata;
   onClick?: (args: { value: S; metadata?: ExtractedFieldMetadata }) => void;
+  onHover?: (
+    args: { value: S; metadata?: ExtractedFieldMetadata } | null
+  ) => void;
 }
 
 export function EditableField<S extends PrimitiveValue>({
@@ -46,6 +49,7 @@ export function EditableField<S extends PrimitiveValue>({
   className,
   metadata,
   onClick,
+  onHover,
   editable = true,
 }: EditableFieldProps<S>) {
   const confidenceThreshold = useUIConfigStore(
@@ -212,6 +216,8 @@ export function EditableField<S extends PrimitiveValue>({
           <div
             ref={containerRef}
             onClick={() => onClick?.({ value, metadata })}
+            onMouseEnter={() => onHover?.({ value, metadata })}
+            onMouseLeave={() => onHover?.(null)}
             className={`cursor-pointer ${showBorder ? "min-h-8" : "w-full"} flex items-center ${defaultBorderClass} ${paddingClass} ${backgroundClass} ${hoverClass} ${className}`}
             data-testid="editable-field-trigger"
           >
@@ -233,6 +239,8 @@ export function EditableField<S extends PrimitiveValue>({
         <div
           ref={containerRef}
           onClick={() => onClick?.({ value, metadata })}
+          onMouseEnter={() => onHover?.({ value, metadata })}
+          onMouseLeave={() => onHover?.(null)}
           className={`cursor-pointer ${showBorder ? "min-h-8" : "w-full"} flex items-center ${defaultBorderClass} ${paddingClass} ${backgroundClass} ${hoverClass} ${className}`}
           data-testid="editable-field-trigger"
         >
