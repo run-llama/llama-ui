@@ -20,6 +20,7 @@ export function ExtractedDataDisplay<S extends JsonShape<S>>({
   editable = true,
   jsonSchema,
   onClickField,
+  onHoverField,
   tableRowsPerPage = 10,
   listItemsPerPage = 10,
 }: ExtractedDataDisplayProps<S>) {
@@ -122,6 +123,7 @@ export function ExtractedDataDisplay<S extends JsonShape<S>>({
                   }}
                   validationErrors={validationErrors}
                   onClickField={onClickField}
+                  onHoverField={onHoverField}
                   editable={editable}
                   tableRowsPerPage={tableRowsPerPage}
                   listItemsPerPage={listItemsPerPage}
@@ -146,6 +148,7 @@ export function ExtractedDataDisplay<S extends JsonShape<S>>({
                 }}
                 validationErrors={validationErrors}
                 onClickField={onClickField}
+                onHoverField={onHoverField}
                 editable={editable}
                 tableRowsPerPage={tableRowsPerPage}
                 listItemsPerPage={listItemsPerPage}
@@ -170,6 +173,7 @@ export function ExtractedDataDisplay<S extends JsonShape<S>>({
                     }}
                     validationErrors={validationErrors}
                     onClickField={onClickField}
+                    onHoverField={onHoverField}
                     editable={editable}
                     tableRowsPerPage={tableRowsPerPage}
                     listItemsPerPage={listItemsPerPage}

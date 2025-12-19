@@ -26,6 +26,11 @@ export interface ExtractedDataDisplayProps<S extends JsonShape<S>> {
     metadata?: ExtractedFieldMetadata;
     path: string[];
   }) => void;
+  onHoverField?: (args: {
+    value: PrimitiveValue;
+    metadata?: ExtractedFieldMetadata;
+    path: string[];
+  } | null) => void;
   tableRowsPerPage?: number;
   listItemsPerPage?: number;
 }

@@ -31,6 +31,11 @@ interface ListRendererProps<S extends PrimitiveValue> {
     metadata?: ExtractedFieldMetadata;
     path: string[];
   }) => void;
+  onHoverField?: (args: {
+    value: PrimitiveValue;
+    metadata?: ExtractedFieldMetadata;
+    path: string[];
+  } | null) => void;
   editable?: boolean;
   listItemsPerPage?: number;
 }
@@ -44,6 +49,7 @@ export function ListRenderer<S extends PrimitiveValue>({
   keyPath = [],
   metadata,
   onClickField,
+  onHoverField,
   editable = true,
   listItemsPerPage = 10,
 }: ListRendererProps<S>) {
@@ -94,6 +100,21 @@ export function ListRenderer<S extends PrimitiveValue>({
     });
   };
 
+  const handleFieldHover = (
+    args: { value: PrimitiveValue; metadata?: ExtractedFieldMetadata } | null,
+    index: number
+  ) => {
+    if (args === null) {
+      onHoverField?.(null);
+    } else {
+      onHoverField?.({
+        value: args.value,
+        metadata: args.metadata,
+        path: [...keyPath, String(index)],
+      });
+    }
+  };
+
   if (!data || data.length === 0) {
     return (
       <div className="border rounded-md bg-white p-4">
@@ -139,6 +160,13 @@ export function ListRenderer<S extends PrimitiveValue>({
               handleFieldClick(args, index);
             };
 
+            const handleItemFieldHover = (args: {
+              value: PrimitiveValue;
+              metadata?: ExtractedFieldMetadata;
+            } | null) => {
+              handleFieldHover(args, index);
+            };
+
             return (
               <TableRow key={index} className="hover:bg-gray-50 border-0">
                 <TableCell className="p-0 border-r border-gray-100 w-12 align-middle h-full">
@@ -162,6 +190,7 @@ export function ListRenderer<S extends PrimitiveValue>({
                       expectedType === PrimitiveType.BOOLEAN
                     }
                     onClick={handleItemFieldClick}
+                    onHover={handleItemFieldHover}
                     editable={editable}
                   />
                 </TableCell>

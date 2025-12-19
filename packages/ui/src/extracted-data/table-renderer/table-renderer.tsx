@@ -62,6 +62,11 @@ export interface TableRendererProps<Row extends JsonObject> {
     metadata?: ExtractedFieldMetadata;
     path: string[];
   }) => void;
+  onHoverField?: (args: {
+    value: PrimitiveValue;
+    metadata?: ExtractedFieldMetadata;
+    path: string[];
+  } | null) => void;
   editable?: boolean;
   tableRowsPerPage?: number;
 }
@@ -76,6 +81,7 @@ export function TableRenderer<Row extends JsonObject>({
   metadata,
   validationErrors = [],
   onClickField,
+  onHoverField,
   editable = true,
   tableRowsPerPage = 10,
 }: TableRendererProps<Row>) {
@@ -468,6 +474,15 @@ export function TableRenderer<Row extends JsonObject>({
                           metadata: args.metadata,
                           path: cellPath,
                         })
+                      }
+                      onHover={(args) =>
+                        args === null
+                          ? onHoverField?.(null)
+                          : onHoverField?.({
+                              value: args.value,
+                              metadata: args.metadata,
+                              path: cellPath,
+                            })
                       }
                       editable={editable}
                     />
