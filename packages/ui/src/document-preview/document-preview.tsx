@@ -5,8 +5,8 @@ import type { DropzoneProps } from "react-dropzone";
 import { cn } from "@/lib/utils";
 import { PdfPreview } from "../file-preview";
 import type { Highlight } from "../file-preview/types";
-import { checkUrl, getFileTypeInfo, resolveFileName } from "./files";
 import { FileUpload } from "./file-upload";
+import { checkUrl, getFileTypeInfo, resolveFileName } from "./files";
 import { FileObjectPreview } from "./previews/file-object-preview";
 import { ImagePreview } from "./previews/image-preview";
 import { TextPreview } from "./previews/text-preview";
@@ -155,18 +155,23 @@ function DocumentPreviewItem({
   highlights,
   previews,
 }: DocumentPreviewItemProps) {
-  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  // Track both the blob URL and which file it was created for
+  // This prevents passing stale/revoked URLs to preview components when switching files
+  const [blobInfo, setBlobInfo] = useState<{
+    url: string;
+    file: File;
+  } | null>(null);
 
   useEffect(() => {
     // XXX: Don't separate this into a useMemo calling URL.createObjectURL
     // Doesn't work with multiple instances of DocumentPreviewItem
     if (!(value instanceof File)) {
-      setBlobUrl(null);
+      setBlobInfo(null);
       return;
     }
 
     const objectUrl = URL.createObjectURL(value);
-    setBlobUrl(objectUrl);
+    setBlobInfo({ url: objectUrl, file: value });
 
     return () => {
       URL.revokeObjectURL(objectUrl);
@@ -174,12 +179,19 @@ function DocumentPreviewItem({
   }, [value]);
 
   const resolvedUrl = useMemo(() => {
-    if (value instanceof File) return blobUrl;
+    if (value instanceof File) {
+      // Only return blob URL if it was created for the current file
+      // This prevents returning stale URLs when switching between files
+      if (blobInfo && blobInfo.file === value) {
+        return blobInfo.url;
+      }
+      return null;
+    }
     if (typeof value === "string") {
       return checkUrl(value);
     }
     return null;
-  }, [value, blobUrl]);
+  }, [value, blobInfo]);
 
   if (!resolvedUrl) {
     return <UploadSkeleton />;
