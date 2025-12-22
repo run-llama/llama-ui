@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 3.5.4
+
+### Patch Changes
+
+- 503ea32: fix: ensure using correct blob URL for document preview
+
 ## 3.5.3
 
 ### Patch Changes
