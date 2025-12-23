@@ -213,24 +213,32 @@ export function PropertyRenderer<S extends JsonShape<S>>({
               onUpdate(keyPath, newArray as JsonObject[], [cellPath]);
             }
           }}
-          onAddRow={(newRow) => {
-            const newArray = [
-              ...(value as Array<Record<string, JsonShape<S>>>),
-              newRow,
-            ];
+          onAddRow={
+            editable
+              ? (newRow) => {
+                  const newArray = [
+                    ...(value as Array<Record<string, JsonShape<S>>>),
+                    newRow,
+                  ];
 
-            // Track the array change and the new row
-            const newRowPath = [...keyPath, String(value.length)];
-            onUpdate(keyPath, newArray as JsonObject[], [newRowPath]);
-          }}
-          onDeleteRow={(index) => {
-            const newArray = (
-              value as Array<Record<string, JsonShape<S>>>
-            ).filter((_, i) => i !== index);
+                  // Track the array change and the new row
+                  const newRowPath = [...keyPath, String(value.length)];
+                  onUpdate(keyPath, newArray as JsonObject[], [newRowPath]);
+                }
+              : undefined
+          }
+          onDeleteRow={
+            editable
+              ? (index) => {
+                  const newArray = (
+                    value as Array<Record<string, JsonShape<S>>>
+                  ).filter((_, i) => i !== index);
 
-            // Track the array change - when deleting, we track the entire array as changed
-            onUpdate(keyPath, newArray as JsonObject[], [keyPath]);
-          }}
+                  // Track the array change - when deleting, we track the entire array as changed
+                  onUpdate(keyPath, newArray as JsonObject[], [keyPath]);
+                }
+              : undefined
+          }
           changedPaths={changedPaths}
           keyPath={keyPath}
           metadata={{
@@ -257,19 +265,27 @@ export function PropertyRenderer<S extends JsonShape<S>>({
             const itemPath = [...keyPath, String(index)];
             onUpdate(keyPath, newArray as JsonObject[], [itemPath]);
           }}
-          onAdd={(newValue) => {
-            const newArray = [...value, newValue];
+          onAdd={
+            editable
+              ? (newValue) => {
+                  const newArray = [...value, newValue];
 
-            // Track the array change and the new item
-            const newItemPath = [...keyPath, String(value.length)];
-            onUpdate(keyPath, newArray as JsonObject[], [newItemPath]);
-          }}
-          onDelete={(index) => {
-            const newArray = value.filter((_, i) => i !== index);
+                  // Track the array change and the new item
+                  const newItemPath = [...keyPath, String(value.length)];
+                  onUpdate(keyPath, newArray as JsonObject[], [newItemPath]);
+                }
+              : undefined
+          }
+          onDelete={
+            editable
+              ? (index) => {
+                  const newArray = value.filter((_, i) => i !== index);
 
-            // Track the array change - when deleting, we track the entire array as changed
-            onUpdate(keyPath, newArray as JsonObject[], [keyPath]);
-          }}
+                  // Track the array change - when deleting, we track the entire array as changed
+                  onUpdate(keyPath, newArray as JsonObject[], [keyPath]);
+                }
+              : undefined
+          }
           changedPaths={changedPaths}
           keyPath={keyPath}
           metadata={{
