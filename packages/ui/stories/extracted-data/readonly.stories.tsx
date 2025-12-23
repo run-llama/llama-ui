@@ -47,5 +47,17 @@ export const Readonly: Story = {
         expect(popovers).toHaveLength(0);
       });
     }
+
+    // Verify no add row buttons are present (tables/lists should be readonly)
+    const addButtons = canvas.queryAllByTitle("Add row");
+    expect(addButtons).toHaveLength(0);
+
+    // Verify no delete buttons are present (tables/lists should be readonly)
+    const deleteButtons = canvas.queryAllByTitle("Delete row");
+    expect(deleteButtons).toHaveLength(0);
+
+    // Also check for delete item buttons in lists
+    const deleteItemButtons = canvas.queryAllByTitle("Delete item");
+    expect(deleteItemButtons).toHaveLength(0);
   },
 };
