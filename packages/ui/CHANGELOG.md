@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 3.5.5
+
+### Patch Changes
+
+- b7dd856: Don't show delete/add for readonly fields in extracted data component
+
 ## 3.5.4
 
 ### Patch Changes
