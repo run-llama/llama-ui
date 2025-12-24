@@ -113,3 +113,29 @@ export const PdfOnly: Story = {
   },
   render: (args) => <UploadStateContainer {...args} />,
 };
+
+export const WithSelectFile: Story = {
+  name: "With Select File Tab",
+  args: {
+    heading: "Upload or select a document",
+    allowMultiple: true,
+    value: [],
+    onSelectFile: () => {
+      alert("Select file button was clicked!");
+    },
+    selectFileLabel: "Browse files",
+    selectFileDescription: "Choose a file from your existing documents",
+  },
+  render: (args) => (
+    <div className="space-y-4">
+      <div className="p-4 bg-blue-50 rounded-lg mx-4 mt-4">
+        <p className="text-blue-700 text-sm">
+          <strong>Note:</strong> This story demonstrates the &quot;Select
+          file&quot; tab. Click the button in the &quot;Select file&quot; tab to
+          see the callback in action.
+        </p>
+      </div>
+      <UploadStateContainer {...args} />
+    </div>
+  ),
+};
