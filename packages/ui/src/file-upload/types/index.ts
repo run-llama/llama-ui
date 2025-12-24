@@ -75,6 +75,9 @@ export interface FileUploadProps extends BaseFileUploadProps {
   fileUrlPlaceholder?: string;
   disableWhenHasSelection?: boolean;
   footer?: ReactNode;
+  onSelectFile?: () => void;
+  selectFileLabel?: string;
+  selectFileDescription?: string;
 }
 
 export interface FileUploaderProps extends BaseFileUploadProps {
@@ -89,6 +92,9 @@ export interface FileUploaderProps extends BaseFileUploadProps {
   trigger?: ReactNode;
   isProcessing?: boolean;
   disabled?: boolean;
+  onSelectFile?: () => void;
+  selectFileLabel?: string;
+  selectFileDescription?: string;
 }
 
 export type { FileUploadProgress } from "./upload-progress";

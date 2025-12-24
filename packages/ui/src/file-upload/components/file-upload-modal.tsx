@@ -31,6 +31,9 @@ export function FileUploader({
   trigger,
   isProcessing = false,
   disabled = false,
+  onSelectFile,
+  selectFileLabel,
+  selectFileDescription,
 }: FileUploaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
@@ -300,6 +303,9 @@ export function FileUploader({
                   maxFileSizeBytes={maxFileSizeBytes}
                   disableWhenHasSelection
                   footer={null}
+                  onSelectFile={onSelectFile}
+                  selectFileLabel={selectFileLabel}
+                  selectFileDescription={selectFileDescription}
                 />
               )}
             </div>
