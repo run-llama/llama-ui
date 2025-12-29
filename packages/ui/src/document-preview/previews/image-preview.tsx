@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { FileToolbar } from "../file-tool-bar";
 import { BoundingBoxOverlay } from "../../file-preview/bounding-box-overlay";
 import type { Highlight } from "../../file-preview/types";
