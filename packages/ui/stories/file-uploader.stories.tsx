@@ -114,6 +114,52 @@ export const MultipleFiles: Story = {
   },
 };
 
+export const WithSelectFile: Story = {
+  args: {
+    title: "Upload Document",
+    description: "Upload a new file or select from existing files",
+    inputFields: [{ key: "name", label: "Document Name", required: true }],
+    allowedFileTypes: [FileType.PDF, FileType.JPEG, FileType.PNG],
+    maxFileSizeBytes: 10 * 1000 * 1000, // 10MB
+    multiple: false, // Select file only works in single file mode
+    onSelectFile: () => {
+      alert("Select file button was clicked!");
+    },
+    selectFileLabel: "Browse files",
+    selectFileDescription: "Choose a file from your existing documents",
+  },
+  render: function Render(args) {
+    const [isSubmitted, setIsSubmitted] = useState(false);
+
+    const handleSuccess = async (
+      fileData: FileUploadData[],
+      fieldValues: Record<string, string>
+    ) => {
+      console.log("Submitted:", { fileData, fieldValues });
+      await args.onSuccess?.(fileData, fieldValues);
+      setIsSubmitted(true);
+    };
+
+    return (
+      <div className="space-y-4">
+        <div className="p-4 bg-blue-50 rounded-lg">
+          <p className="text-blue-700 text-sm">
+            <strong>Note:</strong> This story demonstrates the &quot;Select
+            file&quot; tab. Click the button in the &quot;Select file&quot; tab
+            to see the callback in action.
+          </p>
+        </div>
+        <FileUploader {...args} onSuccess={handleSuccess} />
+        {isSubmitted && (
+          <div className="p-4 bg-green-50 rounded-lg">
+            <p className="text-green-700">File uploaded successfully!</p>
+          </div>
+        )}
+      </div>
+    );
+  },
+};
+
 // Story to test error scenarios
 export const WithAPIErrors: StoryObj<typeof FileUploader> = {
   args: {

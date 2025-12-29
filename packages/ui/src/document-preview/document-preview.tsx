@@ -106,6 +106,9 @@ interface DocumentPreviewBaseProps
   accept?: DropzoneProps["accept"];
   maxFileSize?: number;
   maxFileSizeHelpText?: string;
+  onSelectFile?: () => void;
+  selectFileLabel?: string;
+  selectFileDescription?: string;
 }
 
 export interface DocumentPreviewSingleProps extends DocumentPreviewBaseProps {
@@ -253,6 +256,9 @@ export function DocumentPreview(props: DocumentPreviewProps) {
     previews,
     maxFileSize = DEFAULT_MAX_FILE_SIZE,
     maxFileSizeHelpText = `You can upload files up to ${Math.round(DEFAULT_MAX_FILE_SIZE / 1024 / 1024)} MB`,
+    onSelectFile,
+    selectFileLabel,
+    selectFileDescription,
   } = props;
 
   // Track which index should show the preview (defaults to last index)
@@ -374,6 +380,9 @@ export function DocumentPreview(props: DocumentPreviewProps) {
           uploadHelpText={maxFileSizeHelpText}
           footer={footer}
           accept={accept}
+          onSelectFile={onSelectFile}
+          selectFileLabel={selectFileLabel}
+          selectFileDescription={selectFileDescription}
         />
       </div>
     );

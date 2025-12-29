@@ -1,9 +1,10 @@
 "use client";
 
 import { Input } from "@/base/input";
+import { Button } from "@/base/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/base/tabs";
 import { cn } from "@/lib/utils";
-import { FileText } from "lucide-react";
+import { FileText, FolderOpen } from "lucide-react";
 
 import { FileDropzone } from "./dropzone";
 import type { FileUploadProps } from "../types";
@@ -21,6 +22,9 @@ export function FileUpload({
   fileUrlPlaceholder = "Paste the file link here",
   disableWhenHasSelection = false,
   footer,
+  onSelectFile,
+  selectFileLabel = "Select file",
+  selectFileDescription = "Choose a file from your existing files",
 }: FileUploadProps) {
   const selectedFile = content instanceof File ? content : null;
 
@@ -59,7 +63,12 @@ export function FileUpload({
       )}
 
       <Tabs defaultValue="upload">
-        <TabsList className="grid w-full grid-cols-2 rounded-none border-b border-gray-200 bg-transparent p-0">
+        <TabsList
+          className={cn(
+            "grid w-full rounded-none border-b border-gray-200 bg-transparent p-0",
+            onSelectFile ? "grid-cols-3" : "grid-cols-2"
+          )}
+        >
           <TabsTrigger
             value="upload"
             className="rounded-none border-x-0 border-b-2 border-t-0 border-transparent bg-transparent text-xs font-semibold text-gray-500 shadow-none data-[state=active]:border-b-[#8B5CF6] data-[state=active]:text-[#8B5CF6] data-[state=active]:shadow-none"
@@ -72,6 +81,14 @@ export function FileUpload({
           >
             File URL
           </TabsTrigger>
+          {onSelectFile && (
+            <TabsTrigger
+              value="select"
+              className="rounded-none border-x-0 border-b-2 border-t-0 border-transparent bg-transparent text-xs font-semibold text-gray-500 shadow-none data-[state=active]:border-b-[#8B5CF6] data-[state=active]:text-[#8B5CF6] data-[state=active]:shadow-none"
+            >
+              Select file
+            </TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="upload" className="mt-6">
@@ -103,6 +120,31 @@ export function FileUpload({
             />
           </div>
         </TabsContent>
+
+        {onSelectFile && (
+          <TabsContent value="select" className="mt-6">
+            <div className="rounded-lg border-2 border-dashed border-gray-200 p-8">
+              <div className="flex flex-col items-center justify-center gap-4 text-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+                  <FolderOpen className="h-8 w-8 text-gray-500" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">
+                    {selectFileDescription}
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onSelectFile}
+                  className="mt-2"
+                >
+                  {selectFileLabel}
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+        )}
       </Tabs>
 
       {footer}
