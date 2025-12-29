@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 3.5.6
+
+### Patch Changes
+
+- 7f6f79f: add image highlight support. add selectfile support for documentpreview
+
 ## 3.5.5
 
 ### Patch Changes
