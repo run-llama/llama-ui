@@ -23,6 +23,7 @@ import {
   PanelLeftOpen,
   PanelRightOpen,
 } from "lucide-react";
+import { getDefaultWorkflowUrl } from "../lib/get-default-url";
 
 // Utility to handle keyboard shortcuts
 function useKeyboardShortcut(key: string, callback: () => void, ctrl = true) {
@@ -43,6 +44,10 @@ function useKeyboardShortcut(key: string, callback: () => void, ctrl = true) {
 
 // Utility to resolve base URL from query param or default
 function resolveBaseUrl(): string {
+  if (typeof window === "undefined") {
+    return getDefaultWorkflowUrl();
+  }
+
   const urlParams = new URLSearchParams(window.location.search);
   const apiParam = urlParams.get("api");
 
@@ -50,7 +55,7 @@ function resolveBaseUrl(): string {
     return apiParam.endsWith("/") ? apiParam.slice(0, -1) : apiParam;
   }
 
-  return "http://localhost:8000";
+  return getDefaultWorkflowUrl();
 }
 
 export function WorkflowDebugger() {
@@ -104,7 +109,7 @@ export function WorkflowDebugger() {
   };
 
   const handleUrlReset = () => {
-    const defaultUrl = "http://localhost:8000";
+    const defaultUrl = getDefaultWorkflowUrl();
     setBaseUrl(defaultUrl);
     setEditingUrl(defaultUrl);
   };
