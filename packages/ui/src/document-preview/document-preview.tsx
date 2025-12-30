@@ -282,6 +282,7 @@ export function DocumentPreview(props: DocumentPreviewProps) {
 
   const multiOnChange = multiProps?.onChange;
   const multiValues = multiProps?.value ?? [];
+
   const normalizedValues = allowMultiple
     ? multiValues.map((item) => item.content)
     : toArray(singleProps?.value ?? null);

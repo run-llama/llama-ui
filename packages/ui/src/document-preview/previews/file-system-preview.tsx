@@ -61,16 +61,16 @@ export function FileSystemPreview({
 
   return (
     <div className="flex h-full flex-col bg-muted/30">
-      <div className="flex items-center justify-between border-b px-6 py-3">
-        <span className="text-sm font-medium text-foreground">
-          {fileCount} {label} selected from your file system
-        </span>
+      <div className="flex items-center gap-3 border-b px-6 py-3">
         {onAddFiles && (
           <Button size="xs" onClick={onAddFiles}>
             <Plus className="size-4" />
             Add files
           </Button>
         )}
+        <span className="text-sm text-muted-foreground">
+          {fileCount} {label} selected from your file system
+        </span>
       </div>
       <ScrollArea className="flex-1" viewportClassName="[&>div]:!block">
         <div className="flex flex-col gap-1 p-4">
