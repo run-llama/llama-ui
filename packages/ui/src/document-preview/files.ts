@@ -141,3 +141,43 @@ export const downloadFile = (contentUrl: string, fileName?: string | null) => {
   link.click();
   document.body.removeChild(link);
 };
+
+export type FileItemType = "file" | "directory" | "upload";
+
+/**
+ * Determines the type of a file item based on its content.
+ * @param content - File object or string content
+ * @returns "file" for file_id://, "directory" for directory_id://, "upload" otherwise
+ */
+export const getFileItemType = (content: File | string): FileItemType => {
+  if (typeof content === "string") {
+    if (content.startsWith("file_id://")) return "file";
+    if (content.startsWith("directory_id://")) return "directory";
+  }
+  return "upload";
+};
+
+/**
+ * Checks if a content string is a file system selection (file_id:// or directory_id://).
+ * @param content - File object or string content
+ * @returns true if content is a file system selection
+ */
+export const isFileSystemSelection = (content: File | string): boolean => {
+  return (
+    typeof content === "string" &&
+    (content.startsWith("file_id://") || content.startsWith("directory_id://"))
+  );
+};
+
+/**
+ * Extracts file IDs from an array of content values.
+ * Only returns IDs for file system selections (file_id:// or directory_id://).
+ * @param values - Array of File objects or string content
+ * @returns Array of file system selection strings
+ */
+export const getSelectedFileIds = (values: (File | string)[]): string[] => {
+  return values.filter(
+    (content): content is string =>
+      typeof content === "string" && isFileSystemSelection(content)
+  );
+};

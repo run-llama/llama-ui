@@ -6,7 +6,14 @@ import { cn } from "@/lib/utils";
 import { PdfPreview } from "../file-preview";
 import type { Highlight } from "../file-preview/types";
 import { FileUpload } from "./file-upload";
-import { checkUrl, getFileTypeInfo, resolveFileName } from "./files";
+import {
+  checkUrl,
+  getFileTypeInfo,
+  getFileItemType,
+  getSelectedFileIds,
+  isFileSystemSelection,
+  resolveFileName,
+} from "./files";
 import { FileObjectPreview } from "./previews/file-object-preview";
 import {
   FileSystemPreview,
@@ -15,7 +22,7 @@ import {
 import { ImagePreview } from "./previews/image-preview";
 import { TextPreview } from "./previews/text-preview";
 import { UnsupportedPreview } from "./previews/unsupported-preview";
-import { SelectFileBar, type FileItemType } from "./select-file-bar";
+import { SelectFileBar } from "./select-file-bar";
 import { UploadSkeleton } from "./upload-skeleton";
 
 type UploadableContent = File | string;
@@ -362,19 +369,8 @@ export function DocumentPreview(props: DocumentPreviewProps) {
     setPreviewIndex(index);
   };
 
-  const getSelectedFileIds = (): string[] => {
-    return normalizedValues
-      .filter(
-        (content): content is string =>
-          typeof content === "string" &&
-          (content.startsWith("file_id://") ||
-            content.startsWith("directory_id://"))
-      )
-      .map((content) => content);
-  };
-
   const handleSelectFile = onSelectFile
-    ? () => onSelectFile(getSelectedFileIds())
+    ? () => onSelectFile(getSelectedFileIds(normalizedValues))
     : undefined;
 
   const renderFileUpload = (options?: { variant: "small" | "normal" }) => {
@@ -423,20 +419,7 @@ export function DocumentPreview(props: DocumentPreviewProps) {
     ? Math.max(0, MAX_FILE_COUNT - normalizedValues.length)
     : 1;
 
-  const getFileItemType = (content: UploadableContent): FileItemType => {
-    if (typeof content === "string") {
-      if (content.startsWith("file_id://")) return "file";
-      if (content.startsWith("directory_id://")) return "directory";
-    }
-    return "upload";
-  };
-
-  const allFileSystemSelections = normalizedValues.every(
-    (content) =>
-      typeof content === "string" &&
-      (content.startsWith("file_id://") ||
-        content.startsWith("directory_id://"))
-  );
+  const allFileSystemSelections = normalizedValues.every(isFileSystemSelection);
 
   if (allFileSystemSelections && normalizedValues.length > 0) {
     const fileSystemItems: FileSystemItem[] = normalizedValues.map(

@@ -4,8 +4,7 @@ import { Button, buttonVariants } from "@/base/button";
 import { ScrollArea, ScrollBar } from "@/base/scroll-area";
 import { ToolTipper } from "@/base/tooltipper";
 import { cn } from "@/lib/utils";
-
-export type FileItemType = "file" | "directory" | "upload";
+import type { FileItemType } from "./files";
 
 interface SelectFileBarProps {
   files: Array<{ fileName: string | null; index: number; type?: FileItemType }>;
