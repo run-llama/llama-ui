@@ -138,3 +138,19 @@ export const UnsupportedPreview: Story = {
     fileName: "document.docx",
   },
 };
+
+export const FileSystemFilePreview: Story = {
+  name: "File System - File",
+  args: {
+    value: "file_id://file-abc123def456",
+    fileName: "quarterly-report.pdf",
+  },
+};
+
+export const FileSystemDirectoryPreview: Story = {
+  name: "File System - Directory",
+  args: {
+    value: "directory_id://dir-xyz789ghi012",
+    fileName: "Project Documents",
+  },
+};

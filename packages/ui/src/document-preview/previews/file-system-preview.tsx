@@ -1,0 +1,110 @@
+import { File, Folder, Plus, Trash2 } from "lucide-react";
+import { Button } from "@/base/button";
+import { ScrollArea } from "@/base/scroll-area";
+import { ToolTipper } from "@/base/tooltipper";
+
+export type FileSystemType = "file" | "directory";
+
+export interface FileSystemItem {
+  fileName: string | null;
+  type: FileSystemType;
+  index: number;
+}
+
+interface FileSystemPreviewProps {
+  files: FileSystemItem[];
+  onRemove?: (index: number) => void;
+  onAddFiles?: () => void;
+}
+
+export function FileSystemPreview({
+  files,
+  onRemove,
+  onAddFiles,
+}: FileSystemPreviewProps) {
+  if (files.length === 0) {
+    return null;
+  }
+
+  if (files.length === 1 && files[0].type === "directory") {
+    const file = files[0];
+    return (
+      <div className="flex h-full flex-1 flex-col items-center justify-center gap-4 bg-muted/30">
+        <div className="flex size-24 items-center justify-center rounded-2xl bg-muted">
+          <Folder className="size-12 text-muted-foreground" />
+        </div>
+        <div className="flex flex-col items-center gap-1 px-8 text-center">
+          <span className="text-sm font-medium text-foreground">
+            {file.fileName ?? "Untitled Directory"}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            This directory has been selected from your file system
+          </span>
+        </div>
+        {onRemove && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onRemove(file.index)}
+            className="mt-2"
+          >
+            <Trash2 className="size-4 mr-2" />
+            Remove
+          </Button>
+        )}
+      </div>
+    );
+  }
+
+  const fileCount = files.length;
+  const label = fileCount === 1 ? "file" : "files";
+
+  return (
+    <div className="flex h-full flex-col bg-muted/30">
+      <div className="flex items-center justify-between border-b px-6 py-3">
+        <span className="text-sm font-medium text-foreground">
+          {fileCount} {label} selected from your file system
+        </span>
+        {onAddFiles && (
+          <Button size="xs" onClick={onAddFiles}>
+            <Plus className="size-4" />
+            Add files
+          </Button>
+        )}
+      </div>
+      <ScrollArea className="flex-1" viewportClassName="[&>div]:!block">
+        <div className="flex flex-col gap-1 p-4">
+          {files.map((file) => (
+            <div
+              key={file.index}
+              className="flex items-center gap-3 rounded-lg border bg-background px-4 py-3"
+            >
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+                {file.type === "directory" ? (
+                  <Folder className="size-5 text-muted-foreground" />
+                ) : (
+                  <File className="size-5 text-muted-foreground" />
+                )}
+              </div>
+              <span className="flex-1 truncate text-sm font-medium text-foreground">
+                {file.fileName ?? `Untitled ${file.type === "directory" ? "Directory" : "File"}`}
+              </span>
+              {onRemove && (
+                <ToolTipper content="Remove">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onRemove(file.index)}
+                    className="size-8 shrink-0 p-0"
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                </ToolTipper>
+              )}
+            </div>
+          ))}
+        </div>
+      </ScrollArea>
+    </div>
+  );
+}
