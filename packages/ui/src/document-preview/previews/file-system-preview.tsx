@@ -87,7 +87,8 @@ export function FileSystemPreview({
                 )}
               </div>
               <span className="flex-1 truncate text-sm font-medium text-foreground">
-                {file.fileName ?? `Untitled ${file.type === "directory" ? "Directory" : "File"}`}
+                {file.fileName ??
+                  `Untitled ${file.type === "directory" ? "Directory" : "File"}`}
               </span>
               {onRemove && (
                 <ToolTipper content="Remove">

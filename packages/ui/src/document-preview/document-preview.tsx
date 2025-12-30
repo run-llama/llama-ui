@@ -434,7 +434,8 @@ export function DocumentPreview(props: DocumentPreviewProps) {
   const allFileSystemSelections = normalizedValues.every(
     (content) =>
       typeof content === "string" &&
-      (content.startsWith("file_id://") || content.startsWith("directory_id://"))
+      (content.startsWith("file_id://") ||
+        content.startsWith("directory_id://"))
   );
 
   if (allFileSystemSelections && normalizedValues.length > 0) {
