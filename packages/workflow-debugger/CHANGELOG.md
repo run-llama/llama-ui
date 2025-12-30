@@ -1,5 +1,11 @@
 # @llamaindex/workflow-debugger
 
+## 0.2.12
+
+### Patch Changes
+
+- 47a460e: Default to current host/origin for workflow debugger
+
 ## 0.2.11
 
 ### Patch Changes
