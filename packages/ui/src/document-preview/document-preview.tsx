@@ -6,8 +6,19 @@ import { cn } from "@/lib/utils";
 import { PdfPreview } from "../file-preview";
 import type { Highlight } from "../file-preview/types";
 import { FileUpload } from "./file-upload";
-import { checkUrl, getFileTypeInfo, resolveFileName } from "./files";
+import {
+  checkUrl,
+  getFileTypeInfo,
+  getFileItemType,
+  getSelectedFileIds,
+  isFileSystemSelection,
+  resolveFileName,
+} from "./files";
 import { FileObjectPreview } from "./previews/file-object-preview";
+import {
+  FileSystemPreview,
+  type FileSystemItem,
+} from "./previews/file-system-preview";
 import { ImagePreview } from "./previews/image-preview";
 import { TextPreview } from "./previews/text-preview";
 import { UnsupportedPreview } from "./previews/unsupported-preview";
@@ -106,7 +117,7 @@ interface DocumentPreviewBaseProps
   accept?: DropzoneProps["accept"];
   maxFileSize?: number;
   maxFileSizeHelpText?: string;
-  onSelectFile?: () => void;
+  onSelectFile?: (selectedFileIds: string[]) => void;
   selectFileLabel?: string;
   selectFileDescription?: string;
 }
@@ -278,6 +289,7 @@ export function DocumentPreview(props: DocumentPreviewProps) {
 
   const multiOnChange = multiProps?.onChange;
   const multiValues = multiProps?.value ?? [];
+
   const normalizedValues = allowMultiple
     ? multiValues.map((item) => item.content)
     : toArray(singleProps?.value ?? null);
@@ -357,6 +369,10 @@ export function DocumentPreview(props: DocumentPreviewProps) {
     setPreviewIndex(index);
   };
 
+  const handleSelectFile = onSelectFile
+    ? () => onSelectFile(getSelectedFileIds(normalizedValues))
+    : undefined;
+
   const renderFileUpload = (options?: { variant: "small" | "normal" }) => {
     const maxFileCount = allowMultiple
       ? Math.max(0, MAX_FILE_COUNT - normalizedValues.length)
@@ -380,7 +396,7 @@ export function DocumentPreview(props: DocumentPreviewProps) {
           uploadHelpText={maxFileSizeHelpText}
           footer={footer}
           accept={accept}
-          onSelectFile={onSelectFile}
+          onSelectFile={handleSelectFile}
           selectFileLabel={selectFileLabel}
           selectFileDescription={selectFileDescription}
         />
@@ -403,13 +419,44 @@ export function DocumentPreview(props: DocumentPreviewProps) {
     ? Math.max(0, MAX_FILE_COUNT - normalizedValues.length)
     : 1;
 
+  const allFileSystemSelections = normalizedValues.every(isFileSystemSelection);
+
+  if (allFileSystemSelections && normalizedValues.length > 0) {
+    const fileSystemItems: FileSystemItem[] = normalizedValues.map(
+      (content, index) => ({
+        fileName: normalizedFileNames[index] ?? null,
+        type: getFileItemType(content) === "directory" ? "directory" : "file",
+        index,
+      })
+    );
+
+    const hasDirectorySelection = fileSystemItems.some(
+      (item) => item.type === "directory"
+    );
+
+    return (
+      <div className={cn("flex flex-col", className)}>
+        <FileSystemPreview
+          files={fileSystemItems}
+          onRemove={allowRemoval ? handleRemoveAt : undefined}
+          onAddFiles={
+            !hasDirectorySelection && handleSelectFile
+              ? handleSelectFile
+              : undefined
+          }
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={cn("flex flex-col", className)}>
       {allowMultiple && (
         <SelectFileBar
-          files={normalizedValues.map((_, index) => ({
+          files={normalizedValues.map((content, index) => ({
             fileName: normalizedFileNames[index] ?? null,
             index,
+            type: getFileItemType(content),
           }))}
           currentIndex={currentPreviewIndex}
           onSelect={handleSelectAt}
@@ -429,7 +476,6 @@ export function DocumentPreview(props: DocumentPreviewProps) {
         {currentValue && (
           <DocumentPreviewItem
             value={currentValue}
-            // don't show file name for multiple files (as we're showing select file bar)
             fileName={allowMultiple ? undefined : currentFileName}
             onRemove={() => handleRemoveAt(currentPreviewIndex)}
             allowRemoval={allowRemoval && !allowMultiple}

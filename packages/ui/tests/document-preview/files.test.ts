@@ -3,7 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   checkUrl,
   downloadFile,
+  getFileItemType,
   getFileTypeInfo,
+  getSelectedFileIds,
+  isFileSystemSelection,
   resolveFileName,
 } from "../../src/document-preview/files";
 
@@ -389,5 +392,195 @@ describe("downloadFile", () => {
     downloadFile(contentUrl, fileName);
 
     expect(clickSpy).toHaveBeenCalled();
+  });
+});
+
+describe("getFileItemType", () => {
+  it("returns 'file' for file_id:// prefix", () => {
+    const result = getFileItemType("file_id://file-abc123def456");
+
+    expect(result).toBe("file");
+  });
+
+  it("returns 'directory' for directory_id:// prefix", () => {
+    const result = getFileItemType("directory_id://dir-xyz789");
+
+    expect(result).toBe("directory");
+  });
+
+  it("returns 'upload' for regular URL", () => {
+    const result = getFileItemType("https://example.com/document.pdf");
+
+    expect(result).toBe("upload");
+  });
+
+  it("returns 'upload' for data URL", () => {
+    const result = getFileItemType("data:application/pdf;base64,JVBERi0xLjQ=");
+
+    expect(result).toBe("upload");
+  });
+
+  it("returns 'upload' for File object", () => {
+    const file = new File(["dummy"], "document.pdf", {
+      type: "application/pdf",
+    });
+
+    const result = getFileItemType(file);
+
+    expect(result).toBe("upload");
+  });
+
+  it("returns 'upload' for relative URL", () => {
+    const result = getFileItemType("/path/to/file.pdf");
+
+    expect(result).toBe("upload");
+  });
+
+  it("handles file_id:// with various ID formats", () => {
+    expect(getFileItemType("file_id://abc")).toBe("file");
+    expect(getFileItemType("file_id://123-456-789")).toBe("file");
+    expect(getFileItemType("file_id://file_with_underscores")).toBe("file");
+  });
+
+  it("handles directory_id:// with various ID formats", () => {
+    expect(getFileItemType("directory_id://abc")).toBe("directory");
+    expect(getFileItemType("directory_id://123-456-789")).toBe("directory");
+    expect(getFileItemType("directory_id://dir_with_underscores")).toBe(
+      "directory"
+    );
+  });
+});
+
+describe("isFileSystemSelection", () => {
+  it("returns true for file_id:// prefix", () => {
+    const result = isFileSystemSelection("file_id://file-abc123");
+
+    expect(result).toBe(true);
+  });
+
+  it("returns true for directory_id:// prefix", () => {
+    const result = isFileSystemSelection("directory_id://dir-xyz789");
+
+    expect(result).toBe(true);
+  });
+
+  it("returns false for regular URL", () => {
+    const result = isFileSystemSelection("https://example.com/document.pdf");
+
+    expect(result).toBe(false);
+  });
+
+  it("returns false for data URL", () => {
+    const result = isFileSystemSelection(
+      "data:application/pdf;base64,JVBERi0xLjQ="
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("returns false for File object", () => {
+    const file = new File(["dummy"], "document.pdf", {
+      type: "application/pdf",
+    });
+
+    const result = isFileSystemSelection(file);
+
+    expect(result).toBe(false);
+  });
+
+  it("returns false for relative URL", () => {
+    const result = isFileSystemSelection("/path/to/file.pdf");
+
+    expect(result).toBe(false);
+  });
+
+  it("returns false for empty string", () => {
+    const result = isFileSystemSelection("");
+
+    expect(result).toBe(false);
+  });
+
+  it("returns false for string that contains but doesn't start with file_id://", () => {
+    const result = isFileSystemSelection("some-prefix-file_id://abc");
+
+    expect(result).toBe(false);
+  });
+});
+
+describe("getSelectedFileIds", () => {
+  it("returns empty array for empty input", () => {
+    const result = getSelectedFileIds([]);
+
+    expect(result).toEqual([]);
+  });
+
+  it("returns file system selection strings only", () => {
+    const values = [
+      "file_id://file-abc123",
+      "https://example.com/document.pdf",
+      "directory_id://dir-xyz789",
+    ];
+
+    const result = getSelectedFileIds(values);
+
+    expect(result).toEqual([
+      "file_id://file-abc123",
+      "directory_id://dir-xyz789",
+    ]);
+  });
+
+  it("filters out File objects", () => {
+    const file = new File(["dummy"], "document.pdf", {
+      type: "application/pdf",
+    });
+    const values = ["file_id://file-abc123", file, "directory_id://dir-xyz789"];
+
+    const result = getSelectedFileIds(values);
+
+    expect(result).toEqual([
+      "file_id://file-abc123",
+      "directory_id://dir-xyz789",
+    ]);
+  });
+
+  it("returns empty array when no file system selections exist", () => {
+    const file = new File(["dummy"], "document.pdf");
+    const values = [
+      "https://example.com/document.pdf",
+      file,
+      "/relative/path.pdf",
+    ];
+
+    const result = getSelectedFileIds(values);
+
+    expect(result).toEqual([]);
+  });
+
+  it("returns all items when all are file system selections", () => {
+    const values = [
+      "file_id://file-abc123",
+      "file_id://file-def456",
+      "directory_id://dir-xyz789",
+    ];
+
+    const result = getSelectedFileIds(values);
+
+    expect(result).toEqual(values);
+  });
+
+  it("preserves order of file system selections", () => {
+    const values = [
+      "directory_id://dir-first",
+      "file_id://file-second",
+      "file_id://file-third",
+    ];
+
+    const result = getSelectedFileIds(values);
+
+    expect(result).toEqual([
+      "directory_id://dir-first",
+      "file_id://file-second",
+      "file_id://file-third",
+    ]);
   });
 });

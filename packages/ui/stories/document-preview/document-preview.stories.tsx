@@ -139,3 +139,75 @@ export const WithSelectFile: Story = {
     </div>
   ),
 };
+
+export const FileSystemDirectory: Story = {
+  name: "File System - Directory",
+  args: {
+    allowMultiple: true,
+    value: [
+      {
+        content: "directory_id://dir-xyz789ghi012",
+        fileName: "Project Documents",
+        id: "dir-002",
+      },
+    ],
+  },
+  render: (args) => (
+    <div className="space-y-4">
+      <div className="p-4 bg-amber-50 rounded-lg mx-4 mt-4">
+        <p className="text-amber-700 text-sm">
+          <strong>Note:</strong> A single directory selected from the file
+          system displays as a centered placeholder with a folder icon.
+        </p>
+      </div>
+      <UploadStateContainer {...args} />
+    </div>
+  ),
+};
+
+export const FileSystemMultipleFiles: Story = {
+  name: "File System - Multiple Files",
+  args: {
+    allowMultiple: true,
+    value: [
+      {
+        content: "file_id://file-abc123def456",
+        fileName: "quarterly-report.pdf",
+        id: "dfl-001",
+      },
+      {
+        content: "file_id://file-ghi789jkl012",
+        fileName: "financial-summary.xlsx",
+        id: "dfl-002",
+      },
+      {
+        content: "file_id://file-mno345pqr678",
+        fileName: "meeting-notes.docx",
+        id: "dfl-003",
+      },
+      {
+        content: "file_id://file-stu901vwx234",
+        fileName: "product-roadmap.pdf",
+        id: "dfl-004",
+      },
+    ],
+    onSelectFile: (selectedFileIds: string[]) => {
+      console.log("Already selected file IDs:", selectedFileIds);
+      alert(
+        `Add files clicked!\n\nAlready selected (${selectedFileIds.length} files):\n${selectedFileIds.join("\n")}\n\nUse these IDs to filter out duplicates in your file picker.`
+      );
+    },
+  },
+  render: (args) => (
+    <div className="space-y-4">
+      <div className="p-4 bg-amber-50 rounded-lg mx-4 mt-4">
+        <p className="text-amber-700 text-sm">
+          <strong>Note:</strong> The &quot;Add files&quot; button passes
+          currently selected file IDs to the callback, allowing you to filter
+          out duplicates in your file picker.
+        </p>
+      </div>
+      <UploadStateContainer {...args} />
+    </div>
+  ),
+};

@@ -1,12 +1,13 @@
-import { File, Minus, Trash2 } from "lucide-react";
+import { File, Folder, Minus, Trash2 } from "lucide-react";
 import type { MouseEvent, KeyboardEvent } from "react";
 import { Button, buttonVariants } from "@/base/button";
 import { ScrollArea, ScrollBar } from "@/base/scroll-area";
 import { ToolTipper } from "@/base/tooltipper";
 import { cn } from "@/lib/utils";
+import type { FileItemType } from "./files";
 
 interface SelectFileBarProps {
-  files: Array<{ fileName: string | null; index: number }>;
+  files: Array<{ fileName: string | null; index: number; type?: FileItemType }>;
   currentIndex: number;
   onSelect: (index: number) => void;
   onRemove: (index: number) => void;
@@ -51,11 +52,21 @@ export const SelectFileBar = ({
             {files.length} {files.length === 1 ? "file" : "files"}
           </span>
         )}
-        {files.map(({ fileName, index }) => {
+        {files.map(({ fileName, index, type }) => {
           const displayName = fileName ?? `File ${index + 1}`;
           // Use composite key for stability
           const key = `${index}-${fileName ?? `file-${index}`}`;
           const isCurrent = index === currentIndex;
+
+          const renderIcon = () => {
+            if (type === "directory") {
+              return <Folder className="size-3 shrink-0" />;
+            }
+            if (type === "file") {
+              return <File className="size-3 shrink-0" />;
+            }
+            return null;
+          };
 
           return (
             <div
@@ -75,6 +86,7 @@ export const SelectFileBar = ({
                 }
               }}
             >
+              {renderIcon()}
               <span
                 className={`whitespace-nowrap text-xs ${
                   isCurrent ? "text-accent-foreground" : "text-muted-foreground"
