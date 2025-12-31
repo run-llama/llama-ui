@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 3.6.0
+
+### Minor Changes
+
+- d0295bc: Adding support for file system files in document preview
+
 ## 3.5.6
 
 ### Patch Changes
