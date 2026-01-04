@@ -104,6 +104,22 @@ export function JsonSchemaEditor({
     setRawJsonValues(nextRaw);
   }, [properties, values]);
 
+  // Initialize boolean fields to false when they are undefined
+  // This ensures boolean fields are always included in the payload
+  useEffect(() => {
+    const updates: Record<string, JSONValue> = {};
+    for (const [key, def] of Object.entries(properties)) {
+      if (def.type === "boolean" && values[key] === undefined) {
+        updates[key] = false;
+      }
+    }
+    if (Object.keys(updates).length > 0) {
+      onChange({ ...values, ...updates });
+    }
+    // Only run when properties change, not on every values change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [properties, onChange]);
+
   const handleValueChange = (key: string, newValue: JSONValue) => {
     onChange({ ...values, [key]: newValue });
   };

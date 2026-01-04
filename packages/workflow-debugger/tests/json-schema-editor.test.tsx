@@ -104,4 +104,21 @@ describe("JsonSchemaEditor (debugger)", () => {
     );
     expect(combobox).toHaveTextContent("True");
   });
+
+  it("initializes undefined boolean fields to false", () => {
+    const onChange = vi.fn();
+    render(
+      <JsonSchemaEditor
+        schema={baseSchema}
+        values={{}}
+        onChange={onChange}
+      />,
+    );
+
+    // Boolean fields should be initialized to false when undefined
+    // This ensures they are always included in the payload (fixes Pydantic validation errors)
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ enabled: false }),
+    );
+  });
 });
