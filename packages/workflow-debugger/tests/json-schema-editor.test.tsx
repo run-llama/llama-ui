@@ -105,7 +105,56 @@ describe("JsonSchemaEditor (debugger)", () => {
     expect(combobox).toHaveTextContent("True");
   });
 
-  it("initializes undefined boolean fields to false", () => {
+  it("initializes required boolean fields to false", () => {
+    const onChange = vi.fn();
+    const schemaWithRequiredBoolean = {
+      properties: {
+        title: { type: "string", title: "Title" },
+        enabled: { type: "boolean", title: "Enabled" },
+      },
+      required: ["title", "enabled"] as string[],
+    };
+
+    render(
+      <JsonSchemaEditor
+        schema={schemaWithRequiredBoolean}
+        values={{}}
+        onChange={onChange}
+      />,
+    );
+
+    // Required boolean fields should be initialized to false when undefined
+    // This ensures they are always included in the payload (fixes Pydantic validation errors)
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ enabled: false }),
+    );
+  });
+
+  it("initializes required nullable boolean fields to null", () => {
+    const onChange = vi.fn();
+    const schemaWithNullableBoolean = {
+      properties: {
+        title: { type: "string", title: "Title" },
+        enabled: { type: "boolean", title: "Enabled", nullable: true },
+      },
+      required: ["title", "enabled"] as string[],
+    };
+
+    render(
+      <JsonSchemaEditor
+        schema={schemaWithNullableBoolean}
+        values={{}}
+        onChange={onChange}
+      />,
+    );
+
+    // Required nullable boolean fields should be initialized to null
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ enabled: null }),
+    );
+  });
+
+  it("does not initialize optional boolean fields", () => {
     const onChange = vi.fn();
     render(
       <JsonSchemaEditor
@@ -115,10 +164,8 @@ describe("JsonSchemaEditor (debugger)", () => {
       />,
     );
 
-    // Boolean fields should be initialized to false when undefined
-    // This ensures they are always included in the payload (fixes Pydantic validation errors)
-    expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ enabled: false }),
-    );
+    // Optional boolean fields should NOT be auto-initialized
+    // (enabled is not in the required array in baseSchema)
+    expect(onChange).not.toHaveBeenCalled();
   });
 });

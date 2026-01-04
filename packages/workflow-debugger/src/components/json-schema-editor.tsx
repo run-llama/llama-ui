@@ -14,6 +14,7 @@ export interface SimpleSchemaProperty {
   type?: string;
   title?: string;
   description?: string;
+  nullable?: boolean;
 }
 
 export interface SimpleSchema {
@@ -104,13 +105,14 @@ export function JsonSchemaEditor({
     setRawJsonValues(nextRaw);
   }, [properties, values]);
 
-  // Initialize boolean fields to false when they are undefined
-  // This ensures boolean fields are always included in the payload
+  // Initialize required boolean fields when they are undefined
+  // This ensures required boolean fields are always included in the payload
   useEffect(() => {
     const updates: Record<string, JSONValue> = {};
     for (const [key, def] of Object.entries(properties)) {
-      if (def.type === "boolean" && values[key] === undefined) {
-        updates[key] = false;
+      if (def.type === "boolean" && values[key] === undefined && required.has(key)) {
+        // For nullable fields, initialize to null; otherwise initialize to false
+        updates[key] = def.nullable ? null : false;
       }
     }
     if (Object.keys(updates).length > 0) {
