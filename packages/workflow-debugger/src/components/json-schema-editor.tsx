@@ -110,7 +110,11 @@ export function JsonSchemaEditor({
   useEffect(() => {
     const updates: Record<string, JSONValue> = {};
     for (const [key, def] of Object.entries(properties)) {
-      if (def.type === "boolean" && values[key] === undefined && required.has(key)) {
+      if (
+        def.type === "boolean" &&
+        values[key] === undefined &&
+        required.has(key)
+      ) {
         // For nullable fields, initialize to null; otherwise initialize to false
         updates[key] = def.nullable ? null : false;
       }
@@ -212,6 +216,19 @@ export function JsonSchemaEditor({
         }
 
         if (fieldType === "boolean") {
+          const isNullable = fieldSchema.nullable === true;
+
+          // Determine current value for display
+          const getCurrentValue = () => {
+            if (values[fieldName] === null) return "null";
+            if (values[fieldName] === true || values[fieldName] === "true")
+              return "true";
+            if (values[fieldName] === false || values[fieldName] === "false")
+              return "false";
+            // For undefined, show empty placeholder if nullable, otherwise default to false
+            return isNullable ? "" : "false";
+          };
+
           return (
             <div key={fieldName} className="space-y-2">
               <label htmlFor={fieldId} className="text-sm font-medium">
@@ -221,14 +238,14 @@ export function JsonSchemaEditor({
                 )}
               </label>
               <Select
-                onValueChange={(value) =>
-                  handleValueChange(fieldName, value === "true")
-                }
-                value={
-                  values[fieldName] === true || values[fieldName] === "true"
-                    ? "true"
-                    : "false"
-                }
+                onValueChange={(value) => {
+                  if (value === "null") {
+                    handleValueChange(fieldName, null);
+                  } else {
+                    handleValueChange(fieldName, value === "true");
+                  }
+                }}
+                value={getCurrentValue()}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select..." />
@@ -236,6 +253,7 @@ export function JsonSchemaEditor({
                 <SelectContent>
                   <SelectItem value="true">True</SelectItem>
                   <SelectItem value="false">False</SelectItem>
+                  {isNullable && <SelectItem value="null">None</SelectItem>}
                 </SelectContent>
               </Select>
               {fieldDescription && (

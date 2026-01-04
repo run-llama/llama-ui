@@ -157,15 +157,78 @@ describe("JsonSchemaEditor (debugger)", () => {
   it("does not initialize optional boolean fields", () => {
     const onChange = vi.fn();
     render(
-      <JsonSchemaEditor
-        schema={baseSchema}
-        values={{}}
-        onChange={onChange}
-      />,
+      <JsonSchemaEditor schema={baseSchema} values={{}} onChange={onChange} />,
     );
 
     // Optional boolean fields should NOT be auto-initialized
     // (enabled is not in the required array in baseSchema)
     expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("nullable boolean shows None option and handles null values", () => {
+    const onChange = vi.fn();
+    const schemaWithNullableBoolean = {
+      properties: {
+        flag: { type: "boolean", title: "Flag", nullable: true },
+      },
+      required: [] as string[],
+    };
+
+    const { rerender } = render(
+      <JsonSchemaEditor
+        schema={schemaWithNullableBoolean}
+        values={{ flag: null }}
+        onChange={onChange}
+      />,
+    );
+
+    // Null value should display as "None"
+    const combobox = screen.getByRole("combobox");
+    expect(combobox).toHaveTextContent("None");
+
+    // Selecting True should set value to true
+    fireEvent.click(combobox);
+    fireEvent.click(screen.getByText("True"));
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ flag: true }),
+    );
+
+    // Rerender with true value
+    rerender(
+      <JsonSchemaEditor
+        schema={schemaWithNullableBoolean}
+        values={{ flag: true }}
+        onChange={onChange}
+      />,
+    );
+    expect(combobox).toHaveTextContent("True");
+
+    // Selecting None should set value to null
+    fireEvent.click(combobox);
+    fireEvent.click(screen.getByText("None"));
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ flag: null }),
+    );
+  });
+
+  it("non-nullable boolean does not show None option", () => {
+    const onChange = vi.fn();
+    render(
+      <JsonSchemaEditor
+        schema={baseSchema}
+        values={{ enabled: false }}
+        onChange={onChange}
+      />,
+    );
+
+    // Open the select dropdown
+    fireEvent.click(screen.getByRole("combobox"));
+
+    // Should have True and False options (use getAllByText since False appears in trigger too)
+    expect(screen.getByText("True")).toBeInTheDocument();
+    expect(screen.getAllByText("False").length).toBeGreaterThan(0);
+
+    // Should NOT have None option
+    expect(screen.queryByText("None")).not.toBeInTheDocument();
   });
 });
