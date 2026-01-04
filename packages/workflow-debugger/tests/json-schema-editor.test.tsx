@@ -59,4 +59,49 @@ describe("JsonSchemaEditor (debugger)", () => {
       expect.objectContaining({ tags: null }),
     );
   });
+
+  it("correctly displays boolean false values (not truthy string conversion)", () => {
+    const onChange = vi.fn();
+    const { rerender } = render(
+      <JsonSchemaEditor
+        schema={baseSchema}
+        values={{ enabled: false }}
+        onChange={onChange}
+      />,
+    );
+
+    // Boolean false should display as "False"
+    const combobox = screen.getByRole("combobox");
+    expect(combobox).toHaveTextContent("False");
+
+    // String "false" should also display as "False" (not "True" due to truthy string)
+    rerender(
+      <JsonSchemaEditor
+        schema={baseSchema}
+        values={{ enabled: "false" as unknown as boolean }}
+        onChange={onChange}
+      />,
+    );
+    expect(combobox).toHaveTextContent("False");
+
+    // Boolean true should display as "True"
+    rerender(
+      <JsonSchemaEditor
+        schema={baseSchema}
+        values={{ enabled: true }}
+        onChange={onChange}
+      />,
+    );
+    expect(combobox).toHaveTextContent("True");
+
+    // String "true" should display as "True"
+    rerender(
+      <JsonSchemaEditor
+        schema={baseSchema}
+        values={{ enabled: "true" as unknown as boolean }}
+        onChange={onChange}
+      />,
+    );
+    expect(combobox).toHaveTextContent("True");
+  });
 });

@@ -206,7 +206,11 @@ export function JsonSchemaEditor({
                 onValueChange={(value) =>
                   handleValueChange(fieldName, value === "true")
                 }
-                value={String(Boolean(values[fieldName]))}
+                value={
+                  values[fieldName] === true || values[fieldName] === "true"
+                    ? "true"
+                    : "false"
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select..." />
