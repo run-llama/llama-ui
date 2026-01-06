@@ -142,6 +142,29 @@ export const FileToolbar = ({
     onFullscreen ||
     onReset;
 
+  const fileNameElement = fileName && (
+    <div className="flex items-center gap-2">
+      <File className="size-4 text-muted-foreground" />
+      <span className="text-xs text-muted-foreground">{fileName}</span>
+    </div>
+  );
+
+  const removeButtonElement = onRemove && (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onRemove}
+          className="size-6 p-0"
+        >
+          <Trash2 className="size-4" />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>Remove file</TooltipContent>
+    </Tooltip>
+  );
+
   return (
     <div
       className={cn(
@@ -149,8 +172,8 @@ export const FileToolbar = ({
         className
       )}
     >
-      {/* Page Navigation - Left Side */}
-      {showPageNavigation && (
+      {/* Left Side - Page Navigation or File Name + Remove */}
+      {showPageNavigation ? (
         <div className="flex items-center gap-1">
           <Tooltip>
             <TooltipTrigger asChild>
@@ -204,138 +227,128 @@ export const FileToolbar = ({
             <TooltipContent>Next page</TooltipContent>
           </Tooltip>
         </div>
+      ) : (
+        <div className="flex items-center gap-2">
+          {fileNameElement}
+          {removeButtonElement}
+        </div>
       )}
 
       {/* Controls - Right Side */}
-      {hasControls && (
-        <div className="flex items-center gap-3 ml-auto">
-          {showPageNavigation &&
-            (showZoomControls || onDownload || onFullscreen || onReset) && (
-              <div className="h-6 w-px bg-border" />
-            )}
-
-          {/* Zoom Controls */}
-          {showZoomControls && (
-            <>
-              <div className="flex items-center gap-1">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleZoomOut}
-                      disabled={scale !== undefined && scale <= 0.5}
-                      className="size-6 p-0"
-                      aria-label="Zoom Out"
-                    >
-                      <Minus className="size-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Zoom out</TooltipContent>
-                </Tooltip>
-                <span className="text-center text-xs text-muted-foreground">
-                  {scale !== undefined ? Math.round(scale * 100) : 0}%
-                </span>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleZoomIn}
-                      disabled={scale !== undefined && scale >= 3.0}
-                      className="size-6 p-0"
-                      aria-label="Zoom In"
-                    >
-                      <Plus className="size-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Zoom in</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleReset}
-                      className="size-6 p-0"
-                      aria-label="Reset Zoom"
-                    >
-                      <RotateCcw className="size-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Reset zoom</TooltipContent>
-                </Tooltip>
-              </div>
-
-              {(onDownload || onFullscreen) && (
+      <div className="flex items-center gap-3 ml-auto">
+        {hasControls && (
+          <>
+            {showPageNavigation &&
+              (showZoomControls || onDownload || onFullscreen || onReset) && (
                 <div className="h-6 w-px bg-border" />
               )}
-            </>
-          )}
 
-          {/* Download Button */}
-          {onDownload && (
-            <>
+            {/* Zoom Controls */}
+            {showZoomControls && (
+              <>
+                <div className="flex items-center gap-1">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleZoomOut}
+                        disabled={scale !== undefined && scale <= 0.5}
+                        className="size-6 p-0"
+                        aria-label="Zoom Out"
+                      >
+                        <Minus className="size-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Zoom out</TooltipContent>
+                  </Tooltip>
+                  <span className="text-center text-xs text-muted-foreground">
+                    {scale !== undefined ? Math.round(scale * 100) : 0}%
+                  </span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleZoomIn}
+                        disabled={scale !== undefined && scale >= 3.0}
+                        className="size-6 p-0"
+                        aria-label="Zoom In"
+                      >
+                        <Plus className="size-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Zoom in</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleReset}
+                        className="size-6 p-0"
+                        aria-label="Reset Zoom"
+                      >
+                        <RotateCcw className="size-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Reset zoom</TooltipContent>
+                  </Tooltip>
+                </div>
+
+                {(onDownload || onFullscreen) && (
+                  <div className="h-6 w-px bg-border" />
+                )}
+              </>
+            )}
+
+            {/* Download Button */}
+            {onDownload && (
+              <>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={onDownload}
+                      className="size-6 p-0"
+                      aria-label="Download PDF"
+                    >
+                      <Download className="size-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Download</TooltipContent>
+                </Tooltip>
+                {onFullscreen && <div className="h-6 w-px bg-border" />}
+              </>
+            )}
+
+            {/* Fullscreen Button */}
+            {onFullscreen && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={onDownload}
+                    onClick={onFullscreen}
                     className="size-6 p-0"
-                    aria-label="Download PDF"
+                    aria-label="Fullscreen"
                   >
-                    <Download className="size-4" />
+                    <Maximize className="size-4" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Download</TooltipContent>
+                <TooltipContent>Fullscreen</TooltipContent>
               </Tooltip>
-              {onFullscreen && <div className="h-6 w-px bg-border" />}
-            </>
-          )}
-
-          {/* Fullscreen Button */}
-          {onFullscreen && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onFullscreen}
-                  className="size-6 p-0"
-                  aria-label="Fullscreen"
-                >
-                  <Maximize className="size-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Fullscreen</TooltipContent>
-            </Tooltip>
-          )}
-        </div>
-      )}
-
-      {/* File name and remove button - Right Side */}
-      <div className="flex items-center gap-2">
-        {fileName && (
-          <>
-            <File className="size-4" />
-            <span className="text-xs text-muted-foreground">{fileName}</span>
+            )}
           </>
         )}
-        {onRemove && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onRemove}
-                className="size-6 p-0"
-              >
-                <Trash2 className="size-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Remove file</TooltipContent>
-          </Tooltip>
+
+        {/* File name and remove button on right side when page navigation is shown */}
+        {showPageNavigation && (
+          <>
+            {fileNameElement}
+            {removeButtonElement}
+          </>
         )}
       </div>
     </div>
