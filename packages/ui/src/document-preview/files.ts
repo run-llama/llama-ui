@@ -181,3 +181,31 @@ export const getSelectedFileIds = (values: (File | string)[]): string[] => {
       typeof content === "string" && isFileSystemSelection(content)
   );
 };
+
+/**
+ * Checks if a file has page controls (like PDF page navigation).
+ * @param content - File object or string content
+ * @returns true if the file type supports page controls
+ */
+export const hasPageControls = (content: File | string): boolean => {
+  const { mimeType, extension } = getFileTypeInfo(content);
+  return mimeType === "application/pdf" || extension === "pdf";
+};
+
+/**
+ * Resolves the fileName to display in the preview toolbar.
+ * For multi-file mode, only shows fileName for files without page controls.
+ * @param allowMultiple - Whether multiple files are allowed
+ * @param content - Current file content
+ * @param fileName - The file name to potentially display
+ * @returns The fileName to display, or undefined to hide it
+ */
+export const resolvePreviewFileName = (
+  allowMultiple: boolean,
+  content: File | string,
+  fileName: string | undefined
+): string | undefined => {
+  if (!allowMultiple) return fileName;
+  // For multi-file mode, only hide fileName for files with page controls (PDFs)
+  return hasPageControls(content) ? undefined : fileName;
+};
