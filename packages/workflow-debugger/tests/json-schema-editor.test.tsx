@@ -258,7 +258,9 @@ describe("JsonSchemaEditor (debugger)", () => {
 
     // Should render as a boolean select dropdown, NOT a JSON textarea
     // The label should NOT have "(JSON)" suffix
-    expect(screen.queryByLabelText(/Absolute Value \(JSON\)/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText(/Absolute Value \(JSON\)/i),
+    ).not.toBeInTheDocument();
 
     // Should have a combobox for the boolean field
     const comboboxes = screen.getAllByRole("combobox");
