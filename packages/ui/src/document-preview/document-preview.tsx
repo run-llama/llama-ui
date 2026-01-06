@@ -13,6 +13,7 @@ import {
   getSelectedFileIds,
   isFileSystemSelection,
   resolveFileName,
+  resolvePreviewFileName,
 } from "./files";
 import { FileObjectPreview } from "./previews/file-object-preview";
 import {
@@ -476,7 +477,11 @@ export function DocumentPreview(props: DocumentPreviewProps) {
         {currentValue && (
           <DocumentPreviewItem
             value={currentValue}
-            fileName={allowMultiple ? undefined : currentFileName}
+            fileName={resolvePreviewFileName(
+              allowMultiple,
+              currentValue,
+              currentFileName
+            )}
             onRemove={() => handleRemoveAt(currentPreviewIndex)}
             allowRemoval={allowRemoval && !allowMultiple}
             highlights={props.highlights}

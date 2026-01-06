@@ -245,7 +245,7 @@ export function SheetPreview({
     <>
       <div className={cn("flex h-full flex-col", className)}>
         <FileToolbar
-          fileName={fileName ?? "spreadsheet.xlsx"}
+          fileName={fileName}
           onFullscreen={handleFullscreen}
           scale={scale}
           onScaleChange={handleScaleChange}
@@ -256,12 +256,12 @@ export function SheetPreview({
       <FullscreenDialog
         open={isFullscreenOpen}
         onOpenChange={setIsFullscreenOpen}
-        title={fileName ?? "spreadsheet.xlsx"}
+        title={fileName ?? "Spreadsheet"}
         maxWidth="max-w-[95vw]"
       >
         <div className="flex h-full flex-col">
           <FileToolbar
-            fileName={fileName ?? "spreadsheet.xlsx"}
+            fileName={fileName}
             onFullscreen={undefined}
             scale={fullscreenScale}
             onScaleChange={handleFullscreenScaleChange}
