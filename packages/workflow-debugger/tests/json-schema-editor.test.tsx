@@ -231,4 +231,103 @@ describe("JsonSchemaEditor (debugger)", () => {
     // Should NOT have None option
     expect(screen.queryByText("None")).not.toBeInTheDocument();
   });
+
+  it("handles anyOf nullable boolean pattern from Pydantic (bool | None)", () => {
+    // This is the exact schema Pydantic generates for `field: bool | None = None`
+    const pydanticSchema = {
+      properties: {
+        a: { type: "integer", title: "A" },
+        b: { type: "integer", title: "B" },
+        absolute_value: {
+          anyOf: [{ type: "boolean" }, { type: "null" }],
+          default: null,
+          title: "Absolute Value",
+        },
+      },
+      required: ["a", "b"] as string[],
+    };
+
+    const onChange = vi.fn();
+    render(
+      <JsonSchemaEditor
+        schema={pydanticSchema as any}
+        values={{ a: 1, b: 2, absolute_value: null }}
+        onChange={onChange}
+      />,
+    );
+
+    // Should render as a boolean select dropdown, NOT a JSON textarea
+    // The label should NOT have "(JSON)" suffix
+    expect(screen.queryByLabelText(/Absolute Value \(JSON\)/i)).not.toBeInTheDocument();
+
+    // Should have a combobox for the boolean field
+    const comboboxes = screen.getAllByRole("combobox");
+    expect(comboboxes.length).toBe(1);
+
+    // Open the dropdown and verify it has True/False/None options
+    fireEvent.click(comboboxes[0]);
+    expect(screen.getByText("True")).toBeInTheDocument();
+    expect(screen.getByText("False")).toBeInTheDocument();
+    expect(screen.getByText("None")).toBeInTheDocument();
+  });
+
+  it("handles anyOf nullable integer pattern from Pydantic (int | None)", () => {
+    // Pydantic generates this for `field: int | None = None`
+    const pydanticSchema = {
+      properties: {
+        count: {
+          anyOf: [{ type: "integer" }, { type: "null" }],
+          default: null,
+          title: "Count",
+        },
+      },
+      required: [] as string[],
+    };
+
+    const onChange = vi.fn();
+    render(
+      <JsonSchemaEditor
+        schema={pydanticSchema as any}
+        values={{ count: 5 }}
+        onChange={onChange}
+      />,
+    );
+
+    // Should render as a number input, NOT a JSON textarea
+    expect(screen.queryByLabelText(/Count \(JSON\)/i)).not.toBeInTheDocument();
+
+    const input = screen.getByLabelText(/Count/i);
+    expect(input).toHaveAttribute("type", "number");
+    expect(input).toHaveValue(5);
+  });
+
+  it("handles anyOf nullable string pattern from Pydantic (str | None)", () => {
+    // Pydantic generates this for `field: str | None = None`
+    const pydanticSchema = {
+      properties: {
+        name: {
+          anyOf: [{ type: "string" }, { type: "null" }],
+          default: null,
+          title: "Name",
+        },
+      },
+      required: [] as string[],
+    };
+
+    const onChange = vi.fn();
+    render(
+      <JsonSchemaEditor
+        schema={pydanticSchema as any}
+        values={{ name: "test" }}
+        onChange={onChange}
+      />,
+    );
+
+    // Should render as a text input, NOT a JSON textarea with "(JSON)" label
+    expect(screen.queryByLabelText(/Name \(JSON\)/i)).not.toBeInTheDocument();
+
+    const input = screen.getByLabelText(/Name/i);
+    expect(input.tagName.toLowerCase()).toBe("textarea");
+    expect(input).toHaveValue("test");
+  });
 });
