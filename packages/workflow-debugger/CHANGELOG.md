@@ -1,5 +1,13 @@
 # @llamaindex/workflow-debugger
 
+## 0.2.14
+
+### Patch Changes
+
+- 2a47997: Fix boolean field handling in workflow debugger schema editor to support nullable boolean types.
+- Updated dependencies [2a47997]
+  - @llamaindex/ui@3.6.1
+
 ## 0.2.13
 
 ### Patch Changes

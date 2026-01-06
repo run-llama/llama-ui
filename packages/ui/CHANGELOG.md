@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 3.6.1
+
+### Patch Changes
+
+- 2a47997: Fix workflow store handling of failed workflow results to read the json result data from error HTTP responses.
+
 ## 3.6.0
 
 ### Minor Changes
