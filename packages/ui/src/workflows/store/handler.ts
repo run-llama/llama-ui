@@ -103,13 +103,43 @@ export function createActions(state: HandlerState, client: Client) {
       if (!resolvedHandlerId) return;
 
       try {
-        const data = await getHandlersByHandlerId({
+        const response = await getHandlersByHandlerId({
           client: client,
           path: { handler_id: resolvedHandlerId },
         });
-        const updated = createState(data.data ?? {});
 
-        Object.assign(state, updated);
+        // hey-api client with ThrowOnError=false returns { data, error }
+        // For 500 responses, data is undefined and error contains the response body
+        // The server returns 500 for failed handlers but still includes valid handler data
+        if (response.error) {
+          const errorBody = response.error as unknown;
+          // Check if error body is actually valid handler data
+          if (
+            typeof errorBody === "object" &&
+            errorBody !== null &&
+            "handler_id" in errorBody &&
+            "status" in errorBody
+          ) {
+            // Use the handler data from the 500 response
+            const updated = createState(errorBody as Partial<RawHandler>);
+            Object.assign(state, updated);
+            return;
+          }
+          // Otherwise it's a real API error
+          const errorDetail =
+            typeof errorBody === "object" &&
+            errorBody !== null &&
+            "detail" in errorBody
+              ? String((errorBody as { detail: unknown }).detail)
+              : String(errorBody);
+          state.loadingError = errorDetail;
+          return;
+        }
+
+        if (response.data) {
+          const updated = createState(response.data);
+          Object.assign(state, updated);
+        }
       } catch (error) {
         state.loadingError =
           error instanceof Error ? error.message : String(error);

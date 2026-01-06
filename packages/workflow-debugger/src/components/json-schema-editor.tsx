@@ -14,6 +14,41 @@ export interface SimpleSchemaProperty {
   type?: string;
   title?: string;
   description?: string;
+  nullable?: boolean;
+  anyOf?: Array<{ type?: string }>;
+  default?: unknown;
+}
+
+/**
+ * Normalizes a schema property to extract type and nullable info.
+ * Handles Pydantic's anyOf pattern for nullable types like `bool | None`:
+ *   {"anyOf": [{"type": "boolean"}, {"type": "null"}], "default": null}
+ */
+function normalizeSchemaProperty(prop: SimpleSchemaProperty): {
+  type: string;
+  nullable: boolean;
+} {
+  // If type is directly specified, use it
+  if (prop.type) {
+    return { type: prop.type, nullable: prop.nullable ?? false };
+  }
+
+  // Handle anyOf pattern (Pydantic nullable types)
+  if (prop.anyOf && Array.isArray(prop.anyOf)) {
+    const types = prop.anyOf
+      .map((item) => item.type)
+      .filter((t): t is string => typeof t === "string");
+
+    const hasNull = types.includes("null");
+    const nonNullTypes = types.filter((t) => t !== "null");
+
+    if (nonNullTypes.length === 1) {
+      return { type: nonNullTypes[0], nullable: hasNull };
+    }
+  }
+
+  // Fallback to unknown/complex type
+  return { type: "unknown", nullable: false };
 }
 
 export interface SimpleSchema {
@@ -95,7 +130,8 @@ export function JsonSchemaEditor({
   useEffect(() => {
     const nextRaw: Record<string, string> = { ...rawJsonValues };
     for (const [key, def] of Object.entries(properties)) {
-      if (!isComplexType(def.type)) continue;
+      const { type: normalizedType } = normalizeSchemaProperty(def);
+      if (!isComplexType(normalizedType)) continue;
       if (nextRaw[key] === undefined) {
         const v = values[key];
         nextRaw[key] = v !== undefined ? JSON.stringify(v, null, 2) : "";
@@ -103,6 +139,28 @@ export function JsonSchemaEditor({
     }
     setRawJsonValues(nextRaw);
   }, [properties, values]);
+
+  // Initialize required boolean fields when they are undefined
+  // This ensures required boolean fields are always included in the payload
+  useEffect(() => {
+    const updates: Record<string, JSONValue> = {};
+    for (const [key, def] of Object.entries(properties)) {
+      const { type: normalizedType, nullable } = normalizeSchemaProperty(def);
+      if (
+        normalizedType === "boolean" &&
+        values[key] === undefined &&
+        required.has(key)
+      ) {
+        // For nullable fields, initialize to null; otherwise initialize to false
+        updates[key] = nullable ? null : false;
+      }
+    }
+    if (Object.keys(updates).length > 0) {
+      onChange({ ...values, ...updates });
+    }
+    // Only run when properties change, not on every values change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [properties, onChange]);
 
   const handleValueChange = (key: string, newValue: JSONValue) => {
     onChange({ ...values, [key]: newValue });
@@ -117,7 +175,8 @@ export function JsonSchemaEditor({
       {items.map(([fieldName, fieldSchema]) => {
         const fieldId = `field-${fieldName}`;
         const fieldTitle = fieldSchema.title || fieldName;
-        const fieldType = fieldSchema.type || "string";
+        const { type: fieldType, nullable: isNullable } =
+          normalizeSchemaProperty(fieldSchema);
         const fieldDescription = fieldSchema.description || "";
 
         if (fieldType === "string") {
@@ -194,6 +253,17 @@ export function JsonSchemaEditor({
         }
 
         if (fieldType === "boolean") {
+          // Determine current value for display
+          const getCurrentValue = () => {
+            if (values[fieldName] === null) return "null";
+            if (values[fieldName] === true || values[fieldName] === "true")
+              return "true";
+            if (values[fieldName] === false || values[fieldName] === "false")
+              return "false";
+            // For undefined, show empty placeholder if nullable, otherwise default to false
+            return isNullable ? "" : "false";
+          };
+
           return (
             <div key={fieldName} className="space-y-2">
               <label htmlFor={fieldId} className="text-sm font-medium">
@@ -203,10 +273,14 @@ export function JsonSchemaEditor({
                 )}
               </label>
               <Select
-                onValueChange={(value) =>
-                  handleValueChange(fieldName, value === "true")
-                }
-                value={String(Boolean(values[fieldName]))}
+                onValueChange={(value) => {
+                  if (value === "null") {
+                    handleValueChange(fieldName, null);
+                  } else {
+                    handleValueChange(fieldName, value === "true");
+                  }
+                }}
+                value={getCurrentValue()}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select..." />
@@ -214,6 +288,7 @@ export function JsonSchemaEditor({
                 <SelectContent>
                   <SelectItem value="true">True</SelectItem>
                   <SelectItem value="false">False</SelectItem>
+                  {isNullable && <SelectItem value="null">None</SelectItem>}
                 </SelectContent>
               </Select>
               {fieldDescription && (
