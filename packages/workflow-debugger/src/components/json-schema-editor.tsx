@@ -15,6 +15,40 @@ export interface SimpleSchemaProperty {
   title?: string;
   description?: string;
   nullable?: boolean;
+  anyOf?: Array<{ type?: string }>;
+  default?: unknown;
+}
+
+/**
+ * Normalizes a schema property to extract type and nullable info.
+ * Handles Pydantic's anyOf pattern for nullable types like `bool | None`:
+ *   {"anyOf": [{"type": "boolean"}, {"type": "null"}], "default": null}
+ */
+function normalizeSchemaProperty(prop: SimpleSchemaProperty): {
+  type: string;
+  nullable: boolean;
+} {
+  // If type is directly specified, use it
+  if (prop.type) {
+    return { type: prop.type, nullable: prop.nullable ?? false };
+  }
+
+  // Handle anyOf pattern (Pydantic nullable types)
+  if (prop.anyOf && Array.isArray(prop.anyOf)) {
+    const types = prop.anyOf
+      .map((item) => item.type)
+      .filter((t): t is string => typeof t === "string");
+
+    const hasNull = types.includes("null");
+    const nonNullTypes = types.filter((t) => t !== "null");
+
+    if (nonNullTypes.length === 1) {
+      return { type: nonNullTypes[0], nullable: hasNull };
+    }
+  }
+
+  // Fallback to unknown/complex type
+  return { type: "unknown", nullable: false };
 }
 
 export interface SimpleSchema {
@@ -96,7 +130,8 @@ export function JsonSchemaEditor({
   useEffect(() => {
     const nextRaw: Record<string, string> = { ...rawJsonValues };
     for (const [key, def] of Object.entries(properties)) {
-      if (!isComplexType(def.type)) continue;
+      const { type: normalizedType } = normalizeSchemaProperty(def);
+      if (!isComplexType(normalizedType)) continue;
       if (nextRaw[key] === undefined) {
         const v = values[key];
         nextRaw[key] = v !== undefined ? JSON.stringify(v, null, 2) : "";
@@ -110,13 +145,14 @@ export function JsonSchemaEditor({
   useEffect(() => {
     const updates: Record<string, JSONValue> = {};
     for (const [key, def] of Object.entries(properties)) {
+      const { type: normalizedType, nullable } = normalizeSchemaProperty(def);
       if (
-        def.type === "boolean" &&
+        normalizedType === "boolean" &&
         values[key] === undefined &&
         required.has(key)
       ) {
         // For nullable fields, initialize to null; otherwise initialize to false
-        updates[key] = def.nullable ? null : false;
+        updates[key] = nullable ? null : false;
       }
     }
     if (Object.keys(updates).length > 0) {
@@ -139,7 +175,8 @@ export function JsonSchemaEditor({
       {items.map(([fieldName, fieldSchema]) => {
         const fieldId = `field-${fieldName}`;
         const fieldTitle = fieldSchema.title || fieldName;
-        const fieldType = fieldSchema.type || "string";
+        const { type: fieldType, nullable: isNullable } =
+          normalizeSchemaProperty(fieldSchema);
         const fieldDescription = fieldSchema.description || "";
 
         if (fieldType === "string") {
@@ -216,8 +253,6 @@ export function JsonSchemaEditor({
         }
 
         if (fieldType === "boolean") {
-          const isNullable = fieldSchema.nullable === true;
-
           // Determine current value for display
           const getCurrentValue = () => {
             if (values[fieldName] === null) return "null";

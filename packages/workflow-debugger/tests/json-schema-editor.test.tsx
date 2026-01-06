@@ -268,7 +268,8 @@ describe("JsonSchemaEditor (debugger)", () => {
     fireEvent.click(comboboxes[0]);
     expect(screen.getByText("True")).toBeInTheDocument();
     expect(screen.getByText("False")).toBeInTheDocument();
-    expect(screen.getByText("None")).toBeInTheDocument();
+    // "None" appears twice: in the trigger (current value) and in the dropdown
+    expect(screen.getAllByText("None").length).toBeGreaterThanOrEqual(1);
   });
 
   it("handles anyOf nullable integer pattern from Pydantic (int | None)", () => {
