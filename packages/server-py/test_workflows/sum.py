@@ -9,7 +9,6 @@ logger = getLogger(__name__)
 class SumInput(StartEvent):
     a: int
     b: int
-    absolute_value: bool
 
 class ProgressEvent(Event):
     step: str
@@ -51,7 +50,7 @@ class SumWorkflow(Workflow):
                 message="Calculating result"
             )
         )
-        result = abs(ev.a + ev.b) if ev.absolute_value else ev.a + ev.b
+        result = ev.a + ev.b
         return CalculateResponseEvent(result=result)
 
     @step

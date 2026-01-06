@@ -9,6 +9,8 @@ logger = getLogger(__name__)
 class SubtractInput(StartEvent):
     a: int
     b: int
+    absolute_value: bool | None = None
+
 
 class ProgressEvent(Event):
     step: str
@@ -18,6 +20,7 @@ class ProgressEvent(Event):
 class CalculateRequestEvent(Event):
     a: int
     b: int
+    absolute_value: bool | None = None
 
 class CalculateResponseEvent(Event):
     result: int
@@ -37,7 +40,7 @@ class SubtractWorkflow(Workflow):
             )
         )
         await asyncio.sleep(1.0)
-        return CalculateRequestEvent(a=ev.a, b=ev.b)
+        return CalculateRequestEvent(a=ev.a, b=ev.b, absolute_value=ev.absolute_value)
     
     @step
     async def Subtract(self, ctx: Context, ev: CalculateRequestEvent) -> CalculateResponseEvent:
@@ -51,6 +54,8 @@ class SubtractWorkflow(Workflow):
             )
         )
         result = ev.a - ev.b
+        if ev.absolute_value:
+            result = abs(result)
         return CalculateResponseEvent(result=result)
 
     @step
