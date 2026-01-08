@@ -251,7 +251,11 @@ export function FileUploader({
             {/* Input Fields */}
             {inputFields?.map((field) => (
               <div key={field.key} className="space-y-2">
-                <Label htmlFor={field.key} label={field.label} required={field.required} />
+                <Label
+                  htmlFor={field.key}
+                  label={field.label}
+                  required={field.required}
+                />
                 <Input
                   id={field.key}
                   value={fieldValues[field.key] || ""}
@@ -269,7 +273,11 @@ export function FileUploader({
 
             {/* File Upload Area */}
             <div className="space-y-2">
-              <Label htmlFor={multiple ? "files" : "file"} label={multiple ? "Files" : "File"} required />
+              <Label
+                htmlFor={multiple ? "files" : "file"}
+                label={multiple ? "Files" : "File"}
+                required
+              />
               {multiple ? (
                 <FileDropzone
                   multiple
