@@ -183,7 +183,11 @@ export function JsonSchemaEditor({
         if (fieldType === "string") {
           return (
             <div key={fieldName} className="space-y-2">
-              <Label htmlFor={fieldId} label={fieldTitle} required={required.has(fieldName)} />
+              <Label
+                htmlFor={fieldId}
+                label={fieldTitle}
+                required={required.has(fieldName)}
+              />
               <Textarea
                 id={fieldId}
                 value={(values[fieldName] as string) || ""}
@@ -205,7 +209,11 @@ export function JsonSchemaEditor({
         if (fieldType === "number" || fieldType === "integer") {
           return (
             <div key={fieldName} className="space-y-2">
-              <Label htmlFor={fieldId} label={fieldTitle} required={required.has(fieldName)} />
+              <Label
+                htmlFor={fieldId}
+                label={fieldTitle}
+                required={required.has(fieldName)}
+              />
               <Input
                 id={fieldId}
                 type="number"
@@ -257,7 +265,11 @@ export function JsonSchemaEditor({
 
           return (
             <div key={fieldName} className="space-y-2">
-              <Label htmlFor={fieldId} label={fieldTitle} required={required.has(fieldName)} />
+              <Label
+                htmlFor={fieldId}
+                label={fieldTitle}
+                required={required.has(fieldName)}
+              />
               <Select
                 onValueChange={(value) => {
                   if (value === "null") {
@@ -297,7 +309,11 @@ export function JsonSchemaEditor({
 
         return (
           <div key={fieldName} className="space-y-2">
-            <Label htmlFor={fieldId} label={fieldTitle} required={required.has(fieldName)} />
+            <Label
+              htmlFor={fieldId}
+              label={fieldTitle}
+              required={required.has(fieldName)}
+            />
             <Textarea
               id={fieldId}
               value={raw}

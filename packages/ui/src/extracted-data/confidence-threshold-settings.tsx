@@ -37,7 +37,10 @@ export function ConfidenceThresholdSettings({
         className
       )}
     >
-      <Label htmlFor="confidenceThreshold" label={`Confidence Threshold (${roundedConfidenceThreshold}%)`} />
+      <Label
+        htmlFor="confidenceThreshold"
+        label={`Confidence Threshold (${roundedConfidenceThreshold}%)`}
+      />
       <Slider
         className="w-full max-w-md"
         name="confidenceThreshold"
