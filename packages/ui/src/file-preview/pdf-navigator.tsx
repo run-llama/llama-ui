@@ -74,7 +74,7 @@ export const PdfNavigator = (props: PdfNavigatorProps) => {
 
   return (
     <div className={cn("sticky top-0 w-full z-50 text-xs", className)}>
-      <div className="bg-white border px-6 flex items-center justify-between gap-3 h-10">
+      <div className="bg-white border px-6 flex items-center justify-between gap-3 h-12">
         <div className="flex items-center gap-2">
           <File className="size-4" />
           <span className="text-xs text-muted-foreground">{fileName}</span>
