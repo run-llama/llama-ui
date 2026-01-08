@@ -174,9 +174,7 @@ export function RunDetailsPanel({
               </h4>
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <Label htmlFor="hide-internal" className="text-xs">
-                    Hide internal
-                  </Label>
+                  <Label htmlFor="hide-internal" label="Hide internal" />
                   <Switch
                     id="hide-internal"
                     checked={hideInternal}
