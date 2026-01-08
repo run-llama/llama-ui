@@ -96,7 +96,7 @@ export const PdfPreviewImpl = ({
     logger.error("Error loading PDF", error);
     setLoadError(
       error.message ||
-        "Failed to load PDF. The file may be corrupted or too large."
+      "Failed to load PDF. The file may be corrupted or too large."
     );
     setIsLoading(false);
   }, []);
@@ -463,9 +463,8 @@ export const PdfPreviewImpl = ({
                 lastLoadedUrl.current = null;
                 setFile(null);
               }}
-            >
-              Retry
-            </Button>
+              label="Retry"
+            />
           </div>
         </div>
       </div>
@@ -625,9 +624,9 @@ function VirtualizedPageList({
             style={
               !isVisible && pageHeight
                 ? {
-                    height: `${pageHeight}px`,
-                    minHeight: `${pageHeight}px`,
-                  }
+                  height: `${pageHeight}px`,
+                  minHeight: `${pageHeight}px`,
+                }
                 : undefined
             }
           >
@@ -660,10 +659,10 @@ function VirtualizedPageList({
                 style={
                   pageHeight
                     ? {
-                        width: "100%",
-                        height: `${pageHeight}px`,
-                        minHeight: `${pageHeight}px`,
-                      }
+                      width: "100%",
+                      height: `${pageHeight}px`,
+                      minHeight: `${pageHeight}px`,
+                    }
                     : { minHeight: `${estimatedPageHeight}px` }
                 }
               >

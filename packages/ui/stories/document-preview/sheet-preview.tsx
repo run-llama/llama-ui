@@ -291,9 +291,7 @@ const ErrorState = ({
   <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center">
     <TriangleAlert className="size-6 text-amber-500" />
     <p className="text-xs text-muted-foreground">{children}</p>
-    <Button variant="outline" size="xs" onClick={onDownload}>
-      Download to view
-    </Button>
+    <Button variant="outline" size="sm" onClick={onDownload} label="Download to view" />
   </div>
 );
 
@@ -302,8 +300,6 @@ const EmptyState = ({ onDownload }: { onDownload: () => void }) => (
     <p className="text-xs text-muted-foreground">
       This spreadsheet is empty or could not be parsed.
     </p>
-    <Button variant="outline" size="xs" onClick={onDownload}>
-      Download to view
-    </Button>
+    <Button variant="outline" size="sm" onClick={onDownload} label="Download to view" />
   </div>
 );

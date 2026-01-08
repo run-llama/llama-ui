@@ -51,25 +51,17 @@ export function UploadProgress({ files, onClose }: UploadProgressProps) {
             {showOverallProgress && (
               <Button
                 variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0"
+                size="icon-sm"
+                startIcon={<ChevronDown className={`h-4 w-4 transition-transform duration-200 ease-in-out ${isCollapsed ? "rotate-180" : "rotate-0"}`} />}
                 onClick={() => setIsCollapsed(!isCollapsed)}
-              >
-                <ChevronDown
-                  className={`h-4 w-4 transition-transform duration-200 ease-in-out ${
-                    isCollapsed ? "rotate-180" : "rotate-0"
-                  }`}
-                />
-              </Button>
+              />
             )}
             <Button
               variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0"
+              size="icon-sm"
+              startIcon={<X />}
               onClick={onClose}
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            />
           </div>
         </div>
 
@@ -78,11 +70,10 @@ export function UploadProgress({ files, onClose }: UploadProgressProps) {
           <>
             <Progress
               value={stats.totalProgress}
-              className={`h-2 mb-2 ${
-                stats.uploading === 0 && stats.completed > 0
-                  ? "[&>[data-slot=progress-indicator]]:bg-green-500"
-                  : ""
-              }`}
+              className={`h-2 mb-2 ${stats.uploading === 0 && stats.completed > 0
+                ? "[&>[data-slot=progress-indicator]]:bg-green-500"
+                : ""
+                }`}
             />
 
             <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -117,18 +108,10 @@ export function UploadProgress({ files, onClose }: UploadProgressProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full h-6 text-xs transition-all duration-200 hover:bg-accent"
+                startIcon={<ChevronDown className={`h-3 w-3 mr-1 transition-transform duration-200 ${showAll ? "rotate-180" : "rotate-0"}`} />}
+                label={showAll ? "Show Less" : `View ${files.length - maxVisible} More Files`}
                 onClick={() => setShowAll(!showAll)}
-              >
-                <ChevronDown
-                  className={`h-3 w-3 mr-1 transition-transform duration-200 ${
-                    showAll ? "rotate-180" : "rotate-0"
-                  }`}
-                />
-                {showAll
-                  ? "Show Less"
-                  : `View ${files.length - maxVisible} More Files`}
-              </Button>
+              />
             </div>
           )}
         </div>
@@ -154,15 +137,14 @@ function FileProgressItem({
       <div className="space-y-1">
         <div className="flex items-center gap-2 text-xs">
           <div
-            className={`w-2 h-2 rounded-full flex-shrink-0 ${
-              status === "error"
-                ? "bg-destructive"
-                : status === "completed"
-                  ? "bg-green-500"
-                  : status === "canceled"
-                    ? "bg-muted-foreground"
-                    : "bg-primary animate-pulse"
-            }`}
+            className={`w-2 h-2 rounded-full flex-shrink-0 ${status === "error"
+              ? "bg-destructive"
+              : status === "completed"
+                ? "bg-green-500"
+                : status === "canceled"
+                  ? "bg-muted-foreground"
+                  : "bg-primary animate-pulse"
+              }`}
           />
           <span className="font-medium truncate flex-1" title={file.name}>
             {file.name}
@@ -201,29 +183,27 @@ function FileProgressItem({
         {/* Progress Bar */}
         <Progress
           value={Math.min(progress, 100)}
-          className={`h-2 transition-all duration-300 ${
-            status === "error"
-              ? "[&>[data-slot=progress-indicator]]:bg-destructive"
-              : status === "completed"
-                ? "[&>[data-slot=progress-indicator]]:bg-green-500"
-                : status === "canceled"
-                  ? "[&>[data-slot=progress-indicator]]:bg-muted-foreground"
-                  : ""
-          }`}
+          className={`h-2 transition-all duration-300 ${status === "error"
+            ? "[&>[data-slot=progress-indicator]]:bg-destructive"
+            : status === "completed"
+              ? "[&>[data-slot=progress-indicator]]:bg-green-500"
+              : status === "canceled"
+                ? "[&>[data-slot=progress-indicator]]:bg-muted-foreground"
+                : ""
+            }`}
         />
 
         {/* Status */}
         <div className="flex items-center justify-between text-xs">
           <span
-            className={`${
-              status === "error"
-                ? "text-destructive"
-                : status === "completed"
-                  ? "text-green-600"
-                  : status === "canceled"
-                    ? "text-muted-foreground"
-                    : "text-muted-foreground"
-            }`}
+            className={`${status === "error"
+              ? "text-destructive"
+              : status === "completed"
+                ? "text-green-600"
+                : status === "canceled"
+                  ? "text-muted-foreground"
+                  : "text-muted-foreground"
+              }`}
           >
             {status === "error" && error
               ? error

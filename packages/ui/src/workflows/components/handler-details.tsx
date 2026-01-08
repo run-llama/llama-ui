@@ -68,9 +68,7 @@ export function HandlerDetails({ handlerId, onBack }: HandlerDetailsProps) {
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Handler Details</h2>
         {onBack && (
-          <Button onClick={onBack} variant="outline">
-            Back to List
-          </Button>
+          <Button onClick={onBack} variant="outline" label="Back to List" />
         )}
       </div>
 

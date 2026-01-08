@@ -231,13 +231,13 @@ export function FileUploader({
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
           {trigger || (
-            <Button className="cursor-pointer" disabled={disabled}>
-              {isProcessing && (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              )}
-              <Upload className="h-4 w-4" />
-              {titleOrDefault}
-            </Button>
+            <Button
+              disabled={disabled}
+              startIcon={<Upload className="h-4 w-4" />}
+              label={titleOrDefault}
+              isLoading={isProcessing}
+              onClick={() => setIsOpen(true)}
+            />
           )}
         </DialogTrigger>
         <DialogContent className="sm:max-w-md">
@@ -312,14 +312,14 @@ export function FileUploader({
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button onClick={handleUpload} disabled={!canSubmit()}>
-              {selectedFiles.length > 1
+            <Button variant="outline" label="Cancel" onClick={handleClose} />
+            <Button
+              onClick={handleUpload}
+              disabled={!canSubmit()}
+              label={selectedFiles.length > 1
                 ? `Upload ${selectedFiles.length} Files & Process`
                 : "Upload & Process"}
-            </Button>
+            />
           </DialogFooter>
         </DialogContent>
       </Dialog>

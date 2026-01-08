@@ -154,12 +154,10 @@ export const FileToolbar = ({
       <TooltipTrigger asChild>
         <Button
           variant="ghost"
-          size="sm"
+          size="icon-sm"
           onClick={onRemove}
-          className="size-6 p-0"
-        >
-          <Trash2 className="size-4" />
-        </Button>
+          startIcon={<Trash2 />}
+        />
       </TooltipTrigger>
       <TooltipContent>Remove file</TooltipContent>
     </Tooltip>
@@ -179,13 +177,11 @@ export const FileToolbar = ({
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 onClick={handlePrevPage}
                 disabled={currentPage === undefined || currentPage <= 1}
-                className="size-6 p-0"
-              >
-                <ChevronLeft className="size-4" />
-              </Button>
+                startIcon={<ChevronLeft />}
+              />
             </TooltipTrigger>
             <TooltipContent>Previous page</TooltipContent>
           </Tooltip>
@@ -212,17 +208,15 @@ export const FileToolbar = ({
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 onClick={handleNextPage}
                 disabled={
                   currentPage === undefined ||
                   totalPages === undefined ||
                   currentPage >= totalPages
                 }
-                className="size-6 p-0"
-              >
-                <ChevronRight className="size-4" />
-              </Button>
+                startIcon={<ChevronRight />}
+              />
             </TooltipTrigger>
             <TooltipContent>Next page</TooltipContent>
           </Tooltip>
@@ -251,14 +245,12 @@ export const FileToolbar = ({
                     <TooltipTrigger asChild>
                       <Button
                         variant="ghost"
-                        size="sm"
+                        size="icon-sm"
                         onClick={handleZoomOut}
                         disabled={scale !== undefined && scale <= 0.5}
-                        className="size-6 p-0"
+                        startIcon={<Minus />}
                         aria-label="Zoom Out"
-                      >
-                        <Minus className="size-4" />
-                      </Button>
+                      />
                     </TooltipTrigger>
                     <TooltipContent>Zoom out</TooltipContent>
                   </Tooltip>
@@ -269,14 +261,12 @@ export const FileToolbar = ({
                     <TooltipTrigger asChild>
                       <Button
                         variant="ghost"
-                        size="sm"
+                        size="icon-sm"
                         onClick={handleZoomIn}
                         disabled={scale !== undefined && scale >= 3.0}
-                        className="size-6 p-0"
+                        startIcon={<Plus />}
                         aria-label="Zoom In"
-                      >
-                        <Plus className="size-4" />
-                      </Button>
+                      />
                     </TooltipTrigger>
                     <TooltipContent>Zoom in</TooltipContent>
                   </Tooltip>
@@ -284,13 +274,11 @@ export const FileToolbar = ({
                     <TooltipTrigger asChild>
                       <Button
                         variant="ghost"
-                        size="sm"
+                        size="icon-sm"
                         onClick={handleReset}
-                        className="size-6 p-0"
+                        startIcon={<RotateCcw />}
                         aria-label="Reset Zoom"
-                      >
-                        <RotateCcw className="size-4" />
-                      </Button>
+                      />
                     </TooltipTrigger>
                     <TooltipContent>Reset zoom</TooltipContent>
                   </Tooltip>
@@ -309,13 +297,11 @@ export const FileToolbar = ({
                   <TooltipTrigger asChild>
                     <Button
                       variant="ghost"
-                      size="sm"
+                      size="icon-sm"
                       onClick={onDownload}
-                      className="size-6 p-0"
+                      startIcon={<Download />}
                       aria-label="Download PDF"
-                    >
-                      <Download className="size-4" />
-                    </Button>
+                    />
                   </TooltipTrigger>
                   <TooltipContent>Download</TooltipContent>
                 </Tooltip>
@@ -329,13 +315,11 @@ export const FileToolbar = ({
                 <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
-                    size="sm"
+                    size="icon-sm"
                     onClick={onFullscreen}
-                    className="size-6 p-0"
+                    startIcon={<Maximize />}
                     aria-label="Fullscreen"
-                  >
-                    <Maximize className="size-4" />
-                  </Button>
+                  />
                 </TooltipTrigger>
                 <TooltipContent>Fullscreen</TooltipContent>
               </Tooltip>
