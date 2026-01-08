@@ -311,7 +311,7 @@ export function JsonSchemaEditor({
           <div key={fieldName} className="space-y-2">
             <Label
               htmlFor={fieldId}
-              label={fieldTitle}
+              label={`${fieldTitle} (JSON)`}
               required={required.has(fieldName)}
             />
             <Textarea
