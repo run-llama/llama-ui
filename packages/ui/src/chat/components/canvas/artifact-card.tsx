@@ -62,14 +62,12 @@ export function ArtifactCard({
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 shrink-0 cursor-pointer text-xs"
           onClick={(e) => {
             e.stopPropagation();
             restoreArtifact(data);
           }}
-        >
-          Restore
-        </Button>
+          label="Restore"
+        />
       )}
     </div>
   );
