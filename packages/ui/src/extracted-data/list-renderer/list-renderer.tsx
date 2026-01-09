@@ -127,7 +127,7 @@ export function ListRenderer<S extends PrimitiveValue>({
             variant="outline"
             size="sm"
             onClick={handleAdd}
-            startIcon={<Plus className={cn("size-4", "text-blue-600")} />}
+            startIcon={<Plus className="text-blue-600" />}
           />
         )}
       </div>
@@ -229,7 +229,7 @@ export function ListRenderer<S extends PrimitiveValue>({
                   variant="ghost"
                   size="sm"
                   onClick={handleAdd}
-                  startIcon={<Plus className={cn("size-4", "text-blue-600")} />}
+                  startIcon={<Plus className="text-blue-600" />}
                 />
               </TableCell>
             </TableRow>
