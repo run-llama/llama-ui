@@ -102,7 +102,7 @@ const tabsTriggerVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  },
+  }
 );
 
 export interface TabsTriggerProps
@@ -133,7 +133,7 @@ function TabsTrigger({ label, icon: Icon, badge, ...props }: TabsTriggerProps) {
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        tabsTriggerVariants({ variant: variant as "default" | "underline" }),
+        tabsTriggerVariants({ variant: variant as "default" | "underline" })
       )}
       {...props}
     >

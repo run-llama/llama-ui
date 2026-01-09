@@ -21,8 +21,8 @@ interface SectionTitleProps
     VariantProps<typeof sectionTitleVariants> {
   title: string;
   subtitle?: string;
-//   primaryAction?: ButtonProps;
-//   secondaryAction?: ButtonProps;
+  //   primaryAction?: ButtonProps;
+  //   secondaryAction?: ButtonProps;
 }
 
 /**
@@ -42,8 +42,8 @@ interface SectionTitleProps
 function SectionTitle({
   title,
   subtitle,
-//   primaryAction,
-//   secondaryAction,
+  //   primaryAction,
+  //   secondaryAction,
   align,
   ...props
 }: SectionTitleProps) {

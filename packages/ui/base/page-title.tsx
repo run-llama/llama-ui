@@ -22,8 +22,8 @@ interface PageTitleProps
     VariantProps<typeof pageTitleVariants> {
   title: string;
   subtitle?: string;
-//   primaryAction?: ButtonProps;
-//   secondaryAction?: ButtonProps;
+  //   primaryAction?: ButtonProps;
+  //   secondaryAction?: ButtonProps;
   separator?: boolean;
 }
 
@@ -45,8 +45,8 @@ interface PageTitleProps
 function PageTitle({
   title,
   subtitle,
-//   primaryAction,
-//   secondaryAction,
+  //   primaryAction,
+  //   secondaryAction,
   separator = true,
   align,
   ...props

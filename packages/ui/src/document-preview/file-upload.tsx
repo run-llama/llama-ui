@@ -198,20 +198,9 @@ export function FileUpload({
               onSelectFile ? "grid-cols-3" : "grid-cols-2"
             )}
           >
-            <TabsTrigger
-              value="upload"
-              label="Upload file"
-            />
-            <TabsTrigger
-              value="url"
-              label="File URL"
-            />
-            {onSelectFile && (
-              <TabsTrigger
-                value="select"
-                label="Select file"
-              />
-            )}
+            <TabsTrigger value="upload" label="Upload file" />
+            <TabsTrigger value="url" label="File URL" />
+            {onSelectFile && <TabsTrigger value="select" label="Select file" />}
           </TabsList>
 
           <TabsContent value="upload" className="mt-6">
