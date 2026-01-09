@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Loader2, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
 
 import { Button } from "@/base/button";
 import { Input } from "@/base/input";
