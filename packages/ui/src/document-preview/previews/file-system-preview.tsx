@@ -65,6 +65,7 @@ export function FileSystemPreview({
             size="sm"
             onClick={onAddFiles}
             startIcon={<Plus />}
+            variant="outline"
             label="Add files"
           />
         )}

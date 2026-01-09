@@ -1,4 +1,4 @@
-import { File, Folder, Minus, Trash2 } from "lucide-react";
+import { File, Folder, Minus, Trash, Upload } from "lucide-react";
 import type { MouseEvent, KeyboardEvent } from "react";
 import { Button, buttonVariants } from "@/base/button";
 import { ScrollArea, ScrollBar } from "@/base/scroll-area";
@@ -36,12 +36,13 @@ export const SelectFileBar = ({
           <Button
             size="sm"
             onClick={onToggleFileUpload}
-            startIcon={isFileUploadExpanded ? <Minus /> : <File />}
-            label={isFileUploadExpanded ? "Hide upload" : "Add files"}
+            startIcon={isFileUploadExpanded ? <Minus /> : <Upload />}
+            label={isFileUploadExpanded ? "Hide upload" : "Upload"}
+            variant="outline"
           />
         )}
         {files.length > 0 && (
-          <span className="text-xs text-muted-foreground shrink-0">
+          <span className="text-sm shrink-0 font-medium">
             {files.length} {files.length === 1 ? "file" : "files"}
           </span>
         )}
@@ -68,7 +69,7 @@ export const SelectFileBar = ({
               tabIndex={0}
               className={cn(
                 buttonVariants({ variant: "outline", size: "sm" }),
-                "flex shrink-0 items-center gap-2 border-border px-3 hover:bg-muted cursor-pointer",
+                "flex shrink-0 items-center gap-1 border-border hover:bg-muted cursor-pointer",
                 isCurrent ? "bg-accent" : "bg-white"
               )}
               onClick={() => onSelect(index)}
@@ -81,9 +82,8 @@ export const SelectFileBar = ({
             >
               {renderIcon()}
               <span
-                className={`whitespace-nowrap text-xs ${
-                  isCurrent ? "text-accent-foreground" : "text-muted-foreground"
-                }`}
+                className={`whitespace-nowrap text-sm ${isCurrent ? "text-accent-foreground" : "text-muted-foreground"
+                  }`}
               >
                 {displayName}
               </span>
@@ -92,7 +92,7 @@ export const SelectFileBar = ({
                   variant="ghost"
                   onClick={makeButtonHandler(() => onRemove(index))}
                   size="icon-sm"
-                  startIcon={<Trash2 className="size-3" />}
+                  startIcon={<Trash className={cn(isCurrent ? "text-accent-foreground" : "text-muted-foreground")} />}
                 />
               </ToolTipper>
             </div>
