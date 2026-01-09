@@ -59,7 +59,7 @@ function AccordionTrigger({
   caption,
   icon: Icon,
   showTooltip = false,
-  tooltipContent,
+  // tooltipContent,
   badge,
   ...props
 }: AccordionTriggerProps) {
