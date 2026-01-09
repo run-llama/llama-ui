@@ -82,8 +82,9 @@ export const SelectFileBar = ({
             >
               {renderIcon()}
               <span
-                className={`whitespace-nowrap text-sm ${isCurrent ? "text-accent-foreground" : "text-muted-foreground"
-                  }`}
+                className={`whitespace-nowrap text-sm ${
+                  isCurrent ? "text-accent-foreground" : "text-muted-foreground"
+                }`}
               >
                 {displayName}
               </span>
@@ -92,7 +93,15 @@ export const SelectFileBar = ({
                   variant="ghost"
                   onClick={makeButtonHandler(() => onRemove(index))}
                   size="icon-sm"
-                  startIcon={<Trash className={cn(isCurrent ? "text-accent-foreground" : "text-muted-foreground")} />}
+                  startIcon={
+                    <Trash
+                      className={cn(
+                        isCurrent
+                          ? "text-accent-foreground"
+                          : "text-muted-foreground"
+                      )}
+                    />
+                  }
                 />
               </ToolTipper>
             </div>

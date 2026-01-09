@@ -204,11 +204,7 @@ export function ListRenderer<S extends PrimitiveValue>({
                         size="icon-sm"
                         onClick={() => handleDelete(index)}
                         title="Delete item"
-                        startIcon={
-                          <Trash2
-                            className="text-destructive"
-                          />
-                        }
+                        startIcon={<Trash2 className="text-destructive" />}
                       />
                     </div>
                   </TableCell>
