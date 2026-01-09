@@ -72,7 +72,7 @@ function AccordionTrigger({
           "disabled:pointer-events-none disabled:opacity-50",
           "[&[data-state=open]>div:last-child>svg]:rotate-180",
           "[&:active_.accordion-trigger-text>span]:opacity-60",
-          "[&:active>div:last-child>svg]:opacity-60",
+          "[&:active>div:last-child>svg]:opacity-60"
         )}
         {...props}
       >
