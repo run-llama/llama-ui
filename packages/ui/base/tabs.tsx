@@ -4,81 +4,143 @@ import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 
-import { cn } from "@/lib/utils";
+import { cn } from "../lib/utils";
 
-function Tabs({
-  className,
-  ...props
-}: React.ComponentProps<typeof TabsPrimitive.Root>) {
+/**
+ * Tabs - A tab navigation component for organizing content into separate views.
+ *
+ * Composition:
+ * - `Tabs` - Root component
+ * - `TabsList` - Container for tab triggers with variant support
+ * - `TabsTrigger` - Individual tab button with explicit label, icon, and badge support
+ * - `TabsContent` - Content panel for each tab
+ *
+ * Variants:
+ * - `default` - Rounded background with padding
+ * - `underline` - Minimal underline style (recommended for icon tabs)
+ *
+ * Features:
+ * - Icon support via `icon` prop
+ * - Optional badge display
+ * - Icon-only tabs (omit label)
+ *
+ * Example:
+ * ```tsx
+ * <Tabs defaultValue="overview">
+ *   <TabsList variant="default">
+ *     <TabsTrigger value="overview" label="Overview" />
+ *     <TabsTrigger value="settings" label="Settings" />
+ *   </TabsList>
+ *   <TabsContent value="overview">Overview content</TabsContent>
+ *   <TabsContent value="settings">Settings content</TabsContent>
+ * </Tabs>
+ *
+ * // With icons
+ * <TabsList variant="underline">
+ *   <TabsTrigger value="list" label="List" icon={List} />
+ *   <TabsTrigger value="grid" label="Grid" icon={Grid} badge="New" />
+ * </TabsList>
+ * ```
+ */
+
+function Tabs({ ...props }: React.ComponentProps<typeof TabsPrimitive.Root>) {
   return (
     <TabsPrimitive.Root
       data-slot="tabs"
-      className={cn("flex flex-col gap-2", className)}
+      className={cn("flex flex-col gap-2")}
       {...props}
     />
   );
 }
 
-const tabsListVariants = cva(
-  "inline-flex w-fit items-center justify-center rounded-lg bg-muted text-muted-foreground",
-  {
-    variants: {
-      size: {
-        default: "h-9 p-[3px]",
-        xs: "h-7 p-[2px]",
-        sm: "h-8 p-[2px]",
-        lg: "h-10 p-1",
-      },
+const tabsListVariants = cva("inline-flex w-fit items-center", {
+  variants: {
+    variant: {
+      default: "bg-muted rounded-lg p-[3px] justify-center",
+      underline: "border-b border-border justify-start",
     },
-    defaultVariants: {
-      size: "default",
-    },
-  }
-);
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+});
 
-function TabsList({
-  className,
-  size,
-  ...props
-}: React.ComponentProps<typeof TabsPrimitive.List> &
-  VariantProps<typeof tabsListVariants>) {
+type TabsListProps = React.ComponentProps<typeof TabsPrimitive.List> &
+  VariantProps<typeof tabsListVariants>;
+
+const TabsListContext = React.createContext<{
+  variant?: "default" | "underline" | null;
+}>({
+  variant: "default",
+});
+
+function TabsList({ className, variant, ...props }: TabsListProps) {
+  const contextValue = React.useMemo(() => ({ variant }), [variant]);
+
   return (
-    <TabsPrimitive.List
-      data-slot="tabs-list"
-      className={cn(tabsListVariants({ size }), className)}
-      {...props}
-    />
+    <TabsListContext value={contextValue}>
+      <TabsPrimitive.List
+        data-slot="tabs-list"
+        className={cn(tabsListVariants({ variant }), className)}
+        {...props}
+      />
+    </TabsListContext>
   );
 }
 
 const tabsTriggerVariants = cva(
-  "focus-visible:ring-ring/50 dark:data-[state=active]:bg-input/30 inline-flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-transparent font-medium text-muted-foreground transition-[color,box-shadow] hover:cursor-pointer focus-visible:border-ring focus-visible:outline-1 focus-visible:outline-ring focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm dark:text-muted-foreground dark:data-[state=active]:border-input dark:data-[state=active]:text-foreground [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0 [&_svg]:text-muted-foreground data-[state=active]:[&_svg]:text-foreground outline-none",
   {
     variants: {
-      size: {
-        default: "h-[calc(100%-1px)] px-2 py-1 text-sm",
-        sm: "h-[calc(100%-1px)] px-1.5 py-0.5 text-xs",
-        lg: "h-[calc(100%-1px)] px-3 py-1.5 text-sm",
+      variant: {
+        default:
+          "text-foreground rounded-lg px-2 py-1 text-sm min-h-7 min-w-7 border border-transparent data-[state=active]:bg-background data-[state=active]:shadow-sm dark:data-[state=active]:bg-input/30 dark:data-[state=active]:border-input focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+        underline:
+          "text-muted-foreground px-3 py-3 text-sm min-h-12 border-b-2 border-transparent data-[state=active]:text-foreground data-[state=active]:border-primary focus-visible:ring-ring/50 focus-visible:ring-[3px]",
       },
     },
     defaultVariants: {
-      size: "default",
+      variant: "default",
     },
-  }
+  },
 );
 
-function TabsTrigger({
-  className,
-  size,
-  ...props
-}: React.ComponentProps<typeof TabsPrimitive.Trigger> &
-  VariantProps<typeof tabsTriggerVariants>) {
+export interface TabsTriggerProps
+  extends Omit<
+    React.ComponentProps<typeof TabsPrimitive.Trigger>,
+    "children" | "className"
+  > {
+  /** The text label displayed in the tab */
+  label?: string;
+  /** Optional icon component to display at the start of the trigger */
+  icon?: React.ComponentType<{ className?: string }>;
+  /** Optional badge to display after the label */
+  badge?: React.ReactNode;
+}
+
+/**
+ * TabsTrigger - An opinionated tab trigger component matching the LlamaCloud design system.
+ *
+ * Key differences from base Shadcn TabsTrigger:
+ * - Uses explicit `label`, `icon`, and `badge` props instead of arbitrary children
+ * - Fixed internal structure (icon → label → badge)
+ * - Styling matches design system states (default, focus, disabled, active)
+ */
+function TabsTrigger({ label, icon: Icon, badge, ...props }: TabsTriggerProps) {
+  const { variant } = React.use(TabsListContext);
+
   return (
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
-      className={cn(tabsTriggerVariants({ size }), className)}
+      className={cn(
+        tabsTriggerVariants({ variant: variant as "default" | "underline" }),
+      )}
       {...props}
-    />
+    >
+      {Icon && <Icon aria-hidden="true" />}
+      {label && <span>{label}</span>}
+      {badge && <div className="flex shrink-0">{badge}</div>}
+    </TabsPrimitive.Trigger>
   );
 }
 
