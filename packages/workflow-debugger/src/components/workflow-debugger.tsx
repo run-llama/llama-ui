@@ -11,6 +11,7 @@ import {
   PopoverContent,
   PopoverTrigger,
   useWorkflows,
+  Label,
 } from "@llamaindex/ui";
 import { useState, useEffect, useCallback } from "react";
 import { getHealth } from "@llamaindex/workflows-client";
@@ -190,9 +191,7 @@ export function WorkflowDebugger() {
 
         {/* Centered Workflow Dropdown */}
         <div className="flex items-center gap-2">
-          <label className="text-xs text-muted-foreground font-medium">
-            Workflow:
-          </label>
+          <Label htmlFor="workflow" label="Workflow:" />
           <Select
             value={selectedWorkflow || ""}
             onValueChange={setSelectedWorkflow}

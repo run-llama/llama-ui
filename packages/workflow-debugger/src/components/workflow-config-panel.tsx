@@ -6,6 +6,7 @@ import {
   Skeleton,
   useWorkflow,
   useHandlers,
+  Label,
 } from "@llamaindex/ui";
 import { PanelRightClose } from "lucide-react";
 import { JsonSchemaEditor } from "./json-schema-editor";
@@ -190,9 +191,7 @@ export function WorkflowConfigPanel({
                 />
               ) : (
                 <div className="space-y-2">
-                  <label htmlFor="raw-input" className="text-sm font-medium">
-                    Input (JSON)
-                  </label>
+                  <Label htmlFor="raw-input" label="Input (JSON)" />
                   <Textarea
                     id="raw-input"
                     value={rawInput}

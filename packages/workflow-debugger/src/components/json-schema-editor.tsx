@@ -7,6 +7,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Label,
 } from "@llamaindex/ui";
 import type { JSONValue } from "./workflow-config-panel";
 
@@ -182,12 +183,11 @@ export function JsonSchemaEditor({
         if (fieldType === "string") {
           return (
             <div key={fieldName} className="space-y-2">
-              <label htmlFor={fieldId} className="text-sm font-medium">
-                {fieldTitle}
-                {required.has(fieldName) && (
-                  <span className="text-destructive ml-1">*</span>
-                )}
-              </label>
+              <Label
+                htmlFor={fieldId}
+                label={fieldTitle}
+                required={required.has(fieldName)}
+              />
               <Textarea
                 id={fieldId}
                 value={(values[fieldName] as string) || ""}
@@ -209,12 +209,11 @@ export function JsonSchemaEditor({
         if (fieldType === "number" || fieldType === "integer") {
           return (
             <div key={fieldName} className="space-y-2">
-              <label htmlFor={fieldId} className="text-sm font-medium">
-                {fieldTitle}
-                {required.has(fieldName) && (
-                  <span className="text-destructive ml-1">*</span>
-                )}
-              </label>
+              <Label
+                htmlFor={fieldId}
+                label={fieldTitle}
+                required={required.has(fieldName)}
+              />
               <Input
                 id={fieldId}
                 type="number"
@@ -266,12 +265,11 @@ export function JsonSchemaEditor({
 
           return (
             <div key={fieldName} className="space-y-2">
-              <label htmlFor={fieldId} className="text-sm font-medium">
-                {fieldTitle}
-                {required.has(fieldName) && (
-                  <span className="text-destructive ml-1">*</span>
-                )}
-              </label>
+              <Label
+                htmlFor={fieldId}
+                label={fieldTitle}
+                required={required.has(fieldName)}
+              />
               <Select
                 onValueChange={(value) => {
                   if (value === "null") {
@@ -311,12 +309,11 @@ export function JsonSchemaEditor({
 
         return (
           <div key={fieldName} className="space-y-2">
-            <label htmlFor={fieldId} className="text-sm font-medium">
-              {fieldTitle} (JSON)
-              {required.has(fieldName) && (
-                <span className="text-destructive ml-1">*</span>
-              )}
-            </label>
+            <Label
+              htmlFor={fieldId}
+              label={`${fieldTitle} (JSON)`}
+              required={required.has(fieldName)}
+            />
             <Textarea
               id={fieldId}
               value={raw}

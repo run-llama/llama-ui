@@ -19,6 +19,7 @@ import { useFileUpload } from "../hooks/use-file-upload";
 import { useUploadProgress } from "../hooks/use-upload-progress";
 import { UploadProgress } from "./upload-progress";
 import { logger } from "@shared/logger";
+import { Label } from "@/base/label";
 
 export function FileUploader({
   title,
@@ -250,12 +251,11 @@ export function FileUploader({
             {/* Input Fields */}
             {inputFields?.map((field) => (
               <div key={field.key} className="space-y-2">
-                <label htmlFor={field.key} className="text-sm font-medium">
-                  {field.label}
-                  {field.required && (
-                    <span className="text-destructive ml-1">*</span>
-                  )}
-                </label>
+                <Label
+                  htmlFor={field.key}
+                  label={field.label}
+                  required={field.required}
+                />
                 <Input
                   id={field.key}
                   value={fieldValues[field.key] || ""}
@@ -273,10 +273,11 @@ export function FileUploader({
 
             {/* File Upload Area */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">
-                {multiple ? "Files" : "File"}{" "}
-                <span className="text-destructive ml-1">*</span>
-              </label>
+              <Label
+                htmlFor={multiple ? "files" : "file"}
+                label={multiple ? "Files" : "File"}
+                required
+              />
               {multiple ? (
                 <FileDropzone
                   multiple
