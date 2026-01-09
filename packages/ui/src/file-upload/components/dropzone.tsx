@@ -161,11 +161,11 @@ export function FileDropzone({
           disabled
             ? undefined
             : (event) => {
-              if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                handleClick();
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  handleClick();
+                }
               }
-            }
         }
       >
         <Input

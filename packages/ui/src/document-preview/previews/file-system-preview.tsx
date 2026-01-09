@@ -61,7 +61,12 @@ export function FileSystemPreview({
     <div className="flex h-full flex-col bg-muted/30">
       <div className="flex items-center gap-3 border-b px-6 py-3">
         {onAddFiles && (
-          <Button size="sm" onClick={onAddFiles} startIcon={<Plus />} label="Add files" />
+          <Button
+            size="sm"
+            onClick={onAddFiles}
+            startIcon={<Plus />}
+            label="Add files"
+          />
         )}
         <span className="text-sm text-muted-foreground">
           {fileCount} {label} selected from your file system

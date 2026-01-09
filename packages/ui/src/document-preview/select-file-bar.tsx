@@ -81,8 +81,9 @@ export const SelectFileBar = ({
             >
               {renderIcon()}
               <span
-                className={`whitespace-nowrap text-xs ${isCurrent ? "text-accent-foreground" : "text-muted-foreground"
-                  }`}
+                className={`whitespace-nowrap text-xs ${
+                  isCurrent ? "text-accent-foreground" : "text-muted-foreground"
+                }`}
               >
                 {displayName}
               </span>

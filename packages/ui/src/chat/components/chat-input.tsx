@@ -192,11 +192,7 @@ function ChatInputUpload(props: ChatInputUploadProps) {
       isProcessing={isLoading}
       trigger={
         <div className="absolute bottom-2 left-2">
-          <Button
-            variant="outline"
-            size="icon-sm"
-            startIcon={<Plus />}
-          />
+          <Button variant="outline" size="icon-sm" startIcon={<Plus />} />
         </div>
       }
     />

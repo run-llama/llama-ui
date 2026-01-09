@@ -285,8 +285,16 @@ export function SendEventDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)} label="Cancel" />
-          <Button onClick={handleSendEvent} disabled={!canSend} label={sending ? "Sending..." : "Send Event"} />
+          <Button
+            variant="outline"
+            onClick={() => setOpen(false)}
+            label="Cancel"
+          />
+          <Button
+            onClick={handleSendEvent}
+            disabled={!canSend}
+            label={sending ? "Sending..." : "Send Event"}
+          />
         </DialogFooter>
       </DialogContent>
     </Dialog>

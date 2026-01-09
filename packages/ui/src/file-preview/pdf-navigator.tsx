@@ -64,13 +64,13 @@ export const PdfNavigator = (props: PdfNavigatorProps) => {
     props.isLoading === true
       ? null
       : (() => {
-        // remove non-toolbar props from props
-        // and return the remaining props as toolbarProps
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { fileName, onRemove, className, isLoading, ...rest } =
-          props satisfies PdfNavigatorPropsLoaded;
-        return rest;
-      })();
+          // remove non-toolbar props from props
+          // and return the remaining props as toolbarProps
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { fileName, onRemove, className, isLoading, ...rest } =
+            props satisfies PdfNavigatorPropsLoaded;
+          return rest;
+        })();
 
   return (
     <div className={cn("sticky top-0 w-full z-50 text-xs", className)}>

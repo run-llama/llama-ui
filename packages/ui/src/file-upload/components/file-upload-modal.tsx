@@ -316,9 +316,11 @@ export function FileUploader({
             <Button
               onClick={handleUpload}
               disabled={!canSubmit()}
-              label={selectedFiles.length > 1
-                ? `Upload ${selectedFiles.length} Files & Process`
-                : "Upload & Process"}
+              label={
+                selectedFiles.length > 1
+                  ? `Upload ${selectedFiles.length} Files & Process`
+                  : "Upload & Process"
+              }
             />
           </DialogFooter>
         </DialogContent>

@@ -127,10 +127,7 @@ export function ListRenderer<S extends PrimitiveValue>({
             variant="outline"
             size="sm"
             onClick={handleAdd}
-            startIcon={<Plus className={cn(
-              "size-4",
-              "text-blue-600"
-            )} />}
+            startIcon={<Plus className={cn("size-4", "text-blue-600")} />}
           />
         )}
       </div>
@@ -208,9 +205,11 @@ export function ListRenderer<S extends PrimitiveValue>({
                         size="icon-sm"
                         onClick={() => handleDelete(index)}
                         title="Delete item"
-                        startIcon={<Trash2 className={cn(
-                          "text-red-500 hover:text-red-700"
-                        )} />}
+                        startIcon={
+                          <Trash2
+                            className={cn("text-red-500 hover:text-red-700")}
+                          />
+                        }
                       />
                     </div>
                   </TableCell>
@@ -222,15 +221,15 @@ export function ListRenderer<S extends PrimitiveValue>({
             <TableRow className="hover:bg-gray-50 border-0">
               <TableCell className="p-0 border-r border-gray-100 w-12 align-middle h-full"></TableCell>
               <TableCell className="p-0 min-w-[120px] align-top h-full"></TableCell>
-              <TableCell colSpan={onDelete ? 3 : 2} className="text-center p-0 h-10">
+              <TableCell
+                colSpan={onDelete ? 3 : 2}
+                className="text-center p-0 h-10"
+              >
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleAdd}
-                  startIcon={<Plus className={cn(
-                    "size-4",
-                    "text-blue-600"
-                  )} />}
+                  startIcon={<Plus className={cn("size-4", "text-blue-600")} />}
                 />
               </TableCell>
             </TableRow>

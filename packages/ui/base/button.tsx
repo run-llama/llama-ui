@@ -33,12 +33,12 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  },
+  }
 );
 
 export interface ButtonProps
   extends Omit<React.ComponentProps<"button">, "className" | "children">,
-  VariantProps<typeof buttonVariants> {
+    VariantProps<typeof buttonVariants> {
   label?: string;
   startIcon?: React.ReactNode;
   endIcon?: React.ReactNode;
@@ -106,7 +106,7 @@ function Button({
       {label && (
         <span
           className={cn(
-            size === "icon" || size === "icon-sm" ? "sr-only" : undefined,
+            size === "icon" || size === "icon-sm" ? "sr-only" : undefined
           )}
         >
           {label}

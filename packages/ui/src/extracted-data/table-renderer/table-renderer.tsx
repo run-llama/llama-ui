@@ -286,7 +286,7 @@ export function TableRenderer<Row extends JsonObject>({
               if (
                 depth === 0 ||
                 column.path.slice(0, depth).join(".") ===
-                nextColumn.path.slice(0, depth).join(".")
+                  nextColumn.path.slice(0, depth).join(".")
               ) {
                 colSpan++;
                 nextColIndex++;
@@ -481,10 +481,10 @@ export function TableRenderer<Row extends JsonObject>({
                         args === null
                           ? onHoverField?.(null)
                           : onHoverField?.({
-                            value: args.value,
-                            metadata: args.metadata,
-                            path: cellPath,
-                          })
+                              value: args.value,
+                              metadata: args.metadata,
+                              path: cellPath,
+                            })
                       }
                       editable={editable}
                     />
@@ -499,7 +499,9 @@ export function TableRenderer<Row extends JsonObject>({
                       size="icon-sm"
                       onClick={() => handleDeleteRow(rowIndex)}
                       title="Delete row"
-                      startIcon={<Trash2 className="text-red-500 hover:text-red-700" />}
+                      startIcon={
+                        <Trash2 className="text-red-500 hover:text-red-700" />
+                      }
                     />
                   </div>
                 </TableCell>
