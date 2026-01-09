@@ -23,12 +23,7 @@ export function ReviewStatusBadge({ value }: { value: string }) {
     variant: "secondary",
   };
 
-  return (
-    <Badge
-      variant={config.variant}
-      label={config.label}
-    />
-  );
+  return <Badge variant={config.variant} label={config.label} />;
 }
 
 export function SyncedIcon({ value }: { value: boolean }) {

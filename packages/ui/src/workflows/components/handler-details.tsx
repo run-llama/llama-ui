@@ -143,12 +143,7 @@ export function HandlerDetails({ handlerId, onBack }: HandlerDetailsProps) {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Events</CardTitle>
-            {isStreaming && (
-              <Badge
-                variant="outline"
-                label="Streaming..."
-              />
-            )}
+            {isStreaming && <Badge variant="outline" label="Streaming..." />}
           </div>
         </CardHeader>
         <CardContent>
@@ -165,10 +160,7 @@ export function HandlerDetails({ handlerId, onBack }: HandlerDetailsProps) {
                     className="rounded-lg border p-3 text-sm space-y-2"
                   >
                     <div className="flex items-center justify-between">
-                      <Badge
-                        variant="secondary"
-                        label={event.type}
-                      />
+                      <Badge variant="secondary" label={event.type} />
                       <span className="text-xs text-muted-foreground">
                         {event.timestamp.toLocaleTimeString()}
                       </span>

@@ -56,10 +56,7 @@ export function ArtifactCard({
       </div>
       {isLatest ? (
         <span className="ml-2">
-          <Badge
-            variant="default"
-            label="Latest"
-          />
+          <Badge variant="default" label="Latest" />
         </span>
       ) : (
         <Button

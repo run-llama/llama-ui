@@ -24,12 +24,12 @@ const badgeVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  },
+  }
 );
 
 export interface BadgeProps
   extends Omit<React.ComponentProps<"span">, "children" | "className">,
-  VariantProps<typeof badgeVariants> {
+    VariantProps<typeof badgeVariants> {
   /** When true, renders the badge as a Slot component for composability */
   asChild?: boolean;
   /** Optional icon to display before the label */
