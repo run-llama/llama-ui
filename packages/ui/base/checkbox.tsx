@@ -78,7 +78,6 @@ const CheckboxGroup = ({
   ref?: React.RefObject<HTMLDivElement | null>;
 }) => {
   return (
-    // eslint-disable-next-line @eslint-react/no-unstable-context-value
     <CheckboxGroupContext value={{ variant }}>
       <div ref={ref} className="grid gap-3">
         {children}
