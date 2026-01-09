@@ -49,7 +49,6 @@ export const ColumnFilter: React.FC<ColumnFilterProps> = ({
           startIcon={
             <Filter
               className={cn(
-                "size-3", // filter use smaller icon size
                 selectedValues.length > 0
                   ? "text-primary"
                   : "text-muted-foreground"
