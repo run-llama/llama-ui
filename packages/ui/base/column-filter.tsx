@@ -45,14 +45,18 @@ export const ColumnFilter: React.FC<ColumnFilterProps> = ({
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          size="icon"
-          className={cn(
-            "h-6 w-6 p-0",
-            selectedValues.length > 0 ? "text-primary" : "text-muted-foreground"
-          )}
-        >
-          <Filter className="h-3 w-3" />
-        </Button>
+          size="icon-sm"
+          startIcon={
+            <Filter
+              className={cn(
+                "size-3", // filter use smaller icon size
+                selectedValues.length > 0
+                  ? "text-primary"
+                  : "text-muted-foreground"
+              )}
+            />
+          }
+        />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-48">
         {options.map((option) => (
