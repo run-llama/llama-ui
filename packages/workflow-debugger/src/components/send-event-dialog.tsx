@@ -22,6 +22,7 @@ import {
   postEventsByHandlerId,
   getWorkflowsByNameEvents,
 } from "@llamaindex/workflows-client";
+import { Label } from "@llamaindex/ui";
 
 interface EventSchema {
   title?: string;
@@ -223,7 +224,7 @@ export function SendEventDialog({
             <>
               {/* Event Type Selector */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">Event Type</label>
+                <Label htmlFor="eventType" label="Event Type" />
                 <Select
                   value={selectedEventType || ""}
                   onValueChange={setSelectedEventType}
@@ -247,7 +248,7 @@ export function SendEventDialog({
               {/* Event Data Editor */}
               {selectedSchema && (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Event Data</label>
+                  <Label htmlFor="eventData" label="Event Data" />
                   <JsonSchemaEditor
                     schema={{
                       properties: selectedSchema.properties as Record<
