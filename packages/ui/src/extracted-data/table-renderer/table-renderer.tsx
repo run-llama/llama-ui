@@ -522,7 +522,6 @@ export function TableRenderer<Row extends JsonObject>({
                   variant="ghost"
                   size="icon-sm"
                   onClick={handleAddRow}
-                  label="Add row"
                   startIcon={<Plus className="text-blue-600" />}
                 />
               </TableCell>

@@ -83,7 +83,7 @@ export const PdfNavigator = (props: PdfNavigatorProps) => {
               variant="ghost"
               size="icon-sm"
               onClick={onRemove}
-              label="Remove PDF"
+              title="Remove PDF"
               startIcon={<Trash2 />}
             />
           )}
