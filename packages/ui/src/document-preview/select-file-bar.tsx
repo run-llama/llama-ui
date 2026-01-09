@@ -30,22 +30,15 @@ export const SelectFileBar = ({
     };
 
   return (
-    <ScrollArea className="h-10 border-b" viewportClassName="flex items-center">
+    <ScrollArea className="h-12 border-b" viewportClassName="flex items-center">
       <div className="flex items-center gap-3 px-6">
         {onToggleFileUpload && (
-          <Button size="xs" onClick={onToggleFileUpload}>
-            {isFileUploadExpanded ? (
-              <>
-                <Minus className="size-4" />
-                Hide upload
-              </>
-            ) : (
-              <>
-                <File className="size-4" />
-                Add files
-              </>
-            )}
-          </Button>
+          <Button
+            size="sm"
+            onClick={onToggleFileUpload}
+            startIcon={isFileUploadExpanded ? <Minus /> : <File />}
+            label={isFileUploadExpanded ? "Hide upload" : "Add files"}
+          />
         )}
         {files.length > 0 && (
           <span className="text-xs text-muted-foreground shrink-0">
@@ -74,7 +67,7 @@ export const SelectFileBar = ({
               role="button"
               tabIndex={0}
               className={cn(
-                buttonVariants({ variant: "outline", size: "xs" }),
+                buttonVariants({ variant: "outline", size: "sm" }),
                 "flex shrink-0 items-center gap-2 border-border px-3 hover:bg-muted cursor-pointer",
                 isCurrent ? "bg-accent" : "bg-white"
               )}
@@ -88,9 +81,8 @@ export const SelectFileBar = ({
             >
               {renderIcon()}
               <span
-                className={`whitespace-nowrap text-xs ${
-                  isCurrent ? "text-accent-foreground" : "text-muted-foreground"
-                }`}
+                className={`whitespace-nowrap text-xs ${isCurrent ? "text-accent-foreground" : "text-muted-foreground"
+                  }`}
               >
                 {displayName}
               </span>
@@ -98,10 +90,9 @@ export const SelectFileBar = ({
                 <Button
                   variant="ghost"
                   onClick={makeButtonHandler(() => onRemove(index))}
-                  className="size-5 shrink-0 p-0"
-                >
-                  <Trash2 className="size-3" />
-                </Button>
+                  size="icon-sm"
+                  startIcon={<Trash2 className="size-3" />}
+                />
               </ToolTipper>
             </div>
           );
