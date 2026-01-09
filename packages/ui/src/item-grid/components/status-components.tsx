@@ -6,31 +6,28 @@ export function ReviewStatusBadge({ value }: { value: string }) {
   const statusConfig = {
     pending_review: {
       label: "Awaiting Review",
-      variant: "secondary" as const,
-      className: "bg-amber-100 text-amber-600 hover:bg-amber-200",
+      variant: "default" as const,
     },
     approved: {
       label: "Approved",
-      variant: "default" as const,
-      className: "bg-green-100 text-green-600 hover:bg-green-200",
+      variant: "success" as const,
     },
     rejected: {
       label: "Rejected",
       variant: "destructive" as const,
-      className: "bg-red-100 text-red-600 hover:bg-red-200",
     },
   };
 
   const config = statusConfig[value as keyof typeof statusConfig] || {
     label: value,
-    variant: "outline" as const,
-    className: "",
+    variant: "secondary",
   };
 
   return (
-    <Badge variant={config.variant} className={config.className}>
-      {config.label}
-    </Badge>
+    <Badge
+      variant={config.variant}
+      label={config.label}
+    />
   );
 }
 

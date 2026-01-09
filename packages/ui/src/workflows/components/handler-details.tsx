@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/base/card";
 import { Badge } from "@/base/badge";
 import { ScrollArea } from "@/base/scroll-area";
 import { useHandler } from "../hooks";
+import { RunStatus } from "@/src";
 
 export interface HandlerDetailsProps {
   handlerId: string;
@@ -48,18 +49,18 @@ export function HandlerDetails({ handlerId, onBack }: HandlerDetailsProps) {
     }
   }, [state.status, subscribeToEvents]);
 
-  const getStatusColor = (status: string) => {
+  const getStatusVariant = (status: RunStatus) => {
     switch (status) {
       case "running":
-        return "bg-blue-500";
+        return "default";
       case "completed":
-        return "bg-green-500";
+        return "success";
       case "failed":
-        return "bg-red-500";
+        return "destructive";
       case "cancelled":
-        return "bg-gray-500";
+        return "secondary";
       default:
-        return "bg-gray-400";
+        return "secondary";
     }
   };
 
@@ -78,9 +79,10 @@ export function HandlerDetails({ handlerId, onBack }: HandlerDetailsProps) {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>{state.workflow_name}</CardTitle>
-            <Badge className={getStatusColor(state.status)}>
-              {state.status}
-            </Badge>
+            <Badge
+              label={state.status}
+              variant={getStatusVariant(state.status)}
+            />
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -142,9 +144,10 @@ export function HandlerDetails({ handlerId, onBack }: HandlerDetailsProps) {
           <div className="flex items-center justify-between">
             <CardTitle>Events</CardTitle>
             {isStreaming && (
-              <Badge variant="outline" className="animate-pulse">
-                Streaming...
-              </Badge>
+              <Badge
+                variant="outline"
+                label="Streaming..."
+              />
             )}
           </div>
         </CardHeader>
@@ -162,7 +165,10 @@ export function HandlerDetails({ handlerId, onBack }: HandlerDetailsProps) {
                     className="rounded-lg border p-3 text-sm space-y-2"
                   >
                     <div className="flex items-center justify-between">
-                      <Badge variant="secondary">{event.type}</Badge>
+                      <Badge
+                        variant="secondary"
+                        label={event.type}
+                      />
                       <span className="text-xs text-muted-foreground">
                         {event.timestamp.toLocaleTimeString()}
                       </span>
