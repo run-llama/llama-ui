@@ -94,7 +94,8 @@ function AccordionTrigger({
           </div>
           {showTooltip && (
             <div className="flex shrink-0">
-              {tooltipContent ? (
+              {/* TODO: Add tooltip component */}
+              {/* {tooltipContent ? (
                 <Tooltip
                   trigger={
                     <button
@@ -114,16 +115,17 @@ function AccordionTrigger({
                   className="text-muted-foreground size-3.5"
                   aria-hidden="true"
                 />
-              )}
+              )} */}
             </div>
           )}
           {badge && (
             <div className="flex shrink-0">
-              {typeof badge === "string" ? (
+              {/* TODO: Add badge component */}
+              {/* {typeof badge === "string" ? (
                 <Badge variant="secondary" label={badge} />
               ) : (
                 badge
-              )}
+              )} */}
             </div>
           )}
         </div>
