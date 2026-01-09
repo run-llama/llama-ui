@@ -167,9 +167,8 @@ export function WorkflowDebugger() {
 
   return (
     <div
-      className={`h-screen flex flex-col bg-background ${
-        isDragging ? "resize-active" : ""
-      }`}
+      className={`h-screen flex flex-col bg-background ${isDragging ? "resize-active" : ""
+        }`}
     >
       {/* Slim Titlebar */}
       <div className="flex items-center justify-between h-12 px-4 bg-card border-b border-border">
@@ -177,16 +176,11 @@ export function WorkflowDebugger() {
           {/* Sidebar Toggle */}
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
             title={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
-          >
-            {sidebarCollapsed ? (
-              <PanelLeftOpen className="h-4 w-4" />
-            ) : (
-              <PanelLeftClose className="h-4 w-4" />
-            )}
-          </Button>
+            startIcon={sidebarCollapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
+          />
 
           <h1 className="text-md font-semibold">Workflow Debugger</h1>
         </div>
@@ -217,9 +211,8 @@ export function WorkflowDebugger() {
         <div className="flex items-center gap-2">
           {isServerHealthy !== null && (
             <span
-              className={`${
-                isServerHealthy ? "bg-green-500" : "bg-red-500"
-              } h-2 w-2 rounded-full`}
+              className={`${isServerHealthy ? "bg-green-500" : "bg-red-500"
+                } h-2 w-2 rounded-full`}
             />
           )}
           {isServerHealthy === false && (
@@ -229,9 +222,7 @@ export function WorkflowDebugger() {
           )}
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <Settings className="h-4 w-4" />
-              </Button>
+              <Button variant="ghost" size="icon-sm" startIcon={<Settings />} />
             </PopoverTrigger>
             <PopoverContent className="w-80">
               <div className="space-y-4">
@@ -248,16 +239,14 @@ export function WorkflowDebugger() {
                       variant="outline"
                       size="sm"
                       disabled={editingUrl === baseUrl}
-                    >
-                      Save
-                    </Button>
+                      label="Save"
+                    />
                     <Button
                       onClick={handleUrlReset}
                       variant="outline"
                       size="sm"
-                    >
-                      Reset
-                    </Button>
+                      label="Reset"
+                    />
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Current: {baseUrl}
@@ -302,9 +291,8 @@ export function WorkflowDebugger() {
 
               {/* Resizable Gutter */}
               <div
-                className={`w-2 hover:bg-gray-500/20 hover:shadow-lg cursor-col-resize flex-shrink-0 transition-all duration-200 relative group border-l border-r border-border ${
-                  isDragging ? "shadow-xl" : ""
-                }`}
+                className={`w-2 hover:bg-gray-500/20 hover:shadow-lg cursor-col-resize flex-shrink-0 transition-all duration-200 relative group border-l border-r border-border ${isDragging ? "shadow-xl" : ""
+                  }`}
                 onMouseDown={handleMouseDown}
                 title="Drag to resize panels"
               ></div>
@@ -314,13 +302,11 @@ export function WorkflowDebugger() {
             <div className="w-10 border-r border-border bg-muted/30 flex flex-col items-center justify-center hover:bg-muted/50 transition-colors">
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 onClick={() => setConfigPanelCollapsed(false)}
                 title="Show configuration panel (Ctrl+B)"
-                className="h-10 w-10 p-0"
-              >
-                <PanelRightOpen className="h-5 w-5" />
-              </Button>
+                startIcon={<PanelRightOpen />}
+              />
             </div>
           )}
 

@@ -189,9 +189,8 @@ export function RunDetailsPanel({
                   variant="ghost"
                   size="sm"
                   onClick={() => setCompactJson(!compactJson)}
-                >
-                  {compactJson ? "Formatted" : "Compact"}
-                </Button>
+                  label={compactJson ? "Formatted" : "Compact"}
+                />
               </div>
             </div>
           </div>

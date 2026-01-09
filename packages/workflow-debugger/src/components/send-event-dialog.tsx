@@ -197,10 +197,9 @@ export function SendEventDialog({
                 ? "No workflow selected"
                 : "Send event to workflow"
           }
-        >
-          <Send className="h-4 w-4 mr-2" />
-          Send Event
-        </Button>
+          label="Send Event"
+          startIcon={<Send />}
+        />
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
@@ -286,12 +285,8 @@ export function SendEventDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleSendEvent} disabled={!canSend}>
-            {sending ? "Sending..." : "Send Event"}
-          </Button>
+          <Button variant="outline" onClick={() => setOpen(false)} label="Cancel" />
+          <Button onClick={handleSendEvent} disabled={!canSend} label={sending ? "Sending..." : "Send Event"} />
         </DialogFooter>
       </DialogContent>
     </Dialog>
