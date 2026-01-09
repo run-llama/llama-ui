@@ -198,26 +198,9 @@ export function FileUpload({
               onSelectFile ? "grid-cols-3" : "grid-cols-2"
             )}
           >
-            <TabsTrigger
-              value="upload"
-              className="rounded-none border-x-0 border-b-2 border-t-0 border-transparent bg-transparent text-xs font-semibold text-gray-500 shadow-none data-[state=active]:border-b-[#8B5CF6] data-[state=active]:text-[#8B5CF6] data-[state=active]:shadow-none"
-            >
-              Upload file
-            </TabsTrigger>
-            <TabsTrigger
-              value="url"
-              className="rounded-none border-x-0 border-b-2 border-t-0 border-transparent bg-transparent text-xs font-semibold text-gray-500 shadow-none data-[state=active]:border-b-[#8B5CF6] data-[state=active]:text-[#8B5CF6] data-[state=active]:shadow-none"
-            >
-              File URL
-            </TabsTrigger>
-            {onSelectFile && (
-              <TabsTrigger
-                value="select"
-                className="rounded-none border-x-0 border-b-2 border-t-0 border-transparent bg-transparent text-xs font-semibold text-gray-500 shadow-none data-[state=active]:border-b-[#8B5CF6] data-[state=active]:text-[#8B5CF6] data-[state=active]:shadow-none"
-              >
-                Select file
-              </TabsTrigger>
-            )}
+            <TabsTrigger value="upload" label="Upload file" />
+            <TabsTrigger value="url" label="File URL" />
+            {onSelectFile && <TabsTrigger value="select" label="Select file" />}
           </TabsList>
 
           <TabsContent value="upload" className="mt-6">
