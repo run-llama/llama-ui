@@ -1,10 +1,11 @@
 import * as React from "react";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
-import { ChevronDownIcon, Info } from "lucide-react";
+// import { ChevronDownIcon, Info } from "lucide-react";
+import { ChevronDownIcon } from "lucide-react";
 
 import { cn } from "../lib/utils";
-import { Tooltip } from "./tooltip";
-import { Badge } from "./badge";
+// import { Tooltip } from "./tooltip";
+// import { Badge } from "./badge";
 
 function Accordion({
   ...props
