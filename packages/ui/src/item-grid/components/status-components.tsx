@@ -36,9 +36,9 @@ export function ReviewStatusBadge({ value }: { value: string }) {
 
 export function SyncedIcon({ value }: { value: boolean }) {
   return value ? (
-    <CheckIcon className="w-4 h-4 text-green-600" />
+    <CheckIcon className="w-4 h-4 text-success" />
   ) : (
-    <XIcon className="w-4 h-4 text-red-600" />
+    <XIcon className="w-4 h-4 text-destructive" />
   );
 }
 

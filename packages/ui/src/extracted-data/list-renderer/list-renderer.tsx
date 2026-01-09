@@ -14,7 +14,6 @@ import { findFieldSchemaMetadata } from "../metadata-path-utils";
 import { findExtractedFieldMetadata } from "../metadata-lookup";
 import { DataPagination } from "../data-pagination";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 
 interface ListRendererProps<S extends PrimitiveValue> {
   data: S[];
@@ -127,7 +126,7 @@ export function ListRenderer<S extends PrimitiveValue>({
             variant="outline"
             size="sm"
             onClick={handleAdd}
-            startIcon={<Plus className="text-blue-600" />}
+            startIcon={<Plus className="text-primary" />}
           />
         )}
       </div>
@@ -207,7 +206,7 @@ export function ListRenderer<S extends PrimitiveValue>({
                         title="Delete item"
                         startIcon={
                           <Trash2
-                            className={cn("text-red-500 hover:text-red-700")}
+                            className="text-destructive"
                           />
                         }
                       />
@@ -229,7 +228,7 @@ export function ListRenderer<S extends PrimitiveValue>({
                   variant="ghost"
                   size="sm"
                   onClick={handleAdd}
-                  startIcon={<Plus className="text-blue-600" />}
+                  startIcon={<Plus className="text-primary" />}
                 />
               </TableCell>
             </TableRow>

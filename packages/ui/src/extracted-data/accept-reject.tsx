@@ -26,7 +26,7 @@ export function AcceptReject<T extends JsonShape<T>>({
 
   return (
     <div className="flex gap-2 justify-center">
-      <div className="text-red-700">
+      <div className="text-destructive">
         <Button
           onClick={() => handleSave("rejected")}
           variant="outline"
@@ -34,8 +34,7 @@ export function AcceptReject<T extends JsonShape<T>>({
           label="Reject File"
         />
       </div>
-
-      <div className="text-green-700">
+      <div className="text-success">
         <Button
           onClick={() => handleSave("approved")}
           variant="outline"
