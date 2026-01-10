@@ -20,7 +20,7 @@ const alertVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  },
+  }
 );
 
 const variantIcons = {
@@ -56,8 +56,8 @@ function Alert({
   title,
   description,
   showIcon = true,
-//   buttonLabel,
-//   onButtonClick,
+  //   buttonLabel,
+  //   onButtonClick,
 }: AlertProps) {
   const Icon = variantIcons[variant ?? "default"];
 
