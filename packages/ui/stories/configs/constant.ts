@@ -6,4 +6,3 @@ export const OrganizationId = "662921d1-f30c-47f0-a180-ff58b7a79d3e";
 export const API_KEY = import.meta.env.STORYBOOK_LLAMA_CLOUD_API_KEY as
   | string
   | undefined;
-export const HAS_API_KEY = !!API_KEY;
