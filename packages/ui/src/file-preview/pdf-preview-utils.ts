@@ -72,6 +72,11 @@ export function findClosestPage(
 }
 
 /**
+ * How the PDF should fit within the container on initial load
+ */
+export type FitMode = "width" | "page";
+
+/**
  * Calculates scale to fit PDF page in container width
  */
 export function calculateFitToWidthScale(
@@ -81,4 +86,102 @@ export function calculateFitToWidthScale(
 ): number {
   const availableWidth = containerWidth - padding;
   return availableWidth / viewportWidth;
+}
+
+/**
+ * Calculates initial scale based on fit mode
+ */
+export function calculateInitialScale(
+  fitMode: FitMode,
+  viewport: { width: number; height: number },
+  container: { width: number; height: number },
+  padding: number = 16
+): number {
+  const availableWidth = container.width - padding;
+  const availableHeight = container.height - padding;
+
+  if (fitMode === "width") {
+    return availableWidth / viewport.width;
+  }
+
+  // "page" mode - fit entire page in view
+  const scaleToFitWidth = availableWidth / viewport.width;
+  const scaleToFitHeight = availableHeight / viewport.height;
+  return Math.min(scaleToFitWidth, scaleToFitHeight);
+}
+
+export interface HighlightScrollParams {
+  /** Top offset of the page element relative to scroll container */
+  pageTop: number;
+  /** Height of the page in scaled pixels */
+  pageHeight: number;
+  /** Y position of highlight on page (unscaled) */
+  highlightY: number;
+  /** Height of highlight (unscaled) */
+  highlightHeight: number;
+  /** Current scale factor */
+  scale: number;
+  /** Height of the viewport/container */
+  viewportHeight: number;
+  /** Total scrollable height of container */
+  scrollHeight: number;
+  /** Minimum distance from viewport edge */
+  minEdgeDistance: number;
+}
+
+/**
+ * Calculates optimal scroll position to show a highlight.
+ * Uses smart positioning that averages between centering the highlight
+ * and centering the page, while ensuring minimum distance from viewport edges.
+ *
+ * @returns The target scrollTop value, or null if calculation cannot be performed
+ */
+export function calculateHighlightScrollPosition(
+  params: HighlightScrollParams
+): number {
+  const {
+    pageTop,
+    pageHeight,
+    highlightY,
+    highlightHeight,
+    scale,
+    viewportHeight,
+    scrollHeight,
+    minEdgeDistance,
+  } = params;
+
+  // Calculate highlight bounds in scaled pixels relative to container
+  const highlightTopAbsolute = pageTop + highlightY * scale;
+  const highlightBottomAbsolute =
+    pageTop + (highlightY + highlightHeight) * scale;
+  const highlightCenterAbsolute =
+    (highlightTopAbsolute + highlightBottomAbsolute) / 2;
+
+  // Calculate page center for averaging
+  const pageCenterAbsolute = pageTop + pageHeight / 2;
+
+  // Scroll position to center the highlight in viewport
+  const scrollToCenterHighlight = highlightCenterAbsolute - viewportHeight / 2;
+
+  // Scroll position to center the page in viewport
+  const scrollToCenterPage = pageCenterAbsolute - viewportHeight / 2;
+
+  // Average the two positions (bias toward highlight)
+  let targetScroll = (scrollToCenterHighlight + scrollToCenterPage) / 2;
+
+  // Check where highlight ends up and enforce minimum edge distance
+  const highlightTopInViewport = highlightTopAbsolute - targetScroll;
+  const highlightBottomInViewport = highlightBottomAbsolute - targetScroll;
+
+  if (highlightTopInViewport < minEdgeDistance) {
+    // Highlight too close to top - scroll up (reduce scroll value)
+    targetScroll = highlightTopAbsolute - minEdgeDistance;
+  } else if (highlightBottomInViewport > viewportHeight - minEdgeDistance) {
+    // Highlight too close to bottom - scroll down
+    targetScroll = highlightBottomAbsolute - (viewportHeight - minEdgeDistance);
+  }
+
+  // Clamp to valid scroll range
+  const maxScroll = scrollHeight - viewportHeight;
+  return Math.max(0, Math.min(targetScroll, maxScroll));
 }

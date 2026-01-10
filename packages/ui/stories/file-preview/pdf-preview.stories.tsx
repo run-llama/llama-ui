@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { expect, within, userEvent, waitFor } from "@storybook/test";
 import { PdfPreview } from "../../src/file-preview/pdf-preview";
 
@@ -23,6 +23,12 @@ const meta: Meta<typeof PdfPreview> = {
       action: "remove",
       description: "Callback when remove button is clicked",
     },
+    fitMode: {
+      control: "radio",
+      options: ["page", "width"],
+      description:
+        'How the PDF should fit on initial load. "page" fits entire page, "width" fits to container width.',
+    },
   },
 };
 
@@ -44,10 +50,10 @@ export const InteractiveHighlight: Story = {
   args: {
     url: "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf",
   },
-  render: (args) => <InteractiveHighlightExample url={args.url} />,
+  render: (args) => <InteractiveHighlightExample {...args} />,
 };
 
-function InteractiveHighlightExample({ url }: { url: string }) {
+function InteractiveHighlightExample(props: Parameters<typeof PdfPreview>[0]) {
   const [highlights, setHighlights] = useState([
     { page: 1, x: 100, y: 350, width: 250, height: 140 },
     { page: 2, x: 150, y: 300, width: 200, height: 80 },
@@ -72,6 +78,12 @@ function InteractiveHighlightExample({ url }: { url: string }) {
       { page: 2, x: 150, y: 300, width: 200, height: 80 },
     ]);
 
+  const goToTopOfPage = () =>
+    setHighlights([{ page: 1, x: 100, y: 30, width: 300, height: 50 }]);
+
+  const goToBottomOfPage = () =>
+    setHighlights([{ page: 1, x: 100, y: 700, width: 300, height: 50 }]);
+
   return (
     <div className="h-screen flex">
       <div className="w-64 p-4 border-r space-y-2">
@@ -88,18 +100,29 @@ function InteractiveHighlightExample({ url }: { url: string }) {
         >
           Randomize Area
         </button>
+        <button
+          className="px-2 py-1 border rounded w-full"
+          onClick={goToTopOfPage}
+        >
+          Top of Page (y=30)
+        </button>
+        <button
+          className="px-2 py-1 border rounded w-full"
+          onClick={goToBottomOfPage}
+        >
+          Bottom of Page (y=700)
+        </button>
       </div>
       <div className="flex-1">
-        <PdfPreview url={url} highlights={highlights} />
+        <PdfPreview {...props} highlights={highlights} />
       </div>
     </div>
   );
 }
 
 // Interactive Test Component similar to DataUpdateTestsComponent
-function PdfHighlightTestsComponent() {
-  const url =
-    "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf";
+function PdfHighlightTestsComponent(props: Parameters<typeof PdfPreview>[0]) {
+  const url = props.url || "/large-pdf-file.pdf";
 
   const [highlight, setHighlight] = useState({
     page: 1,
@@ -134,6 +157,14 @@ function PdfHighlightTestsComponent() {
 
   const goToPage3 = () => {
     updateHighlight({ page: 3, x: 80, y: 150, width: 350, height: 120 });
+  };
+
+  const goToPage10 = () => {
+    updateHighlight({ page: 10, x: 100, y: 200, width: 300, height: 100 });
+  };
+
+  const goToPage20 = () => {
+    updateHighlight({ page: 20, x: 120, y: 250, width: 280, height: 90 });
   };
 
   const createSmallHighlight = () => {
@@ -251,6 +282,34 @@ function PdfHighlightTestsComponent() {
               }}
             >
               Go to Page 3
+            </button>
+            <button
+              data-testid="go-to-page-10"
+              onClick={goToPage10}
+              style={{
+                padding: "6px 8px",
+                fontSize: "12px",
+                border: "1px solid #ddd",
+                borderRadius: "4px",
+                background: "white",
+                cursor: "pointer",
+              }}
+            >
+              Go to Page 10
+            </button>
+            <button
+              data-testid="go-to-page-20"
+              onClick={goToPage20}
+              style={{
+                padding: "6px 8px",
+                fontSize: "12px",
+                border: "1px solid #ddd",
+                borderRadius: "4px",
+                background: "white",
+                cursor: "pointer",
+              }}
+            >
+              Go to Page 20
             </button>
           </div>
         </div>
@@ -372,6 +431,7 @@ function PdfHighlightTestsComponent() {
       {/* Right panel: PDF Preview */}
       <div style={{ flex: 1 }}>
         <PdfPreview
+          {...props}
           url={url}
           highlights={highlight.width > 0 ? [highlight] : undefined}
         />
@@ -381,7 +441,10 @@ function PdfHighlightTestsComponent() {
 }
 
 export const HighlightInteractiveTests: Story = {
-  render: () => <PdfHighlightTestsComponent />,
+  args: {
+    url: "/large-pdf-file.pdf",
+  },
+  render: (args) => <PdfHighlightTestsComponent {...args} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
@@ -425,38 +488,56 @@ export const HighlightInteractiveTests: Story = {
       "Page: 3"
     );
 
-    // Test 3: Create small highlight
+    // Test 3: Navigate to page 10 (tests virtualization)
+    const goToPage10Button = canvas.getByTestId("go-to-page-10");
+    await userEvent.click(goToPage10Button);
+
+    await waitForUpdate(3);
+    expect(canvas.getByTestId("current-highlight")).toHaveTextContent(
+      "Page: 10"
+    );
+
+    // Test 4: Navigate to page 20 (tests deeper virtualization)
+    const goToPage20Button = canvas.getByTestId("go-to-page-20");
+    await userEvent.click(goToPage20Button);
+
+    await waitForUpdate(4);
+    expect(canvas.getByTestId("current-highlight")).toHaveTextContent(
+      "Page: 20"
+    );
+
+    // Test 5: Create small highlight
     const smallHighlightButton = canvas.getByTestId("small-highlight");
     await userEvent.click(smallHighlightButton);
 
-    await waitForUpdate(3);
+    await waitForUpdate(5);
     expect(canvas.getByTestId("current-highlight")).toHaveTextContent(
       "Size: 100 × 50"
     );
 
-    // Test 4: Create large highlight
+    // Test 6: Create large highlight
     const largeHighlightButton = canvas.getByTestId("large-highlight");
     await userEvent.click(largeHighlightButton);
 
-    await waitForUpdate(4);
+    await waitForUpdate(6);
     expect(canvas.getByTestId("current-highlight")).toHaveTextContent(
       "Size: 400 × 200"
     );
 
-    // Test 5: Clear highlight
+    // Test 7: Clear highlight
     const clearButton = canvas.getByTestId("clear-highlight");
     await userEvent.click(clearButton);
 
-    await waitForUpdate(5);
+    await waitForUpdate(7);
     expect(canvas.getByTestId("current-highlight")).toHaveTextContent(
       "Size: 0 × 0"
     );
 
-    // Test 6: Reset highlight to default
+    // Test 8: Reset highlight to default
     const resetButton = canvas.getByTestId("reset-highlight");
     await userEvent.click(resetButton);
 
-    await waitForUpdate(6);
+    await waitForUpdate(8);
     expect(canvas.getByTestId("current-highlight")).toHaveTextContent(
       "Page: 1"
     );
@@ -470,7 +551,7 @@ export const HighlightInteractiveTests: Story = {
 
     // Final verification
     expect(canvas.getByTestId("update-counter")).toHaveTextContent(
-      "Updates: 6"
+      "Updates: 8"
     );
   },
 };
@@ -480,13 +561,14 @@ export const WithRemoveButton: Story = {
     url: "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf",
     fileName: "sample-document.pdf",
   },
-  render: (args) => (
-    <WithRemoveExample {...args} fileName={args.fileName ?? undefined} />
-  ),
+  render: (args) => <WithRemoveExample {...args} />,
 };
 
 export const UploadAndPreview: Story = {
-  render: () => <UploadAndPreviewExample />,
+  args: {
+    url: "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf",
+  },
+  render: (args) => <UploadAndPreviewExample {...args} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
@@ -522,13 +604,7 @@ export const UploadAndPreview: Story = {
 };
 
 // Component to demonstrate the remove functionality
-function WithRemoveExample({
-  url,
-  fileName,
-}: {
-  url: string;
-  fileName?: string;
-}) {
+function WithRemoveExample(props: Parameters<typeof PdfPreview>[0]) {
   const [isRemoved, setIsRemoved] = useState(false);
   const [removeLog, setRemoveLog] = useState<string[]>([]);
 
@@ -536,8 +612,10 @@ function WithRemoveExample({
     setIsRemoved(true);
     setRemoveLog((prev) => [
       ...prev,
-      `${new Date().toLocaleTimeString()}: PDF removed - ${fileName}`,
+      `${new Date().toLocaleTimeString()}: PDF removed - ${props.fileName || "document"}`,
     ]);
+    // Also call the onRemove from props if provided (for Storybook action logging)
+    props.onRemove?.();
   };
 
   if (isRemoved) {
@@ -549,7 +627,7 @@ function WithRemoveExample({
             PDF Removed
           </h2>
           <p className="text-gray-500 mb-4">
-            The PDF "{fileName}" has been removed.
+            The PDF "{props.fileName || "document"}" has been removed.
           </p>
           <button
             onClick={() => setIsRemoved(false)}
@@ -574,20 +652,29 @@ function WithRemoveExample({
 
   return (
     <div className="h-screen">
-      <PdfPreview url={url} fileName={fileName} onRemove={handleRemove} />
+      <PdfPreview {...props} onRemove={handleRemove} />
     </div>
   );
 }
 
 // We can use these files for testing:
 // https://issuu.com/pamperedchef/docs/pamperedchef-ss25-us-catalog
-function UploadAndPreviewExample() {
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+function UploadAndPreviewExample(props: Parameters<typeof PdfPreview>[0]) {
+  const [pdfUrl, setPdfUrl] = useState<string | null>(props.url || null);
+  const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
+
+  // Sync with props.url from controls, but don't override uploaded files
+  useEffect(() => {
+    if (props.url && !uploadedUrl) {
+      setPdfUrl(props.url);
+    }
+  }, [props.url, uploadedUrl]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type === "application/pdf") {
       const url = URL.createObjectURL(file);
+      setUploadedUrl(url);
       setPdfUrl(url);
     }
   };
@@ -610,7 +697,7 @@ function UploadAndPreviewExample() {
       <div className="flex-1 min-h-0" data-testid="pdf-preview-container">
         {pdfUrl ? (
           <div className="h-full min-h-0" data-testid="pdf-preview">
-            <PdfPreview url={pdfUrl} />
+            <PdfPreview {...props} url={pdfUrl} />
           </div>
         ) : (
           <div
