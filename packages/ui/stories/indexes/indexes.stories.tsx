@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { ApiProvider } from "../../src/lib";
 import { useIndexList, useIndex } from "../../src/indexes";
 import { createRealClientsForTests } from "@/src/lib/api-provider";
-import { API_KEY, ProjectId } from "../configs/constant";
+import { API_KEY, HAS_API_KEY, ProjectId } from "../configs/constant";
 
 function IndexListDemo() {
   const { indexes, loading, error, sync } = useIndexList();
@@ -57,36 +57,63 @@ function IndexDetailDemo(props: { id: string }) {
   );
 }
 
-const meta: Meta = {
-  title: "Data/Indexes",
-  parameters: {
-    layout: "padded",
-  },
-  decorators: [
-    (Story) => (
-      <ApiProvider
-        clients={createRealClientsForTests({
-          baseUrl: "https://api.cloud.llamaindex.ai",
-          apiKey: API_KEY,
-        })}
-        project={{ id: ProjectId }}
-      >
-        <div style={{ padding: 16 }}>
-          <Story />
-        </div>
-      </ApiProvider>
-    ),
-  ],
-};
+function ApiKeyMissingMessage() {
+  return (
+    <div className="p-4 text-amber-600 bg-amber-50 rounded border border-amber-200">
+      STORYBOOK_LLAMA_CLOUD_API_KEY environment variable is not set. This story
+      requires a valid API key.
+    </div>
+  );
+}
+
+// When API key is available, use real clients; otherwise show placeholder
+const meta: Meta = HAS_API_KEY
+  ? {
+      title: "Data/Indexes",
+      parameters: {
+        layout: "padded",
+      },
+      decorators: [
+        (Story) => (
+          <ApiProvider
+            clients={createRealClientsForTests({
+              baseUrl: "https://api.cloud.llamaindex.ai",
+              apiKey: API_KEY,
+            })}
+            project={{ id: ProjectId }}
+          >
+            <div style={{ padding: 16 }}>
+              <Story />
+            </div>
+          </ApiProvider>
+        ),
+      ],
+    }
+  : {
+      title: "Data/Indexes",
+      parameters: {
+        layout: "padded",
+      },
+      // Skip tests when API key is not available
+      tags: ["skip-test"],
+    };
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const List: Story = {
-  render: () => <IndexListDemo />,
-};
+export const List: Story = HAS_API_KEY
+  ? {
+      render: () => <IndexListDemo />,
+    }
+  : {
+      render: () => <ApiKeyMissingMessage />,
+    };
 
-export const Detail: Story = {
-  args: { id: "9a5118f8-7598-479f-94b4-2ba9689b73d3" },
-  render: (args) => <IndexDetailDemo id={args.id as string} />,
-};
+export const Detail: Story = HAS_API_KEY
+  ? {
+      args: { id: "9a5118f8-7598-479f-94b4-2ba9689b73d3" },
+      render: (args) => <IndexDetailDemo id={args.id as string} />,
+    }
+  : {
+      render: () => <ApiKeyMissingMessage />,
+    };
