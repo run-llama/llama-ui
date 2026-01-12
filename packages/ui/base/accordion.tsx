@@ -1,11 +1,10 @@
 import * as React from "react";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
-// import { ChevronDownIcon, Info } from "lucide-react";
-import { ChevronDownIcon } from "lucide-react";
+import { ChevronDownIcon, Info } from "lucide-react";
 
 import { cn } from "../lib/utils";
-// import { Tooltip } from "./tooltip";
-// import { Badge } from "./badge";
+import { Tooltip } from "./tooltip";
+import { Badge } from "./badge";
 
 function Accordion({
   ...props
@@ -59,7 +58,7 @@ function AccordionTrigger({
   caption,
   icon: Icon,
   showTooltip = false,
-  // tooltipContent,
+  tooltipContent,
   badge,
   ...props
 }: AccordionTriggerProps) {
@@ -80,28 +79,27 @@ function AccordionTrigger({
         <div className="flex min-w-0 flex-1 items-center gap-3">
           {Icon && (
             <div className="flex shrink-0">
-              <Icon className="text-foreground size-4" aria-hidden="true" />
+              <Icon className="size-4 text-foreground" aria-hidden="true" />
             </div>
           )}
           <div className="accordion-trigger-text flex min-w-0 items-baseline gap-2">
-            <span className="text-foreground truncate text-sm font-medium leading-5 hover:underline">
+            <span className="truncate text-sm font-medium leading-5 text-foreground hover:underline">
               {title}
             </span>
             {caption && (
-              <span className="text-muted-foreground shrink-0 text-sm font-normal leading-5">
+              <span className="shrink-0 text-sm font-normal leading-5 text-muted-foreground">
                 {caption}
               </span>
             )}
           </div>
           {showTooltip && (
             <div className="flex shrink-0">
-              {/* TODO: Add tooltip component */}
-              {/* {tooltipContent ? (
+              {tooltipContent ? (
                 <Tooltip
                   trigger={
                     <button
                       type="button"
-                      className="focus-visible:ring-ring/50 text-muted-foreground hover:text-foreground flex size-4 items-center justify-center rounded-full outline-none transition-colors focus-visible:ring-[2px] focus-visible:ring-offset-0"
+                      className="focus-visible:ring-ring/50 flex size-4 items-center justify-center rounded-full text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-[2px] focus-visible:ring-offset-0"
                       onClick={(e) => e.stopPropagation()}
                       aria-label="More information"
                     >
@@ -113,25 +111,24 @@ function AccordionTrigger({
                 />
               ) : (
                 <Info
-                  className="text-muted-foreground size-3.5"
+                  className="size-3.5 text-muted-foreground"
                   aria-hidden="true"
                 />
-              )} */}
+              )}
             </div>
           )}
           {badge && (
             <div className="flex shrink-0">
-              {/* TODO: Add badge component */}
-              {/* {typeof badge === "string" ? (
+              {typeof badge === "string" ? (
                 <Badge variant="secondary" label={badge} />
               ) : (
                 badge
-              )} */}
+              )}
             </div>
           )}
         </div>
         <div className="flex shrink-0">
-          <ChevronDownIcon className="text-muted-foreground pointer-events-none size-4 shrink-0 transition-transform duration-200" />
+          <ChevronDownIcon className="pointer-events-none size-4 shrink-0 text-muted-foreground transition-transform duration-200" />
         </div>
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
@@ -149,7 +146,7 @@ function AccordionContent({
       className="overflow-hidden text-sm data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
       {...props}
     >
-      <div className={cn("text-foreground pb-4 pt-0", className)}>
+      <div className={cn("pb-4 pt-0 text-foreground", className)}>
         {children}
       </div>
     </AccordionPrimitive.Content>
