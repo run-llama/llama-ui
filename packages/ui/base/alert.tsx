@@ -2,7 +2,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { Info, OctagonAlert, TriangleAlert } from "lucide-react";
 
 import { cn } from "../lib/utils";
-// import { Button } from "./button";
+import { Button } from "./button";
 
 const alertVariants = cva(
   "relative w-full rounded-lg border bg-card px-4 py-3 text-sm",
@@ -56,8 +56,8 @@ function Alert({
   title,
   description,
   showIcon = true,
-  //   buttonLabel,
-  //   onButtonClick,
+  buttonLabel,
+  onButtonClick,
 }: AlertProps) {
   const Icon = variantIcons[variant ?? "default"];
 
@@ -90,15 +90,14 @@ function Alert({
           )}
         </div>
       </div>
-      {/* TODO: Add button component */}
-      {/* {buttonLabel && (
+      {buttonLabel && (
         <Button
           variant="outline"
           size="sm"
           onClick={onButtonClick}
           label={buttonLabel}
         />
-      )} */}
+      )}
     </div>
   );
 }
