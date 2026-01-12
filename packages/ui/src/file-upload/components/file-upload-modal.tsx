@@ -247,7 +247,7 @@ export function FileUploader({
             <p className="text-sm text-muted-foreground">{modalDescription}</p>
           </DialogHeader>
 
-          <div className="space-y-4 overflow-hidden">
+          <div className="space-y-4">
             {/* Input Fields */}
             {inputFields?.map((field) => (
               <div key={field.key} className="space-y-2">
@@ -261,7 +261,7 @@ export function FileUploader({
                   value={fieldValues[field.key] || ""}
                   onChange={(e) => handleFieldChange(field.key, e.target.value)}
                   placeholder={field.placeholder}
-                  className={fieldErrors[field.key] ? "border-destructive" : ""}
+                  variant={fieldErrors[field.key] ? "error" : "default"}
                 />
                 {fieldErrors[field.key] && (
                   <p className="text-sm text-destructive">

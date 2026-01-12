@@ -168,15 +168,16 @@ export function FileDropzone({
               }
         }
       >
-        <Input
-          ref={inputRef}
-          type="file"
-          className="hidden"
-          onChange={disabled ? undefined : handleFileInputChange}
-          accept={acceptValue}
-          multiple={multiple}
-          disabled={disabled}
-        />
+        <div className="hidden">
+          <Input
+            ref={inputRef}
+            type="file"
+            onChange={disabled ? undefined : handleFileInputChange}
+            accept={acceptValue}
+            multiple={multiple}
+            disabled={disabled}
+          />
+        </div>
         {renderFileContent()}
       </div>
       {footer}
