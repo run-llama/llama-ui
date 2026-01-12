@@ -18,7 +18,7 @@ import {
 } from "@/base/select";
 import { PrimitiveValue } from "../types";
 import { useUIConfigStore } from "@/src/store/ui-config-store";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/base/tooltip";
+import { Tooltip } from "@/base/tooltip";
 
 interface EditableFieldProps<S extends PrimitiveValue> {
   value: S;
@@ -211,8 +211,8 @@ export function EditableField<S extends PrimitiveValue>({
 
   if (!editable) {
     return (
-      <Tooltip>
-        <TooltipTrigger asChild>
+      <Tooltip
+        trigger={
           <div
             ref={containerRef}
             onClick={() => onClick?.({ value, metadata })}
@@ -225,11 +225,9 @@ export function EditableField<S extends PrimitiveValue>({
               {displayValue}
             </span>
           </div>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>{displayValue}</p>
-        </TooltipContent>
-      </Tooltip>
+        }
+        content={<p>{displayValue}</p>}
+      />
     );
   }
 
