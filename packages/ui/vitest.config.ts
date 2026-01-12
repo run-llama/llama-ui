@@ -80,6 +80,10 @@ export default defineConfig({
             ],
           },
           setupFiles: ["./tests/storybook-setup.ts"],
+          // Exclude stories that require API keys when not available
+          ...(process.env.STORYBOOK_LLAMA_CLOUD_API_KEY
+            ? {}
+            : { exclude: ["**/stories/indexes/**"] }),
         },
       },
     ],

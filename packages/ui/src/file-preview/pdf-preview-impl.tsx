@@ -8,10 +8,12 @@ import { FileToolbar } from "../document-preview/file-tool-bar";
 import { BoundingBoxOverlay } from "./bounding-box-overlay";
 import type { BoundingBox, Highlight } from "./types";
 import {
-  calculateFitToWidthScale,
+  calculateHighlightScrollPosition,
+  calculateInitialScale,
   calculateVisiblePageRange,
   findClosestPage,
   groupHighlightsByPage,
+  type FitMode,
 } from "./pdf-preview-utils";
 
 // Configure worker path for PDF.js
@@ -34,6 +36,8 @@ export interface PdfPreviewImplProps {
   onRemove?: () => void;
   highlights?: Highlight[];
   toolbarClassName?: string;
+  /** How the PDF should fit on initial load. Defaults to "page" (fit entire page). */
+  fitMode?: FitMode;
 }
 
 // map of page number to page viewport dimensions
@@ -48,6 +52,8 @@ const pdfOptions = {
 
 const VIRTUALIZATION_BUFFER = 5;
 const DEFAULT_PAGE_HEIGHT = 800;
+const MIN_HIGHLIGHT_EDGE_DISTANCE = 60; // Minimum pixels from viewport edge when scrolling to highlight
+const PENDING_HIGHLIGHT_TIMEOUT_MS = 2000; // Max time to wait for page dimensions before giving up
 
 export const PdfPreviewImpl = ({
   fileName,
@@ -56,6 +62,7 @@ export const PdfPreviewImpl = ({
   onRemove,
   highlights,
   toolbarClassName,
+  fitMode = "width",
 }: PdfPreviewImplProps) => {
   const [numPages, setNumPages] = useState<number>();
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -64,7 +71,6 @@ export const PdfPreviewImpl = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const pageRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
-  const isInitialScaleSet = useRef(false);
 
   const [pageBaseDims, setPageBaseDims] = useState<PageBaseDims>({}); // store page viewport to use for bounding box overlay
   const [showHighlights, setShowHighlights] = useState<boolean>(true); // whether to show the highlights
@@ -72,6 +78,9 @@ export const PdfPreviewImpl = ({
   const [pageHeights, setPageHeights] = useState<{ [key: number]: number }>({});
   const [loadError, setLoadError] = useState<string | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
+  const [pendingHighlight, setPendingHighlight] = useState<Highlight | null>(
+    null
+  );
 
   const highlightsByPage = useMemo(
     () => groupHighlightsByPage(highlights),
@@ -128,19 +137,90 @@ export const PdfPreviewImpl = ({
     [numPages]
   );
 
-  // when highlights are set, navigate to the first highlight's page
+  // Scroll to show a highlight with smart positioning
+  const scrollToHighlight = useCallback(
+    (highlight: Highlight) => {
+      const container = containerRef.current;
+      const pageEl = pageRefs.current[highlight.page];
+      const pageDims = pageBaseDims[highlight.page];
+
+      if (!container || !pageEl || !pageDims) {
+        return;
+      }
+
+      const targetScroll = calculateHighlightScrollPosition({
+        pageTop: pageEl.offsetTop,
+        pageHeight: pageDims.height * scale,
+        highlightY: highlight.y,
+        highlightHeight: highlight.height,
+        scale,
+        viewportHeight: container.clientHeight,
+        scrollHeight: container.scrollHeight,
+        minEdgeDistance: MIN_HIGHLIGHT_EDGE_DISTANCE,
+      });
+
+      // Only use smooth scroll for single-page navigation to avoid layout shift issues
+      // during long-distance scrolls where virtualization loads/unloads pages
+      const currentScrollPage = findClosestPage(
+        pageRefs.current,
+        container.getBoundingClientRect()
+      );
+      const pageDistance = Math.abs(currentScrollPage - highlight.page);
+      const scrollBehavior = pageDistance <= 1 ? "smooth" : "instant";
+
+      container.scrollTo({
+        top: targetScroll,
+        behavior: scrollBehavior,
+      });
+    },
+    [scale, pageBaseDims]
+  );
+
+  // when highlights are set, navigate to the highlight's position
   useEffect(() => {
     if (!highlights || highlights.length === 0) return;
     if (!numPages) return;
 
     const firstHighlight = highlights[0];
-    if (firstHighlight.page > numPages) return;
-    const pageEl = pageRefs.current[firstHighlight.page];
-    if (pageEl) {
-      goToPage(firstHighlight.page);
-      setShowHighlights(true);
+    const targetPage = Math.min(Math.max(firstHighlight.page, 1), numPages);
+
+    // Ensure the page is in the visible set
+    setCurrentPage(targetPage);
+    const visibleRange = calculateVisiblePageRange(
+      targetPage,
+      numPages,
+      VIRTUALIZATION_BUFFER
+    );
+    setVisiblePages(new Set(visibleRange));
+    setShowHighlights(true);
+
+    setPendingHighlight({ ...firstHighlight, page: targetPage });
+  }, [highlights, numPages]);
+
+  useEffect(() => {
+    if (!pendingHighlight) return;
+    const targetPage = pendingHighlight.page;
+    const pageEl = pageRefs.current[targetPage];
+    const pageDims = pageBaseDims[targetPage];
+
+    if (pageEl && pageDims) {
+      scrollToHighlight(pendingHighlight);
+      setPendingHighlight(null);
+      return;
     }
-  }, [highlights, numPages, goToPage]);
+
+    // Fallback: if page dimensions aren't available after timeout,
+    // clear pending highlight and scroll to page instead
+    const timeoutId = setTimeout(() => {
+      setPendingHighlight(null);
+      const el = pageRefs.current[targetPage];
+      if (el) {
+        el.scrollIntoView({ behavior: "instant", block: "center" });
+      }
+    }, PENDING_HIGHLIGHT_TIMEOUT_MS);
+
+    return () => clearTimeout(timeoutId);
+  }, [pendingHighlight, pageBaseDims, scrollToHighlight]);
 
   useEffect(() => {
     if (!numPages) return;
@@ -178,23 +258,25 @@ export const PdfPreviewImpl = ({
         ...prev,
         [page.pageNumber]: scaledHeight,
       }));
-
-      if (
-        !isInitialScaleSet.current &&
-        page.pageNumber === 1 &&
-        containerRef.current
-      ) {
-        const containerWidth = containerRef.current.clientWidth;
-        const newScale = calculateFitToWidthScale(
-          viewport.width,
-          containerWidth
-        );
-        setScale(newScale);
-        isInitialScaleSet.current = true;
-      }
     },
-    [scale]
+    [scale, fitMode]
   );
+
+  const firstPageDims = pageBaseDims[1];
+  // rescale the zoom when fit mode changes, or the page dimensions change
+  useEffect(() => {
+    if (firstPageDims && containerRef.current) {
+      const newScale = calculateInitialScale(
+        fitMode,
+        { width: firstPageDims.width, height: firstPageDims.height },
+        {
+          width: containerRef.current.clientWidth,
+          height: containerRef.current.clientHeight,
+        }
+      );
+      setScale(newScale);
+    }
+  }, [fitMode, firstPageDims]);
 
   // click anywhere on the page to hide the highlights
   const handleClickOnPage = () => {
@@ -274,6 +356,7 @@ export const PdfPreviewImpl = ({
 
       const totalPages = numPages ?? closestPage;
       const clampedPage = Math.min(Math.max(closestPage, 1), totalPages);
+
       setCurrentPage(clampedPage);
     };
 
