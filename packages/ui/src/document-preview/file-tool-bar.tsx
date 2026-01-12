@@ -12,7 +12,7 @@ import {
 import { useEffect, useState } from "react";
 import { Button } from "@/base/button";
 import { Input } from "@/base/input";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/base/tooltip";
+import { Tooltip } from "@/base/tooltip";
 import { cn } from "@/lib/utils";
 
 export interface FileToolbarProps {
@@ -150,17 +150,17 @@ export const FileToolbar = ({
   );
 
   const removeButtonElement = onRemove && (
-    <Tooltip>
-      <TooltipTrigger asChild>
+    <Tooltip
+      trigger={
         <Button
           variant="ghost"
           size="icon-sm"
           onClick={onRemove}
           startIcon={<Trash2 />}
         />
-      </TooltipTrigger>
-      <TooltipContent>Remove file</TooltipContent>
-    </Tooltip>
+      }
+      content="Remove file"
+    />
   );
 
   return (
@@ -173,18 +173,17 @@ export const FileToolbar = ({
       {/* Left Side - Page Navigation or File Name + Remove */}
       {showPageNavigation ? (
         <div className="flex items-center gap-1">
-          <Tooltip>
-            <TooltipTrigger asChild>
+          <Tooltip
+            trigger={
               <Button
                 variant="ghost"
                 size="icon-sm"
                 onClick={handlePrevPage}
-                disabled={currentPage === undefined || currentPage <= 1}
                 startIcon={<ChevronLeft />}
               />
-            </TooltipTrigger>
-            <TooltipContent>Previous page</TooltipContent>
-          </Tooltip>
+            }
+            content="Previous page"
+          />
 
           <div className="flex items-center justify-center gap-1">
             <Input
@@ -204,8 +203,8 @@ export const FileToolbar = ({
             </span>
           </div>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
+          <Tooltip
+            trigger={
               <Button
                 variant="ghost"
                 size="icon-sm"
@@ -217,9 +216,9 @@ export const FileToolbar = ({
                 }
                 startIcon={<ChevronRight />}
               />
-            </TooltipTrigger>
-            <TooltipContent>Next page</TooltipContent>
-          </Tooltip>
+            }
+            content="Next page"
+          />
         </div>
       ) : (
         <div className="flex items-center gap-2">
@@ -241,8 +240,8 @@ export const FileToolbar = ({
             {showZoomControls && (
               <>
                 <div className="flex items-center gap-1">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
+                  <Tooltip
+                    trigger={
                       <Button
                         variant="ghost"
                         size="icon-sm"
@@ -251,14 +250,14 @@ export const FileToolbar = ({
                         startIcon={<Minus />}
                         aria-label="Zoom Out"
                       />
-                    </TooltipTrigger>
-                    <TooltipContent>Zoom out</TooltipContent>
-                  </Tooltip>
+                    }
+                    content="Zoom out"
+                  />
                   <span className="text-center text-xs text-muted-foreground">
                     {scale !== undefined ? Math.round(scale * 100) : 0}%
                   </span>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
+                  <Tooltip
+                    trigger={
                       <Button
                         variant="ghost"
                         size="icon-sm"
@@ -267,11 +266,11 @@ export const FileToolbar = ({
                         startIcon={<Plus />}
                         aria-label="Zoom In"
                       />
-                    </TooltipTrigger>
-                    <TooltipContent>Zoom in</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
+                    }
+                    content="Zoom in"
+                  />
+                  <Tooltip
+                    trigger={
                       <Button
                         variant="ghost"
                         size="icon-sm"
@@ -279,9 +278,9 @@ export const FileToolbar = ({
                         startIcon={<RotateCcw />}
                         aria-label="Reset Zoom"
                       />
-                    </TooltipTrigger>
-                    <TooltipContent>Reset zoom</TooltipContent>
-                  </Tooltip>
+                    }
+                    content="Reset zoom"
+                  />
                 </div>
 
                 {(onDownload || onFullscreen) && (
@@ -293,8 +292,8 @@ export const FileToolbar = ({
             {/* Download Button */}
             {onDownload && (
               <>
-                <Tooltip>
-                  <TooltipTrigger asChild>
+                <Tooltip
+                  trigger={
                     <Button
                       variant="ghost"
                       size="icon-sm"
@@ -302,17 +301,17 @@ export const FileToolbar = ({
                       startIcon={<Download />}
                       aria-label="Download PDF"
                     />
-                  </TooltipTrigger>
-                  <TooltipContent>Download</TooltipContent>
-                </Tooltip>
+                  }
+                  content="Download"
+                />
                 {onFullscreen && <div className="h-6 w-px bg-border" />}
               </>
             )}
 
             {/* Fullscreen Button */}
             {onFullscreen && (
-              <Tooltip>
-                <TooltipTrigger asChild>
+              <Tooltip
+                trigger={
                   <Button
                     variant="ghost"
                     size="icon-sm"
@@ -320,9 +319,9 @@ export const FileToolbar = ({
                     startIcon={<Maximize />}
                     aria-label="Fullscreen"
                   />
-                </TooltipTrigger>
-                <TooltipContent>Fullscreen</TooltipContent>
-              </Tooltip>
+                }
+                content="Fullscreen"
+              />
             )}
           </>
         )}

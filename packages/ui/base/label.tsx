@@ -1,8 +1,7 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { CircleHelp } from "lucide-react";
-//TODO replace with tooltip after swap
-import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
+import { Tooltip } from "./tooltip";
 
 const labelContainerVariants = cva("flex flex-col gap-3 w-full", {
   variants: {
@@ -111,14 +110,14 @@ const Label = ({
           )}
           {badge}
           {tooltip && (
-            <Tooltip>
-              <TooltipTrigger asChild>
+            <Tooltip
+              trigger={
                 <div className="flex size-4 shrink-0 cursor-pointer items-center justify-center text-muted-foreground hover:text-foreground [&>svg]:size-full">
                   <CircleHelp />
                 </div>
-              </TooltipTrigger>
-              <TooltipContent>{tooltip}</TooltipContent>
-            </Tooltip>
+              }
+              content={tooltip}
+            />
           )}
         </div>
         {description && (
