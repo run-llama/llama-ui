@@ -496,13 +496,11 @@ export function TableRenderer<Row extends JsonObject>({
                   <div className="w-full h-full flex items-center justify-center">
                     <Button
                       variant="ghost"
-                      size="icon"
+                      size="icon-sm"
                       onClick={() => handleDeleteRow(rowIndex)}
-                      className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-transparent cursor-pointer"
                       title="Delete row"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                      startIcon={<Trash2 className="text-destructive" />}
+                    />
                   </div>
                 </TableCell>
               )}
@@ -522,12 +520,10 @@ export function TableRenderer<Row extends JsonObject>({
               >
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="icon-sm"
                   onClick={handleAddRow}
-                  className="text-blue-600 border-blue-200 hover:bg-transparent cursor-pointer"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
+                  startIcon={<Plus className="text-primary" />}
+                />
               </TableCell>
             </TableRow>
           )}

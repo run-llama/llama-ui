@@ -126,10 +126,8 @@ export function ListRenderer<S extends PrimitiveValue>({
             variant="outline"
             size="sm"
             onClick={handleAdd}
-            className="text-blue-600 border-blue-200 hover:bg-blue-50 cursor-pointer"
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
+            startIcon={<Plus className="text-primary" />}
+          />
         )}
       </div>
     );
@@ -174,7 +172,7 @@ export function ListRenderer<S extends PrimitiveValue>({
             return (
               <TableRow key={index} className="hover:bg-gray-50 border-0">
                 <TableCell className="p-0 border-r border-gray-100 w-12 align-middle h-full">
-                  <div className="w-full h-full border-b flex items-center justify-center text-sm text-gray-600 font-medium bg-gray-25 p-2">
+                  <div className="w-full h-full border-b flex items-center justify-center text-sm text-gray-600 font-medium bg-gray-25 p-2 min-h-10">
                     {index + 1}
                   </div>
                 </TableCell>
@@ -200,16 +198,14 @@ export function ListRenderer<S extends PrimitiveValue>({
                 </TableCell>
                 {onDelete && (
                   <TableCell className="p-0 w-12 align-middle h-full">
-                    <div className="flex items-center justify-center border-b">
+                    <div className="flex items-center justify-center border-b min-h-10">
                       <Button
                         variant="ghost"
-                        size="icon"
+                        size="icon-sm"
                         onClick={() => handleDelete(index)}
-                        className="h-9 w-9 text-red-500 hover:text-red-700 hover:bg-transparent cursor-pointer rounded-none"
                         title="Delete item"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                        startIcon={<Trash2 className="text-destructive" />}
+                      />
                     </div>
                   </TableCell>
                 )}
@@ -220,15 +216,16 @@ export function ListRenderer<S extends PrimitiveValue>({
             <TableRow className="hover:bg-gray-50 border-0">
               <TableCell className="p-0 border-r border-gray-100 w-12 align-middle h-full"></TableCell>
               <TableCell className="p-0 min-w-[120px] align-top h-full"></TableCell>
-              <TableCell colSpan={onDelete ? 3 : 2} className="text-center p-0">
+              <TableCell
+                colSpan={onDelete ? 3 : 2}
+                className="text-center p-0 h-10"
+              >
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleAdd}
-                  className="h-9 w-9 text-blue-600 border-blue-200 hover:bg-transparent cursor-pointer"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
+                  startIcon={<Plus className="text-primary" />}
+                />
               </TableCell>
             </TableRow>
           )}

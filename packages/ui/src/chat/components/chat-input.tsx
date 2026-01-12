@@ -1,4 +1,4 @@
-import { Send, Square } from "lucide-react";
+import { Send, Square, Plus } from "lucide-react";
 import { createContext, useContext, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/base/button";
@@ -191,17 +191,9 @@ function ChatInputUpload(props: ChatInputUploadProps) {
       }}
       isProcessing={isLoading}
       trigger={
-        <Button
-          type="button"
-          variant="secondary"
-          size="icon"
-          className={cn(
-            "absolute bottom-2 left-2 rounded-full",
-            props.className
-          )}
-        >
-          +
-        </Button>
+        <div className="absolute bottom-2 left-2">
+          <Button variant="outline" size="icon-sm" startIcon={<Plus />} />
+        </div>
       }
     />
   );
@@ -213,26 +205,26 @@ function ChatInputSubmit(props: ChatInputSubmitProps) {
 
   if (stop && isLoading) {
     return (
-      <Button
-        type="button"
-        size="icon"
-        onClick={stop}
-        className="absolute bottom-2 right-2 rounded-full"
-      >
-        <Square className="size-3" fill="white" stroke="white" />
-      </Button>
+      <div className="absolute bottom-2 right-2">
+        <Button
+          type="button"
+          size="icon"
+          onClick={stop}
+          startIcon={<Square />}
+        />
+      </div>
     );
   }
 
   return (
-    <Button
-      type="submit"
-      size="icon"
-      disabled={props.disabled ?? isDisabled}
-      className={cn("absolute bottom-2 right-2 rounded-full", props.className)}
-    >
-      {props.children ?? <Send className="size-4" />}
-    </Button>
+    <div className={cn("absolute bottom-2 right-2", props.className)}>
+      <Button
+        type="submit"
+        size="icon"
+        disabled={props.disabled ?? isDisabled}
+        startIcon={props.children ?? <Send />}
+      />
+    </div>
   );
 }
 

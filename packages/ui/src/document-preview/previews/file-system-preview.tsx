@@ -46,11 +46,9 @@ export function FileSystemPreview({
             variant="outline"
             size="sm"
             onClick={() => onRemove(file.index)}
-            className="mt-2"
-          >
-            <Trash2 className="size-4 mr-2" />
-            Remove
-          </Button>
+            startIcon={<Trash2 />}
+            label="Remove"
+          />
         )}
       </div>
     );
@@ -63,10 +61,13 @@ export function FileSystemPreview({
     <div className="flex h-full flex-col bg-muted/30">
       <div className="flex items-center gap-3 border-b px-6 py-3">
         {onAddFiles && (
-          <Button size="xs" onClick={onAddFiles}>
-            <Plus className="size-4" />
-            Add files
-          </Button>
+          <Button
+            size="sm"
+            onClick={onAddFiles}
+            startIcon={<Plus />}
+            variant="outline"
+            label="Add files"
+          />
         )}
         <span className="text-sm text-muted-foreground">
           {fileCount} {label} selected from your file system
@@ -96,10 +97,8 @@ export function FileSystemPreview({
                     variant="ghost"
                     size="sm"
                     onClick={() => onRemove(file.index)}
-                    className="size-8 shrink-0 p-0"
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
+                    startIcon={<Trash2 />}
+                  />
                 </ToolTipper>
               )}
             </div>

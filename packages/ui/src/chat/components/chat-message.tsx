@@ -134,26 +134,19 @@ function ChatMessageActions(props: ChatMessageActionsProps) {
       <Button
         title="Copy"
         onClick={() => copyToClipboard(messageTextContent)}
-        size="icon"
+        size="icon-sm"
         variant="outline"
-        className="h-8 w-8"
-      >
-        {isCopied ? (
-          <Check className="h-4 w-4" />
-        ) : (
-          <Copy className="h-4 w-4" />
-        )}
-      </Button>
+        // className="h-8 w-8"
+        startIcon={isCopied ? <Check /> : <Copy />}
+      />
       {showReload && (
         <Button
           title="Regenerate"
           variant="outline"
-          size="icon"
+          size="icon-sm"
           onClick={() => regenerate?.()}
-          className="h-8 w-8"
-        >
-          <RefreshCw className="h-4 w-4" />
-        </Button>
+          startIcon={<RefreshCw />}
+        />
       )}
     </>
   );

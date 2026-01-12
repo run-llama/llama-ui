@@ -37,9 +37,7 @@ export function HandlerList({ onSelectHandler }: HandlerListProps) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Workflow Handlers</h2>
-        <Button onClick={() => sync()} variant="outline">
-          Refresh
-        </Button>
+        <Button onClick={() => sync()} variant="outline" label="Refresh" />
       </div>
 
       {handlerList.length === 0 ? (
