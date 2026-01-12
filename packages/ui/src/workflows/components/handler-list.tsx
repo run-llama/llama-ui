@@ -18,18 +18,18 @@ export function HandlerList({ onSelectHandler }: HandlerListProps) {
   const { state, sync } = useHandlers();
   const handlerList = Object.values(state.handlers);
 
-  const getStatusColor = (status: RunStatus) => {
+  const getStatusVariant = (status: RunStatus) => {
     switch (status) {
       case "running":
-        return "bg-blue-500";
+        return "default";
       case "completed":
-        return "bg-green-500";
+        return "success";
       case "failed":
-        return "bg-red-500";
+        return "destructive";
       case "cancelled":
-        return "bg-gray-500";
+        return "secondary";
       default:
-        return "bg-gray-400";
+        return "secondary";
     }
   };
 
@@ -61,9 +61,10 @@ export function HandlerList({ onSelectHandler }: HandlerListProps) {
                   <CardTitle className="text-sm font-medium">
                     {handler.workflow_name}
                   </CardTitle>
-                  <Badge className={getStatusColor(handler.status)}>
-                    {handler.status}
-                  </Badge>
+                  <Badge
+                    variant={getStatusVariant(handler.status)}
+                    label={handler.status}
+                  />
                 </div>
               </CardHeader>
               <CardContent>
