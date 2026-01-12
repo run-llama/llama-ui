@@ -116,14 +116,13 @@ export function FileUpload({
                     {selectFileDescription}
                   </p>
                 </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onSelectFile}
-                  className="mt-2"
-                >
-                  {selectFileLabel}
-                </Button>
+                <div className="mt-2">
+                  <Button
+                    variant="outline"
+                    onClick={onSelectFile}
+                    label={selectFileLabel}
+                  />
+                </div>
               </div>
             </div>
           </TabsContent>

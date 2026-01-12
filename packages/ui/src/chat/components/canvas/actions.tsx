@@ -29,12 +29,10 @@ function CanvasCloseButton() {
   return (
     <Button
       variant="ghost"
-      size="icon"
-      className="cursor-pointer rounded-full"
+      size="icon-sm"
       onClick={closeCanvas}
-    >
-      <X className="size-4" />
-    </Button>
+      startIcon={<X />}
+    />
   );
 }
 

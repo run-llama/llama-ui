@@ -51,25 +51,21 @@ export function UploadProgress({ files, onClose }: UploadProgressProps) {
             {showOverallProgress && (
               <Button
                 variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0"
+                size="icon-sm"
+                startIcon={
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform duration-200 ease-in-out ${isCollapsed ? "rotate-180" : "rotate-0"}`}
+                  />
+                }
                 onClick={() => setIsCollapsed(!isCollapsed)}
-              >
-                <ChevronDown
-                  className={`h-4 w-4 transition-transform duration-200 ease-in-out ${
-                    isCollapsed ? "rotate-180" : "rotate-0"
-                  }`}
-                />
-              </Button>
+              />
             )}
             <Button
               variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0"
+              size="icon-sm"
+              startIcon={<X />}
               onClick={onClose}
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            />
           </div>
         </div>
 
@@ -117,18 +113,18 @@ export function UploadProgress({ files, onClose }: UploadProgressProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full h-6 text-xs transition-all duration-200 hover:bg-accent"
+                startIcon={
+                  <ChevronDown
+                    className={`h-3 w-3 mr-1 transition-transform duration-200 ${showAll ? "rotate-180" : "rotate-0"}`}
+                  />
+                }
+                label={
+                  showAll
+                    ? "Show Less"
+                    : `View ${files.length - maxVisible} More Files`
+                }
                 onClick={() => setShowAll(!showAll)}
-              >
-                <ChevronDown
-                  className={`h-3 w-3 mr-1 transition-transform duration-200 ${
-                    showAll ? "rotate-180" : "rotate-0"
-                  }`}
-                />
-                {showAll
-                  ? "Show Less"
-                  : `View ${files.length - maxVisible} More Files`}
-              </Button>
+              />
             </div>
           )}
         </div>

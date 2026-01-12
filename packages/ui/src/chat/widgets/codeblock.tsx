@@ -138,24 +138,15 @@ const CodeBlock: FC<Props> = memo((props) => {
               variant="ghost"
               onClick={downloadAsFile}
               size="icon"
-              className="size-8"
-            >
-              <Download className="size-4" />
-              <span className="sr-only">Download</span>
-            </Button>
+              startIcon={<Download />}
+            />
             <Button
               variant="ghost"
-              size="icon"
+              size="sm"
               onClick={onCopy}
-              className="size-8"
-            >
-              {isCopied ? (
-                <Check className="size-4" />
-              ) : (
-                <Copy className="size-4" />
-              )}
-              <span className="sr-only">Copy code</span>
-            </Button>
+              startIcon={isCopied ? <Check /> : <Copy />}
+              label="Copy code"
+            />
           </div>
         </div>
       )}

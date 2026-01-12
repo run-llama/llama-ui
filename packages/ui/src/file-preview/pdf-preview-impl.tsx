@@ -463,9 +463,8 @@ export const PdfPreviewImpl = ({
                 lastLoadedUrl.current = null;
                 setFile(null);
               }}
-            >
-              Retry
-            </Button>
+              label="Retry"
+            />
           </div>
         </div>
       </div>

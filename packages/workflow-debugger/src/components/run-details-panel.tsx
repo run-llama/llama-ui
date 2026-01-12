@@ -123,9 +123,8 @@ export function RunDetailsPanel({
           <div className="flex items-center gap-2">
             <Badge
               variant={state.status === "completed" ? "default" : "secondary"}
-            >
-              {state.status}
-            </Badge>
+              label={state.status}
+            />
             <SendEventDialog
               handlerId={handlerId}
               workflowName={selectedWorkflow ?? null}
@@ -187,9 +186,8 @@ export function RunDetailsPanel({
                   variant="ghost"
                   size="sm"
                   onClick={() => setCompactJson(!compactJson)}
-                >
-                  {compactJson ? "Formatted" : "Compact"}
-                </Button>
+                  label={compactJson ? "Formatted" : "Compact"}
+                />
               </div>
             </div>
           </div>

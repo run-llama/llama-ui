@@ -80,15 +80,13 @@ export function FileDropzone({
       {showRemoveButton && onRemoveFile && (
         <Button
           variant="ghost"
-          size="sm"
-          className="h-6 w-6 p-0 flex-shrink-0"
+          size="icon-sm"
+          startIcon={<X />}
           onClick={(event) => {
             event.stopPropagation();
             onRemoveFile(file);
           }}
-        >
-          <X className="h-3 w-3" />
-        </Button>
+        />
       )}
     </div>
   );

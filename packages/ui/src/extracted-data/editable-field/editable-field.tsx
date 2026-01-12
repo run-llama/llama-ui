@@ -259,12 +259,13 @@ export function EditableField<S extends PrimitiveValue>({
           {renderEditInput()}
 
           <div className="flex justify-end space-x-2">
-            <Button variant="outline" size="sm" onClick={handleCancel}>
-              Cancel
-            </Button>
-            <Button size="sm" onClick={handleSave}>
-              Save
-            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCancel}
+              label="Cancel"
+            />
+            <Button size="sm" onClick={handleSave} label="Save" />
           </div>
         </div>
       </PopoverContent>
