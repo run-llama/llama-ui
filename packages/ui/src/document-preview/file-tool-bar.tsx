@@ -186,19 +186,20 @@ export const FileToolbar = ({
           />
 
           <div className="flex items-center justify-center gap-1">
-            <Input
-              type="number"
-              value={pageInput}
-              onChange={(e) => handlePageInputChange(e.target.value)}
-              onFocus={handlePageInputFocus}
-              onBlur={handlePageInputSubmit}
-              onKeyDown={handlePageInputKeyDown}
-              className="h-6 w-10 px-1 text-center text-xs! rounded-sm [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:m-0 [&::-webkit-outer-spin-button]:m-0 [-moz-appearance:textfield] shadow-none border border-transparent hover:border-gray-300 focus:border-gray-500 focus:outline-none"
-              min={1}
-              max={totalPages}
-            />
-            <span className="text-xs text-muted-foreground">of</span>
-            <span className="flex items-center text-xs text-muted-foreground h-7 ml-1">
+            <div className="text-sm w-12 [&_input]:h-8 [&_input]:w-full [&_input]:text-center [&_input::-webkit-outer-spin-button]:appearance-none [&_input::-webkit-inner-spin-button]:appearance-none [&_input]:[-moz-appearance:textfield]">
+              <Input
+                type="number"
+                value={pageInput}
+                onChange={(e) => handlePageInputChange(e.target.value)}
+                onFocus={handlePageInputFocus}
+                onBlur={handlePageInputSubmit}
+                onKeyDown={handlePageInputKeyDown}
+                min={1}
+                max={totalPages}
+              />
+            </div>
+            <span className="text-sm text-muted-foreground">of</span>
+            <span className="flex items-center text-sm text-muted-foreground h-7 ml-1">
               {totalPages}
             </span>
           </div>
@@ -253,7 +254,7 @@ export const FileToolbar = ({
                     }
                     content="Zoom out"
                   />
-                  <span className="text-center text-xs text-muted-foreground">
+                  <span className="text-center text-sm text-muted-foreground">
                     {scale !== undefined ? Math.round(scale * 100) : 0}%
                   </span>
                   <Tooltip
