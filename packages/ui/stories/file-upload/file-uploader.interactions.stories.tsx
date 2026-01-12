@@ -139,7 +139,9 @@ export const FileSelectionDisablesUrl: Story = {
     );
 
     await waitFor(() => {
-      expect(urlInput).toHaveClass("cursor-not-allowed");
+      expect(urlInput).toBeDisabled();
+      const styles = window.getComputedStyle(urlInput);
+      expect(styles.cursor).toBe("not-allowed");
     });
 
     await userEvent.click(dialogScope.getByRole("button", { name: /cancel/i }));
