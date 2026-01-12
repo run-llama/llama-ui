@@ -55,21 +55,19 @@ export function ArtifactCard({
         </div>
       </div>
       {isLatest ? (
-        <Badge className="bg-primary text-primary-foreground hover:bg-primary/90 ml-2">
-          Latest
-        </Badge>
+        <span className="ml-2">
+          <Badge variant="default" label="Latest" />
+        </span>
       ) : (
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 shrink-0 cursor-pointer text-xs"
           onClick={(e) => {
             e.stopPropagation();
             restoreArtifact(data);
           }}
-        >
-          Restore
-        </Button>
+          label="Restore"
+        />
       )}
     </div>
   );

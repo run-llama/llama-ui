@@ -129,12 +129,11 @@ export function WorkflowConfigPanel({
           {onCollapse && (
             <Button
               variant="ghost"
-              size="sm"
+              size="icon-sm"
               onClick={onCollapse}
               title="Hide configuration panel (Ctrl+B)"
-            >
-              <PanelRightClose className="h-4 w-4" />
-            </Button>
+              startIcon={<PanelRightClose />}
+            />
           )}
         </div>
         <div className="flex-1 flex items-center justify-center">
@@ -154,12 +153,11 @@ export function WorkflowConfigPanel({
         {onCollapse && (
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={onCollapse}
             title="Hide configuration panel (Ctrl+B)"
-          >
-            <PanelRightClose className="h-4 w-4" />
-          </Button>
+            startIcon={<PanelRightClose />}
+          />
         )}
       </div>
 
@@ -235,10 +233,10 @@ export function WorkflowConfigPanel({
           <Button
             onClick={handleRunWorkflow}
             disabled={isCreating || Object.values(rawJsonErrors).some((e) => e)}
-            className="w-full"
-          >
-            {isCreating ? "Starting..." : "Run Workflow"}
-          </Button>
+            // className="w-full"
+            fullWidth
+            label={isCreating ? "Starting..." : "Run Workflow"}
+          />
         </div>
       )}
     </div>

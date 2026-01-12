@@ -217,16 +217,22 @@ function ChatActions(props: ChatActionsProps) {
   const children = props.children ?? (
     <>
       {showStop && (
-        <Button variant="outline" size="sm" onClick={stop}>
-          <PauseCircle className="mr-2 h-4 w-4" />
-          Stop generating
-        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={stop}
+          startIcon={<PauseCircle />}
+          label="Stop generating"
+        />
       )}
       {showReload && (
-        <Button variant="outline" size="sm" onClick={() => regenerate?.()}>
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Regenerate
-        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => regenerate?.()}
+          startIcon={<RefreshCw />}
+          label="Regenerate"
+        />
       )}
     </>
   );

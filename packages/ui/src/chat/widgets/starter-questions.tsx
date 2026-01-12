@@ -25,10 +25,9 @@ export function StarterQuestions(props: StarterQuestionsProps) {
                 parts: [{ type: TextPartType, text: question }],
               })
             }
-            className="h-auto whitespace-break-spaces"
-          >
-            {question}
-          </Button>
+            // className="h-auto whitespace-break-spaces"
+            label={question}
+          />
         ))}
       </div>
     </div>

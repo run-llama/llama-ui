@@ -27,11 +27,9 @@ export function ActionButton({ onDelete }: { onDelete: () => void }) {
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 cursor-pointer"
-          >
-            <MoreVerticalIcon className="w-4 h-4" />
-          </Button>
+            size="icon-sm"
+            startIcon={<MoreVerticalIcon />}
+          />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem

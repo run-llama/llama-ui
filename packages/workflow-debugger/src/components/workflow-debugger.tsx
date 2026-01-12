@@ -178,16 +178,13 @@ export function WorkflowDebugger() {
           {/* Sidebar Toggle */}
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
             title={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
-          >
-            {sidebarCollapsed ? (
-              <PanelLeftOpen className="h-4 w-4" />
-            ) : (
-              <PanelLeftClose className="h-4 w-4" />
-            )}
-          </Button>
+            startIcon={
+              sidebarCollapsed ? <PanelLeftOpen /> : <PanelLeftClose />
+            }
+          />
 
           <h1 className="text-md font-semibold">Workflow Debugger</h1>
         </div>
@@ -228,9 +225,7 @@ export function WorkflowDebugger() {
           )}
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <Settings className="h-4 w-4" />
-              </Button>
+              <Button variant="ghost" size="icon-sm" startIcon={<Settings />} />
             </PopoverTrigger>
             <PopoverContent className="w-80">
               <div className="space-y-4">
@@ -247,16 +242,14 @@ export function WorkflowDebugger() {
                       variant="outline"
                       size="sm"
                       disabled={editingUrl === baseUrl}
-                    >
-                      Save
-                    </Button>
+                      label="Save"
+                    />
                     <Button
                       onClick={handleUrlReset}
                       variant="outline"
                       size="sm"
-                    >
-                      Reset
-                    </Button>
+                      label="Reset"
+                    />
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Current: {baseUrl}
@@ -313,13 +306,11 @@ export function WorkflowDebugger() {
             <div className="w-10 border-r border-border bg-muted/30 flex flex-col items-center justify-center hover:bg-muted/50 transition-colors">
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-sm"
                 onClick={() => setConfigPanelCollapsed(false)}
                 title="Show configuration panel (Ctrl+B)"
-                className="h-10 w-10 p-0"
-              >
-                <PanelRightOpen className="h-5 w-5" />
-              </Button>
+                startIcon={<PanelRightOpen />}
+              />
             </div>
           )}
 
