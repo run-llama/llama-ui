@@ -1,8 +1,8 @@
 "use client";
 
 import { HelpCircle } from "lucide-react";
-import type React from "react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
+import * as React from "react";
+import { Tooltip } from "./tooltip";
 
 interface ToolTipperProps {
   content: string | React.ReactNode;
@@ -27,14 +27,28 @@ export function ToolTipper({
     children
   );
 
+  if (disabled || !triggerContent) {
+    return <>{triggerContent}</>;
+  }
+
+  // Ensure triggerContent is a ReactElement
+  if (
+    !React.isValidElement(triggerContent) ||
+    typeof triggerContent !== "object" ||
+    triggerContent === null
+  ) {
+    return <>{triggerContent}</>;
+  }
+
   return (
-    <Tooltip delayDuration={delayDuration}>
-      <TooltipTrigger asChild>{triggerContent}</TooltipTrigger>
-      <TooltipContent side={side} hidden={disabled}>
-        <p>{content}</p>
-      </TooltipContent>
-    </Tooltip>
+    <Tooltip
+      trigger={triggerContent}
+      content={content}
+      delayDuration={delayDuration}
+      side={side}
+    />
   );
 }
 
+// eslint-disable-next-line no-restricted-syntax
 export default ToolTipper;
