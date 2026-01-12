@@ -1,12 +1,12 @@
-import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Eye, EyeOff } from "lucide-react";
+import * as React from "react";
 
 import { cn } from "../lib/utils";
 
 const inputVariants = cva(
   [
-    "flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm leading-none shadow-xs transition-colors font-light",
+    "flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm leading-none shadow-xs transition-colors",
     "file:h-7 file:border-0 file:bg-transparent file:pe-2 file:text-sm file:font-medium",
     "placeholder:text-muted-foreground",
     "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
@@ -114,7 +114,7 @@ const Input = ({ ref, variant, type, icon, ...props }: InputProps) => {
             {icon}
           </div>
         )}
-        <span className="text-muted-foreground relative line-clamp-1 flex-1 font-light">
+        <span className="text-muted-foreground relative line-clamp-1 flex-1">
           {fileName || "No file chosen"}
         </span>
       </label>
