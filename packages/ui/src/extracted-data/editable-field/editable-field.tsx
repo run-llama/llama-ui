@@ -190,7 +190,6 @@ export function EditableField<S extends PrimitiveValue>({
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder="Enter a number"
-            className="w-full"
             autoFocus
             required={required}
           />
@@ -202,7 +201,6 @@ export function EditableField<S extends PrimitiveValue>({
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder="Enter value"
-            className="w-full"
             autoFocus
           />
         );

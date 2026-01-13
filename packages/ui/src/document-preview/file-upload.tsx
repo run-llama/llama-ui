@@ -211,7 +211,6 @@ export function FileUpload({
             <div className="rounded-lg border-2 border-gray-200 p-8">
               <Input
                 type="url"
-                className="w-full"
                 placeholder={fileUrlPlaceholder}
                 value={fileUrlInput}
                 onChange={(event) => setFileUrlInput(event.target.value)}
