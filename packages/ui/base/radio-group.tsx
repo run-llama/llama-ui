@@ -66,10 +66,10 @@ const radioItemWrapperVariants = cva("inline-flex items-start gap-2", {
 
 export interface RadioGroupProps
   extends Omit<
-    React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root>,
-    "asChild" | "className"
-  >,
-  VariantProps<typeof radioGroupVariants> {
+      React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root>,
+      "asChild" | "className"
+    >,
+    VariantProps<typeof radioGroupVariants> {
   /**
    * RadioGroup variant styling
    * - "default" - Standard radio buttons in a column layout
@@ -110,11 +110,11 @@ type RadioGroupLabelProps = Omit<
 
 export interface RadioGroupItemProps
   extends Omit<
-    React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>,
-    "asChild" | "children" | "className"
-  >,
-  VariantProps<typeof radioIndicatorVariants>,
-  Partial<RadioGroupLabelProps> {
+      React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>,
+      "asChild" | "children" | "className"
+    >,
+    VariantProps<typeof radioIndicatorVariants>,
+    Partial<RadioGroupLabelProps> {
   /** Position of the radio control relative to label ("start" | "end", default: "start") */
   controlPlacement?: "start" | "end";
 }
