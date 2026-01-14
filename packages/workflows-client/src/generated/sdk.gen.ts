@@ -113,7 +113,7 @@ export const postEventsByHandlerId = <ThrowOnError extends boolean = false>(opti
 /**
  * Health check
  *
- * Returns the server health status.
+ * Returns the server health status and workflow counts.
  */
 export const getHealth = <ThrowOnError extends boolean = false>(options?: Options<GetHealthData, ThrowOnError>) => (options?.client ?? client).get<GetHealthResponses, unknown, ThrowOnError>({ url: '/health', ...options });
 
