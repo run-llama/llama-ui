@@ -44,7 +44,7 @@ export function SendEventDialog({
   const [open, setOpen] = useState(false);
   const [eventSchemas, setEventSchemas] = useState<EventSchema[]>([]);
   const [selectedEventType, setSelectedEventType] = useState<string | null>(
-    null
+    null,
   );
   const [eventData, setEventData] = useState<Record<string, JSONValue>>({});
   const [loading, setLoading] = useState(false);
@@ -92,7 +92,7 @@ export function SendEventDialog({
       } catch (error) {
         console.error("Failed to fetch event schemas:", error);
         setSendError(
-          error instanceof Error ? error.message : "Failed to fetch events"
+          error instanceof Error ? error.message : "Failed to fetch events",
         );
         setEventSchemas([]);
       } finally {
@@ -156,7 +156,7 @@ export function SendEventDialog({
 
       if (error) {
         throw new Error(
-          typeof error === "string" ? error : JSON.stringify(error)
+          typeof error === "string" ? error : JSON.stringify(error),
         );
       }
 
@@ -169,7 +169,7 @@ export function SendEventDialog({
     } catch (error) {
       console.error("Failed to send event:", error);
       setSendError(
-        error instanceof Error ? error.message : "Failed to send event"
+        error instanceof Error ? error.message : "Failed to send event",
       );
     } finally {
       setSending(false);

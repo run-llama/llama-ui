@@ -162,7 +162,7 @@ export function WorkflowDebugger() {
     useCallback(() => {
       setConfigPanelCollapsed((prev) => !prev);
     }, []),
-    true
+    true,
   );
 
   return (
