@@ -236,9 +236,8 @@ export function SendEventDialog({
                       <SelectItem
                         key={schema.title || "unknown"}
                         value={schema.title || ""}
-                      >
-                        {schema.title || "Unnamed Event"}
-                      </SelectItem>
+                        label={schema.title || "Unnamed Event"}
+                      />
                     ))}
                   </SelectContent>
                 </Select>

@@ -161,12 +161,12 @@ export function EditableField<S extends PrimitiveValue>({
       case PrimitiveType.BOOLEAN:
         return (
           <Select onValueChange={handleSelectChange} value={editValue}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger>
               <SelectValue placeholder="Select a value" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="true">true</SelectItem>
-              <SelectItem value="false">false</SelectItem>
+              <SelectItem value="true" label="true" />
+              <SelectItem value="false" label="false" />
             </SelectContent>
           </Select>
         );

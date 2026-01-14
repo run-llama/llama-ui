@@ -284,9 +284,9 @@ export function JsonSchemaEditor({
                   <SelectValue placeholder="Select..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="true">True</SelectItem>
-                  <SelectItem value="false">False</SelectItem>
-                  {isNullable && <SelectItem value="null">None</SelectItem>}
+                  <SelectItem value="true" label="True" />
+                  <SelectItem value="false" label="False" />
+                  {isNullable && <SelectItem value="null" label="None" />}
                 </SelectContent>
               </Select>
               {fieldDescription && (
