@@ -1,30 +1,29 @@
 import {
-  useWorkflowsClient,
-  Input,
   Button,
+  Input,
+  Label,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
   useWorkflows,
-  Label,
+  useWorkflowsClient,
 } from "@llamaindex/ui";
-import { useState, useEffect, useCallback } from "react";
 import { getHealth } from "@llamaindex/workflows-client";
-import { WorkflowConfigPanel } from "./workflow-config-panel";
-import { RunListPanel } from "./run-list-panel";
-import { RunDetailsPanel } from "./run-details-panel";
 import {
-  Settings,
   PanelLeftClose,
   PanelLeftOpen,
   PanelRightOpen,
+  Settings,
 } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { getDefaultWorkflowUrl } from "../lib/get-default-url";
+import { RunDetailsPanel } from "./run-details-panel";
+import { RunListPanel } from "./run-list-panel";
+import { WorkflowConfigPanel } from "./workflow-config-panel";
 
 // Utility to handle keyboard shortcuts
 function useKeyboardShortcut(key: string, callback: () => void, ctrl = true) {
@@ -163,7 +162,7 @@ export function WorkflowDebugger() {
     useCallback(() => {
       setConfigPanelCollapsed((prev) => !prev);
     }, []),
-    true,
+    true
   );
 
   return (
@@ -199,9 +198,7 @@ export function WorkflowDebugger() {
               value={selectedWorkflow || ""}
               onValueChange={setSelectedWorkflow}
             >
-              <SelectTrigger id="workflow">
-                <SelectValue placeholder="Select workflow..." />
-              </SelectTrigger>
+              <SelectTrigger id="workflow" placeholder="Select workflow..." />
               <SelectContent>
                 {Object.keys(workflows).map((workflow) => (
                   <SelectItem
