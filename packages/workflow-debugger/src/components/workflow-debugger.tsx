@@ -168,8 +168,9 @@ export function WorkflowDebugger() {
 
   return (
     <div
-      className={`h-screen flex flex-col bg-background ${isDragging ? "resize-active" : ""
-        }`}
+      className={`h-screen flex flex-col bg-background ${
+        isDragging ? "resize-active" : ""
+      }`}
     >
       {/* Slim Titlebar */}
       <div className="flex items-center justify-between h-12 px-4 bg-card border-b border-border">
@@ -203,7 +204,11 @@ export function WorkflowDebugger() {
               </SelectTrigger>
               <SelectContent>
                 {Object.keys(workflows).map((workflow) => (
-                  <SelectItem key={workflow} value={workflow} label={workflow} />
+                  <SelectItem
+                    key={workflow}
+                    value={workflow}
+                    label={workflow}
+                  />
                 ))}
               </SelectContent>
             </Select>
@@ -214,8 +219,9 @@ export function WorkflowDebugger() {
         <div className="flex items-center gap-2">
           {isServerHealthy !== null && (
             <span
-              className={`${isServerHealthy ? "bg-green-500" : "bg-red-500"
-                } h-2 w-2 rounded-full`}
+              className={`${
+                isServerHealthy ? "bg-green-500" : "bg-red-500"
+              } h-2 w-2 rounded-full`}
             />
           )}
           {isServerHealthy === false && (
@@ -294,8 +300,9 @@ export function WorkflowDebugger() {
 
               {/* Resizable Gutter */}
               <div
-                className={`w-2 hover:bg-gray-500/20 hover:shadow-lg cursor-col-resize flex-shrink-0 transition-all duration-200 relative group border-l border-r border-border ${isDragging ? "shadow-xl" : ""
-                  }`}
+                className={`w-2 hover:bg-gray-500/20 hover:shadow-lg cursor-col-resize flex-shrink-0 transition-all duration-200 relative group border-l border-r border-border ${
+                  isDragging ? "shadow-xl" : ""
+                }`}
                 onMouseDown={handleMouseDown}
                 title="Drag to resize panels"
               ></div>
@@ -331,6 +338,6 @@ export function WorkflowDebugger() {
           </div>
         </div>
       </div>
-    </div >
+    </div>
   );
 }
