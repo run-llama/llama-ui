@@ -1,14 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
 import {
   Input,
-  Textarea,
+  Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-  Label,
+  Textarea,
 } from "@llamaindex/ui";
+import { useEffect, useMemo, useState } from "react";
 import type { JSONValue } from "./workflow-config-panel";
 
 export interface SimpleSchemaProperty {
@@ -280,13 +279,11 @@ export function JsonSchemaEditor({
                 }}
                 value={getCurrentValue()}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select..." />
-                </SelectTrigger>
+                <SelectTrigger placeholder="Select..." />
                 <SelectContent>
-                  <SelectItem value="true">True</SelectItem>
-                  <SelectItem value="false">False</SelectItem>
-                  {isNullable && <SelectItem value="null">None</SelectItem>}
+                  <SelectItem value="true" label="True" />
+                  <SelectItem value="false" label="False" />
+                  {isNullable && <SelectItem value="null" label="None" />}
                 </SelectContent>
               </Select>
               {fieldDescription && (

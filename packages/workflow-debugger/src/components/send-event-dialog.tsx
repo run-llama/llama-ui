@@ -1,4 +1,3 @@
-import { useState, useEffect, useMemo } from "react";
 import {
   Button,
   Dialog,
@@ -8,21 +7,21 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
   useWorkflowsClient,
 } from "@llamaindex/ui";
+import {
+  getWorkflowsByNameEvents,
+  postEventsByHandlerId,
+} from "@llamaindex/workflows-client";
 import { Send } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { JsonSchemaEditor } from "./json-schema-editor";
 import type { JSONValue } from "./workflow-config-panel";
-import {
-  postEventsByHandlerId,
-  getWorkflowsByNameEvents,
-} from "@llamaindex/workflows-client";
-import { Label } from "@llamaindex/ui";
 
 interface EventSchema {
   title?: string;
@@ -228,17 +227,14 @@ export function SendEventDialog({
                   value={selectedEventType || ""}
                   onValueChange={setSelectedEventType}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select event type..." />
-                  </SelectTrigger>
+                  <SelectTrigger placeholder="Select event type..." />
                   <SelectContent>
                     {eventSchemas.map((schema) => (
                       <SelectItem
                         key={schema.title || "unknown"}
                         value={schema.title || ""}
-                      >
-                        {schema.title || "Unnamed Event"}
-                      </SelectItem>
+                        label={schema.title || "Unnamed Event"}
+                      />
                     ))}
                   </SelectContent>
                 </Select>

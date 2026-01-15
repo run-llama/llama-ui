@@ -1,30 +1,29 @@
 import {
-  useWorkflowsClient,
-  Input,
   Button,
+  Input,
+  Label,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
   useWorkflows,
-  Label,
+  useWorkflowsClient,
 } from "@llamaindex/ui";
-import { useState, useEffect, useCallback } from "react";
 import { getHealth } from "@llamaindex/workflows-client";
-import { WorkflowConfigPanel } from "./workflow-config-panel";
-import { RunListPanel } from "./run-list-panel";
-import { RunDetailsPanel } from "./run-details-panel";
 import {
-  Settings,
   PanelLeftClose,
   PanelLeftOpen,
   PanelRightOpen,
+  Settings,
 } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { getDefaultWorkflowUrl } from "../lib/get-default-url";
+import { RunDetailsPanel } from "./run-details-panel";
+import { RunListPanel } from "./run-list-panel";
+import { WorkflowConfigPanel } from "./workflow-config-panel";
 
 // Utility to handle keyboard shortcuts
 function useKeyboardShortcut(key: string, callback: () => void, ctrl = true) {
@@ -191,22 +190,26 @@ export function WorkflowDebugger() {
 
         {/* Centered Workflow Dropdown */}
         <div className="flex items-center gap-2">
-          <Label htmlFor="workflow" label="Workflow:" />
-          <Select
-            value={selectedWorkflow || ""}
-            onValueChange={setSelectedWorkflow}
-          >
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Select workflow..." />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.keys(workflows).map((workflow) => (
-                <SelectItem key={workflow} value={workflow}>
-                  {workflow}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex items-center">
+            <Label htmlFor="workflow" label="Workflow:" variant="standalone" />
+          </div>
+          <div className="w-48">
+            <Select
+              value={selectedWorkflow || ""}
+              onValueChange={setSelectedWorkflow}
+            >
+              <SelectTrigger id="workflow" placeholder="Select workflow..." />
+              <SelectContent>
+                {Object.keys(workflows).map((workflow) => (
+                  <SelectItem
+                    key={workflow}
+                    value={workflow}
+                    label={workflow}
+                  />
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* Connection + Settings */}

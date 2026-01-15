@@ -1,24 +1,24 @@
-import React, { useState, useRef, useLayoutEffect } from "react";
-import {
-  getConfidenceBackgroundClass,
-  getConfidenceBorderClass,
-} from "../confidence-utils";
-import { PrimitiveType, convertPrimitiveValue } from "../primitive-validation";
-import { Popover, PopoverContent, PopoverTrigger } from "@/base/popover";
+import type { ExtractedFieldMetadata } from "llama-cloud-services/beta/agent";
+import type React from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { Button } from "@/base/button";
 import { Input } from "@/base/input";
-import { Textarea } from "@/base/textarea";
-import type { ExtractedFieldMetadata } from "llama-cloud-services/beta/agent";
+import { Popover, PopoverContent, PopoverTrigger } from "@/base/popover";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/base/select";
-import { PrimitiveValue } from "../types";
-import { useUIConfigStore } from "@/src/store/ui-config-store";
+import { Textarea } from "@/base/textarea";
 import { Tooltip } from "@/base/tooltip";
+import { useUIConfigStore } from "@/src/store/ui-config-store";
+import {
+  getConfidenceBackgroundClass,
+  getConfidenceBorderClass,
+} from "../confidence-utils";
+import { convertPrimitiveValue, PrimitiveType } from "../primitive-validation";
+import type { PrimitiveValue } from "../types";
 
 interface EditableFieldProps<S extends PrimitiveValue> {
   value: S;
@@ -161,12 +161,10 @@ export function EditableField<S extends PrimitiveValue>({
       case PrimitiveType.BOOLEAN:
         return (
           <Select onValueChange={handleSelectChange} value={editValue}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select a value" />
-            </SelectTrigger>
+            <SelectTrigger placeholder="Select a value" />
             <SelectContent>
-              <SelectItem value="true">true</SelectItem>
-              <SelectItem value="false">false</SelectItem>
+              <SelectItem value="true" label="true" />
+              <SelectItem value="false" label="false" />
             </SelectContent>
           </Select>
         );
