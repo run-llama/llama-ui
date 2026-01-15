@@ -11,7 +11,6 @@ import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuCheckboxItem,
 } from "@/base/dropdown-menu";
 import type { PaginationState } from "../types";
