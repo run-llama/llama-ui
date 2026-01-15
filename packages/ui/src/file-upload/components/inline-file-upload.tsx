@@ -105,23 +105,21 @@ export function FileUpload({
 
         {onSelectFile && (
           <TabsContent value="select" className="mt-6">
-            <div className="rounded-lg border-2 border-dashed border-gray-200 p-8">
-              <div className="flex flex-col items-center justify-center gap-4 text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-                  <FolderOpen className="h-8 w-8 text-gray-500" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">
-                    {selectFileDescription}
-                  </p>
-                </div>
-                <div className="mt-2">
-                  <Button
-                    variant="outline"
-                    onClick={onSelectFile}
-                    label={selectFileLabel}
-                  />
-                </div>
+            <div className="flex min-h-[200px] flex-col items-center justify-center gap-4 p-8 text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+                <FolderOpen className="h-8 w-8 text-gray-600" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-gray-600">
+                  {selectFileDescription}
+                </p>
+              </div>
+              <div className="mt-2">
+                <Button
+                  variant="default"
+                  onClick={onSelectFile}
+                  label={selectFileLabel}
+                />
               </div>
             </div>
           </TabsContent>
