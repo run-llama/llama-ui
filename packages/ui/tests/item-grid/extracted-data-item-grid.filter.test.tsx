@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { ApiProvider, createMockClients } from "../../src/lib";
 import { ExtractedDataItemGrid } from "../../src/item-grid/extracted-data-item-grid";
 import type { FilterOperation } from "llama-cloud-services/beta/agent";
@@ -31,8 +31,10 @@ describe("ExtractedDataItemGrid baseFilter", () => {
       clients
     );
 
-    // Wait a microtask tick for effects to run
-    await Promise.resolve();
+    // Wait for loading to complete (ensures all state updates are done)
+    await waitFor(() => {
+      expect(screen.queryByText("Loading items...")).toBeNull();
+    });
 
     expect(spy).toHaveBeenCalled();
     const call = spy.mock.calls.at(-1) as any[];
