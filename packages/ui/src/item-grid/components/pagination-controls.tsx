@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuCheckboxItem,
 } from "@/base/dropdown-menu";
 import type { PaginationState } from "../types";
 
@@ -53,16 +54,12 @@ export function PaginationControls({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
               {PAGE_SIZE_OPTIONS.map((option) => (
-                <DropdownMenuItem
+                <DropdownMenuCheckboxItem
                   key={option}
+                  checked={size === option}
+                  label={option.toString()}
                   onClick={() => onPaginationChange({ page: 0, size: option })}
-                  className={cn(
-                    "cursor-pointer px-2 py-1 text-sm",
-                    size === option && "bg-accent font-bold text-primary"
-                  )}
-                >
-                  {option}
-                </DropdownMenuItem>
+                />
               ))}
             </DropdownMenuContent>
           </DropdownMenu>

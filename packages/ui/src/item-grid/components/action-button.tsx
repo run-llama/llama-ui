@@ -33,15 +33,14 @@ export function ActionButton({ onDelete }: { onDelete: () => void }) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem
+            label="Delete"
+            icon={<TrashIcon />}
             onClick={(e: React.MouseEvent) => {
               e.stopPropagation();
               setShowDeleteDialog(true);
             }}
-            className="text-destructive focus:text-destructive"
-          >
-            <TrashIcon className="w-4 h-4 mr-2" />
-            Delete
-          </DropdownMenuItem>
+            destructive
+          />
         </DropdownMenuContent>
       </DropdownMenu>
 
