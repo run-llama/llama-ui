@@ -63,16 +63,13 @@ export const ColumnFilter: React.FC<ColumnFilterProps> = ({
             key={option}
             checked={selectedValues.includes(option)}
             onCheckedChange={(checked) => handleToggleOption(option, checked)}
-          >
-            {option}
-          </DropdownMenuCheckboxItem>
+            label={option}
+          />
         ))}
         {selectedValues.length > 0 && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleClearAll}>
-              Clear filters
-            </DropdownMenuItem>
+            <DropdownMenuItem label="Clear filters" onClick={handleClearAll} />
           </>
         )}
       </DropdownMenuContent>
