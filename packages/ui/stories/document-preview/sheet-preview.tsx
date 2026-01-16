@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import type { PreviewComponentProps } from "../../src/document-preview/document-preview";
 import { FileToolbar } from "../../src/document-preview/file-tool-bar";
 import { FullscreenDialog } from "./fullscreen-dialog";
+import { Empty } from "@/base/empty";
 
 type SheetRow = Array<string | number | boolean | Date | null>;
 
@@ -185,7 +186,13 @@ export function SheetPreview({
               {error}
             </ErrorState>
           ) : !activeSheet || columnCount === 0 ? (
-            <EmptyState onDownload={() => downloadFile(contentUrl, fileName)} />
+            <Empty
+              description="This spreadsheet is empty or could not be parsed."
+              secondaryAction={{
+                label: "Download to view",
+                onClick: () => downloadFile(contentUrl, fileName),
+              }}
+            />
           ) : (
             <div
               className="inline-block origin-top-left p-4"
@@ -291,20 +298,6 @@ const ErrorState = ({
   <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center">
     <TriangleAlert className="size-6 text-amber-500" />
     <p className="text-xs text-muted-foreground">{children}</p>
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={onDownload}
-      label="Download to view"
-    />
-  </div>
-);
-
-const EmptyState = ({ onDownload }: { onDownload: () => void }) => (
-  <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center">
-    <p className="text-xs text-muted-foreground">
-      This spreadsheet is empty or could not be parsed.
-    </p>
     <Button
       variant="outline"
       size="sm"
