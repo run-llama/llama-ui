@@ -474,6 +474,16 @@ function renderHighlight(
       // Animated gradient border
       return (
         <>
+          {/* Inner subtle fill - aligned with border */}
+          <rect
+            x={box.x - 2}
+            y={box.y - 2}
+            width={box.width + 4}
+            height={box.height + 4}
+            rx={6 / zoom}
+            fill="rgba(255, 107, 107, 0.08)"
+            style={{ pointerEvents: "none" }}
+          />
           {/* Gradient border */}
           <rect
             x={box.x - 2}
@@ -486,40 +496,6 @@ function renderHighlight(
             strokeWidth={4 / zoom}
             {...baseProps}
           />
-          {/* Inner subtle fill */}
-          <rect
-            x={box.x}
-            y={box.y}
-            width={box.width}
-            height={box.height}
-            rx={4 / zoom}
-            fill="rgba(255, 107, 107, 0.08)"
-            style={{ pointerEvents: "none" }}
-          />
-          {/* Corner accents */}
-          {[
-            { cx: box.x, cy: box.y },
-            { cx: box.x + box.width, cy: box.y },
-            { cx: box.x, cy: box.y + box.height },
-            { cx: box.x + box.width, cy: box.y + box.height },
-          ].map((corner, i) => (
-            <circle
-              key={i}
-              cx={corner.cx}
-              cy={corner.cy}
-              r={4 / zoom}
-              fill={`url(#${uniqueId}-gradient-animated)`}
-              style={{ pointerEvents: "none" }}
-            >
-              <animate
-                attributeName="r"
-                values={`${3 / zoom};${5 / zoom};${3 / zoom}`}
-                dur="2s"
-                repeatCount="indefinite"
-                begin={`${i * 0.5}s`}
-              />
-            </circle>
-          ))}
         </>
       );
 
