@@ -21,7 +21,6 @@ export function groupHighlightsByPage(highlights: Highlight[] | undefined): {
       y: highlight.y,
       width: highlight.width,
       height: highlight.height,
-      color: "rgba(255, 215, 0, 0.25)",
     });
   });
   return grouped;

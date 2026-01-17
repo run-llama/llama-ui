@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState, useEffect } from "react";
 import { expect, within, userEvent, waitFor } from "@storybook/test";
 import { PdfPreview } from "../../src/file-preview/pdf-preview";
+import type { HighlightStyle } from "../../src/file-preview/types";
 
 const meta: Meta<typeof PdfPreview> = {
   title: "Components/FilePreview/PdfPreview",
@@ -28,6 +29,20 @@ const meta: Meta<typeof PdfPreview> = {
       options: ["page", "width"],
       description:
         'How the PDF should fit on initial load. "page" fits entire page, "width" fits to container width.',
+    },
+    highlightStyle: {
+      control: "select",
+      options: [
+        "classic",
+        "liquidGlass",
+        "lightbox",
+        "neon",
+        "underline",
+        "outline",
+        "gradient",
+        "spotlight",
+      ],
+      description: "Visual style for the highlight overlay",
     },
   },
 };
@@ -114,7 +129,125 @@ function InteractiveHighlightExample(props: Parameters<typeof PdfPreview>[0]) {
         </button>
       </div>
       <div className="flex-1">
-        <PdfPreview {...props} highlights={highlights} />
+        <PdfPreview
+          {...props}
+          highlights={highlights}
+          highlightStyle={props.highlightStyle}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// Highlight Styles Story - Interactive showcase of all highlight styles
+// ============================================================================
+
+const HIGHLIGHT_STYLES: HighlightStyle[] = [
+  "classic",
+  "liquidGlass",
+  "lightbox",
+  "neon",
+  "underline",
+  "outline",
+  "gradient",
+  "spotlight",
+];
+
+const STYLE_DESCRIPTIONS: Record<HighlightStyle, string> = {
+  classic: "Traditional yellow marker highlight",
+  liquidGlass: "Apple-inspired glassmorphism with shimmer animation",
+  lightbox: "Dark vignette effect with spotlight on highlighted area",
+  neon: "Glowing cyan neon border with pulse animation",
+  underline: "Minimal amber underline below content",
+  outline: "Dashed indigo outline, no fill",
+  gradient: "Animated rainbow gradient border with corner accents",
+  spotlight: "Radial light beam effect with animated rays",
+};
+
+export const HighlightStyles: Story = {
+  args: {
+    url: "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf",
+    highlightStyle: "liquidGlass",
+    highlights: [{ page: 1, x: 100, y: 350, width: 250, height: 140 }],
+  },
+  render: (args) => <HighlightStylesExample {...args} />,
+};
+
+function HighlightStylesExample(props: Parameters<typeof PdfPreview>[0]) {
+  const [selectedStyle, setSelectedStyle] = useState<HighlightStyle>(
+    props.highlightStyle || "classic"
+  );
+  const [highlights] = useState([
+    { page: 1, x: 72, y: 280, width: 450, height: 120 },
+  ]);
+
+  // Sync with props when changed via Storybook controls
+  useEffect(() => {
+    if (props.highlightStyle) {
+      setSelectedStyle(props.highlightStyle);
+    }
+  }, [props.highlightStyle]);
+
+  return (
+    <div className="h-screen flex">
+      {/* Style selector sidebar */}
+      <div className="w-80 p-4 border-r bg-gray-50 overflow-y-auto">
+        <div className="mb-4">
+          <h2 className="text-lg font-bold text-gray-800 mb-1">
+            Highlight Styles
+          </h2>
+          <p className="text-sm text-gray-500">
+            Select a style to preview on the PDF
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          {HIGHLIGHT_STYLES.map((style) => (
+            <button
+              key={style}
+              onClick={() => setSelectedStyle(style)}
+              className={`w-full text-left p-3 rounded-lg border transition-all ${
+                selectedStyle === style
+                  ? "border-blue-500 bg-blue-50 shadow-sm"
+                  : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span
+                  className={`font-medium ${
+                    selectedStyle === style ? "text-blue-700" : "text-gray-700"
+                  }`}
+                >
+                  {style}
+                </span>
+                {selectedStyle === style && (
+                  <span className="text-blue-500 text-sm">Active</span>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                {STYLE_DESCRIPTIONS[style]}
+              </p>
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-6 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+          <p className="text-xs text-amber-800">
+            <strong>Tip:</strong> Click anywhere on the PDF to toggle highlight
+            visibility. Some styles have animations - watch for shimmer, pulse,
+            and gradient effects!
+          </p>
+        </div>
+      </div>
+
+      {/* PDF Preview */}
+      <div className="flex-1">
+        <PdfPreview
+          {...props}
+          highlights={highlights}
+          highlightStyle={selectedStyle}
+        />
       </div>
     </div>
   );

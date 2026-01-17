@@ -6,7 +6,7 @@ import { logger } from "@shared/logger";
 import { Button } from "@/base/button";
 import { FileToolbar } from "../document-preview/file-tool-bar";
 import { BoundingBoxOverlay } from "./bounding-box-overlay";
-import type { BoundingBox, Highlight } from "./types";
+import type { BoundingBox, Highlight, HighlightStyle } from "./types";
 import {
   calculateHighlightScrollPosition,
   calculateInitialScale,
@@ -38,6 +38,8 @@ export interface PdfPreviewImplProps {
   toolbarClassName?: string;
   /** How the PDF should fit on initial load. Defaults to "page" (fit entire page). */
   fitMode?: FitMode;
+  /** Visual style for highlights. Defaults to "classic". */
+  highlightStyle?: HighlightStyle;
 }
 
 // map of page number to page viewport dimensions
@@ -63,6 +65,7 @@ export const PdfPreviewImpl = ({
   highlights,
   toolbarClassName,
   fitMode = "width",
+  highlightStyle = "classic",
 }: PdfPreviewImplProps) => {
   const [numPages, setNumPages] = useState<number>();
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -623,6 +626,7 @@ export const PdfPreviewImpl = ({
               showHighlights={showHighlights}
               highlightsByPage={highlightsByPage}
               pageBaseDims={pageBaseDims}
+              highlightStyle={highlightStyle}
             />
           )}
         </Document>
@@ -645,6 +649,7 @@ function VirtualizedPageList({
   showHighlights,
   highlightsByPage,
   pageBaseDims,
+  highlightStyle,
 }: {
   numPages: number;
   visiblePages: Set<number>;
@@ -659,6 +664,7 @@ function VirtualizedPageList({
   showHighlights: boolean;
   highlightsByPage: { [page: number]: BoundingBox[] };
   pageBaseDims: PageBaseDims;
+  highlightStyle: HighlightStyle;
 }) {
   const firstRenderedPage = pagesToRender[0] || 1;
   const lastRenderedPage = pagesToRender[pagesToRender.length - 1] || numPages;
@@ -733,6 +739,7 @@ function VirtualizedPageList({
                       zoom={scale}
                       containerWidth={pageBaseDims[pageNumber].width}
                       containerHeight={pageBaseDims[pageNumber].height}
+                      highlightStyle={highlightStyle}
                     />
                   )}
               </div>

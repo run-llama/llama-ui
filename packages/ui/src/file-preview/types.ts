@@ -32,3 +32,16 @@ export interface Highlight {
   width: number;
   height: number;
 }
+
+/**
+ * Visual styles for PDF highlights
+ */
+export type HighlightStyle =
+  | "classic" // Traditional yellow highlight
+  | "liquidGlass" // Apple-inspired glassmorphism with shimmer
+  | "lightbox" // Dark vignette with spotlight on highlighted area
+  | "neon" // Glowing neon border effect
+  | "underline" // Minimal underline below content
+  | "outline" // Dashed outline, no fill
+  | "gradient" // Animated gradient border
+  | "spotlight"; // Radial light beam effect
