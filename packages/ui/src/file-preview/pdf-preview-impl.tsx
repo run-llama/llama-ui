@@ -82,6 +82,7 @@ export const PdfPreviewImpl = ({
     null
   );
   const isInitialScaleSet = useRef<boolean>(false);
+  const prevFitMode = useRef<FitMode>(fitMode);
 
   const highlightsByPage = useMemo(
     () => groupHighlightsByPage(highlights),
@@ -264,9 +265,16 @@ export const PdfPreviewImpl = ({
   );
 
   const firstPageDims = pageBaseDims[1];
-  // Set initial scale once when first page dimensions are available
-  // Only runs once per document load to avoid overriding manual zoom changes
+  // Set initial scale once when first page dimensions are available, or when fitMode changes
+  // The isInitialScaleSet flag prevents scale from being overwritten by page re-renders
+  // (which happen on every zoom change), but allows re-scaling when fitMode is toggled
   useEffect(() => {
+    // Reset flag when fitMode changes to allow re-scaling
+    if (prevFitMode.current !== fitMode) {
+      isInitialScaleSet.current = false;
+      prevFitMode.current = fitMode;
+    }
+
     if (firstPageDims && containerRef.current && !isInitialScaleSet.current) {
       const newScale = calculateInitialScale(
         fitMode,
