@@ -13,6 +13,9 @@ export interface BoundingBoxOverlayProps {
 let idCounter = 0;
 const generateId = (prefix: string) => `${prefix}-${++idCounter}`;
 
+// Bezel radius for glass effects - large to show off the bezel
+const BEZEL_RADIUS = 16;
+
 export function BoundingBoxOverlay({
   boundingBoxes,
   zoom,
@@ -26,7 +29,7 @@ export function BoundingBoxOverlay({
   }
 
   const uniqueId = generateId("hl");
-  const pad = 6;
+  const pad = 8; // Slightly larger padding for bezel room
 
   return (
     <svg
@@ -42,7 +45,7 @@ export function BoundingBoxOverlay({
       viewBox={`0 0 ${containerWidth} ${containerHeight}`}
     >
       <defs>
-        {/* Clean cutout mask */}
+        {/* Clean cutout mask - uses large radius */}
         <mask id={`${uniqueId}-mask`}>
           <rect
             x="0"
@@ -58,7 +61,7 @@ export function BoundingBoxOverlay({
               y={box.y - pad}
               width={box.width + pad * 2}
               height={box.height + pad * 2}
-              rx="6"
+              rx={BEZEL_RADIUS}
               fill="black"
             />
           ))}
@@ -91,50 +94,69 @@ export function BoundingBoxOverlay({
           <feDropShadow dx="0" dy="2" stdDeviation="6" floodColor="rgba(0,0,0,0.25)" />
         </filter>
 
-        {/* ===== SPECULAR GRADIENTS FOR GLASS ===== */}
+        {/* ===== BEZEL SPECULAR GRADIENTS - ANGLED LIGHT ===== */}
 
-        {/* Top specular - bright highlight simulating light from above */}
-        <linearGradient id={`${uniqueId}-specular-top`} x1="0" y1="0" x2="0" y2="1">
+        {/* Top-left bezel - bright specular at angle (light from top-left) */}
+        <linearGradient id={`${uniqueId}-bezel-top`} x1="0" y1="0" x2="0.3" y2="1">
+          <stop offset="0%" stopColor="rgba(255,255,255,1)" />
+          <stop offset="20%" stopColor="rgba(255,255,255,0.85)" />
+          <stop offset="50%" stopColor="rgba(255,255,255,0.3)" />
+          <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+        </linearGradient>
+
+        {/* Left bezel - bright specular at angle */}
+        <linearGradient id={`${uniqueId}-bezel-left`} x1="0" y1="0" x2="1" y2="0.3">
+          <stop offset="0%" stopColor="rgba(255,255,255,0.9)" />
+          <stop offset="20%" stopColor="rgba(255,255,255,0.65)" />
+          <stop offset="50%" stopColor="rgba(255,255,255,0.15)" />
+          <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+        </linearGradient>
+
+        {/* Bottom bezel - dark shadow at angle (opposite of light) */}
+        <linearGradient id={`${uniqueId}-bezel-bottom`} x1="0.3" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="rgba(0,0,0,0)" />
+          <stop offset="50%" stopColor="rgba(0,0,0,0.2)" />
+          <stop offset="80%" stopColor="rgba(0,0,0,0.4)" />
+          <stop offset="100%" stopColor="rgba(0,0,0,0.55)" />
+        </linearGradient>
+
+        {/* Right bezel - dark shadow at angle */}
+        <linearGradient id={`${uniqueId}-bezel-right`} x1="0" y1="0.3" x2="1" y2="0">
+          <stop offset="0%" stopColor="rgba(0,0,0,0)" />
+          <stop offset="50%" stopColor="rgba(0,0,0,0.18)" />
+          <stop offset="80%" stopColor="rgba(0,0,0,0.35)" />
+          <stop offset="100%" stopColor="rgba(0,0,0,0.5)" />
+        </linearGradient>
+
+        {/* Diagonal specular - bright streak from top-left */}
+        <linearGradient id={`${uniqueId}-specular-diagonal`} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="rgba(255,255,255,0.95)" />
-          <stop offset="40%" stopColor="rgba(255,255,255,0.4)" />
+          <stop offset="15%" stopColor="rgba(255,255,255,0.6)" />
+          <stop offset="35%" stopColor="rgba(255,255,255,0.1)" />
           <stop offset="100%" stopColor="rgba(255,255,255,0)" />
         </linearGradient>
 
-        {/* Left edge specular */}
-        <linearGradient id={`${uniqueId}-specular-left`} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="rgba(255,255,255,0.7)" />
-          <stop offset="50%" stopColor="rgba(255,255,255,0.2)" />
+        {/* Diagonal shadow - dark from bottom-right */}
+        <linearGradient id={`${uniqueId}-shadow-diagonal`} x1="1" y1="1" x2="0" y2="0">
+          <stop offset="0%" stopColor="rgba(0,0,0,0.5)" />
+          <stop offset="15%" stopColor="rgba(0,0,0,0.3)" />
+          <stop offset="35%" stopColor="rgba(0,0,0,0.08)" />
+          <stop offset="100%" stopColor="rgba(0,0,0,0)" />
+        </linearGradient>
+
+        {/* Corner highlight - top-left bright corner */}
+        <radialGradient id={`${uniqueId}-corner-highlight`} cx="0%" cy="0%" r="70%">
+          <stop offset="0%" stopColor="rgba(255,255,255,1)" />
+          <stop offset="30%" stopColor="rgba(255,255,255,0.5)" />
           <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-        </linearGradient>
-
-        {/* Bottom edge - darker, simulates thickness */}
-        <linearGradient id={`${uniqueId}-bottom-edge`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="rgba(0,0,0,0)" />
-          <stop offset="60%" stopColor="rgba(0,0,0,0.1)" />
-          <stop offset="100%" stopColor="rgba(0,0,0,0.25)" />
-        </linearGradient>
-
-        {/* Right edge - subtle shadow */}
-        <linearGradient id={`${uniqueId}-right-edge`} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="rgba(0,0,0,0)" />
-          <stop offset="60%" stopColor="rgba(0,0,0,0.08)" />
-          <stop offset="100%" stopColor="rgba(0,0,0,0.2)" />
-        </linearGradient>
-
-        {/* Inner vignette for curved glass surface simulation */}
-        <radialGradient id={`${uniqueId}-inner-vignette`} cx="50%" cy="30%" r="80%" fx="50%" fy="20%">
-          <stop offset="0%" stopColor="rgba(255,255,255,0.15)" />
-          <stop offset="50%" stopColor="rgba(255,255,255,0.05)" />
-          <stop offset="100%" stopColor="rgba(0,0,0,0.1)" />
         </radialGradient>
 
-        {/* Refraction edge gradient - simulates light bending at glass edges */}
-        <linearGradient id={`${uniqueId}-refract-edge`} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="rgba(200,220,255,0.3)" />
-          <stop offset="15%" stopColor="rgba(255,255,255,0.1)" />
-          <stop offset="85%" stopColor="rgba(255,255,255,0.1)" />
-          <stop offset="100%" stopColor="rgba(200,220,255,0.3)" />
-        </linearGradient>
+        {/* Corner shadow - bottom-right dark corner */}
+        <radialGradient id={`${uniqueId}-corner-shadow`} cx="100%" cy="100%" r="70%">
+          <stop offset="0%" stopColor="rgba(0,0,0,0.5)" />
+          <stop offset="30%" stopColor="rgba(0,0,0,0.25)" />
+          <stop offset="100%" stopColor="rgba(0,0,0,0)" />
+        </radialGradient>
       </defs>
 
       {renderStyle(
@@ -192,10 +214,10 @@ function renderStyle(
               y={box.y - pad}
               width={box.width + pad * 2}
               height={box.height + pad * 2}
-              rx="6"
+              rx={BEZEL_RADIUS}
               fill="none"
-              stroke="rgba(120, 120, 130, 0.25)"
-              strokeWidth={1 / zoom}
+              stroke="rgba(120, 120, 130, 0.2)"
+              strokeWidth={0.5 / zoom}
               {...clickProps(box)}
             />
           ))}
@@ -224,10 +246,10 @@ function renderStyle(
               y={box.y - pad}
               width={box.width + pad * 2}
               height={box.height + pad * 2}
-              rx="6"
+              rx={BEZEL_RADIUS}
               fill="none"
-              stroke="rgba(140, 120, 100, 0.35)"
-              strokeWidth={1.5 / zoom}
+              stroke="rgba(140, 120, 100, 0.25)"
+              strokeWidth={0.5 / zoom}
               {...clickProps(box)}
             />
           ))}
@@ -235,19 +257,20 @@ function renderStyle(
       );
 
     // =========================================================================
-    // GLASS - Inverted glassmorphism with strong refraction cues
-    // Blurs surroundings, crisp center with pronounced specular edges
+    // GLASS - Strong bezel with angled specular highlights
+    // Light from top-left (bright), shadow on bottom-right (dark)
+    // Clear center - no graying of the highlight area
     // =========================================================================
     case "glass":
       return (
         <>
-          {/* Frosted blur on surroundings */}
+          {/* Frosted blur on surroundings only */}
           <rect
             x="0"
             y="0"
             width={containerWidth}
             height={containerHeight}
-            fill="rgba(255, 255, 255, 0.55)"
+            fill="rgba(245, 245, 250, 0.6)"
             mask={`url(#${uniqueId}-mask)`}
             filter={`url(#${uniqueId}-blur-strong)`}
           />
@@ -257,74 +280,84 @@ function renderStyle(
             const by = box.y - pad;
             const bw = box.width + pad * 2;
             const bh = box.height + pad * 2;
+            const bezelWidth = 20; // Thick bezel
 
             return (
               <g key={box.id}>
-                {/* Outer shadow - glass has depth */}
-                <rect
-                  x={bx - 2}
-                  y={by}
-                  width={bw + 4}
-                  height={bh + 4}
-                  rx="8"
-                  fill="rgba(0,0,0,0.15)"
-                  filter={`url(#${uniqueId}-blur-medium)`}
-                />
-
-                {/* Main border - white glass edge */}
+                {/* Clickable transparent area */}
                 <rect
                   x={bx}
                   y={by}
                   width={bw}
                   height={bh}
-                  rx="6"
-                  fill="none"
-                  stroke="rgba(255, 255, 255, 0.8)"
-                  strokeWidth={2 / zoom}
+                  rx={BEZEL_RADIUS}
+                  fill="transparent"
                   {...clickProps(box)}
                 />
 
-                {/* TOP SPECULAR - bright band */}
-                <rect
-                  x={bx + 4}
-                  y={by}
-                  width={bw - 8}
-                  height={18}
-                  rx="4"
-                  fill={`url(#${uniqueId}-specular-top)`}
-                  style={{ pointerEvents: "none" }}
-                />
-
-                {/* LEFT SPECULAR - vertical highlight */}
+                {/* TOP BEZEL - bright specular, angled */}
                 <rect
                   x={bx}
-                  y={by + 12}
-                  width={12}
-                  height={bh - 24}
-                  rx="3"
-                  fill={`url(#${uniqueId}-specular-left)`}
+                  y={by}
+                  width={bw}
+                  height={bezelWidth}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-top)`}
                   style={{ pointerEvents: "none" }}
                 />
 
-                {/* BOTTOM EDGE - darker, thickness */}
+                {/* LEFT BEZEL - bright specular, angled */}
                 <rect
-                  x={bx + 8}
-                  y={by + bh - 10}
-                  width={bw - 16}
-                  height={10}
-                  rx="3"
-                  fill={`url(#${uniqueId}-bottom-edge)`}
+                  x={bx}
+                  y={by}
+                  width={bezelWidth}
+                  height={bh}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-left)`}
                   style={{ pointerEvents: "none" }}
                 />
 
-                {/* RIGHT EDGE - subtle shadow */}
+                {/* BOTTOM BEZEL - dark shadow, angled */}
                 <rect
-                  x={bx + bw - 10}
-                  y={by + 12}
-                  width={10}
-                  height={bh - 24}
-                  rx="3"
-                  fill={`url(#${uniqueId}-right-edge)`}
+                  x={bx}
+                  y={by + bh - bezelWidth}
+                  width={bw}
+                  height={bezelWidth}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-bottom)`}
+                  style={{ pointerEvents: "none" }}
+                />
+
+                {/* RIGHT BEZEL - dark shadow, angled */}
+                <rect
+                  x={bx + bw - bezelWidth}
+                  y={by}
+                  width={bezelWidth}
+                  height={bh}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-right)`}
+                  style={{ pointerEvents: "none" }}
+                />
+
+                {/* TOP-LEFT CORNER - extra bright highlight */}
+                <rect
+                  x={bx}
+                  y={by}
+                  width={bezelWidth * 2}
+                  height={bezelWidth * 2}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-corner-highlight)`}
+                  style={{ pointerEvents: "none" }}
+                />
+
+                {/* BOTTOM-RIGHT CORNER - extra dark shadow */}
+                <rect
+                  x={bx + bw - bezelWidth * 2}
+                  y={by + bh - bezelWidth * 2}
+                  width={bezelWidth * 2}
+                  height={bezelWidth * 2}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-corner-shadow)`}
                   style={{ pointerEvents: "none" }}
                 />
               </g>
@@ -334,18 +367,19 @@ function renderStyle(
       );
 
     // =========================================================================
-    // LOUPE - Magnifying glass with heavy shadow ring and refraction edge
+    // LOUPE - Magnifying glass with pronounced bezel
+    // Heavier bezel, more dramatic light/shadow contrast
     // =========================================================================
     case "loupe":
       return (
         <>
-          {/* Subtle dim on surroundings */}
+          {/* Very subtle dim on surroundings */}
           <rect
             x="0"
             y="0"
             width={containerWidth}
             height={containerHeight}
-            fill="rgba(0, 0, 0, 0.08)"
+            fill="rgba(0, 0, 0, 0.06)"
             mask={`url(#${uniqueId}-mask)`}
             filter={`url(#${uniqueId}-blur-light)`}
           />
@@ -355,68 +389,96 @@ function renderStyle(
             const by = box.y - pad;
             const bw = box.width + pad * 2;
             const bh = box.height + pad * 2;
+            const bezelWidth = 24; // Extra thick bezel for loupe effect
 
             return (
               <g key={box.id}>
-                {/* Heavy blurred shadow ring - the "lens rim" */}
+                {/* Outer soft shadow - depth */}
                 <rect
-                  x={bx - 4}
-                  y={by - 2}
-                  width={bw + 8}
-                  height={bh + 8}
-                  rx="10"
-                  fill="none"
-                  stroke="rgba(0, 0, 0, 0.25)"
-                  strokeWidth={16 / zoom}
-                  filter={`url(#${uniqueId}-blur-strong)`}
+                  x={bx + 4}
+                  y={by + 6}
+                  width={bw}
+                  height={bh}
+                  rx={BEZEL_RADIUS + 2}
+                  fill="rgba(0,0,0,0.2)"
+                  filter={`url(#${uniqueId}-blur-medium)`}
+                  style={{ pointerEvents: "none" }}
                 />
 
-                {/* Secondary shadow ring - tighter */}
-                <rect
-                  x={bx - 1}
-                  y={by - 1}
-                  width={bw + 2}
-                  height={bh + 2}
-                  rx="7"
-                  fill="none"
-                  stroke="rgba(0, 0, 0, 0.12)"
-                  strokeWidth={6 / zoom}
-                  filter={`url(#${uniqueId}-blur-light)`}
-                />
-
-                {/* Inner white edge - bright, catching light */}
+                {/* Clickable transparent area */}
                 <rect
                   x={bx}
                   y={by}
                   width={bw}
                   height={bh}
-                  rx="6"
-                  fill="none"
-                  stroke="rgba(255, 255, 255, 0.9)"
-                  strokeWidth={2.5 / zoom}
+                  rx={BEZEL_RADIUS}
+                  fill="transparent"
                   {...clickProps(box)}
                 />
 
-                {/* Top specular streak - prominent */}
+                {/* TOP BEZEL - very bright, thick */}
                 <rect
-                  x={bx + 8}
-                  y={by + 2}
-                  width={bw * 0.6}
-                  height={6}
-                  rx="3"
-                  fill="rgba(255, 255, 255, 0.85)"
-                  filter={`url(#${uniqueId}-blur-light)`}
+                  x={bx}
+                  y={by}
+                  width={bw}
+                  height={bezelWidth}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-top)`}
                   style={{ pointerEvents: "none" }}
                 />
 
-                {/* Refraction edge hint - subtle color shift */}
+                {/* LEFT BEZEL - very bright, thick */}
                 <rect
-                  x={bx + 2}
-                  y={by + bh - 4}
-                  width={bw - 4}
-                  height={4}
-                  rx="2"
-                  fill={`url(#${uniqueId}-refract-edge)`}
+                  x={bx}
+                  y={by}
+                  width={bezelWidth}
+                  height={bh}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-left)`}
+                  style={{ pointerEvents: "none" }}
+                />
+
+                {/* BOTTOM BEZEL - very dark, thick */}
+                <rect
+                  x={bx}
+                  y={by + bh - bezelWidth}
+                  width={bw}
+                  height={bezelWidth}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-bottom)`}
+                  style={{ pointerEvents: "none" }}
+                />
+
+                {/* RIGHT BEZEL - very dark, thick */}
+                <rect
+                  x={bx + bw - bezelWidth}
+                  y={by}
+                  width={bezelWidth}
+                  height={bh}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-right)`}
+                  style={{ pointerEvents: "none" }}
+                />
+
+                {/* Diagonal specular streak across top-left corner */}
+                <rect
+                  x={bx}
+                  y={by}
+                  width={bw * 0.6}
+                  height={bh * 0.4}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-specular-diagonal)`}
+                  style={{ pointerEvents: "none" }}
+                />
+
+                {/* Diagonal shadow in bottom-right corner */}
+                <rect
+                  x={bx + bw * 0.4}
+                  y={by + bh * 0.6}
+                  width={bw * 0.6}
+                  height={bh * 0.4}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-shadow-diagonal)`}
                   style={{ pointerEvents: "none" }}
                 />
               </g>
@@ -426,7 +488,7 @@ function renderStyle(
       );
 
     // =========================================================================
-    // SHADOWBOX - Clean cutout with dramatic shadow
+    // SHADOWBOX - Clean cutout with dramatic shadow, uses bezel
     // =========================================================================
     case "shadowBox":
       return (
@@ -436,40 +498,92 @@ function renderStyle(
             y="0"
             width={containerWidth}
             height={containerHeight}
-            fill="rgba(25, 25, 35, 0.2)"
+            fill="rgba(25, 25, 35, 0.25)"
             mask={`url(#${uniqueId}-mask)`}
             filter={`url(#${uniqueId}-blur-light)`}
           />
-          {boundingBoxes.map((box) => (
-            <g key={box.id}>
-              <rect
-                x={box.x - pad}
-                y={box.y - pad}
-                width={box.width + pad * 2}
-                height={box.height + pad * 2}
-                rx="6"
-                fill="none"
-                stroke="rgba(0,0,0,0.03)"
-                filter={`url(#${uniqueId}-glass-shadow)`}
-              />
-              <rect
-                x={box.x - pad}
-                y={box.y - pad}
-                width={box.width + pad * 2}
-                height={box.height + pad * 2}
-                rx="6"
-                fill="none"
-                stroke="rgba(255, 255, 255, 0.2)"
-                strokeWidth={1 / zoom}
-                {...clickProps(box)}
-              />
-            </g>
-          ))}
+          {boundingBoxes.map((box) => {
+            const bx = box.x - pad;
+            const by = box.y - pad;
+            const bw = box.width + pad * 2;
+            const bh = box.height + pad * 2;
+            const bezelWidth = 16;
+
+            return (
+              <g key={box.id}>
+                {/* Heavy shadow */}
+                <rect
+                  x={bx + 4}
+                  y={by + 5}
+                  width={bw}
+                  height={bh}
+                  rx={BEZEL_RADIUS}
+                  fill="rgba(0,0,0,0.25)"
+                  filter={`url(#${uniqueId}-blur-medium)`}
+                />
+
+                {/* Clickable area */}
+                <rect
+                  x={bx}
+                  y={by}
+                  width={bw}
+                  height={bh}
+                  rx={BEZEL_RADIUS}
+                  fill="transparent"
+                  {...clickProps(box)}
+                />
+
+                {/* Subtle bezel - light top-left */}
+                <rect
+                  x={bx}
+                  y={by}
+                  width={bw}
+                  height={bezelWidth}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-top)`}
+                  opacity={0.5}
+                  style={{ pointerEvents: "none" }}
+                />
+                <rect
+                  x={bx}
+                  y={by}
+                  width={bezelWidth}
+                  height={bh}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-left)`}
+                  opacity={0.5}
+                  style={{ pointerEvents: "none" }}
+                />
+
+                {/* Subtle bezel - dark bottom-right */}
+                <rect
+                  x={bx}
+                  y={by + bh - bezelWidth}
+                  width={bw}
+                  height={bezelWidth}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-bottom)`}
+                  opacity={0.6}
+                  style={{ pointerEvents: "none" }}
+                />
+                <rect
+                  x={bx + bw - bezelWidth}
+                  y={by}
+                  width={bezelWidth}
+                  height={bh}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-right)`}
+                  opacity={0.6}
+                  style={{ pointerEvents: "none" }}
+                />
+              </g>
+            );
+          })}
         </>
       );
 
     // =========================================================================
-    // DIM - Dark cinematic blur
+    // DIM - Dark cinematic blur with bezel
     // =========================================================================
     case "dim":
       return (
@@ -483,37 +597,68 @@ function renderStyle(
             mask={`url(#${uniqueId}-mask)`}
             filter={`url(#${uniqueId}-blur-medium)`}
           />
-          {boundingBoxes.map((box) => (
-            <g key={box.id}>
-              <rect
-                x={box.x - pad - 3}
-                y={box.y - pad - 3}
-                width={box.width + pad * 2 + 6}
-                height={box.height + pad * 2 + 6}
-                rx="8"
-                fill="none"
-                stroke="rgba(255, 255, 255, 0.1)"
-                strokeWidth={8 / zoom}
-                filter={`url(#${uniqueId}-blur-light)`}
-              />
-              <rect
-                x={box.x - pad}
-                y={box.y - pad}
-                width={box.width + pad * 2}
-                height={box.height + pad * 2}
-                rx="6"
-                fill="none"
-                stroke="rgba(255, 255, 255, 0.3)"
-                strokeWidth={1.5 / zoom}
-                {...clickProps(box)}
-              />
-            </g>
-          ))}
+          {boundingBoxes.map((box) => {
+            const bx = box.x - pad;
+            const by = box.y - pad;
+            const bw = box.width + pad * 2;
+            const bh = box.height + pad * 2;
+            const bezelWidth = 14;
+
+            return (
+              <g key={box.id}>
+                {/* Soft glow around cutout */}
+                <rect
+                  x={bx - 2}
+                  y={by - 2}
+                  width={bw + 4}
+                  height={bh + 4}
+                  rx={BEZEL_RADIUS + 2}
+                  fill="none"
+                  stroke="rgba(255, 255, 255, 0.08)"
+                  strokeWidth={6 / zoom}
+                  filter={`url(#${uniqueId}-blur-light)`}
+                />
+
+                {/* Clickable area */}
+                <rect
+                  x={bx}
+                  y={by}
+                  width={bw}
+                  height={bh}
+                  rx={BEZEL_RADIUS}
+                  fill="transparent"
+                  {...clickProps(box)}
+                />
+
+                {/* Bezel - light on top-left */}
+                <rect
+                  x={bx}
+                  y={by}
+                  width={bw}
+                  height={bezelWidth}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-top)`}
+                  opacity={0.4}
+                  style={{ pointerEvents: "none" }}
+                />
+                <rect
+                  x={bx}
+                  y={by}
+                  width={bezelWidth}
+                  height={bh}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-left)`}
+                  opacity={0.4}
+                  style={{ pointerEvents: "none" }}
+                />
+              </g>
+            );
+          })}
         </>
       );
 
     // =========================================================================
-    // SEPIA - Warm blur, archival feel
+    // SEPIA - Warm blur, archival feel with subtle bezel
     // =========================================================================
     case "sepia":
       return (
@@ -527,36 +672,77 @@ function renderStyle(
             mask={`url(#${uniqueId}-mask)`}
             filter={`url(#${uniqueId}-blur-medium)`}
           />
-          {boundingBoxes.map((box) => (
-            <rect
-              key={box.id}
-              x={box.x - pad}
-              y={box.y - pad}
-              width={box.width + pad * 2}
-              height={box.height + pad * 2}
-              rx="5"
-              fill="none"
-              stroke="rgba(130, 95, 55, 0.45)"
-              strokeWidth={1.5 / zoom}
-              {...clickProps(box)}
-            />
-          ))}
+          {boundingBoxes.map((box) => {
+            const bx = box.x - pad;
+            const by = box.y - pad;
+            const bw = box.width + pad * 2;
+            const bh = box.height + pad * 2;
+            const bezelWidth = 12;
+
+            return (
+              <g key={box.id}>
+                {/* Clickable area */}
+                <rect
+                  x={bx}
+                  y={by}
+                  width={bw}
+                  height={bh}
+                  rx={BEZEL_RADIUS}
+                  fill="transparent"
+                  {...clickProps(box)}
+                />
+
+                {/* Very subtle warm bezel */}
+                <rect
+                  x={bx}
+                  y={by}
+                  width={bw}
+                  height={bezelWidth}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-top)`}
+                  opacity={0.35}
+                  style={{ pointerEvents: "none" }}
+                />
+                <rect
+                  x={bx}
+                  y={by}
+                  width={bezelWidth}
+                  height={bh}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-left)`}
+                  opacity={0.35}
+                  style={{ pointerEvents: "none" }}
+                />
+                <rect
+                  x={bx}
+                  y={by + bh - bezelWidth}
+                  width={bw}
+                  height={bezelWidth}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-bottom)`}
+                  opacity={0.4}
+                  style={{ pointerEvents: "none" }}
+                />
+              </g>
+            );
+          })}
         </>
       );
 
     // =========================================================================
-    // FROST - Heavy inverted glassmorphism, very frosted
+    // FROST - Heavy frost with soft bezel
+    // More diffuse/soft bezel edges, heavier blur on surroundings
     // =========================================================================
     case "frost":
       return (
         <>
-          {/* Dense white frost */}
+          {/* Dense white frost on surroundings */}
           <rect
             x="0"
             y="0"
             width={containerWidth}
             height={containerHeight}
-            fill="rgba(250, 252, 255, 0.75)"
+            fill="rgba(250, 252, 255, 0.8)"
             mask={`url(#${uniqueId}-mask)`}
             filter={`url(#${uniqueId}-blur-extreme)`}
           />
@@ -566,42 +752,82 @@ function renderStyle(
             const by = box.y - pad;
             const bw = box.width + pad * 2;
             const bh = box.height + pad * 2;
+            const bezelWidth = 18;
 
             return (
               <g key={box.id}>
-                {/* Outer shadow for depth */}
-                <rect
-                  x={bx - 2}
-                  y={by}
-                  width={bw + 4}
-                  height={bh + 5}
-                  rx="8"
-                  fill="rgba(100, 120, 150, 0.15)"
-                  filter={`url(#${uniqueId}-blur-medium)`}
-                />
-
-                {/* Clean border */}
+                {/* Clickable transparent area */}
                 <rect
                   x={bx}
                   y={by}
                   width={bw}
                   height={bh}
-                  rx="6"
-                  fill="none"
-                  stroke="rgba(180, 190, 210, 0.7)"
-                  strokeWidth={1.5 / zoom}
+                  rx={BEZEL_RADIUS}
+                  fill="transparent"
                   {...clickProps(box)}
                 />
 
-                {/* Top highlight */}
+                {/* TOP BEZEL - softer bright, blurred */}
                 <rect
-                  x={bx + 6}
-                  y={by + 1}
-                  width={bw - 12}
-                  height={12}
-                  rx="4"
-                  fill={`url(#${uniqueId}-specular-top)`}
-                  opacity={0.6}
+                  x={bx}
+                  y={by}
+                  width={bw}
+                  height={bezelWidth}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-top)`}
+                  filter={`url(#${uniqueId}-blur-light)`}
+                  opacity={0.85}
+                  style={{ pointerEvents: "none" }}
+                />
+
+                {/* LEFT BEZEL - softer bright, blurred */}
+                <rect
+                  x={bx}
+                  y={by}
+                  width={bezelWidth}
+                  height={bh}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-left)`}
+                  filter={`url(#${uniqueId}-blur-light)`}
+                  opacity={0.85}
+                  style={{ pointerEvents: "none" }}
+                />
+
+                {/* BOTTOM BEZEL - softer dark, blurred */}
+                <rect
+                  x={bx}
+                  y={by + bh - bezelWidth}
+                  width={bw}
+                  height={bezelWidth}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-bottom)`}
+                  filter={`url(#${uniqueId}-blur-light)`}
+                  opacity={0.9}
+                  style={{ pointerEvents: "none" }}
+                />
+
+                {/* RIGHT BEZEL - softer dark, blurred */}
+                <rect
+                  x={bx + bw - bezelWidth}
+                  y={by}
+                  width={bezelWidth}
+                  height={bh}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-right)`}
+                  filter={`url(#${uniqueId}-blur-light)`}
+                  opacity={0.9}
+                  style={{ pointerEvents: "none" }}
+                />
+
+                {/* Corner highlight - softer */}
+                <rect
+                  x={bx}
+                  y={by}
+                  width={bezelWidth * 2}
+                  height={bezelWidth * 2}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-corner-highlight)`}
+                  opacity={0.7}
                   style={{ pointerEvents: "none" }}
                 />
               </g>
@@ -611,8 +837,8 @@ function renderStyle(
       );
 
     // =========================================================================
-    // LENS - Non-inverted: Glass effect ON the highlight itself
-    // Strong visual glass cues - shadow, specular, refraction gradient
+    // LENS - Non-inverted: Glass bezel ON the highlight itself
+    // No inversion/dimming, just the bezel effect directly on the highlight
     // =========================================================================
     case "lens":
       return (
@@ -622,85 +848,96 @@ function renderStyle(
             const by = box.y - pad;
             const bw = box.width + pad * 2;
             const bh = box.height + pad * 2;
+            const bezelWidth = 22;
 
             return (
               <g key={box.id}>
-                {/* Heavy drop shadow - glass floats above */}
+                {/* Drop shadow - glass floats above page */}
                 <rect
-                  x={bx + 3}
-                  y={by + 6}
+                  x={bx + 5}
+                  y={by + 7}
                   width={bw}
                   height={bh}
-                  rx="8"
-                  fill="rgba(0, 0, 0, 0.35)"
+                  rx={BEZEL_RADIUS + 2}
+                  fill="rgba(0, 0, 0, 0.3)"
                   filter={`url(#${uniqueId}-blur-strong)`}
+                  style={{ pointerEvents: "none" }}
                 />
 
-                {/* Glass body - semi-transparent with inner vignette */}
+                {/* Clickable transparent area */}
                 <rect
                   x={bx}
                   y={by}
                   width={bw}
                   height={bh}
-                  rx="6"
-                  fill={`url(#${uniqueId}-inner-vignette)`}
-                  stroke="rgba(255, 255, 255, 0.7)"
-                  strokeWidth={2 / zoom}
+                  rx={BEZEL_RADIUS}
+                  fill="transparent"
                   {...clickProps(box)}
                 />
 
-                {/* TOP SPECULAR - very bright, prominent */}
+                {/* TOP BEZEL - bright specular */}
                 <rect
-                  x={bx + 6}
-                  y={by + 2}
-                  width={bw - 12}
-                  height={20}
-                  rx="4"
-                  fill={`url(#${uniqueId}-specular-top)`}
+                  x={bx}
+                  y={by}
+                  width={bw}
+                  height={bezelWidth}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-top)`}
                   style={{ pointerEvents: "none" }}
                 />
 
-                {/* Left specular edge */}
+                {/* LEFT BEZEL - bright specular */}
                 <rect
-                  x={bx + 2}
-                  y={by + 16}
-                  width={14}
-                  height={bh - 32}
-                  rx="4"
-                  fill={`url(#${uniqueId}-specular-left)`}
+                  x={bx}
+                  y={by}
+                  width={bezelWidth}
+                  height={bh}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-left)`}
                   style={{ pointerEvents: "none" }}
                 />
 
-                {/* Bottom dark edge - thickness illusion */}
+                {/* BOTTOM BEZEL - dark shadow */}
                 <rect
-                  x={bx + 10}
-                  y={by + bh - 12}
-                  width={bw - 20}
-                  height={12}
-                  rx="4"
-                  fill={`url(#${uniqueId}-bottom-edge)`}
+                  x={bx}
+                  y={by + bh - bezelWidth}
+                  width={bw}
+                  height={bezelWidth}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-bottom)`}
                   style={{ pointerEvents: "none" }}
                 />
 
-                {/* Right shadow edge */}
+                {/* RIGHT BEZEL - dark shadow */}
                 <rect
-                  x={bx + bw - 14}
-                  y={by + 16}
-                  width={12}
-                  height={bh - 32}
-                  rx="4"
-                  fill={`url(#${uniqueId}-right-edge)`}
+                  x={bx + bw - bezelWidth}
+                  y={by}
+                  width={bezelWidth}
+                  height={bh}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-bezel-right)`}
                   style={{ pointerEvents: "none" }}
                 />
 
-                {/* Refraction color hint at bottom edge */}
+                {/* TOP-LEFT CORNER - extra bright */}
                 <rect
-                  x={bx + 4}
-                  y={by + bh - 3}
-                  width={bw - 8}
-                  height={3}
-                  rx="1.5"
-                  fill="rgba(180, 200, 255, 0.25)"
+                  x={bx}
+                  y={by}
+                  width={bezelWidth * 1.8}
+                  height={bezelWidth * 1.8}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-corner-highlight)`}
+                  style={{ pointerEvents: "none" }}
+                />
+
+                {/* BOTTOM-RIGHT CORNER - extra dark */}
+                <rect
+                  x={bx + bw - bezelWidth * 1.8}
+                  y={by + bh - bezelWidth * 1.8}
+                  width={bezelWidth * 1.8}
+                  height={bezelWidth * 1.8}
+                  rx={BEZEL_RADIUS}
+                  fill={`url(#${uniqueId}-corner-shadow)`}
                   style={{ pointerEvents: "none" }}
                 />
               </g>
@@ -709,7 +946,7 @@ function renderStyle(
         </>
       );
 
-    // Default fallback
+    // Default fallback - same as mist
     default:
       return (
         <>
@@ -729,10 +966,8 @@ function renderStyle(
               y={box.y - pad}
               width={box.width + pad * 2}
               height={box.height + pad * 2}
-              rx="6"
-              fill="none"
-              stroke="rgba(100, 100, 110, 0.3)"
-              strokeWidth={1 / zoom}
+              rx={BEZEL_RADIUS}
+              fill="transparent"
               {...clickProps(box)}
             />
           ))}
