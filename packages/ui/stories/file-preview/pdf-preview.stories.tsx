@@ -33,16 +33,17 @@ const meta: Meta<typeof PdfPreview> = {
     highlightStyle: {
       control: "select",
       options: [
-        "classic",
-        "liquidGlass",
-        "lightbox",
-        "neon",
-        "underline",
-        "outline",
-        "gradient",
-        "spotlight",
+        "veil",
+        "sepia",
+        "loupe",
+        "frost",
+        "parchment",
+        "inkWash",
+        "ember",
+        "depth",
       ],
-      description: "Visual style for the highlight overlay",
+      description:
+        "Visual style for the highlight - all use inversion principle (dimming surroundings)",
     },
   },
 };
@@ -144,31 +145,31 @@ function InteractiveHighlightExample(props: Parameters<typeof PdfPreview>[0]) {
 // ============================================================================
 
 const HIGHLIGHT_STYLES: HighlightStyle[] = [
-  "classic",
-  "liquidGlass",
-  "lightbox",
-  "neon",
-  "underline",
-  "outline",
-  "gradient",
-  "spotlight",
+  "veil",
+  "sepia",
+  "loupe",
+  "frost",
+  "parchment",
+  "inkWash",
+  "ember",
+  "depth",
 ];
 
 const STYLE_DESCRIPTIONS: Record<HighlightStyle, string> = {
-  classic: "Traditional yellow marker highlight",
-  liquidGlass: "Apple-inspired glassmorphism with shimmer animation",
-  lightbox: "Dark vignette effect with spotlight on highlighted area",
-  neon: "Glowing cyan neon border with pulse animation",
-  underline: "Minimal amber underline below content",
-  outline: "Dashed indigo outline, no fill",
-  gradient: "Animated rainbow gradient border with corner accents",
-  spotlight: "Radial light beam effect with animated rays",
+  veil: "Subtle gray wash — barely perceptible, maximum content visibility",
+  sepia: "Warm aged paper tone — timeless, scholarly aesthetic",
+  loupe: "Magnifying glass effect — edge shadow with pristine center",
+  frost: "Frosted glass surroundings — inverted glassmorphism, crisp focus",
+  parchment: "Aged paper effect — cream tones, dashed scholarly border",
+  inkWash: "Deep blue-black wash — elegant like watercolor ink",
+  ember: "Warm firelight glow — cozy, focused reading atmosphere",
+  depth: "Strong focus effect — dramatic darkening, refined highlight",
 };
 
 export const HighlightStyles: Story = {
   args: {
     url: "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf",
-    highlightStyle: "liquidGlass",
+    highlightStyle: "loupe",
     highlights: [{ page: 1, x: 100, y: 350, width: 250, height: 140 }],
   },
   render: (args) => <HighlightStylesExample {...args} />,
@@ -176,7 +177,7 @@ export const HighlightStyles: Story = {
 
 function HighlightStylesExample(props: Parameters<typeof PdfPreview>[0]) {
   const [selectedStyle, setSelectedStyle] = useState<HighlightStyle>(
-    props.highlightStyle || "classic"
+    props.highlightStyle || "veil"
   );
   const [highlights] = useState([
     { page: 1, x: 72, y: 280, width: 450, height: 120 },

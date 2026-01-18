@@ -34,14 +34,15 @@ export interface Highlight {
 }
 
 /**
- * Visual styles for PDF highlights
+ * Visual styles for PDF highlights - all use the "inversion" principle,
+ * dimming surroundings to draw focus rather than overlaying the content.
  */
 export type HighlightStyle =
-  | "classic" // Traditional yellow highlight
-  | "liquidGlass" // Apple-inspired glassmorphism with shimmer
-  | "lightbox" // Dark vignette with spotlight on highlighted area
-  | "neon" // Glowing neon border effect
-  | "underline" // Minimal underline below content
-  | "outline" // Dashed outline, no fill
-  | "gradient" // Animated gradient border
-  | "spotlight"; // Radial light beam effect
+  | "veil" // Subtle gray wash, barely perceptible
+  | "sepia" // Warm aged paper tone, timeless
+  | "loupe" // Magnifying glass with edge shadow, clean center
+  | "frost" // Frosted glass on surroundings (inverted glassmorphism)
+  | "parchment" // Aged paper effect, scholarly feel
+  | "inkWash" // Deep blue-black like watercolor ink
+  | "ember" // Warm glow like reading by firelight
+  | "depth"; // Strong focus effect, dramatic but refined

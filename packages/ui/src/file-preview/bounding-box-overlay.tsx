@@ -19,13 +19,16 @@ export function BoundingBoxOverlay({
   containerWidth,
   containerHeight,
   onBoundingBoxClick,
-  highlightStyle = "classic",
+  highlightStyle = "veil",
 }: BoundingBoxOverlayProps) {
   if (containerWidth === 0 || containerHeight === 0) {
     return null;
   }
 
   const uniqueId = generateId("hl");
+
+  // Common padding around highlight cutouts
+  const pad = 6;
 
   return (
     <svg
@@ -41,560 +44,513 @@ export function BoundingBoxOverlay({
       viewBox={`0 0 ${containerWidth} ${containerHeight}`}
     >
       <defs>
-        {/* Liquid Glass gradient */}
-        <linearGradient
-          id={`${uniqueId}-liquidGlass-gradient`}
-          x1="0%"
-          y1="0%"
-          x2="100%"
-          y2="100%"
-        >
-          <stop offset="0%" stopColor="rgba(255, 255, 255, 0.4)" />
-          <stop offset="50%" stopColor="rgba(255, 255, 255, 0.1)" />
-          <stop offset="100%" stopColor="rgba(255, 255, 255, 0.3)" />
-        </linearGradient>
-
-        {/* Liquid Glass shimmer animation */}
-        <linearGradient
-          id={`${uniqueId}-liquidGlass-shimmer`}
-          x1="0%"
-          y1="0%"
-          x2="100%"
-          y2="0%"
-        >
-          <stop offset="0%" stopColor="rgba(255, 255, 255, 0)">
-            <animate
-              attributeName="offset"
-              values="-0.5;1.5"
-              dur="2s"
-              repeatCount="indefinite"
-            />
-          </stop>
-          <stop offset="50%" stopColor="rgba(255, 255, 255, 0.6)">
-            <animate
-              attributeName="offset"
-              values="0;2"
-              dur="2s"
-              repeatCount="indefinite"
-            />
-          </stop>
-          <stop offset="100%" stopColor="rgba(255, 255, 255, 0)">
-            <animate
-              attributeName="offset"
-              values="0.5;2.5"
-              dur="2s"
-              repeatCount="indefinite"
-            />
-          </stop>
-        </linearGradient>
-
-        {/* Neon glow filter */}
-        <filter
-          id={`${uniqueId}-neon-glow`}
-          x="-50%"
-          y="-50%"
-          width="200%"
-          height="200%"
-        >
-          <feGaussianBlur stdDeviation="3" result="blur1" />
-          <feGaussianBlur stdDeviation="6" result="blur2" />
-          <feGaussianBlur stdDeviation="12" result="blur3" />
-          <feMerge>
-            <feMergeNode in="blur3" />
-            <feMergeNode in="blur2" />
-            <feMergeNode in="blur1" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-
-        {/* Gradient animation */}
-        <linearGradient
-          id={`${uniqueId}-gradient-animated`}
-          x1="0%"
-          y1="0%"
-          x2="100%"
-          y2="100%"
-        >
-          <stop offset="0%" stopColor="#ff6b6b">
-            <animate
-              attributeName="stop-color"
-              values="#ff6b6b;#feca57;#48dbfb;#ff9ff3;#ff6b6b"
-              dur="4s"
-              repeatCount="indefinite"
-            />
-          </stop>
-          <stop offset="50%" stopColor="#48dbfb">
-            <animate
-              attributeName="stop-color"
-              values="#48dbfb;#ff9ff3;#ff6b6b;#feca57;#48dbfb"
-              dur="4s"
-              repeatCount="indefinite"
-            />
-          </stop>
-          <stop offset="100%" stopColor="#ff9ff3">
-            <animate
-              attributeName="stop-color"
-              values="#ff9ff3;#ff6b6b;#feca57;#48dbfb;#ff9ff3"
-              dur="4s"
-              repeatCount="indefinite"
-            />
-          </stop>
-        </linearGradient>
-
-        {/* Spotlight radial gradient */}
-        <radialGradient
-          id={`${uniqueId}-spotlight-radial`}
-          cx="50%"
-          cy="50%"
-          r="70%"
-          fx="50%"
-          fy="30%"
-        >
-          <stop offset="0%" stopColor="rgba(255, 255, 200, 0.3)" />
-          <stop offset="40%" stopColor="rgba(255, 255, 150, 0.15)" />
-          <stop offset="100%" stopColor="rgba(255, 255, 100, 0)" />
-        </radialGradient>
-
-        {/* Glass blur filter for liquid glass */}
-        <filter
-          id={`${uniqueId}-glass-blur`}
-          x="-10%"
-          y="-10%"
-          width="120%"
-          height="120%"
-        >
-          <feGaussianBlur in="SourceGraphic" stdDeviation="0.5" />
-        </filter>
-      </defs>
-
-      {/* Lightbox overlay - full page darkening except highlight area */}
-      {highlightStyle === "lightbox" && boundingBoxes.length > 0 && (
-        <>
-          <defs>
-            <mask id={`${uniqueId}-lightbox-mask`}>
-              <rect
-                x="0"
-                y="0"
-                width={containerWidth}
-                height={containerHeight}
-                fill="white"
-              />
-              {boundingBoxes.map((box) => (
-                <rect
-                  key={`mask-${box.id}`}
-                  x={box.x - 8}
-                  y={box.y - 8}
-                  width={box.width + 16}
-                  height={box.height + 16}
-                  rx="4"
-                  fill="black"
-                />
-              ))}
-            </mask>
-          </defs>
+        {/* Base mask for all lightbox-style effects - cutouts for highlights */}
+        <mask id={`${uniqueId}-cutout-mask`}>
           <rect
             x="0"
             y="0"
             width={containerWidth}
             height={containerHeight}
-            fill="rgba(0, 0, 0, 0.6)"
-            mask={`url(#${uniqueId}-lightbox-mask)`}
+            fill="white"
           />
-        </>
-      )}
+          {boundingBoxes.map((box) => (
+            <rect
+              key={`mask-${box.id}`}
+              x={box.x - pad}
+              y={box.y - pad}
+              width={box.width + pad * 2}
+              height={box.height + pad * 2}
+              rx="3"
+              fill="black"
+            />
+          ))}
+        </mask>
 
-      {boundingBoxes.map((box) => (
-        <g key={box.id}>
-          {renderHighlight(
-            box,
-            zoom,
-            highlightStyle,
-            uniqueId,
-            onBoundingBoxClick
-          )}
-          {box.label && (
-            <text
-              x={box.x}
-              y={box.y - 5}
-              fill={getLabelColor(highlightStyle)}
-              fontSize={12 / zoom}
-              fontWeight="bold"
-            >
-              {box.label}
-            </text>
-          )}
-        </g>
-      ))}
+        {/* Soft feathered mask for gentler transitions */}
+        <mask id={`${uniqueId}-soft-mask`}>
+          <rect
+            x="0"
+            y="0"
+            width={containerWidth}
+            height={containerHeight}
+            fill="white"
+          />
+          {boundingBoxes.map((box) => (
+            <g key={`soft-mask-${box.id}`}>
+              {/* Feathered edge using multiple rects with decreasing opacity */}
+              <rect
+                x={box.x - pad - 20}
+                y={box.y - pad - 20}
+                width={box.width + pad * 2 + 40}
+                height={box.height + pad * 2 + 40}
+                rx="8"
+                fill="rgba(0,0,0,0.3)"
+              />
+              <rect
+                x={box.x - pad - 12}
+                y={box.y - pad - 12}
+                width={box.width + pad * 2 + 24}
+                height={box.height + pad * 2 + 24}
+                rx="5"
+                fill="rgba(0,0,0,0.6)"
+              />
+              <rect
+                x={box.x - pad}
+                y={box.y - pad}
+                width={box.width + pad * 2}
+                height={box.height + pad * 2}
+                rx="3"
+                fill="black"
+              />
+            </g>
+          ))}
+        </mask>
+
+        {/* Blur filter for frost effect */}
+        <filter
+          id={`${uniqueId}-frost-blur`}
+          x="-5%"
+          y="-5%"
+          width="110%"
+          height="110%"
+        >
+          <feGaussianBlur in="SourceGraphic" stdDeviation="2" />
+        </filter>
+
+        {/* Loupe edge shadow filter */}
+        <filter
+          id={`${uniqueId}-loupe-shadow`}
+          x="-20%"
+          y="-20%"
+          width="140%"
+          height="140%"
+        >
+          <feDropShadow
+            dx="0"
+            dy="1"
+            stdDeviation="3"
+            floodColor="rgba(0,0,0,0.25)"
+          />
+        </filter>
+
+        {/* Inner shadow for loupe depth */}
+        <filter
+          id={`${uniqueId}-inner-shadow`}
+          x="-50%"
+          y="-50%"
+          width="200%"
+          height="200%"
+        >
+          <feComponentTransfer in="SourceAlpha">
+            <feFuncA type="table" tableValues="1 0" />
+          </feComponentTransfer>
+          <feGaussianBlur stdDeviation="4" />
+          <feOffset dx="0" dy="2" result="offsetblur" />
+          <feFlood floodColor="rgba(0,0,0,0.3)" result="color" />
+          <feComposite in2="offsetblur" operator="in" />
+          <feComposite in2="SourceAlpha" operator="in" />
+          <feMerge>
+            <feMergeNode in="SourceGraphic" />
+            <feMergeNode />
+          </feMerge>
+        </filter>
+
+        {/* Sepia color matrix */}
+        <filter id={`${uniqueId}-sepia`}>
+          <feColorMatrix
+            type="matrix"
+            values="0.393 0.769 0.189 0 0
+                    0.349 0.686 0.168 0 0
+                    0.272 0.534 0.131 0 0
+                    0     0     0     1 0"
+          />
+        </filter>
+      </defs>
+
+      {/* Render the appropriate style overlay */}
+      {renderOverlay(
+        highlightStyle,
+        uniqueId,
+        containerWidth,
+        containerHeight,
+        boundingBoxes,
+        pad,
+        zoom,
+        onBoundingBoxClick
+      )}
     </svg>
   );
 }
 
-function getLabelColor(style: HighlightStyle): string {
-  switch (style) {
-    case "neon":
-      return "#00ffff";
-    case "gradient":
-      return "#ff6b6b";
-    case "lightbox":
-      return "#ffffff";
-    case "spotlight":
-      return "#ffdd00";
-    case "liquidGlass":
-      return "rgba(255, 255, 255, 0.9)";
-    default:
-      return "rgba(180, 140, 0, 1)";
-  }
-}
-
-function renderHighlight(
-  box: BoundingBox,
-  zoom: number,
+function renderOverlay(
   style: HighlightStyle,
   uniqueId: string,
+  containerWidth: number,
+  containerHeight: number,
+  boundingBoxes: BoundingBox[],
+  pad: number,
+  zoom: number,
   onBoundingBoxClick?: (box: BoundingBox) => void
 ) {
-  const baseProps = {
+  const baseClickProps = (box: BoundingBox) => ({
     style: {
       pointerEvents: "auto" as const,
       cursor: onBoundingBoxClick ? "pointer" : "default",
     },
     onClick: () => onBoundingBoxClick?.(box),
-  };
+  });
 
   switch (style) {
-    case "classic":
-      return (
-        <rect
-          x={box.x}
-          y={box.y}
-          width={box.width}
-          height={box.height}
-          fill="rgba(255, 215, 0, 0.25)"
-          stroke="rgba(255, 180, 0, 0.6)"
-          strokeWidth={2 / zoom}
-          {...baseProps}
-        />
-      );
-
-    case "liquidGlass":
-      // Apple-inspired Liquid Glass effect
+    // =========================================================================
+    // VEIL - Subtle light gray wash, barely perceptible
+    // =========================================================================
+    case "veil":
       return (
         <>
-          {/* Outer glow/shadow */}
           <rect
-            x={box.x - 2}
-            y={box.y - 2}
-            width={box.width + 4}
-            height={box.height + 4}
-            rx={12 / zoom}
-            fill="none"
-            stroke="rgba(255, 255, 255, 0.2)"
-            strokeWidth={8 / zoom}
-            filter={`url(#${uniqueId}-glass-blur)`}
+            x="0"
+            y="0"
+            width={containerWidth}
+            height={containerHeight}
+            fill="rgba(120, 120, 130, 0.12)"
+            mask={`url(#${uniqueId}-soft-mask)`}
           />
-          {/* Main glass body */}
-          <rect
-            x={box.x}
-            y={box.y}
-            width={box.width}
-            height={box.height}
-            rx={10 / zoom}
-            fill={`url(#${uniqueId}-liquidGlass-gradient)`}
-            stroke="rgba(255, 255, 255, 0.5)"
-            strokeWidth={1.5 / zoom}
-            {...baseProps}
-          />
-          {/* Inner highlight / refraction */}
-          <rect
-            x={box.x + 4 / zoom}
-            y={box.y + 4 / zoom}
-            width={box.width - 8 / zoom}
-            height={box.height * 0.4}
-            rx={8 / zoom}
-            fill="rgba(255, 255, 255, 0.15)"
-            style={{ pointerEvents: "none" }}
-          />
-          {/* Shimmer animation overlay */}
-          <rect
-            x={box.x}
-            y={box.y}
-            width={box.width}
-            height={box.height}
-            rx={10 / zoom}
-            fill={`url(#${uniqueId}-liquidGlass-shimmer)`}
-            opacity={0.5}
-            style={{ pointerEvents: "none" }}
-          />
-          {/* Bottom edge highlight */}
-          <line
-            x1={box.x + 10 / zoom}
-            y1={box.y + box.height - 2 / zoom}
-            x2={box.x + box.width - 10 / zoom}
-            y2={box.y + box.height - 2 / zoom}
-            stroke="rgba(255, 255, 255, 0.3)"
-            strokeWidth={1 / zoom}
-            strokeLinecap="round"
-          />
-        </>
-      );
-
-    case "lightbox":
-      // Spotlight cutout effect (main mask handled at container level)
-      return (
-        <>
-          {/* Bright inner glow around the cutout */}
-          <rect
-            x={box.x - 4}
-            y={box.y - 4}
-            width={box.width + 8}
-            height={box.height + 8}
-            rx={4}
-            fill="none"
-            stroke="rgba(255, 255, 255, 0.8)"
-            strokeWidth={2 / zoom}
-            {...baseProps}
-          />
-          {/* Subtle inner shadow for depth */}
-          <rect
-            x={box.x}
-            y={box.y}
-            width={box.width}
-            height={box.height}
-            fill="rgba(255, 255, 255, 0.05)"
-            style={{ pointerEvents: "none" }}
-          />
-        </>
-      );
-
-    case "neon":
-      // Glowing neon border effect
-      return (
-        <>
-          {/* Glow layer */}
-          <rect
-            x={box.x}
-            y={box.y}
-            width={box.width}
-            height={box.height}
-            rx={4 / zoom}
-            fill="none"
-            stroke="#00ffff"
-            strokeWidth={3 / zoom}
-            filter={`url(#${uniqueId}-neon-glow)`}
-            opacity={0.8}
-          />
-          {/* Core bright line */}
-          <rect
-            x={box.x}
-            y={box.y}
-            width={box.width}
-            height={box.height}
-            rx={4 / zoom}
-            fill="rgba(0, 255, 255, 0.05)"
-            stroke="#ffffff"
-            strokeWidth={1.5 / zoom}
-            {...baseProps}
-          />
-          {/* Pulsing animation overlay */}
-          <rect
-            x={box.x}
-            y={box.y}
-            width={box.width}
-            height={box.height}
-            rx={4 / zoom}
-            fill="none"
-            stroke="#00ffff"
-            strokeWidth={2 / zoom}
-            opacity={0.6}
-            style={{ pointerEvents: "none" }}
-          >
-            <animate
-              attributeName="opacity"
-              values="0.6;0.3;0.6"
-              dur="1.5s"
-              repeatCount="indefinite"
+          {boundingBoxes.map((box) => (
+            <rect
+              key={box.id}
+              x={box.x - pad}
+              y={box.y - pad}
+              width={box.width + pad * 2}
+              height={box.height + pad * 2}
+              rx="3"
+              fill="transparent"
+              stroke="rgba(100, 100, 110, 0.15)"
+              strokeWidth={1 / zoom}
+              {...baseClickProps(box)}
             />
-          </rect>
-        </>
-      );
-
-    case "underline":
-      // Minimal underline below content
-      return (
-        <>
-          {/* Invisible hit area for clicks */}
-          <rect
-            x={box.x}
-            y={box.y}
-            width={box.width}
-            height={box.height}
-            fill="transparent"
-            {...baseProps}
-          />
-          {/* Thick underline */}
-          <line
-            x1={box.x}
-            y1={box.y + box.height + 2}
-            x2={box.x + box.width}
-            y2={box.y + box.height + 2}
-            stroke="#f59e0b"
-            strokeWidth={4 / zoom}
-            strokeLinecap="round"
-          />
-          {/* Subtle highlight tint */}
-          <rect
-            x={box.x}
-            y={box.y}
-            width={box.width}
-            height={box.height}
-            fill="rgba(245, 158, 11, 0.08)"
-            style={{ pointerEvents: "none" }}
-          />
-        </>
-      );
-
-    case "outline":
-      // Dashed outline, no fill
-      return (
-        <rect
-          x={box.x}
-          y={box.y}
-          width={box.width}
-          height={box.height}
-          rx={3 / zoom}
-          fill="none"
-          stroke="#6366f1"
-          strokeWidth={2 / zoom}
-          strokeDasharray={`${8 / zoom} ${4 / zoom}`}
-          {...baseProps}
-        />
-      );
-
-    case "gradient":
-      // Animated gradient border
-      return (
-        <>
-          {/* Gradient border */}
-          <rect
-            x={box.x - 2}
-            y={box.y - 2}
-            width={box.width + 4}
-            height={box.height + 4}
-            rx={6 / zoom}
-            fill="none"
-            stroke={`url(#${uniqueId}-gradient-animated)`}
-            strokeWidth={4 / zoom}
-            {...baseProps}
-          />
-          {/* Inner subtle fill */}
-          <rect
-            x={box.x}
-            y={box.y}
-            width={box.width}
-            height={box.height}
-            rx={4 / zoom}
-            fill="rgba(255, 107, 107, 0.08)"
-            style={{ pointerEvents: "none" }}
-          />
-          {/* Corner accents */}
-          {[
-            { cx: box.x, cy: box.y },
-            { cx: box.x + box.width, cy: box.y },
-            { cx: box.x, cy: box.y + box.height },
-            { cx: box.x + box.width, cy: box.y + box.height },
-          ].map((corner, i) => (
-            <circle
-              key={i}
-              cx={corner.cx}
-              cy={corner.cy}
-              r={4 / zoom}
-              fill={`url(#${uniqueId}-gradient-animated)`}
-              style={{ pointerEvents: "none" }}
-            >
-              <animate
-                attributeName="r"
-                values={`${3 / zoom};${5 / zoom};${3 / zoom}`}
-                dur="2s"
-                repeatCount="indefinite"
-                begin={`${i * 0.5}s`}
-              />
-            </circle>
           ))}
         </>
       );
 
-    case "spotlight":
-      // Radial light beam effect
+    // =========================================================================
+    // SEPIA - Warm aged paper tone on surroundings, timeless feel
+    // =========================================================================
+    case "sepia":
       return (
         <>
-          {/* Outer beam halo */}
-          <ellipse
-            cx={box.x + box.width / 2}
-            cy={box.y + box.height / 2}
-            rx={box.width * 0.8}
-            ry={box.height * 0.8}
-            fill={`url(#${uniqueId}-spotlight-radial)`}
-            style={{ pointerEvents: "none" }}
-          />
-          {/* Main highlight area */}
+          {/* Warm sepia overlay on non-highlighted areas */}
           <rect
-            x={box.x}
-            y={box.y}
-            width={box.width}
-            height={box.height}
-            rx={2 / zoom}
-            fill="rgba(255, 250, 200, 0.2)"
-            stroke="rgba(255, 220, 100, 0.6)"
-            strokeWidth={2 / zoom}
-            {...baseProps}
+            x="0"
+            y="0"
+            width={containerWidth}
+            height={containerHeight}
+            fill="rgba(180, 140, 90, 0.18)"
+            mask={`url(#${uniqueId}-soft-mask)`}
           />
-          {/* Top edge light reflection */}
-          <line
-            x1={box.x + 5 / zoom}
-            y1={box.y + 1 / zoom}
-            x2={box.x + box.width - 5 / zoom}
-            y2={box.y + 1 / zoom}
-            stroke="rgba(255, 255, 255, 0.5)"
-            strokeWidth={1 / zoom}
-            strokeLinecap="round"
-          />
-          {/* Animated light rays */}
-          <g opacity={0.3} style={{ pointerEvents: "none" }}>
-            {[0, 1, 2].map((i) => (
-              <line
-                key={i}
-                x1={box.x + box.width * 0.2 + (box.width * 0.3 * i)}
-                y1={box.y - 20 / zoom}
-                x2={box.x + box.width * 0.3 + (box.width * 0.2 * i)}
-                y2={box.y + box.height + 20 / zoom}
-                stroke="rgba(255, 255, 200, 0.4)"
-                strokeWidth={box.width * 0.15}
-              >
-                <animate
-                  attributeName="opacity"
-                  values="0.3;0.5;0.3"
-                  dur="3s"
-                  repeatCount="indefinite"
-                  begin={`${i * 1}s`}
-                />
-              </line>
-            ))}
-          </g>
+          {/* Subtle warm border around highlight */}
+          {boundingBoxes.map((box) => (
+            <rect
+              key={box.id}
+              x={box.x - pad}
+              y={box.y - pad}
+              width={box.width + pad * 2}
+              height={box.height + pad * 2}
+              rx="2"
+              fill="transparent"
+              stroke="rgba(160, 120, 60, 0.25)"
+              strokeWidth={1.5 / zoom}
+              {...baseClickProps(box)}
+            />
+          ))}
         </>
       );
 
+    // =========================================================================
+    // LOUPE - Magnifying glass effect: edge shadow, clean center
+    // =========================================================================
+    case "loupe":
+      return (
+        <>
+          {/* Very subtle surrounding dim */}
+          <rect
+            x="0"
+            y="0"
+            width={containerWidth}
+            height={containerHeight}
+            fill="rgba(0, 0, 0, 0.04)"
+            mask={`url(#${uniqueId}-cutout-mask)`}
+          />
+          {boundingBoxes.map((box) => (
+            <g key={box.id}>
+              {/* Outer lens ring with shadow */}
+              <rect
+                x={box.x - pad - 2}
+                y={box.y - pad - 2}
+                width={box.width + pad * 2 + 4}
+                height={box.height + pad * 2 + 4}
+                rx="4"
+                fill="none"
+                stroke="rgba(0, 0, 0, 0.08)"
+                strokeWidth={6 / zoom}
+                filter={`url(#${uniqueId}-loupe-shadow)`}
+              />
+              {/* Inner bright edge - like light catching glass */}
+              <rect
+                x={box.x - pad}
+                y={box.y - pad}
+                width={box.width + pad * 2}
+                height={box.height + pad * 2}
+                rx="3"
+                fill="none"
+                stroke="rgba(255, 255, 255, 0.5)"
+                strokeWidth={1 / zoom}
+                {...baseClickProps(box)}
+              />
+              {/* Top-left highlight reflection */}
+              <line
+                x1={box.x - pad + 8}
+                y1={box.y - pad + 1}
+                x2={box.x - pad + box.width * 0.4}
+                y2={box.y - pad + 1}
+                stroke="rgba(255, 255, 255, 0.4)"
+                strokeWidth={1 / zoom}
+                strokeLinecap="round"
+              />
+            </g>
+          ))}
+        </>
+      );
+
+    // =========================================================================
+    // FROST - Frosted glass on surroundings (inverted glassmorphism)
+    // =========================================================================
+    case "frost":
+      return (
+        <>
+          {/* Frosted overlay - white with blur effect simulation */}
+          <rect
+            x="0"
+            y="0"
+            width={containerWidth}
+            height={containerHeight}
+            fill="rgba(245, 247, 250, 0.65)"
+            mask={`url(#${uniqueId}-cutout-mask)`}
+          />
+          {/* Subtle grain texture simulation */}
+          <rect
+            x="0"
+            y="0"
+            width={containerWidth}
+            height={containerHeight}
+            fill="rgba(255, 255, 255, 0.1)"
+            mask={`url(#${uniqueId}-cutout-mask)`}
+            style={{ mixBlendMode: "overlay" }}
+          />
+          {/* Clean edge around highlight */}
+          {boundingBoxes.map((box) => (
+            <rect
+              key={box.id}
+              x={box.x - pad}
+              y={box.y - pad}
+              width={box.width + pad * 2}
+              height={box.height + pad * 2}
+              rx="3"
+              fill="none"
+              stroke="rgba(200, 205, 215, 0.5)"
+              strokeWidth={1 / zoom}
+              {...baseClickProps(box)}
+            />
+          ))}
+        </>
+      );
+
+    // =========================================================================
+    // PARCHMENT - Aged paper effect, scholarly feel
+    // =========================================================================
+    case "parchment":
+      return (
+        <>
+          {/* Aged paper tone */}
+          <rect
+            x="0"
+            y="0"
+            width={containerWidth}
+            height={containerHeight}
+            fill="rgba(235, 220, 195, 0.35)"
+            mask={`url(#${uniqueId}-soft-mask)`}
+          />
+          {/* Subtle darkening at edges for depth */}
+          <rect
+            x="0"
+            y="0"
+            width={containerWidth}
+            height={containerHeight}
+            fill="rgba(150, 120, 80, 0.08)"
+            mask={`url(#${uniqueId}-cutout-mask)`}
+          />
+          {boundingBoxes.map((box) => (
+            <rect
+              key={box.id}
+              x={box.x - pad}
+              y={box.y - pad}
+              width={box.width + pad * 2}
+              height={box.height + pad * 2}
+              rx="2"
+              fill="none"
+              stroke="rgba(140, 110, 70, 0.2)"
+              strokeWidth={1 / zoom}
+              strokeDasharray={`${4 / zoom} ${2 / zoom}`}
+              {...baseClickProps(box)}
+            />
+          ))}
+        </>
+      );
+
+    // =========================================================================
+    // INKWASH - Deep blue-black like watercolor ink, elegant
+    // =========================================================================
+    case "inkWash":
+      return (
+        <>
+          {/* Deep ink wash */}
+          <rect
+            x="0"
+            y="0"
+            width={containerWidth}
+            height={containerHeight}
+            fill="rgba(25, 35, 55, 0.25)"
+            mask={`url(#${uniqueId}-soft-mask)`}
+          />
+          {boundingBoxes.map((box) => (
+            <rect
+              key={box.id}
+              x={box.x - pad}
+              y={box.y - pad}
+              width={box.width + pad * 2}
+              height={box.height + pad * 2}
+              rx="2"
+              fill="none"
+              stroke="rgba(40, 55, 80, 0.3)"
+              strokeWidth={1.5 / zoom}
+              {...baseClickProps(box)}
+            />
+          ))}
+        </>
+      );
+
+    // =========================================================================
+    // EMBER - Warm, focused glow like reading by firelight
+    // =========================================================================
+    case "ember":
+      return (
+        <>
+          {/* Warm dark surround */}
+          <rect
+            x="0"
+            y="0"
+            width={containerWidth}
+            height={containerHeight}
+            fill="rgba(45, 30, 25, 0.3)"
+            mask={`url(#${uniqueId}-soft-mask)`}
+          />
+          {/* Subtle warm glow at highlight edges */}
+          {boundingBoxes.map((box) => (
+            <g key={box.id}>
+              <rect
+                x={box.x - pad - 8}
+                y={box.y - pad - 8}
+                width={box.width + pad * 2 + 16}
+                height={box.height + pad * 2 + 16}
+                rx="6"
+                fill="none"
+                stroke="rgba(255, 180, 100, 0.1)"
+                strokeWidth={12 / zoom}
+              />
+              <rect
+                x={box.x - pad}
+                y={box.y - pad}
+                width={box.width + pad * 2}
+                height={box.height + pad * 2}
+                rx="3"
+                fill="none"
+                stroke="rgba(255, 200, 140, 0.25)"
+                strokeWidth={1 / zoom}
+                {...baseClickProps(box)}
+              />
+            </g>
+          ))}
+        </>
+      );
+
+    // =========================================================================
+    // DEPTH - Strong focus effect, dramatic but refined
+    // =========================================================================
+    case "depth":
+      return (
+        <>
+          {/* Darker overlay for strong focus */}
+          <rect
+            x="0"
+            y="0"
+            width={containerWidth}
+            height={containerHeight}
+            fill="rgba(20, 22, 28, 0.5)"
+            mask={`url(#${uniqueId}-soft-mask)`}
+          />
+          {boundingBoxes.map((box) => (
+            <g key={box.id}>
+              {/* Subtle glow around highlight */}
+              <rect
+                x={box.x - pad - 4}
+                y={box.y - pad - 4}
+                width={box.width + pad * 2 + 8}
+                height={box.height + pad * 2 + 8}
+                rx="5"
+                fill="none"
+                stroke="rgba(255, 255, 255, 0.08)"
+                strokeWidth={8 / zoom}
+              />
+              <rect
+                x={box.x - pad}
+                y={box.y - pad}
+                width={box.width + pad * 2}
+                height={box.height + pad * 2}
+                rx="3"
+                fill="none"
+                stroke="rgba(255, 255, 255, 0.2)"
+                strokeWidth={1 / zoom}
+                {...baseClickProps(box)}
+              />
+            </g>
+          ))}
+        </>
+      );
+
+    // Default fallback
     default:
       return (
-        <rect
-          x={box.x}
-          y={box.y}
-          width={box.width}
-          height={box.height}
-          fill={box.color || "rgba(255, 0, 0, 0.2)"}
-          stroke={box.color || "red"}
-          strokeWidth={2 / zoom}
-          {...baseProps}
-        />
+        <>
+          <rect
+            x="0"
+            y="0"
+            width={containerWidth}
+            height={containerHeight}
+            fill="rgba(100, 100, 110, 0.15)"
+            mask={`url(#${uniqueId}-soft-mask)`}
+          />
+          {boundingBoxes.map((box) => (
+            <rect
+              key={box.id}
+              x={box.x - pad}
+              y={box.y - pad}
+              width={box.width + pad * 2}
+              height={box.height + pad * 2}
+              rx="3"
+              fill="transparent"
+              {...baseClickProps(box)}
+            />
+          ))}
+        </>
       );
   }
 }
