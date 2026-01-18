@@ -34,15 +34,17 @@ export interface Highlight {
 }
 
 /**
- * Visual styles for PDF highlights - all use the "inversion" principle,
- * dimming surroundings to draw focus rather than overlaying the content.
+ * Visual styles for PDF highlights.
+ * Most use the "inversion" principle - blurring/dimming surroundings.
+ * "lens" is non-inverted - applies glass effect to the highlight itself.
  */
 export type HighlightStyle =
-  | "veil" // Subtle gray wash, barely perceptible
-  | "sepia" // Warm aged paper tone, timeless
-  | "loupe" // Magnifying glass with edge shadow, clean center
-  | "frost" // Frosted glass on surroundings (inverted glassmorphism)
-  | "parchment" // Aged paper effect, scholarly feel
-  | "inkWash" // Deep blue-black like watercolor ink
-  | "ember" // Warm glow like reading by firelight
-  | "depth"; // Strong focus effect, dramatic but refined
+  | "mist" // Light blur, barely tinted, very subtle
+  | "haze" // Medium blur with slight warmth
+  | "glass" // Inverted glassmorphism: blurred surroundings, specular edges
+  | "loupe" // Magnifying glass: shadow ring, bright inner edge
+  | "shadowBox" // Clean cutout with dramatic drop shadow
+  | "dim" // Dark cinematic blur, dramatic focus
+  | "sepia" // Warm blur, aged/archival feel
+  | "frost" // Heavy inverted glassmorphism, frosted window
+  | "lens"; // Non-inverted: glass effect ON the highlight itself

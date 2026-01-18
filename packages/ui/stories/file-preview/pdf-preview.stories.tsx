@@ -33,17 +33,18 @@ const meta: Meta<typeof PdfPreview> = {
     highlightStyle: {
       control: "select",
       options: [
-        "veil",
-        "sepia",
+        "mist",
+        "haze",
+        "glass",
         "loupe",
+        "shadowBox",
+        "dim",
+        "sepia",
         "frost",
-        "parchment",
-        "inkWash",
-        "ember",
-        "depth",
+        "lens",
       ],
       description:
-        "Visual style for the highlight - all use inversion principle (dimming surroundings)",
+        "Visual style for the highlight - most blur surroundings, 'lens' applies glass to highlight",
     },
   },
 };
@@ -145,31 +146,33 @@ function InteractiveHighlightExample(props: Parameters<typeof PdfPreview>[0]) {
 // ============================================================================
 
 const HIGHLIGHT_STYLES: HighlightStyle[] = [
-  "veil",
-  "sepia",
+  "mist",
+  "haze",
+  "glass",
   "loupe",
+  "shadowBox",
+  "dim",
+  "sepia",
   "frost",
-  "parchment",
-  "inkWash",
-  "ember",
-  "depth",
+  "lens",
 ];
 
 const STYLE_DESCRIPTIONS: Record<HighlightStyle, string> = {
-  veil: "Subtle gray wash — barely perceptible, maximum content visibility",
-  sepia: "Warm aged paper tone — timeless, scholarly aesthetic",
-  loupe: "Magnifying glass effect — edge shadow with pristine center",
-  frost: "Frosted glass surroundings — inverted glassmorphism, crisp focus",
-  parchment: "Aged paper effect — cream tones, dashed scholarly border",
-  inkWash: "Deep blue-black wash — elegant like watercolor ink",
-  ember: "Warm firelight glow — cozy, focused reading atmosphere",
-  depth: "Strong focus effect — dramatic darkening, refined highlight",
+  mist: "Light blur, barely tinted — very subtle, maximum readability",
+  haze: "Medium blur with warmth — soft focus, gentle atmosphere",
+  glass: "Inverted glassmorphism — blurred surroundings, specular highlight edges",
+  loupe: "Magnifying glass — shadow ring with bright inner edge reflection",
+  shadowBox: "Clean cutout — dramatic drop shadow, crisp borders",
+  dim: "Dark cinematic blur — dramatic focus, moody atmosphere",
+  sepia: "Warm blur — aged/archival feel, scholarly warmth",
+  frost: "Heavy inverted glass — dense frosted window effect",
+  lens: "Non-inverted glass — frosted effect ON the highlight with specular",
 };
 
 export const HighlightStyles: Story = {
   args: {
     url: "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf",
-    highlightStyle: "loupe",
+    highlightStyle: "glass",
     highlights: [{ page: 1, x: 100, y: 350, width: 250, height: 140 }],
   },
   render: (args) => <HighlightStylesExample {...args} />,
@@ -177,7 +180,7 @@ export const HighlightStyles: Story = {
 
 function HighlightStylesExample(props: Parameters<typeof PdfPreview>[0]) {
   const [selectedStyle, setSelectedStyle] = useState<HighlightStyle>(
-    props.highlightStyle || "veil"
+    props.highlightStyle || "mist"
   );
   const [highlights] = useState([
     { page: 1, x: 72, y: 280, width: 450, height: 120 },
@@ -236,8 +239,8 @@ function HighlightStylesExample(props: Parameters<typeof PdfPreview>[0]) {
         <div className="mt-6 p-3 bg-amber-50 border border-amber-200 rounded-lg">
           <p className="text-xs text-amber-800">
             <strong>Tip:</strong> Click anywhere on the PDF to toggle highlight
-            visibility. Some styles have animations - watch for shimmer, pulse,
-            and gradient effects!
+            visibility. Try "lens" for non-inverted glass, or "glass" / "frost"
+            for inverted glassmorphism effects.
           </p>
         </div>
       </div>

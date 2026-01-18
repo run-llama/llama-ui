@@ -65,7 +65,7 @@ export const PdfPreviewImpl = ({
   highlights,
   toolbarClassName,
   fitMode = "width",
-  highlightStyle = "veil",
+  highlightStyle = "mist",
 }: PdfPreviewImplProps) => {
   const [numPages, setNumPages] = useState<number>();
   const [currentPage, setCurrentPage] = useState<number>(1);
