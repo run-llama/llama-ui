@@ -5,15 +5,17 @@ import { Button } from "@/base/button";
 import {
   Table,
   TableBody,
-  TableCell,
-  TableHead,
+  CustomTableCell,
   TableHeader,
   TableRow,
+  TableHead,
+  TableCell,
 } from "@/base/table";
+import { Badge } from "@/base/badge";
 import { arrayToCsv } from "@/src/lib/csv-utils";
 import { DataPagination } from "../data-pagination";
 import { EditableField } from "../editable-field";
-import { getFieldDisplayInfo, getFieldLabelText } from "../field-display-utils";
+import { getFieldDisplayInfo } from "../field-display-utils";
 import { findExtractedFieldMetadata } from "../metadata-lookup";
 import {
   buildTableHeaderMetadataPath,
@@ -267,7 +269,6 @@ export function TableRenderer<Row extends JsonObject>({
             validationErrors,
             fieldKeyPath
           );
-          const headerText = getFieldLabelText(fieldInfo);
           const isLeaf = depth === column.path.length - 1;
 
           // Calculate colSpan (how many columns this header should span horizontally)
@@ -315,13 +316,10 @@ export function TableRenderer<Row extends JsonObject>({
               key={`${depth}-${colIndex}`}
               colSpan={colSpan}
               rowSpan={rowSpan}
-              className="px-2 py-2 text-center border-r border-gray-200 border-b min-w-[80px] max-w-[200px] bg-gray-50"
               style={rowSpan > 1 ? { height: `${rowSpan * 32}px` } : undefined}
-            >
-              <div className="break-words text-zinc-900 font-semibold">
-                {headerText}
-              </div>
-            </TableHead>
+              label={fieldInfo.name}
+              badge={fieldInfo.isRequired ? <Badge label="Required" /> : undefined}
+            />
           );
 
           colIndex = nextColIndex;
@@ -344,9 +342,9 @@ export function TableRenderer<Row extends JsonObject>({
           <TableHead
             key="delete-header"
             rowSpan={maxDepth}
-            className="px-2 py-2 text-center border-r border-gray-200 border-b w-12 bg-gray-50"
+            alignment="center"
             style={{ height: `${maxDepth * 32}px` }}
-          ></TableHead>,
+          />,
         ],
       });
       rows[0] = modifiedFirstRow;
@@ -361,18 +359,18 @@ export function TableRenderer<Row extends JsonObject>({
   );
 
   return (
-    <div className="border border-b-0 rounded-md bg-white">
+    <>
       <DataPagination
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         totalItems={data.length}
         perPage={tableRowsPerPage}
       />
-      <Table className="table-auto">
+      <Table>
         <TableHeader>{generateHeaderRows()}</TableHeader>
         <TableBody>
           {visibleData.map((item, rowIndex) => (
-            <TableRow key={rowIndex} className="hover:bg-gray-50 border-0">
+            <TableRow key={rowIndex} state="hover">
               {columns.map((column, colIndex) => {
                 const value = getValue(item, column) as
                   | PrimitiveValue
@@ -389,30 +387,23 @@ export function TableRenderer<Row extends JsonObject>({
                   return (
                     <TableCell
                       key={colIndex}
-                      className="p-0 border-r border-gray-100 min-w-[160px] max-w-[360px] align-top"
-                    >
-                      <div className="px-2 py-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-sm m-1">
-                        Editing nested lists/tables is not supported.
-                      </div>
-                    </TableCell>
+                      label="Editing nested lists/tables is not supported."
+                    />
                   );
                 }
 
                 // If the value is an array of objects, render it recursively as a nested table
                 if (Array.isArray(value) && isArrayOfObjects(value)) {
                   return (
-                    <TableCell
+                    <CustomTableCell
                       key={colIndex}
-                      className="p-0 border-r border-gray-100 min-w-[160px] max-w-[360px]"
                     >
-                      <div className="p-2">
                         <TableRenderer<JsonObject>
                           data={value as JsonObject[]}
                           editable={false}
                           tableRowsPerPage={tableRowsPerPage}
                         />
-                      </div>
-                    </TableCell>
+                    </CustomTableCell>
                   );
                 }
 
@@ -423,12 +414,8 @@ export function TableRenderer<Row extends JsonObject>({
                   return (
                     <TableCell
                       key={colIndex}
-                      className="p-0 border-r border-gray-100 min-w-[80px] max-w-[200px]"
-                    >
-                      <div className="border-b border-gray-200 p-2">
-                        {csvValue}
-                      </div>
-                    </TableCell>
+                      label={csvValue}
+                      />
                   );
                 }
 
@@ -449,9 +436,8 @@ export function TableRenderer<Row extends JsonObject>({
                 const isRequired = fieldInfo?.isRequired || false;
 
                 return (
-                  <TableCell
+                  <CustomTableCell
                     key={colIndex}
-                    className="p-0 border-r border-gray-100 min-w-[80px] max-w-[200px]"
                   >
                     <EditableField<PrimitiveValue>
                       value={value as PrimitiveValue}
@@ -488,12 +474,11 @@ export function TableRenderer<Row extends JsonObject>({
                       }
                       editable={editable}
                     />
-                  </TableCell>
+                  </CustomTableCell>
                 );
               })}
               {onDeleteRow && (
-                <TableCell className="p-0 border-r border-gray-100 border-b w-12">
-                  <div className="w-full h-full flex items-center justify-center">
+                <CustomTableCell >
                     <Button
                       variant="ghost"
                       size="icon-sm"
@@ -501,22 +486,19 @@ export function TableRenderer<Row extends JsonObject>({
                       title="Delete row"
                       startIcon={<Trash2 className="text-destructive" />}
                     />
-                  </div>
-                </TableCell>
+                </CustomTableCell>
               )}
             </TableRow>
           ))}
           {onAddRow && (
-            <TableRow className="hover:bg-gray-50">
+            <TableRow >
               {Array.from({ length: columns.length }).map((_, colIndex) => (
-                <TableCell
+                <CustomTableCell
                   key={colIndex}
-                  className="p-0 border-b min-w-[80px] max-w-[200px]"
-                ></TableCell>
+                />
               ))}
-              <TableCell
+              <CustomTableCell
                 colSpan={columns.length + (onDeleteRow ? 1 : 0)}
-                className="border-b text-center p-0"
               >
                 <Button
                   variant="ghost"
@@ -524,11 +506,11 @@ export function TableRenderer<Row extends JsonObject>({
                   onClick={handleAddRow}
                   startIcon={<Plus className="text-primary" />}
                 />
-              </TableCell>
+              </CustomTableCell>
             </TableRow>
           )}
         </TableBody>
       </Table>
-    </div>
+    </>
   );
 }

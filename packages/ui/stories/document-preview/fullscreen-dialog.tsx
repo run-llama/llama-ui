@@ -1,12 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/base/dialog";
+import { Dialog, DialogContent, DialogHeader } from "@/base/dialog";
 import { cn } from "@/lib/utils";
 
 export interface FullscreenDialogProps {
@@ -39,12 +34,10 @@ export function FullscreenDialog({
           className
         )}
       >
-        <DialogHeader>
-          <div className="flex items-center justify-between p-2">
-            <DialogTitle>{title}</DialogTitle>
-            {headerActions}
-          </div>
-        </DialogHeader>
+        <div className="flex items-center justify-between p-2">
+          <DialogHeader title={title} />
+          {headerActions}
+        </div>
         <div
           className={cn(
             "flex min-h-0 flex-1 flex-col overflow-hidden",

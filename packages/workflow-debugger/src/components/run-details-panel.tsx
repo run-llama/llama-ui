@@ -7,11 +7,12 @@ import {
   Switch,
   Table,
   TableBody,
-  TableCell,
-  TableHead,
+  CustomTableCell,
   TableHeader,
   TableRow,
   isBuiltInEvent,
+  TableHead,
+  TableCell,
 } from "@llamaindex/ui";
 import { useHandler, type WorkflowEvent } from "@llamaindex/ui";
 import { CodeBlock } from "./code-block";
@@ -208,10 +209,10 @@ export function RunDetailsPanel({
               </div>
             ) : (
               <Table>
-                <TableHeader className="sticky top-0 bg-background z-10">
+                <TableHeader sticky>
                   <TableRow>
-                    <TableHead className="w-8">#</TableHead>
-                    <TableHead>Event</TableHead>
+                    <TableHead label="#"/>
+                    <TableHead label="Event"/>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -221,12 +222,9 @@ export function RunDetailsPanel({
                       <TableRow
                         key={`${event.type}-${index}`}
                         data-event-index={index}
-                        className={`cursor-pointer transition-colors`}
                       >
-                        <TableCell className="text-xs text-muted-foreground align-top">
-                          {index + 1}
-                        </TableCell>
-                        <TableCell className="py-3">
+                        <TableCell label={index + 1} />
+                        <CustomTableCell>
                           <div className="space-y-2">
                             <div className="flex items-baseline justify-between gap-2">
                               <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -249,7 +247,7 @@ export function RunDetailsPanel({
                               className="rounded border max-h-64 overflow-auto"
                             />
                           </div>
-                        </TableCell>
+                        </CustomTableCell>
                       </TableRow>
                     );
                   })}

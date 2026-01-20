@@ -241,10 +241,7 @@ export function FileUploader({
           )}
         </DialogTrigger>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader
-            title={titleOrDefault}
-            description={modalDescription}
-          />
+          <DialogHeader title={titleOrDefault} description={modalDescription} />
 
           <div className="space-y-4">
             {/* Input Fields */}

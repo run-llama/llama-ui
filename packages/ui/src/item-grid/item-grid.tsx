@@ -3,10 +3,10 @@ import { cn } from "@/lib/utils";
 import {
   Table,
   TableBody,
-  TableCell,
-  TableHead,
+  CustomTableCell,
   TableHeader,
   TableRow,
+  tableHeadVariants,
 } from "@/base/table";
 
 // Types and config
@@ -180,13 +180,14 @@ export function ItemGrid<T = unknown>({
   return (
     <div className={cn("w-full space-y-4", className)} style={style}>
       <div className="rounded-md border">
-        <Table className="table-fixed">
+        <Table>
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
-                <TableHead
+                <th
                   key={column.key}
                   className={cn(
+                    tableHeadVariants(),
                     "font-medium",
                     column.key === "actions" && "w-15"
                   )}
@@ -199,7 +200,7 @@ export function ItemGrid<T = unknown>({
                     selectedFilters={uiFilters[column.key]}
                     onFilterChange={handleFilterChange}
                   />
-                </TableHead>
+                </th>
               ))}
             </TableRow>
           </TableHeader>
@@ -207,31 +208,31 @@ export function ItemGrid<T = unknown>({
             {data.length === 0 ? (
               <>
                 {/* Hidden row to maintain column widths */}
-                <TableRow className="sr-only">
+                <tr className="sr-only">
                   {columns.map((column) => (
-                    <TableCell
+                    <CustomTableCell
                       key={column.key}
                       className={column.key === "actions" ? "w-15" : undefined}
                     >
                       <div className="h-0 overflow-hidden">placeholder</div>
-                    </TableCell>
+                    </CustomTableCell>
                   ))}
-                </TableRow>
+                </tr>
                 <TableRow>
-                  <TableCell
+                  <CustomTableCell
                     colSpan={columns.length}
                     className="h-24 text-center text-muted-foreground"
                   >
                     No items found.
-                  </TableCell>
+                  </CustomTableCell>
                 </TableRow>
               </>
             ) : (
               data.map((item, rowIndex) => (
-                <TableRow
+                <tr
                   key={item.id || rowIndex}
                   className={cn(
-                    "transition-colors hover:bg-muted/50",
+                    "border-b transition-colors hover:bg-muted/50",
                     onRowClick && "cursor-pointer"
                   )}
                   onClick={() => onRowClick?.(item)}
@@ -239,7 +240,7 @@ export function ItemGrid<T = unknown>({
                   {columns.map((column) => {
                     const value = column.getValue(item);
                     return (
-                      <TableCell
+                      <CustomTableCell
                         key={column.key}
                         className={
                           column.key === "actions" ? "w-15" : undefined
@@ -252,10 +253,10 @@ export function ItemGrid<T = unknown>({
                             {String(value || "-")}
                           </span>
                         )}
-                      </TableCell>
+                      </CustomTableCell>
                     );
                   })}
-                </TableRow>
+                </tr>
               ))
             )}
           </TableBody>
