@@ -211,8 +211,8 @@ export function RunDetailsPanel({
               <Table>
                 <TableHeader sticky>
                   <TableRow>
-                    <TableHead label="#"/>
-                    <TableHead label="Event"/>
+                    <TableHead label="#" />
+                    <TableHead label="Event" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>

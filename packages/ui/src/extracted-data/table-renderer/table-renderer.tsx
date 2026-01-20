@@ -318,7 +318,9 @@ export function TableRenderer<Row extends JsonObject>({
               rowSpan={rowSpan}
               style={rowSpan > 1 ? { height: `${rowSpan * 32}px` } : undefined}
               label={fieldInfo.name}
-              badge={fieldInfo.isRequired ? <Badge label="Required" /> : undefined}
+              badge={
+                fieldInfo.isRequired ? <Badge label="Required" /> : undefined
+              }
             />
           );
 
@@ -395,14 +397,12 @@ export function TableRenderer<Row extends JsonObject>({
                 // If the value is an array of objects, render it recursively as a nested table
                 if (Array.isArray(value) && isArrayOfObjects(value)) {
                   return (
-                    <CustomTableCell
-                      key={colIndex}
-                    >
-                        <TableRenderer<JsonObject>
-                          data={value as JsonObject[]}
-                          editable={false}
-                          tableRowsPerPage={tableRowsPerPage}
-                        />
+                    <CustomTableCell key={colIndex}>
+                      <TableRenderer<JsonObject>
+                        data={value as JsonObject[]}
+                        editable={false}
+                        tableRowsPerPage={tableRowsPerPage}
+                      />
                     </CustomTableCell>
                   );
                 }
@@ -411,12 +411,7 @@ export function TableRenderer<Row extends JsonObject>({
                 if (Array.isArray(value)) {
                   const csvValue = arrayToCsv(value);
 
-                  return (
-                    <TableCell
-                      key={colIndex}
-                      label={csvValue}
-                      />
-                  );
+                  return <TableCell key={colIndex} label={csvValue} />;
                 }
 
                 // Primitive or object leaf -> EditableField as before
@@ -436,9 +431,7 @@ export function TableRenderer<Row extends JsonObject>({
                 const isRequired = fieldInfo?.isRequired || false;
 
                 return (
-                  <CustomTableCell
-                    key={colIndex}
-                  >
+                  <CustomTableCell key={colIndex}>
                     <EditableField<PrimitiveValue>
                       value={value as PrimitiveValue}
                       onSave={(newValue) =>
@@ -478,28 +471,24 @@ export function TableRenderer<Row extends JsonObject>({
                 );
               })}
               {onDeleteRow && (
-                <CustomTableCell >
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => handleDeleteRow(rowIndex)}
-                      title="Delete row"
-                      startIcon={<Trash2 className="text-destructive" />}
-                    />
+                <CustomTableCell>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => handleDeleteRow(rowIndex)}
+                    title="Delete row"
+                    startIcon={<Trash2 className="text-destructive" />}
+                  />
                 </CustomTableCell>
               )}
             </TableRow>
           ))}
           {onAddRow && (
-            <TableRow >
+            <TableRow>
               {Array.from({ length: columns.length }).map((_, colIndex) => (
-                <CustomTableCell
-                  key={colIndex}
-                />
+                <CustomTableCell key={colIndex} />
               ))}
-              <CustomTableCell
-                colSpan={columns.length + (onDeleteRow ? 1 : 0)}
-              >
+              <CustomTableCell colSpan={columns.length + (onDeleteRow ? 1 : 0)}>
                 <Button
                   variant="ghost"
                   size="icon-sm"

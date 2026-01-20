@@ -1,5 +1,11 @@
 import { EditableField } from "../editable-field";
-import { Table, TableBody, CustomTableCell, TableRow, TableCell } from "@/base/table";
+import {
+  Table,
+  TableBody,
+  CustomTableCell,
+  TableRow,
+  TableCell,
+} from "@/base/table";
 import { Button } from "@/base/button";
 import {
   isArrayItemChanged,
@@ -193,14 +199,14 @@ export function ListRenderer<S extends PrimitiveValue>({
                   />
                 </CustomTableCell>
                 {onDelete && (
-                  <CustomTableCell >
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => handleDelete(index)}
-                        title="Delete item"
-                        startIcon={<Trash2 className="text-destructive" />}
-                      />
+                  <CustomTableCell>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => handleDelete(index)}
+                      title="Delete item"
+                      startIcon={<Trash2 className="text-destructive" />}
+                    />
                   </CustomTableCell>
                 )}
               </TableRow>
@@ -208,11 +214,9 @@ export function ListRenderer<S extends PrimitiveValue>({
           })}
           {onAdd && (
             <TableRow state="hover">
-              <CustomTableCell  />
-              <CustomTableCell  />
-              <CustomTableCell
-                colSpan={onDelete ? 3 : 2}
-              >
+              <CustomTableCell />
+              <CustomTableCell />
+              <CustomTableCell colSpan={onDelete ? 3 : 2}>
                 <Button
                   variant="ghost"
                   size="sm"
