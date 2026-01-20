@@ -22,7 +22,6 @@ export * from "../base/button";
 export * from "../base/calendar";
 export * from "../base/card";
 export * from "../base/checkbox";
-export * from "../base/command";
 export * from "../base/context-menu";
 export * from "../base/dialog";
 export * from "../base/drawer";

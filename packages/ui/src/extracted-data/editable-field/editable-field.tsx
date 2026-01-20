@@ -176,7 +176,6 @@ export function EditableField<S extends PrimitiveValue>({
             onChange={handleTextareaChange}
             onKeyDown={handleKeyDown}
             placeholder="Enter value"
-            className="w-full min-h-[100px] resize-none"
             autoFocus
           />
         );

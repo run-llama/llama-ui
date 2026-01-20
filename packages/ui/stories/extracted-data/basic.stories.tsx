@@ -245,17 +245,36 @@ export const Basic: Story = {
       expect(highConfidenceInput).not.toHaveClass("bg-orange-50"); // Should not have orange background
     }
 
-    // Test: Nested period required fields should be bold
+    // Test: Nested period required fields should show required indicator
+    // For table headers, required fields show a "Required" badge
     const startDateLabels = canvas.getAllByText(/Start Date/);
     for (const label of startDateLabels) {
-      const element = label.closest("div");
-      expect(element).toHaveClass("font-semibold"); // period.start is required
+      // Check if it's in a table header (th element)
+      const tableHeader = label.closest("th");
+      if (tableHeader) {
+        // Table headers show required fields with a badge
+        const requiredBadge = within(tableHeader).queryByText("Required");
+        expect(requiredBadge).toBeInTheDocument(); // period.start is required
+      } else {
+        // For non-table labels, check for font-semibold class
+        const element = label.closest("div");
+        expect(element).toHaveClass("font-semibold"); // period.start is required
+      }
     }
 
     const endDateLabels = canvas.getAllByText(/End Date/);
     for (const label of endDateLabels) {
-      const element = label.closest("div");
-      expect(element).toHaveClass("font-semibold"); // period.end is required
+      // Check if it's in a table header (th element)
+      const tableHeader = label.closest("th");
+      if (tableHeader) {
+        // Table headers show required fields with a badge
+        const requiredBadge = within(tableHeader).queryByText("Required");
+        expect(requiredBadge).toBeInTheDocument(); // period.end is required
+      } else {
+        // For non-table labels, check for font-semibold class
+        const element = label.closest("div");
+        expect(element).toHaveClass("font-semibold"); // period.end is required
+      }
     }
 
     // Test 1: Edit primitive field (receipt number)

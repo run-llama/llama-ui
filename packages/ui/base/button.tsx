@@ -92,11 +92,12 @@ function Button({
   endIcon,
   isLoading,
   disabled,
+  type = "button",
   ...props
 }: ButtonProps) {
   return (
     <button
-      type="button"
+      type={type}
       data-slot="button"
       className={cn(buttonVariants({ variant, size, fullWidth }))}
       disabled={isLoading || disabled}

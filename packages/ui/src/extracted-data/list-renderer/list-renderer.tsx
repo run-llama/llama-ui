@@ -1,5 +1,11 @@
 import { EditableField } from "../editable-field";
-import { Table, TableBody, TableCell, TableRow } from "@/base/table";
+import {
+  Table,
+  TableBody,
+  CustomTableCell,
+  TableRow,
+  TableCell,
+} from "@/base/table";
 import { Button } from "@/base/button";
 import {
   isArrayItemChanged,
@@ -146,7 +152,7 @@ export function ListRenderer<S extends PrimitiveValue>({
         totalItems={data.length}
         perPage={listItemsPerPage}
       />
-      <Table className="table-auto">
+      <Table>
         <TableBody>
           {visibleData.map((item, index) => {
             // Check if this specific array item has been changed
@@ -170,13 +176,9 @@ export function ListRenderer<S extends PrimitiveValue>({
             };
 
             return (
-              <TableRow key={index} className="hover:bg-gray-50 border-0">
-                <TableCell className="p-0 border-r border-gray-100 w-12 align-middle h-full">
-                  <div className="w-full h-full border-b flex items-center justify-center text-sm text-gray-600 font-medium bg-gray-25 p-2 min-h-10">
-                    {index + 1}
-                  </div>
-                </TableCell>
-                <TableCell className="p-0 min-w-[120px] align-top h-full">
+              <TableRow key={index} state="hover">
+                <TableCell label={index + 1} />
+                <CustomTableCell>
                   <EditableField<S>
                     value={item}
                     onSave={(newValue) => onUpdate(index, newValue)}
@@ -195,38 +197,33 @@ export function ListRenderer<S extends PrimitiveValue>({
                     onHover={handleItemFieldHover}
                     editable={editable}
                   />
-                </TableCell>
+                </CustomTableCell>
                 {onDelete && (
-                  <TableCell className="p-0 w-12 align-middle h-full">
-                    <div className="flex items-center justify-center border-b min-h-10">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => handleDelete(index)}
-                        title="Delete item"
-                        startIcon={<Trash2 className="text-destructive" />}
-                      />
-                    </div>
-                  </TableCell>
+                  <CustomTableCell>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => handleDelete(index)}
+                      title="Delete item"
+                      startIcon={<Trash2 className="text-destructive" />}
+                    />
+                  </CustomTableCell>
                 )}
               </TableRow>
             );
           })}
           {onAdd && (
-            <TableRow className="hover:bg-gray-50 border-0">
-              <TableCell className="p-0 border-r border-gray-100 w-12 align-middle h-full"></TableCell>
-              <TableCell className="p-0 min-w-[120px] align-top h-full"></TableCell>
-              <TableCell
-                colSpan={onDelete ? 3 : 2}
-                className="text-center p-0 h-10"
-              >
+            <TableRow state="hover">
+              <CustomTableCell />
+              <CustomTableCell />
+              <CustomTableCell colSpan={onDelete ? 3 : 2}>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleAdd}
                   startIcon={<Plus className="text-primary" />}
                 />
-              </TableCell>
+              </CustomTableCell>
             </TableRow>
           )}
         </TableBody>

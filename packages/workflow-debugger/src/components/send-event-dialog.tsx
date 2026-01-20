@@ -2,10 +2,8 @@ import {
   Button,
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
   DialogTrigger,
   Label,
   Select,
@@ -202,12 +200,10 @@ export function SendEventDialog({
         />
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Send Event to Workflow</DialogTitle>
-          <DialogDescription>
-            Send a custom event to the running workflow handler.
-          </DialogDescription>
-        </DialogHeader>
+        <DialogHeader
+          title="Send Event to Workflow"
+          description="Send a custom event to the running workflow handler."
+        />
 
         <div className="space-y-4 py-4">
           {loading ? (
@@ -281,18 +277,14 @@ export function SendEventDialog({
           )}
         </div>
 
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => setOpen(false)}
-            label="Cancel"
-          />
-          <Button
-            onClick={handleSendEvent}
-            disabled={!canSend}
-            label={sending ? "Sending..." : "Send Event"}
-          />
-        </DialogFooter>
+        <DialogFooter
+          secondary={{ label: "Cancel", onClick: () => setOpen(false) }}
+          primary={{
+            label: sending ? "Sending..." : "Send Event",
+            onClick: handleSendEvent,
+            disabled: !canSend,
+          }}
+        />
       </DialogContent>
     </Dialog>
   );
