@@ -7,7 +7,6 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle,
   DialogTrigger,
   DialogFooter,
 } from "@/base/dialog";
@@ -242,10 +241,10 @@ export function FileUploader({
           )}
         </DialogTrigger>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{titleOrDefault}</DialogTitle>
-            <p className="text-sm text-muted-foreground">{modalDescription}</p>
-          </DialogHeader>
+          <DialogHeader
+            title={titleOrDefault}
+            description={modalDescription}
+          />
 
           <div className="space-y-4">
             {/* Input Fields */}
@@ -312,18 +311,17 @@ export function FileUploader({
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" label="Cancel" onClick={handleClose} />
-            <Button
-              onClick={handleUpload}
-              disabled={!canSubmit()}
-              label={
+          <DialogFooter
+            secondary={{ label: "Cancel", onClick: handleClose }}
+            primary={{
+              label:
                 selectedFiles.length > 1
                   ? `Upload ${selectedFiles.length} Files & Process`
-                  : "Upload & Process"
-              }
-            />
-          </DialogFooter>
+                  : "Upload & Process",
+              onClick: handleUpload,
+              disabled: !canSubmit(),
+            }}
+          />
         </DialogContent>
       </Dialog>
 
