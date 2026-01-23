@@ -385,6 +385,18 @@ export type GetHealthResponses = {
      */
     200: {
         status: string;
+        /**
+         * Number of workflow handlers currently loaded in memory
+         */
+        loaded_workflows: number;
+        /**
+         * Number of workflow handlers that are active (not idle)
+         */
+        active_workflows: number;
+        /**
+         * Number of workflow handlers that are idle
+         */
+        idle_workflows: number;
     };
 };
 
