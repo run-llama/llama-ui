@@ -1,7 +1,7 @@
 "use client";
 
-import { Upload, FolderOpen } from "lucide-react";
-import { type ReactNode, useCallback, useMemo, useState } from "react";
+import { FolderOpen } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
 import Dropzone, {
   type DropzoneProps,
   type FileRejection,
@@ -10,16 +10,18 @@ import { toast } from "sonner";
 import { Button } from "@/base/button";
 import { Input } from "@/base/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/base/tabs";
+import { UploadZone } from "@/base/upload-zone";
 import { cn } from "@/lib/utils";
 
 interface FileUploadProps {
   className?: string;
   heading?: string;
   onContentChange: (content: File[] | string) => void;
-  uploadDescription?: string;
-  uploadHelpText?: string;
+  title?: string;
+  description?: string;
+  showSupportedFiles?: boolean;
+  supportedFiles?: string;
   fileUrlPlaceholder?: string;
-  footer?: ReactNode;
   variant?: "small" | "normal";
   accept?: DropzoneProps["accept"];
   maxSize?: DropzoneProps["maxSize"];
@@ -33,10 +35,11 @@ export function FileUpload({
   className,
   heading = "File Upload",
   onContentChange,
-  uploadDescription = "Upload file (drag or click)",
-  uploadHelpText = "You can upload a file up to 315 MB",
+  title = "Drag files here to upload",
+  description = "Up to 20 files, 315 MB total",
+  showSupportedFiles = true,
+  supportedFiles,
   fileUrlPlaceholder = "Paste the file link here",
-  footer,
   variant = "normal",
   accept,
   maxSize,
@@ -86,18 +89,14 @@ export function FileUpload({
     setFileUrlInput("");
   }, [fileUrlInput, onContentChange, accept]);
 
-  const defaultFooter = useMemo(() => {
+  const defaultSupportedFiles = useMemo(() => {
+    if (supportedFiles) return supportedFiles;
     if (!accept || typeof accept !== "object") return null;
     const extensions = Object.values(accept).flat();
     if (extensions.length === 0) return null;
-    // need to use slice(1) to remove the dot from the extension
-    const formats = extensions
-      .map((ext) => ext.slice(1).toUpperCase())
-      .join(", ");
-    return <span>Supported file formats: {formats}</span>;
-  }, [accept]);
-
-  const displayFooter = footer ?? defaultFooter;
+    const formats = extensions.map((ext) => ext.slice(1).toUpperCase()).join(", ");
+    return `Supported file formats: ${formats}`;
+  }, [accept, supportedFiles]);
 
   const onDrop = useCallback(
     (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
@@ -138,7 +137,6 @@ export function FileUpload({
     [maxFileCount, onContentChange]
   );
 
-  // Accept all files, but filter out .json in custom validator
   const dropzoneContent = (
     <Dropzone
       onDrop={onDrop}
@@ -148,25 +146,15 @@ export function FileUpload({
       multiple={maxFileCount > 1}
     >
       {({ getRootProps, getInputProps, isDragActive }) => (
-        <div
-          {...getRootProps()}
-          className={cn(
-            "flex min-h-[200px] cursor-pointer flex-col items-center justify-center gap-4 rounded-lg border border-dashed p-8 text-center transition-all",
-            isDragActive
-              ? "border-neutral-400 bg-neutral-100 ring-[3px] ring-neutral-950/10"
-              : "border-neutral-300 bg-white hover:border-neutral-400"
-          )}
-        >
+        <div {...getRootProps()} className="cursor-pointer">
           <input {...getInputProps()} />
-          <div className="flex max-w-[384px] flex-col items-center gap-4">
-            <Upload className="h-5 w-5 text-neutral-500" />
-            <div className="flex flex-col items-center gap-1 text-center">
-              <p className="text-base font-medium text-foreground">
-                {uploadDescription}
-              </p>
-              <p className="text-sm text-muted-foreground">{uploadHelpText}</p>
-            </div>
-          </div>
+          <UploadZone
+            state={isDragActive ? "focus" : "default"}
+            title={title}
+            description={description}
+            showSupportedFiles={showSupportedFiles}
+            supportedFiles={defaultSupportedFiles ?? undefined}
+          />
         </div>
       )}
     </Dropzone>
@@ -241,12 +229,6 @@ export function FileUpload({
           )}
         </Tabs>
       )}
-
-      {variant === "normal" && displayFooter ? (
-        <div className="mt-6 rounded-md bg-gray-100 p-4 text-center text-xs text-gray-500">
-          {displayFooter}
-        </div>
-      ) : null}
     </div>
   );
 }

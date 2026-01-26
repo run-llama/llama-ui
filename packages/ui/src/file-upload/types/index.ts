@@ -1,10 +1,8 @@
 import type { ReactNode } from "react";
-
 import type { FileType } from "../utils/file-utils";
 
 interface BaseFileUploadProps {
   allowedFileTypes?: FileType[];
-  maxFileSizeBytes?: number;
 }
 
 export interface FileDropzoneProps extends BaseFileUploadProps {
@@ -12,11 +10,10 @@ export interface FileDropzoneProps extends BaseFileUploadProps {
   selectedFiles?: File[];
   onFilesSelected: (files: File[]) => void;
   onRemoveFile?: (file: File) => void;
-  className?: string;
-  emptyTitle?: string;
-  emptyDescription?: string;
-  listFooter?: ReactNode;
-  footer?: ReactNode;
+  title?: string;
+  description?: string;
+  showSupportedFiles?: boolean;
+  supportedFiles?: string;
   showRemoveButton?: boolean;
   disabled?: boolean;
 }
@@ -78,6 +75,7 @@ export interface FileUploadProps extends BaseFileUploadProps {
   onSelectFile?: () => void;
   selectFileLabel?: string;
   selectFileDescription?: string;
+  maxFileSizeBytes?: number;
 }
 
 export interface FileUploaderProps extends BaseFileUploadProps {
@@ -95,6 +93,7 @@ export interface FileUploaderProps extends BaseFileUploadProps {
   onSelectFile?: () => void;
   selectFileLabel?: string;
   selectFileDescription?: string;
+  maxFileSizeBytes?: number;
 }
 
 export type { FileUploadProgress } from "./upload-progress";

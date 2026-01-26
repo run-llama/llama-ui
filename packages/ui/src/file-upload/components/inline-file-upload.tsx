@@ -80,8 +80,7 @@ export function FileUpload({
             onFilesSelected={handleFilesSelected}
             onRemoveFile={allowFileRemoval ? handleRemoveFile : undefined}
             allowedFileTypes={allowedFileTypes}
-            maxFileSizeBytes={maxFileSizeBytes}
-            emptyTitle={uploadDescription}
+            title={uploadDescription}
             showRemoveButton={allowFileRemoval}
             disabled={
               disableWhenHasSelection &&
