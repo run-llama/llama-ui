@@ -151,21 +151,21 @@ export function FileUpload({
         <div
           {...getRootProps()}
           className={cn(
-            "flex min-h-[200px] cursor-pointer items-center justify-center rounded-lg border-2 border-dotted p-8 text-center transition-colors",
+            "flex min-h-[200px] cursor-pointer flex-col items-center justify-center gap-4 rounded-lg border border-dashed p-8 text-center transition-all",
             isDragActive
-              ? "bg-primary/5 border-primary"
-              : "hover:border-primary/50 border-gray-300"
+              ? "border-neutral-400 bg-neutral-100 ring-[3px] ring-neutral-950/10"
+              : "border-neutral-300 bg-white hover:border-neutral-400"
           )}
         >
           <input {...getInputProps()} />
-          <div className="flex flex-col items-center justify-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-              <Upload className="h-8 w-8" />
+          <div className="flex max-w-[384px] flex-col items-center gap-4">
+            <Upload className="h-5 w-5 text-neutral-500" />
+            <div className="flex flex-col items-center gap-1 text-center">
+              <p className="text-base font-medium text-foreground">
+                {uploadDescription}
+              </p>
+              <p className="text-sm text-muted-foreground">{uploadHelpText}</p>
             </div>
-            <p className="text-sm font-semibold text-gray-600">
-              {uploadDescription}
-            </p>
-            <p className="text-xs text-gray-400">{uploadHelpText}</p>
           </div>
         </div>
       )}

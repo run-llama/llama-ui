@@ -94,14 +94,12 @@ export function FileDropzone({
   const renderFileContent = () => {
     if (!hasFiles) {
       return (
-        <div className="flex flex-col items-center justify-center gap-4 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-            <Upload className="h-8 w-8" />
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm font-semibold text-gray-600">{emptyTitle}</p>
+        <div className="flex max-w-[384px] flex-col items-center gap-4">
+          <Upload className="h-5 w-5 text-neutral-500" />
+          <div className="flex flex-col items-center gap-1 text-center">
+            <p className="text-base font-medium text-foreground">{emptyTitle}</p>
             {emptyDescription ? (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 {emptyDescription}
               </p>
             ) : null}
@@ -138,15 +136,15 @@ export function FileDropzone({
     <>
       <div
         className={cn(
-          "flex flex-col gap-4 rounded-lg border-2 border-dotted p-8 transition-colors",
+          "flex flex-col gap-4 rounded-lg border border-dashed p-8 transition-all",
           disabled ? "opacity-60" : "cursor-pointer",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-neutral-950/10",
           !disabled && isDragging
-            ? "border-primary bg-primary/5"
-            : "border-gray-300 hover-border-primary/50",
+            ? "border-neutral-400 bg-neutral-100 ring-[3px] ring-neutral-950/10"
+            : "border-neutral-300 bg-white hover:border-neutral-400",
           hasFiles
             ? "items-stretch text-left"
-            : "items-center text-center min-h-[200px]",
+            : "items-center justify-center text-center min-h-[200px]",
           className
         )}
         onDragEnter={disabled ? undefined : handleDragEnter}
