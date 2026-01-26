@@ -19,7 +19,6 @@ interface FileUploadProps {
   onContentChange: (content: File[] | string) => void;
   title?: string;
   description?: string;
-  showSupportedFiles?: boolean;
   supportedFiles?: string;
   fileUrlPlaceholder?: string;
   variant?: "small" | "normal";
@@ -37,7 +36,6 @@ export function FileUpload({
   onContentChange,
   title = "Drag files here to upload",
   description = "Up to 20 files, 315 MB total",
-  showSupportedFiles = true,
   supportedFiles,
   fileUrlPlaceholder = "Paste the file link here",
   variant = "normal",
@@ -152,7 +150,6 @@ export function FileUpload({
             state={isDragActive ? "focus" : "default"}
             title={title}
             description={description}
-            showSupportedFiles={showSupportedFiles}
             supportedFiles={defaultSupportedFiles ?? undefined}
           />
         </div>

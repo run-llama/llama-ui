@@ -8,8 +8,7 @@ import { cn } from "@/lib/utils";
  * - `state` - Visual state of the component: "default" or "focus"
  * - `title` - Main heading text (default: "Drag files here to upload")
  * - `description` - Secondary description text below the title
- * - `showSupportedFiles` - Whether to display the supportedFiles text (default: true)
- * - `supportedFiles` - Text describing supported file formats
+ * - `supportedFiles` - Text describing supported file formats (displayed if provided)
  *
  * States:
  * - `default` - Standard appearance with neutral colors
@@ -30,7 +29,6 @@ export interface UploadZoneProps {
   state?: "default" | "focus";
   title?: string;
   description?: string;
-  showSupportedFiles?: boolean;
   supportedFiles?: string;
   className?: string;
 }
@@ -39,7 +37,6 @@ export function UploadZone({
   title = "Drag files here to upload",
   description,
   supportedFiles,
-  showSupportedFiles = true,
   state = "default",
   className,
 }: UploadZoneProps) {
@@ -62,7 +59,7 @@ export function UploadZone({
           )}
         </div>
       </div>
-      {showSupportedFiles && supportedFiles && (
+      {supportedFiles && (
         <p className="max-w-[384px] text-center text-xs text-muted-foreground">
           {supportedFiles}
         </p>

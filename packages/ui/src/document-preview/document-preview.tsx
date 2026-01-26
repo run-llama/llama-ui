@@ -118,7 +118,6 @@ interface DocumentPreviewBaseProps
   maxFileSize?: number;
   title?: string;
   description?: string;
-  showSupportedFiles?: boolean;
   supportedFiles?: string;
   onSelectFile?: (selectedFileIds: string[]) => void;
   selectFileLabel?: string;
@@ -270,7 +269,6 @@ export function DocumentPreview(props: DocumentPreviewProps) {
     maxFileSize = DEFAULT_MAX_FILE_SIZE,
     title,
     description,
-    showSupportedFiles = true,
     supportedFiles,
     onSelectFile,
     selectFileLabel,
@@ -377,7 +375,6 @@ export function DocumentPreview(props: DocumentPreviewProps) {
           maxSize={maxFileSize}
           title={title}
           description={description}
-          showSupportedFiles={showSupportedFiles}
           supportedFiles={supportedFiles}
           accept={accept}
           onSelectFile={handleSelectFile}

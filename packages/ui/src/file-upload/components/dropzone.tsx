@@ -29,7 +29,6 @@ export function FileDropzone({
   onFilesSelected,
   onRemoveFile,
   allowedFileTypes,
-  showSupportedFiles = false,
   supportedFiles,
   showRemoveButton = true,
   disabled = false,
@@ -93,7 +92,6 @@ export function FileDropzone({
       state={isDragging ? "focus" : "default"}
       title={title}
       description={description}
-      showSupportedFiles={showSupportedFiles}
       supportedFiles={displaySupportedFiles}
     />
   );

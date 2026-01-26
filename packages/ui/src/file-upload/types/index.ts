@@ -12,7 +12,6 @@ export interface FileDropzoneProps extends BaseFileUploadProps {
   onRemoveFile?: (file: File) => void;
   title?: string;
   description?: string;
-  showSupportedFiles?: boolean;
   supportedFiles?: string;
   showRemoveButton?: boolean;
   disabled?: boolean;
