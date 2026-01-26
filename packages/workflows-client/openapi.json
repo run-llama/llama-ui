@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Workflows API",
-    "version": "2.11.3"
+    "version": "2.13.1"
   },
   "components": {
     "schemas": {
@@ -560,7 +560,7 @@
     "/health": {
       "get": {
         "summary": "Health check",
-        "description": "Returns the server health status.",
+        "description": "Returns the server health status and workflow counts.",
         "responses": {
           "200": {
             "description": "Successful health check",
@@ -572,10 +572,25 @@
                     "status": {
                       "type": "string",
                       "example": "healthy"
+                    },
+                    "loaded_workflows": {
+                      "type": "integer",
+                      "description": "Number of workflow handlers currently loaded in memory"
+                    },
+                    "active_workflows": {
+                      "type": "integer",
+                      "description": "Number of workflow handlers that are active (not idle)"
+                    },
+                    "idle_workflows": {
+                      "type": "integer",
+                      "description": "Number of workflow handlers that are idle"
                     }
                   },
                   "required": [
-                    "status"
+                    "status",
+                    "loaded_workflows",
+                    "active_workflows",
+                    "idle_workflows"
                   ]
                 }
               }
