@@ -15,6 +15,7 @@ export interface FileDropzoneProps extends BaseFileUploadProps {
   supportedFiles?: string;
   showRemoveButton?: boolean;
   disabled?: boolean;
+  maxFileSizeBytes?: number;
 }
 
 export interface FileUploadData {
