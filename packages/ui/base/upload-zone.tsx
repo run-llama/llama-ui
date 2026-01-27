@@ -43,7 +43,7 @@ export function UploadZone({
   return (
     <div
       className={cn(
-        "flex min-h-[200px] w-full flex-col items-center justify-center gap-4 rounded-lg border border-dashed p-8 text-center transition-all",
+        "flex min-h-[200px] w-full flex-col items-center justify-center gap-6 rounded-lg border border-dashed p-8 text-center transition-all",
         state === "focus"
           ? "border-neutral-400 bg-neutral-100 ring-[3px] ring-neutral-950/10"
           : "border-neutral-300 bg-white",
