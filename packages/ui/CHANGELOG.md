@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 4.0.2
+
+### Patch Changes
+
+- 75bf6ed: update ui for upload
+
 ## 4.0.1
 
 ### Patch Changes
