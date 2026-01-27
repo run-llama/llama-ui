@@ -75,7 +75,6 @@ const UploadStateContainer: FC<StoryArgs> = (props = {}) => {
 
 export const UploadState: Story = {
   args: {
-    heading: "Upload a document",
     allowMultiple: true,
     value: [],
     title: "Drag files here to upload",
@@ -108,7 +107,6 @@ export const MultipleFiles: Story = {
 export const PdfOnly: Story = {
   name: "PDF Files Only",
   args: {
-    heading: "Upload a PDF file",
     allowMultiple: true,
     value: [],
     accept: {
@@ -121,7 +119,6 @@ export const PdfOnly: Story = {
 export const WithSelectFile: Story = {
   name: "With Select File Tab",
   args: {
-    heading: "Upload or select a document",
     allowMultiple: true,
     value: [],
     onSelectFile: () => {

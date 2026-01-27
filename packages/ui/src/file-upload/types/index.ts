@@ -68,7 +68,12 @@ export interface FileUploadProps extends BaseFileUploadProps {
   onContentChange: (content: File | string | null) => void;
   allowFileRemoval?: boolean;
   showHeader?: boolean;
+  /** Title text shown in the dropzone (default: "Drag files here to upload") */
+  uploadTitle?: string;
+  /** Description text shown below the title (e.g., "Up to 20 files, 315 MB total") */
   uploadDescription?: string;
+  /** Text describing supported file formats */
+  supportedFiles?: string;
   fileUrlPlaceholder?: string;
   disableWhenHasSelection?: boolean;
   footer?: ReactNode;

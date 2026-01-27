@@ -105,6 +105,8 @@ function getTypeHintAndPlaceholder(type?: string): {
   };
 }
 
+const EMPTY_PROPERTIES: Record<string, SimpleSchemaProperty> = {};
+
 export function JsonSchemaEditor({
   schema,
   values,
@@ -112,7 +114,7 @@ export function JsonSchemaEditor({
   onErrorsChange,
   className,
 }: JsonSchemaEditorProps) {
-  const properties = schema?.properties || {};
+  const properties = schema?.properties ?? EMPTY_PROPERTIES;
   const required = new Set(schema?.required || []);
 
   const [rawJsonValues, setRawJsonValues] = useState<Record<string, string>>(
@@ -128,16 +130,18 @@ export function JsonSchemaEditor({
 
   // Initialize raw values for complex fields when schema or values change
   useEffect(() => {
-    const nextRaw: Record<string, string> = { ...rawJsonValues };
-    for (const [key, def] of Object.entries(properties)) {
-      const { type: normalizedType } = normalizeSchemaProperty(def);
-      if (!isComplexType(normalizedType)) continue;
-      if (nextRaw[key] === undefined) {
-        const v = values[key];
-        nextRaw[key] = v !== undefined ? JSON.stringify(v, null, 2) : "";
+    setRawJsonValues((prev) => {
+      const nextRaw: Record<string, string> = { ...prev };
+      for (const [key, def] of Object.entries(properties)) {
+        const { type: normalizedType } = normalizeSchemaProperty(def);
+        if (!isComplexType(normalizedType)) continue;
+        if (nextRaw[key] === undefined) {
+          const v = values[key];
+          nextRaw[key] = v !== undefined ? JSON.stringify(v, null, 2) : "";
+        }
       }
-    }
-    setRawJsonValues(nextRaw);
+      return nextRaw;
+    });
   }, [properties, values]);
 
   // Initialize required boolean fields when they are undefined

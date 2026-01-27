@@ -134,9 +134,10 @@ export function FileDropzone({
   return (
     <div
       className={cn(
+        "flex h-full flex-1 flex-col",
         disabled ? "opacity-60" : "cursor-pointer",
         hasFiles &&
-          "flex flex-col gap-4 rounded-lg border border-dashed p-8 transition-all items-stretch text-left",
+          "gap-4 rounded-lg border border-dashed p-4 transition-all items-stretch text-left",
         hasFiles &&
           "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-neutral-950/10",
         hasFiles &&
