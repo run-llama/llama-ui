@@ -81,7 +81,7 @@ export const UrlEntryDisablesDropzone: Story = {
     );
 
     const dropzone = await dialogScope.findByRole("button", {
-      name: /upload file \(drag or click\)/i,
+      name: /drag files here to upload/i,
     });
 
     await waitFor(() => {
@@ -100,7 +100,7 @@ export const UrlEntryDisablesDropzone: Story = {
     );
 
     const reenabledDropzone = await dialogScope.findByRole("button", {
-      name: /upload file \(drag or click\)/i,
+      name: /drag files here to upload/i,
     });
 
     await waitFor(() => {
