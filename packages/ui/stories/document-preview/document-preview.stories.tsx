@@ -75,7 +75,6 @@ const UploadStateContainer: FC<StoryArgs> = (props = {}) => {
 
 export const UploadState: Story = {
   args: {
-    heading: "Upload a document",
     allowMultiple: true,
     value: [],
     title: "Drag files here to upload",
