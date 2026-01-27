@@ -64,14 +64,20 @@ export function FileUpload({
         </div>
       )}
 
-      <Tabs defaultValue="upload" className="flex h-full flex-1 flex-col items-center">
+      <Tabs
+        defaultValue="upload"
+        className="flex h-full flex-1 flex-col items-center"
+      >
         <TabsList>
           <TabsTrigger value="upload" label="Upload file" />
           <TabsTrigger value="url" label="File URL" />
           {onSelectFile && <TabsTrigger value="select" label="Select file" />}
         </TabsList>
 
-        <TabsContent value="upload" className="mt-4 flex w-full flex-1 flex-col">
+        <TabsContent
+          value="upload"
+          className="mt-4 flex w-full flex-1 flex-col"
+        >
           <FileDropzone
             selectedFiles={selectedFile ? [selectedFile] : []}
             onFilesSelected={handleFilesSelected}
@@ -105,7 +111,10 @@ export function FileUpload({
         </TabsContent>
 
         {onSelectFile && (
-          <TabsContent value="select" className="mt-4 flex w-full flex-1 flex-col">
+          <TabsContent
+            value="select"
+            className="mt-4 flex w-full flex-1 flex-col"
+          >
             <div className="flex h-full min-h-[200px] flex-1 flex-col items-center justify-center gap-4 p-4 text-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100">
                 <FolderOpen className="h-8 w-8 text-neutral-500" />
