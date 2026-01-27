@@ -1,5 +1,28 @@
 # @llamaindex/workflow-debugger
 
+## 0.2.15
+
+### Patch Changes
+
+- 936c524: Use the new Select component
+- 650dc36: Use the new button style
+- c767f5d: add table and dialog v2 component
+- f547f64: Use new badge component
+- Updated dependencies [a6c9e7b]
+- Updated dependencies [03adf7b]
+- Updated dependencies [03c8db5]
+- Updated dependencies [936c524]
+- Updated dependencies [650dc36]
+- Updated dependencies [6020952]
+- Updated dependencies [c767f5d]
+- Updated dependencies [f547f64]
+- Updated dependencies [650dc36]
+- Updated dependencies [9c1f1f0]
+- Updated dependencies [30aa0fe]
+- Updated dependencies [db0982a]
+  - @llamaindex/ui@4.0.0
+  - @llamaindex/workflows-client@1.8.3
+
 ## 0.2.14
 
 ### Patch Changes

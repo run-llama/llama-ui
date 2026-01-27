@@ -1,5 +1,27 @@
 # @llamaindex/ui
 
+## 4.0.0
+
+### Major Changes
+
+- db0982a: major version update. updating file-upload and document-preview with neew upload-zone component
+
+### Minor Changes
+
+- 30aa0fe: Improve PDF viewer highlight panning and add page fit prop
+
+### Patch Changes
+
+- a6c9e7b: Use the new input component
+- 03adf7b: Change EmptyState to the new Empty
+- 03c8db5: Use the new tooltip component
+- 936c524: Use the new Select component
+- 650dc36: Use the new button style
+- 6020952: update dropdown to v2
+- c767f5d: add table and dialog v2 component
+- f547f64: Use new badge component
+- 650dc36: style: increase height of file toolbar and PDF navigator for UI consistency
+
 ## 3.6.1
 
 ### Patch Changes
