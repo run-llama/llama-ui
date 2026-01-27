@@ -126,7 +126,7 @@ export const WithSelectFile: Story = {
       alert("Select file button was clicked!");
     },
     selectFileLabel: "Browse files",
-    selectFileDescription: "Choose a file from your existing documents",
+    selectFileDescription: "Choose a file from your existing files",
   },
   render: function Render(args) {
     const [isSubmitted, setIsSubmitted] = useState(false);

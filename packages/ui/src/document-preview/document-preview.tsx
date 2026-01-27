@@ -112,7 +112,6 @@ export type PreviewsMap = {
 interface DocumentPreviewBaseProps
   extends Omit<DocumentPreviewItemProps, "fileName" | "value" | "onRemove"> {
   isLoading?: boolean;
-  heading?: string;
   className?: string;
   accept?: DropzoneProps["accept"];
   maxFileSize?: number;
@@ -259,7 +258,6 @@ function DocumentPreviewItem({
 export function DocumentPreview(props: DocumentPreviewProps) {
   const {
     isLoading = false,
-    heading,
     onRemove,
     allowRemoval = true,
     allowMultiple = false,
@@ -371,10 +369,9 @@ export function DocumentPreview(props: DocumentPreviewProps) {
     }
 
     return (
-      <div className="flex flex-col items-center justify-start px-20 py-8">
+      <div className="flex h-full flex-1 flex-col items-center justify-start px-20 py-4">
         <FileUpload
-          className="max-w-4xl"
-          heading={heading ?? "File Upload"}
+          className="h-full max-w-4xl"
           variant={options?.variant ?? "normal"}
           onContentChange={handleContentChange}
           maxFileCount={maxFileCount}

@@ -15,7 +15,6 @@ import { cn } from "@/lib/utils";
 
 interface FileUploadProps {
   className?: string;
-  heading?: string;
   onContentChange: (content: File[] | string) => void;
   title?: string;
   description?: string;
@@ -32,7 +31,6 @@ interface FileUploadProps {
 
 export function FileUpload({
   className,
-  heading = "File Upload",
   onContentChange,
   title = "Drag files here to upload",
   description = "Up to 20 files, 315 MB total",
@@ -146,7 +144,7 @@ export function FileUpload({
       multiple={maxFileCount > 1}
     >
       {({ getRootProps, getInputProps, isDragActive }) => (
-        <div {...getRootProps()} className="cursor-pointer">
+        <div {...getRootProps()} className="flex h-full flex-1 cursor-pointer">
           <input {...getInputProps()} />
           <UploadZone
             state={isDragActive ? "focus" : "default"}
@@ -160,60 +158,43 @@ export function FileUpload({
   );
 
   return (
-    <div className={cn("w-full", className)}>
-      {variant === "normal" && (
-        <div className="text-center">
-          <div className="mb-6 flex justify-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <Logo />
-            </div>
-          </div>
-          <h1 className="mb-8 text-sm font-semibold">{heading}</h1>
-        </div>
-      )}
-
+    <div className={cn("flex h-full w-full flex-col", className)}>
       {variant === "small" ? (
         dropzoneContent
       ) : (
-        <Tabs defaultValue="upload">
-          <TabsList
-            variant="underline"
-            className="grid w-full"
-            style={{
-              gridTemplateColumns: onSelectFile
-                ? "repeat(3, 1fr)"
-                : "repeat(2, 1fr)",
-            }}
-          >
+        <Tabs defaultValue="upload" className="flex h-full flex-1 flex-col items-center">
+          <TabsList>
             <TabsTrigger value="upload" label="Upload file" />
             <TabsTrigger value="url" label="File URL" />
             {onSelectFile && <TabsTrigger value="select" label="Select file" />}
           </TabsList>
 
-          <TabsContent value="upload" className="mt-6">
+          <TabsContent value="upload" className="mt-4 flex w-full flex-1 flex-col">
             {dropzoneContent}
           </TabsContent>
 
-          <TabsContent value="url" className="mt-6">
-            <div className="rounded-lg border-2 border-gray-200 p-8">
-              <Input
-                type="url"
-                placeholder={fileUrlPlaceholder}
-                value={fileUrlInput}
-                onChange={(event) => setFileUrlInput(event.target.value)}
-                onBlur={handleUrlSubmit}
-              />
+          <TabsContent value="url" className="mt-4 flex w-full flex-1 flex-col">
+            <div className="flex h-full flex-1 flex-col min-h-[200px] items-center justify-center gap-4 rounded-lg border border-dashed border-neutral-300 bg-white p-4">
+              <div className="w-full max-w-md">
+                <Input
+                  type="url"
+                  placeholder={fileUrlPlaceholder}
+                  value={fileUrlInput}
+                  onChange={(event) => setFileUrlInput(event.target.value)}
+                  onBlur={handleUrlSubmit}
+                />
+              </div>
             </div>
           </TabsContent>
 
           {onSelectFile && (
-            <TabsContent value="select" className="mt-6">
-              <div className="flex min-h-[200px] flex-col items-center justify-center gap-4 p-8 text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-                  <FolderOpen className="h-8 w-8 text-gray-600" />
+            <TabsContent value="select" className="mt-4 flex w-full flex-1 flex-col">
+              <div className="flex h-full min-h-[200px] flex-1 flex-col items-center justify-center gap-4 p-4 text-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100">
+                  <FolderOpen className="h-8 w-8 text-neutral-500" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm font-semibold text-gray-600">
+                  <p className="text-sm font-medium text-muted-foreground">
                     {selectFileDescription}
                   </p>
                 </div>
@@ -232,50 +213,3 @@ export function FileUpload({
   );
 }
 
-function Logo() {
-  return (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M14 2V8H20"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M16 13H8"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M16 17H8"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M10 9H9H8"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
