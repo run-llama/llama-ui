@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 4.0.1
+
+### Patch Changes
+
+- 096da46: add maxsize for fileupload
+
 ## 4.0.0
 
 ### Major Changes
