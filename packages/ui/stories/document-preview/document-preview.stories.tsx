@@ -78,6 +78,10 @@ export const UploadState: Story = {
     heading: "Upload a document",
     allowMultiple: true,
     value: [],
+    title: "Drag files here to upload",
+    description: "Up to 20 files, 315 MB total",
+    supportedFiles:
+      "Supported file formats: Documents (e.g. PDF, DOCX, WPS), Slides (e.g. PPTX, Keynote), Spreadsheets (e.g. XLSX, CSV), Images (e.g. PNG, JPG, TIFF) and more.",
   },
   render: (args) => <UploadStateContainer {...args} />,
 };

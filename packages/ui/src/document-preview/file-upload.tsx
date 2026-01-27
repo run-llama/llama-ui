@@ -1,7 +1,7 @@
 "use client";
 
-import { Upload, FolderOpen } from "lucide-react";
-import { type ReactNode, useCallback, useMemo, useState } from "react";
+import { FolderOpen } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
 import Dropzone, {
   type DropzoneProps,
   type FileRejection,
@@ -10,16 +10,17 @@ import { toast } from "sonner";
 import { Button } from "@/base/button";
 import { Input } from "@/base/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/base/tabs";
+import { UploadZone } from "@/base/upload-zone";
 import { cn } from "@/lib/utils";
 
 interface FileUploadProps {
   className?: string;
   heading?: string;
   onContentChange: (content: File[] | string) => void;
-  uploadDescription?: string;
-  uploadHelpText?: string;
+  title?: string;
+  description?: string;
+  supportedFiles?: string;
   fileUrlPlaceholder?: string;
-  footer?: ReactNode;
   variant?: "small" | "normal";
   accept?: DropzoneProps["accept"];
   maxSize?: DropzoneProps["maxSize"];
@@ -33,10 +34,10 @@ export function FileUpload({
   className,
   heading = "File Upload",
   onContentChange,
-  uploadDescription = "Upload file (drag or click)",
-  uploadHelpText = "You can upload a file up to 315 MB",
+  title = "Drag files here to upload",
+  description = "Up to 20 files, 315 MB total",
+  supportedFiles,
   fileUrlPlaceholder = "Paste the file link here",
-  footer,
   variant = "normal",
   accept,
   maxSize,
@@ -86,18 +87,16 @@ export function FileUpload({
     setFileUrlInput("");
   }, [fileUrlInput, onContentChange, accept]);
 
-  const defaultFooter = useMemo(() => {
+  const defaultSupportedFiles = useMemo(() => {
+    if (supportedFiles) return supportedFiles;
     if (!accept || typeof accept !== "object") return null;
     const extensions = Object.values(accept).flat();
     if (extensions.length === 0) return null;
-    // need to use slice(1) to remove the dot from the extension
     const formats = extensions
       .map((ext) => ext.slice(1).toUpperCase())
       .join(", ");
-    return <span>Supported file formats: {formats}</span>;
-  }, [accept]);
-
-  const displayFooter = footer ?? defaultFooter;
+    return `Supported file formats: ${formats}`;
+  }, [accept, supportedFiles]);
 
   const onDrop = useCallback(
     (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
@@ -138,7 +137,6 @@ export function FileUpload({
     [maxFileCount, onContentChange]
   );
 
-  // Accept all files, but filter out .json in custom validator
   const dropzoneContent = (
     <Dropzone
       onDrop={onDrop}
@@ -148,25 +146,14 @@ export function FileUpload({
       multiple={maxFileCount > 1}
     >
       {({ getRootProps, getInputProps, isDragActive }) => (
-        <div
-          {...getRootProps()}
-          className={cn(
-            "flex min-h-[200px] cursor-pointer items-center justify-center rounded-lg border-2 border-dotted p-8 text-center transition-colors",
-            isDragActive
-              ? "bg-primary/5 border-primary"
-              : "hover:border-primary/50 border-gray-300"
-          )}
-        >
+        <div {...getRootProps()} className="cursor-pointer">
           <input {...getInputProps()} />
-          <div className="flex flex-col items-center justify-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-              <Upload className="h-8 w-8" />
-            </div>
-            <p className="text-sm font-semibold text-gray-600">
-              {uploadDescription}
-            </p>
-            <p className="text-xs text-gray-400">{uploadHelpText}</p>
-          </div>
+          <UploadZone
+            state={isDragActive ? "focus" : "default"}
+            title={title}
+            description={description}
+            supportedFiles={defaultSupportedFiles ?? undefined}
+          />
         </div>
       )}
     </Dropzone>
@@ -177,10 +164,7 @@ export function FileUpload({
       {variant === "normal" && (
         <div className="text-center">
           <div className="mb-6 flex justify-center">
-            <div
-              className="flex h-12 w-12 items-center justify-center rounded-full"
-              style={{ backgroundColor: "#F3F0FF", color: "#8B5CF6" }}
-            >
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
               <Logo />
             </div>
           </div>
@@ -193,10 +177,13 @@ export function FileUpload({
       ) : (
         <Tabs defaultValue="upload">
           <TabsList
-            className={cn(
-              "grid w-full rounded-none border-b border-gray-200 bg-transparent p-0",
-              onSelectFile ? "grid-cols-3" : "grid-cols-2"
-            )}
+            variant="underline"
+            className="grid w-full"
+            style={{
+              gridTemplateColumns: onSelectFile
+                ? "repeat(3, 1fr)"
+                : "repeat(2, 1fr)",
+            }}
           >
             <TabsTrigger value="upload" label="Upload file" />
             <TabsTrigger value="url" label="File URL" />
@@ -241,12 +228,6 @@ export function FileUpload({
           )}
         </Tabs>
       )}
-
-      {variant === "normal" && displayFooter ? (
-        <div className="mt-6 rounded-md bg-gray-100 p-4 text-center text-xs text-gray-500">
-          {displayFooter}
-        </div>
-      ) : null}
     </div>
   );
 }

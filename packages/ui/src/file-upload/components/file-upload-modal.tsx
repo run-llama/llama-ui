@@ -281,23 +281,15 @@ export function FileUploader({
                   onFilesSelected={handleFileSelect}
                   onRemoveFile={removeFile}
                   allowedFileTypes={allowedFileTypes}
-                  maxFileSizeBytes={maxFileSizeBytes}
-                  listFooter={
-                    <div className="border-t border-muted-foreground/20 pt-2 text-xs text-muted-foreground">
-                      Click to add more files or drag and drop
-                    </div>
-                  }
                 />
               ) : (
                 <FileUpload
-                  className="mt-0"
                   heading={titleOrDefault}
                   content={singleUploadContent}
                   onContentChange={handleContentChange}
                   allowFileRemoval
                   showHeader={false}
                   allowedFileTypes={allowedFileTypes}
-                  maxFileSizeBytes={maxFileSizeBytes}
                   disableWhenHasSelection
                   footer={null}
                   onSelectFile={onSelectFile}

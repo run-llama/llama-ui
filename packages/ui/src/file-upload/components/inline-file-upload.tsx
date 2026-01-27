@@ -17,7 +17,6 @@ export function FileUpload({
   allowFileRemoval = false,
   showHeader = true,
   allowedFileTypes = [],
-  maxFileSizeBytes,
   uploadDescription = "Upload file (drag or click)",
   fileUrlPlaceholder = "Paste the file link here",
   disableWhenHasSelection = false,
@@ -80,8 +79,7 @@ export function FileUpload({
             onFilesSelected={handleFilesSelected}
             onRemoveFile={allowFileRemoval ? handleRemoveFile : undefined}
             allowedFileTypes={allowedFileTypes}
-            maxFileSizeBytes={maxFileSizeBytes}
-            emptyTitle={uploadDescription}
+            title={uploadDescription}
             showRemoveButton={allowFileRemoval}
             disabled={
               disableWhenHasSelection &&

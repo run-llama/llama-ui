@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { DropzoneProps } from "react-dropzone";
 import { cn } from "@/lib/utils";
 import { PdfPreview } from "../file-preview";
@@ -114,10 +114,11 @@ interface DocumentPreviewBaseProps
   isLoading?: boolean;
   heading?: string;
   className?: string;
-  footer?: ReactNode;
   accept?: DropzoneProps["accept"];
   maxFileSize?: number;
-  maxFileSizeHelpText?: string;
+  title?: string;
+  description?: string;
+  supportedFiles?: string;
   onSelectFile?: (selectedFileIds: string[]) => void;
   selectFileLabel?: string;
   selectFileDescription?: string;
@@ -263,11 +264,12 @@ export function DocumentPreview(props: DocumentPreviewProps) {
     allowRemoval = true,
     allowMultiple = false,
     className = "h-full w-full flex-1",
-    footer,
     accept,
     previews,
     maxFileSize = DEFAULT_MAX_FILE_SIZE,
-    maxFileSizeHelpText = `You can upload files up to ${Math.round(DEFAULT_MAX_FILE_SIZE / 1024 / 1024)} MB`,
+    title,
+    description,
+    supportedFiles,
     onSelectFile,
     selectFileLabel,
     selectFileDescription,
@@ -288,7 +290,6 @@ export function DocumentPreview(props: DocumentPreviewProps) {
     ? null
     : (props as DocumentPreviewSingleProps);
 
-  const multiOnChange = multiProps?.onChange;
   const multiValues = multiProps?.value ?? [];
 
   const normalizedValues = allowMultiple
@@ -310,12 +311,10 @@ export function DocumentPreview(props: DocumentPreviewProps) {
 
   const handleContentChange = (newContent: File[] | string) => {
     if (!allowMultiple) {
-      if (Array.isArray(newContent)) {
-        singleProps?.onChange?.(newContent[0] ?? null);
-        return;
-      }
-
-      singleProps?.onChange?.(newContent);
+      const value = Array.isArray(newContent)
+        ? (newContent[0] ?? null)
+        : newContent;
+      singleProps?.onChange?.(value);
       return;
     }
 
@@ -327,47 +326,34 @@ export function DocumentPreview(props: DocumentPreviewProps) {
       ...newContents.map((content) => ({ content })),
     ];
     void multiProps?.onChange?.(newItems);
-
-    // Reset preview index to show the newly added file (last index)
     setPreviewIndex(newItems.length - 1);
   };
 
   const handleRemoveAt = (index: number) => {
     if (!allowRemoval) return;
+
     if (!allowMultiple) {
-      const nextValues = normalizedValues.filter(
-        (_, itemIndex) => itemIndex !== index
-      );
-      singleProps?.onChange?.(
-        nextValues.length ? (nextValues[0] ?? null) : null
-      );
+      singleProps?.onChange?.(null);
       singleProps?.onRemove?.();
       return;
     }
 
-    const nextItems = multiValues.filter((_, itemIndex) => itemIndex !== index);
-
+    const nextItems = multiValues.filter((_, i) => i !== index);
     onRemove?.(index);
-
-    void multiOnChange?.(nextItems);
+    void multiProps?.onChange?.(nextItems);
 
     // Update preview index after removal
     if (previewIndex !== null) {
       if (previewIndex === index) {
-        // If the removed item was the preview item, reset to show last item
         setPreviewIndex(nextItems.length > 0 ? nextItems.length - 1 : null);
       } else if (previewIndex > index) {
-        // If the removed item was before the preview item, decrement the index
         setPreviewIndex(previewIndex - 1);
       }
-      // If previewIndex < index, no change needed
     }
   };
 
   const handleSelectAt = (index: number) => {
-    if (!allowMultiple) return;
-    // Set the clicked item as the preview item without changing order
-    setPreviewIndex(index);
+    if (allowMultiple) setPreviewIndex(index);
   };
 
   const handleSelectFile = onSelectFile
@@ -393,9 +379,9 @@ export function DocumentPreview(props: DocumentPreviewProps) {
           onContentChange={handleContentChange}
           maxFileCount={maxFileCount}
           maxSize={maxFileSize}
-          uploadDescription={`Upload ${maxFileCount > 1 ? `up to ${maxFileCount} files` : "file"} (drag or click)`}
-          uploadHelpText={maxFileSizeHelpText}
-          footer={footer}
+          title={title}
+          description={description}
+          supportedFiles={supportedFiles}
           accept={accept}
           onSelectFile={handleSelectFile}
           selectFileLabel={selectFileLabel}
@@ -420,9 +406,11 @@ export function DocumentPreview(props: DocumentPreviewProps) {
     ? Math.max(0, MAX_FILE_COUNT - normalizedValues.length)
     : 1;
 
-  const allFileSystemSelections = normalizedValues.every(isFileSystemSelection);
+  const allFileSystemSelections =
+    normalizedValues.length > 0 &&
+    normalizedValues.every(isFileSystemSelection);
 
-  if (allFileSystemSelections && normalizedValues.length > 0) {
+  if (allFileSystemSelections) {
     const fileSystemItems: FileSystemItem[] = normalizedValues.map(
       (content, index) => ({
         fileName: normalizedFileNames[index] ?? null,
