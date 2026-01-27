@@ -1,10 +1,12 @@
 import { Upload, X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/base/button";
 import { Input } from "@/base/input";
 import { UploadZone } from "@/base/upload-zone";
 import { cn } from "@/lib/utils";
 import type { FileDropzoneProps } from "../types";
 import { useFileDropzone } from "../hooks/use-file-dropzone";
+import { validateFile } from "../utils/file-utils";
 
 const unitLabels = ["B", "KB", "MB", "GB"];
 
@@ -34,7 +36,30 @@ export function FileDropzone({
   disabled = false,
   title = multiple ? "Drag files here to upload" : "Drag file here to upload",
   description,
+  maxFileSizeBytes,
 }: FileDropzoneProps) {
+  const handleFilesWithValidation = (files: File[]) => {
+    if (disabled) return;
+
+    const validFiles: File[] = [];
+    files.forEach((file) => {
+      const validationError = validateFile(
+        file,
+        allowedFileTypes,
+        maxFileSizeBytes
+      );
+      if (validationError) {
+        toast.error(`${file.name}: ${validationError}`);
+      } else {
+        validFiles.push(file);
+      }
+    });
+
+    if (validFiles.length > 0) {
+      onFilesSelected(validFiles);
+    }
+  };
+
   const {
     inputRef,
     isDragging,
@@ -45,11 +70,7 @@ export function FileDropzone({
     handleFileInputChange,
     handleClick,
   } = useFileDropzone({
-    onFilesSelected: (files) => {
-      if (!disabled) {
-        onFilesSelected(files);
-      }
-    },
+    onFilesSelected: handleFilesWithValidation,
     multiple,
   });
 
