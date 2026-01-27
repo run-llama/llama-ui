@@ -162,10 +162,7 @@ export function FileUpload({
       {variant === "normal" && (
         <div className="text-center">
           <div className="mb-6 flex justify-center">
-            <div
-              className="flex h-12 w-12 items-center justify-center rounded-full"
-              style={{ backgroundColor: "#F3F0FF", color: "#8B5CF6" }}
-            >
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
               <Logo />
             </div>
           </div>
@@ -178,10 +175,13 @@ export function FileUpload({
       ) : (
         <Tabs defaultValue="upload">
           <TabsList
-            className={cn(
-              "grid w-full rounded-none border-b border-gray-200 bg-transparent p-0",
-              onSelectFile ? "grid-cols-3" : "grid-cols-2"
-            )}
+            variant="underline"
+            className="grid w-full"
+            style={{
+              gridTemplateColumns: onSelectFile
+                ? "repeat(3, 1fr)"
+                : "repeat(2, 1fr)",
+            }}
           >
             <TabsTrigger value="upload" label="Upload file" />
             <TabsTrigger value="url" label="File URL" />
