@@ -92,7 +92,9 @@ export function FileUpload({
     if (!accept || typeof accept !== "object") return null;
     const extensions = Object.values(accept).flat();
     if (extensions.length === 0) return null;
-    const formats = extensions.map((ext) => ext.slice(1).toUpperCase()).join(", ");
+    const formats = extensions
+      .map((ext) => ext.slice(1).toUpperCase())
+      .join(", ");
     return `Supported file formats: ${formats}`;
   }, [accept, supportedFiles]);
 

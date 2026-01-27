@@ -32,9 +32,7 @@ export function FileDropzone({
   supportedFiles,
   showRemoveButton = true,
   disabled = false,
-  title = multiple
-    ? "Drag files here to upload"
-    : "Drag file here to upload",
+  title = multiple ? "Drag files here to upload" : "Drag file here to upload",
   description,
 }: FileDropzoneProps) {
   const {
@@ -59,8 +57,9 @@ export function FileDropzone({
   const acceptValue = allowedFileTypes?.length
     ? allowedFileTypes.map((type) => `.${type}`).join(",")
     : undefined;
-  const displaySupportedFiles = supportedFiles
-    ?? (allowedFileTypes?.length
+  const displaySupportedFiles =
+    supportedFiles ??
+    (allowedFileTypes?.length
       ? `Supported: ${allowedFileTypes.map((type) => type.toUpperCase()).join(", ")}`
       : undefined);
 
@@ -117,10 +116,12 @@ export function FileDropzone({
         disabled ? "opacity-60" : "cursor-pointer",
         hasFiles &&
           "flex flex-col gap-4 rounded-lg border border-dashed p-8 transition-all items-stretch text-left",
-        hasFiles && "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-neutral-950/10",
-        hasFiles && (!disabled && isDragging
-          ? "border-neutral-400 bg-neutral-100 ring-[3px] ring-neutral-950/10"
-          : "border-neutral-300 bg-white hover:border-neutral-400")
+        hasFiles &&
+          "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-neutral-950/10",
+        hasFiles &&
+          (!disabled && isDragging
+            ? "border-neutral-400 bg-neutral-100 ring-[3px] ring-neutral-950/10"
+            : "border-neutral-300 bg-white hover:border-neutral-400")
       )}
       onDragEnter={disabled ? undefined : handleDragEnter}
       onDragLeave={disabled ? undefined : handleDragLeave}

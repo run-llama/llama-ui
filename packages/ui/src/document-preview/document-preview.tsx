@@ -283,8 +283,12 @@ export function DocumentPreview(props: DocumentPreviewProps) {
     return <UploadSkeleton />;
   }
 
-  const multiProps = allowMultiple ? (props as DocumentPreviewMultiProps) : null;
-  const singleProps = allowMultiple ? null : (props as DocumentPreviewSingleProps);
+  const multiProps = allowMultiple
+    ? (props as DocumentPreviewMultiProps)
+    : null;
+  const singleProps = allowMultiple
+    ? null
+    : (props as DocumentPreviewSingleProps);
 
   const multiValues = multiProps?.value ?? [];
 
@@ -307,7 +311,9 @@ export function DocumentPreview(props: DocumentPreviewProps) {
 
   const handleContentChange = (newContent: File[] | string) => {
     if (!allowMultiple) {
-      const value = Array.isArray(newContent) ? (newContent[0] ?? null) : newContent;
+      const value = Array.isArray(newContent)
+        ? (newContent[0] ?? null)
+        : newContent;
       singleProps?.onChange?.(value);
       return;
     }
@@ -401,7 +407,8 @@ export function DocumentPreview(props: DocumentPreviewProps) {
     : 1;
 
   const allFileSystemSelections =
-    normalizedValues.length > 0 && normalizedValues.every(isFileSystemSelection);
+    normalizedValues.length > 0 &&
+    normalizedValues.every(isFileSystemSelection);
 
   if (allFileSystemSelections) {
     const fileSystemItems: FileSystemItem[] = normalizedValues.map(
