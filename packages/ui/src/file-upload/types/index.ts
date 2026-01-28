@@ -38,20 +38,14 @@ export interface UseFileUploadOptions {
   onUploadComplete?: (file: File, fileHash?: string) => void;
   onUploadError?: (file: File, error: string, fileHash?: string) => void;
   /**
-   * Whether to use the beta file API (v1/beta/files) which supports upsert operations
-   * with external file IDs for deduplication.
-   * @default false
-   */
-  useBetaApi?: boolean;
-  /**
    * Whether to compute a SHA-256 hash of the file before uploading.
-   * The hash will be used as the external_file_id when useBetaApi is true.
+   * The hash will be used as the external_file_id for deduplication.
    * @default false
    */
   hashFile?: boolean;
   /**
    * Prefix to prepend to the file hash when used as an external_file_id.
-   * Only applicable when both useBetaApi and hashFile are true.
+   * Only applicable when hashFile is true.
    * @default ""
    */
   externalIdPrefix?: string;
@@ -125,21 +119,15 @@ export interface FileUploaderProps extends BaseFileUploadProps {
   selectFileDescription?: string;
   maxFileSizeBytes?: number;
   /**
-   * Whether to use the beta file API (v1/beta/files) which supports upsert operations
-   * with external file IDs for deduplication.
-   * @default false
-   */
-  useBetaApi?: boolean;
-  /**
    * Whether to compute a SHA-256 hash of the file before uploading.
    * The hash will be included in the FileUploadData and used as external_file_id
-   * when useBetaApi is true.
+   * for deduplication.
    * @default false
    */
   hashFile?: boolean;
   /**
    * Prefix to prepend to the file hash when used as an external_file_id.
-   * Only applicable when both useBetaApi and hashFile are true.
+   * Only applicable when hashFile is true.
    * @default ""
    */
   externalIdPrefix?: string;

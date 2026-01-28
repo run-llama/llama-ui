@@ -34,7 +34,6 @@ export function FileUploader({
   onSelectFile,
   selectFileLabel,
   selectFileDescription,
-  useBetaApi = false,
   hashFile = false,
   externalIdPrefix = "",
 }: FileUploaderProps) {
@@ -59,7 +58,6 @@ export function FileUploader({
     onProgress: uploadProgress.updateProgress,
     onUploadComplete: uploadProgress.completeUpload,
     onUploadError: uploadProgress.failUpload,
-    useBetaApi,
     hashFile,
     externalIdPrefix,
   });

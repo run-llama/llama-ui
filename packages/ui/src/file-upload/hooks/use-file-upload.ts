@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { logger } from "@shared/logger";
 import {
-  uploadFileApiV1FilesPost,
   readFileContentApiV1FilesIdContentGet,
   uploadFileFromUrlApiV1FilesUploadFromUrlPut,
   upsertFileApiV1BetaFilesPut,
@@ -36,7 +35,6 @@ export function useFileUpload({
   onUploadStart,
   onUploadComplete,
   onUploadError,
-  useBetaApi = false,
   hashFile = false,
   externalIdPrefix = "",
 }: UseFileUploadOptions = {}): UseFileUploadReturn {
@@ -113,29 +111,12 @@ export function useFileUpload({
 
       onUploadStart?.(file, fileHash);
 
-      let fileId: string;
-
-      if (useBetaApi) {
-        // Use beta API with external_file_id for deduplication
-        const externalFileId = fileHash
-          ? `${externalIdPrefix}${fileHash}`
-          : undefined;
-        const result = await uploadWithBetaApi(file, externalFileId);
-        fileId = result.id;
-      } else {
-        // Use standard API
-        const response = await uploadFileApiV1FilesPost({
-          body: {
-            upload_file: file,
-          },
-        });
-
-        if (response.error) {
-          throw response.error;
-        }
-
-        fileId = response.data.id;
-      }
+      // Use beta API with external_file_id for deduplication
+      const externalFileId = fileHash
+        ? `${externalIdPrefix}${fileHash}`
+        : undefined;
+      const result = await uploadWithBetaApi(file, externalFileId);
+      const fileId = result.id;
 
       // Real API call with progress simulation
       onProgress?.(file, 10);
