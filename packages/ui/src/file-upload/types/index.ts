@@ -34,6 +34,11 @@ export interface UploadResult {
 }
 
 export interface UseFileUploadOptions {
+  /**
+   * LlamaCloud client instance for file uploads.
+   * Required - get it from ApiProvider using useLlamaCloudClient() hook.
+   */
+  llamaCloudClient: LlamaCloudClient;
   onProgress?: (file: File, progress: number) => void;
   onUploadStart?: (file: File, fileHash?: string) => void;
   onUploadComplete?: (file: File, fileHash?: string) => void;
@@ -51,31 +56,16 @@ export interface UseFileUploadOptions {
    */
   externalIdPrefix?: string;
   /**
-   * LlamaCloud client instance for file uploads.
-   * When provided, uses the new @llamaindex/llama-cloud SDK for uploads.
-   */
-  llamaCloudClient?: LlamaCloudClient;
-  /**
-   * The intended purpose of the file when using the LlamaCloud SDK.
+   * The intended purpose of the file.
    * Valid values: 'user_data', 'parse', 'extract', 'split', 'classify', 'sheet', 'agent_app'
    * @default "user_data"
    */
   filePurpose?: string;
 }
 
-export interface UploadFromUrlOptions {
-  name?: string;
-  proxyUrl?: string;
-  requestHeaders?: Record<string, string>;
-}
-
 export interface UseFileUploadReturn {
   isUploading: boolean;
   uploadFile: (file: File) => Promise<UploadResult>;
-  uploadFromUrl: (
-    url: string,
-    options?: UploadFromUrlOptions
-  ) => Promise<UploadResult>;
   uploadAndReturn: (file: File) => Promise<UploadResult>;
   /**
    * Computes the SHA-256 hash of a file without uploading it.
@@ -105,6 +95,7 @@ export interface FileUploadProps extends BaseFileUploadProps {
   uploadDescription?: string;
   /** Text describing supported file formats */
   supportedFiles?: string;
+  /** Placeholder text for the URL input field (default: "Paste the file link here") */
   fileUrlPlaceholder?: string;
   disableWhenHasSelection?: boolean;
   footer?: ReactNode;
@@ -115,6 +106,11 @@ export interface FileUploadProps extends BaseFileUploadProps {
 }
 
 export interface FileUploaderProps extends BaseFileUploadProps {
+  /**
+   * LlamaCloud client instance for file uploads.
+   * Required - get it from ApiProvider using useLlamaCloudClient() hook.
+   */
+  llamaCloudClient: LlamaCloudClient;
   title?: string;
   description?: string;
   inputFields?: InputField[];
@@ -144,12 +140,7 @@ export interface FileUploaderProps extends BaseFileUploadProps {
    */
   externalIdPrefix?: string;
   /**
-   * LlamaCloud client instance for file uploads.
-   * When provided, uses the new @llamaindex/llama-cloud SDK for uploads.
-   */
-  llamaCloudClient?: LlamaCloudClient;
-  /**
-   * The intended purpose of the file when using the LlamaCloud SDK.
+   * The intended purpose of the file.
    * Valid values: 'user_data', 'parse', 'extract', 'split', 'classify', 'sheet', 'agent_app'
    * @default "user_data"
    */

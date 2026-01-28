@@ -10,7 +10,6 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/base/dialog";
-import { FileUpload } from "./inline-file-upload";
 import { FileDropzone } from "./dropzone";
 import type { FileUploaderProps } from "../types";
 import { validateFile, type FileType } from "../utils/file-utils";
@@ -21,6 +20,7 @@ import { logger } from "@shared/logger";
 import { Label } from "@/base/label";
 
 export function FileUploader({
+  llamaCloudClient,
   title,
   description,
   inputFields,
@@ -36,14 +36,12 @@ export function FileUploader({
   selectFileDescription,
   hashFile = false,
   externalIdPrefix = "",
-  llamaCloudClient,
   filePurpose = "user_data",
 }: FileUploaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [fileUrl, setFileUrl] = useState("");
 
   // Dynamic title and description based on multiple setting
   const titleOrDefault = title || (multiple ? "Upload Files" : "Upload File");
@@ -55,14 +53,14 @@ export function FileUploader({
 
   const uploadProgress = useUploadProgress();
 
-  const { uploadAndReturn, uploadFromUrl } = useFileUpload({
+  const { uploadAndReturn } = useFileUpload({
+    llamaCloudClient,
     onUploadStart: uploadProgress.startUpload,
     onProgress: uploadProgress.updateProgress,
     onUploadComplete: uploadProgress.completeUpload,
     onUploadError: uploadProgress.failUpload,
     hashFile,
     externalIdPrefix,
-    llamaCloudClient,
     filePurpose,
   });
 
@@ -71,7 +69,6 @@ export function FileUploader({
     setFieldValues({});
     setSelectedFiles([]);
     setFieldErrors({});
-    setFileUrl("");
   };
 
   const handleFieldChange = (key: string, value: string) => {
@@ -108,7 +105,6 @@ export function FileUploader({
 
   const handleFileSelect = (newFiles: File[]) => {
     const validFiles: File[] = [];
-    // Remove toast usage, just skip invalid files
     newFiles.forEach((file) => {
       const validationError = validateFile(
         file,
@@ -124,38 +120,13 @@ export function FileUploader({
       if (multiple) {
         setSelectedFiles((prev) => [...prev, ...validFiles]);
       } else {
-        setSelectedFiles(validFiles.slice(0, 1)); // Only take the first file for single upload
+        setSelectedFiles(validFiles.slice(0, 1));
       }
-      setFileUrl("");
     }
-  };
-
-  const handleContentChange = (content: File | string | null) => {
-    if (content instanceof File) {
-      handleFileSelect([content]);
-      return;
-    }
-
-    if (typeof content === "string") {
-      setSelectedFiles([]);
-      setFileUrl(content);
-      return;
-    }
-
-    setSelectedFiles([]);
-    setFileUrl("");
   };
 
   const handleUpload = async () => {
-    const hasFiles = selectedFiles.length > 0;
-    const trimmedUrl = fileUrl.trim();
-    const currentFieldValues = { ...fieldValues };
-
-    if (multiple) {
-      if (!hasFiles) {
-        return;
-      }
-    } else if (!hasFiles && trimmedUrl.length === 0) {
+    if (selectedFiles.length === 0) {
       return;
     }
 
@@ -163,56 +134,31 @@ export function FileUploader({
       return;
     }
 
-    const uploadFiles = async (files: File[]) => {
-      handleClose();
+    const currentFieldValues = { ...fieldValues };
+    handleClose();
 
-      try {
-        const results = await Promise.all(
-          files.map((file) => uploadAndReturn(file))
-        );
-        const successfulData = results
-          .filter((result) => result.success && result.data)
-          .map((result) => result.data!);
+    try {
+      const results = await Promise.all(
+        selectedFiles.map((file) => uploadAndReturn(file))
+      );
+      const successfulData = results
+        .filter((result) => result.success && result.data)
+        .map((result) => result.data!);
 
-        if (successfulData.length > 0) {
-          await onSuccess(successfulData, currentFieldValues);
-        }
-      } catch (error) {
-        logger.error("FileUploader uploadFiles failed", {
-          error,
-          fileCount: files.length,
-        });
+      if (successfulData.length > 0) {
+        await onSuccess(successfulData, currentFieldValues);
       }
-    };
-
-    if (!multiple && trimmedUrl.length > 0 && !hasFiles) {
-      handleClose();
-
-      try {
-        const result = await uploadFromUrl(trimmedUrl);
-        if (result.success && result.data) {
-          await onSuccess([result.data], {
-            ...currentFieldValues,
-            fileUrl: trimmedUrl,
-          });
-        }
-      } catch (error) {
-        logger.error("FileUploader uploadFromUrl failed", {
-          error,
-          url: trimmedUrl,
-        });
-      }
-      return;
+    } catch (error) {
+      logger.error("FileUploader uploadFiles failed", {
+        error,
+        fileCount: selectedFiles.length,
+      });
     }
-
-    await uploadFiles(multiple ? selectedFiles : selectedFiles.slice(0, 1));
   };
 
   const removeFile = (fileToRemove: File) => {
     setSelectedFiles((prev) => prev.filter((file) => file !== fileToRemove));
   };
-
-  const singleUploadContent = selectedFiles[0] ?? (fileUrl ? fileUrl : null);
 
   const canSubmit = () => {
     const requiredFieldsSatisfied =
@@ -228,12 +174,9 @@ export function FileUploader({
       return false;
     }
 
-    if (multiple) {
-      return selectedFiles.length > 0;
-    }
-
-    return selectedFiles.length > 0 || fileUrl.trim().length > 0;
+    return selectedFiles.length > 0;
   };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -282,29 +225,14 @@ export function FileUploader({
                 label={multiple ? "Files" : "File"}
                 required
               />
-              {multiple ? (
-                <FileDropzone
-                  multiple
-                  selectedFiles={selectedFiles}
-                  onFilesSelected={handleFileSelect}
-                  onRemoveFile={removeFile}
-                  allowedFileTypes={allowedFileTypes}
-                />
-              ) : (
-                <FileUpload
-                  heading={titleOrDefault}
-                  content={singleUploadContent}
-                  onContentChange={handleContentChange}
-                  allowFileRemoval
-                  showHeader={false}
-                  allowedFileTypes={allowedFileTypes}
-                  disableWhenHasSelection
-                  footer={null}
-                  onSelectFile={onSelectFile}
-                  selectFileLabel={selectFileLabel}
-                  selectFileDescription={selectFileDescription}
-                />
-              )}
+              <FileDropzone
+                multiple={multiple}
+                selectedFiles={selectedFiles}
+                onFilesSelected={handleFileSelect}
+                onRemoveFile={removeFile}
+                allowedFileTypes={allowedFileTypes}
+                maxFileSizeBytes={maxFileSizeBytes}
+              />
             </div>
           </div>
 

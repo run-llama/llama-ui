@@ -9,6 +9,7 @@ import { Message, MessageRole } from "./chat.interface";
 import { v4 as uuidv4 } from "uuid";
 import { MessagePart } from "./message-parts";
 import { TextPartType } from "./message-parts/types";
+import type { LlamaCloudClient } from "../../lib/clients";
 
 interface ChatInputProps extends React.PropsWithChildren {
   className?: string;
@@ -27,6 +28,7 @@ interface ChatInputFieldProps {
 
 interface ChatInputUploadProps {
   className?: string;
+  llamaCloudClient: LlamaCloudClient;
   onSuccess?: (files: File[]) => Promise<void> | void;
   allowedFileTypes?: FileType[];
   maxFileSizeMB?: number;
@@ -180,6 +182,7 @@ function ChatInputUpload(props: ChatInputUploadProps) {
 
   return (
     <FileUploader
+      llamaCloudClient={props.llamaCloudClient}
       title={props.multiple ? "Upload Files" : "Upload File"}
       description={props.multiple ? "Attach multiple files" : "Attach a file"}
       multiple={props.multiple ?? true}
