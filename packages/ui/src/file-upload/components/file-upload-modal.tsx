@@ -34,6 +34,9 @@ export function FileUploader({
   onSelectFile,
   selectFileLabel,
   selectFileDescription,
+  useBetaApi = false,
+  hashFile = false,
+  externalIdPrefix = "",
 }: FileUploaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
@@ -56,6 +59,9 @@ export function FileUploader({
     onProgress: uploadProgress.updateProgress,
     onUploadComplete: uploadProgress.completeUpload,
     onUploadError: uploadProgress.failUpload,
+    useBetaApi,
+    hashFile,
+    externalIdPrefix,
   });
 
   const handleClose = () => {

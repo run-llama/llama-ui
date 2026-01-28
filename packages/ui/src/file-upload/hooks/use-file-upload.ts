@@ -4,6 +4,8 @@ import {
   uploadFileApiV1FilesPost,
   readFileContentApiV1FilesIdContentGet,
   uploadFileFromUrlApiV1FilesUploadFromUrlPut,
+  upsertFileApiV1BetaFilesPut,
+  generatePresignedUrlApiV1FilesPut,
 } from "llama-cloud-services/api";
 
 import type {
@@ -13,6 +15,7 @@ import type {
   UseFileUploadOptions,
   UseFileUploadReturn,
 } from "../types";
+import { computeFileHash } from "../utils/file-utils";
 
 function deriveFileNameFromUrl(url: string): string {
   try {
@@ -33,25 +36,106 @@ export function useFileUpload({
   onUploadStart,
   onUploadComplete,
   onUploadError,
+  useBetaApi = false,
+  hashFile = false,
+  externalIdPrefix = "",
 }: UseFileUploadOptions = {}): UseFileUploadReturn {
   const [isUploading, setIsUploading] = useState(false);
 
-  const uploadFile = async (file: File): Promise<UploadResult> => {
-    setIsUploading(true);
-    onUploadStart?.(file);
+  const computeHash = async (file: File): Promise<string> => {
+    return computeFileHash(file);
+  };
 
-    try {
-      const response = await uploadFileApiV1FilesPost({
-        body: {
-          upload_file: file,
+  /**
+   * Uploads a file using the beta API with upsert capability.
+   * First generates a presigned URL, then uploads the file content to that URL.
+   */
+  const uploadWithBetaApi = async (
+    file: File,
+    externalFileId?: string
+  ): Promise<{ id: string }> => {
+    // Use the beta upsert endpoint which creates or updates based on external_file_id
+    const response = await upsertFileApiV1BetaFilesPut({
+      body: {
+        name: file.name,
+        external_file_id: externalFileId,
+        file_size: file.size,
+      },
+    });
+
+    if (response.error) {
+      throw response.error;
+    }
+
+    const fileId = response.data.id;
+
+    // Generate presigned URL for upload
+    const presignedResponse = await generatePresignedUrlApiV1FilesPut({
+      body: {
+        name: file.name,
+        file_size: file.size,
+      },
+    });
+
+    if (presignedResponse.error) {
+      throw presignedResponse.error;
+    }
+
+    // Upload file content to presigned URL
+    const uploadUrl = presignedResponse.data.presigned_url;
+    if (uploadUrl) {
+      const uploadResponse = await fetch(uploadUrl, {
+        method: "PUT",
+        body: file,
+        headers: {
+          "Content-Type": file.type || "application/octet-stream",
         },
       });
 
-      if (response.error) {
-        throw response.error;
+      if (!uploadResponse.ok) {
+        throw new Error(`Failed to upload file content: ${uploadResponse.statusText}`);
+      }
+    }
+
+    return { id: fileId };
+  };
+
+  const uploadFile = async (file: File): Promise<UploadResult> => {
+    setIsUploading(true);
+
+    let fileHash: string | undefined;
+
+    try {
+      // Compute hash if enabled
+      if (hashFile) {
+        fileHash = await computeFileHash(file);
       }
 
-      const fileId = response.data.id;
+      onUploadStart?.(file, fileHash);
+
+      let fileId: string;
+
+      if (useBetaApi) {
+        // Use beta API with external_file_id for deduplication
+        const externalFileId = fileHash
+          ? `${externalIdPrefix}${fileHash}`
+          : undefined;
+        const result = await uploadWithBetaApi(file, externalFileId);
+        fileId = result.id;
+      } else {
+        // Use standard API
+        const response = await uploadFileApiV1FilesPost({
+          body: {
+            upload_file: file,
+          },
+        });
+
+        if (response.error) {
+          throw response.error;
+        }
+
+        fileId = response.data.id;
+      }
 
       // Real API call with progress simulation
       onProgress?.(file, 10);
@@ -74,10 +158,11 @@ export function useFileUpload({
         file,
         fileId,
         url: fileUrl,
+        fileHash,
       };
 
       onProgress?.(file, 100);
-      onUploadComplete?.(file);
+      onUploadComplete?.(file, fileHash);
 
       return {
         success: true,
@@ -88,7 +173,7 @@ export function useFileUpload({
       logger.error("uploadFile failed", { error });
       const errorMessage =
         error instanceof Error ? error.message : "Upload failed";
-      onUploadError?.(file, errorMessage);
+      onUploadError?.(file, errorMessage, fileHash);
 
       return {
         success: false,
@@ -111,7 +196,8 @@ export function useFileUpload({
     });
 
     setIsUploading(true);
-    onUploadStart?.(virtualFile);
+    // URL uploads don't support file hashing since content isn't available locally
+    onUploadStart?.(virtualFile, undefined);
 
     try {
       const response = await uploadFileFromUrlApiV1FilesUploadFromUrlPut({
@@ -146,17 +232,18 @@ export function useFileUpload({
         file: virtualFile,
         fileId,
         url: fileUrl,
+        // No hash for URL uploads
       };
 
       onProgress?.(virtualFile, 100);
-      onUploadComplete?.(virtualFile);
+      onUploadComplete?.(virtualFile, undefined);
 
       return { success: true, data: fileData, error: null };
     } catch (error) {
       logger.error("uploadFromUrl failed", { error });
       const errorMessage =
         error instanceof Error ? error.message : "Upload failed";
-      onUploadError?.(virtualFile, errorMessage);
+      onUploadError?.(virtualFile, errorMessage, undefined);
 
       return { success: false, data: null, error: error as Error };
     } finally {
@@ -169,6 +256,7 @@ export function useFileUpload({
     uploadFile,
     uploadFromUrl,
     uploadAndReturn: uploadFile,
+    computeHash,
   };
 }
 

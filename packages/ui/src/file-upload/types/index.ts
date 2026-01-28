@@ -22,6 +22,8 @@ export interface FileUploadData {
   file: File;
   fileId: string;
   url?: string;
+  /** SHA-256 hash of the file, if hashing was enabled */
+  fileHash?: string;
 }
 
 export interface UploadResult {
@@ -32,9 +34,27 @@ export interface UploadResult {
 
 export interface UseFileUploadOptions {
   onProgress?: (file: File, progress: number) => void;
-  onUploadStart?: (file: File) => void;
-  onUploadComplete?: (file: File) => void;
-  onUploadError?: (file: File, error: string) => void;
+  onUploadStart?: (file: File, fileHash?: string) => void;
+  onUploadComplete?: (file: File, fileHash?: string) => void;
+  onUploadError?: (file: File, error: string, fileHash?: string) => void;
+  /**
+   * Whether to use the beta file API (v1/beta/files) which supports upsert operations
+   * with external file IDs for deduplication.
+   * @default false
+   */
+  useBetaApi?: boolean;
+  /**
+   * Whether to compute a SHA-256 hash of the file before uploading.
+   * The hash will be used as the external_file_id when useBetaApi is true.
+   * @default false
+   */
+  hashFile?: boolean;
+  /**
+   * Prefix to prepend to the file hash when used as an external_file_id.
+   * Only applicable when both useBetaApi and hashFile are true.
+   * @default ""
+   */
+  externalIdPrefix?: string;
 }
 
 export interface UploadFromUrlOptions {
@@ -51,6 +71,11 @@ export interface UseFileUploadReturn {
     options?: UploadFromUrlOptions
   ) => Promise<UploadResult>;
   uploadAndReturn: (file: File) => Promise<UploadResult>;
+  /**
+   * Computes the SHA-256 hash of a file without uploading it.
+   * Useful for checking if a file already exists before uploading.
+   */
+  computeHash: (file: File) => Promise<string>;
 }
 
 export interface InputField {
@@ -99,6 +124,25 @@ export interface FileUploaderProps extends BaseFileUploadProps {
   selectFileLabel?: string;
   selectFileDescription?: string;
   maxFileSizeBytes?: number;
+  /**
+   * Whether to use the beta file API (v1/beta/files) which supports upsert operations
+   * with external file IDs for deduplication.
+   * @default false
+   */
+  useBetaApi?: boolean;
+  /**
+   * Whether to compute a SHA-256 hash of the file before uploading.
+   * The hash will be included in the FileUploadData and used as external_file_id
+   * when useBetaApi is true.
+   * @default false
+   */
+  hashFile?: boolean;
+  /**
+   * Prefix to prepend to the file hash when used as an external_file_id.
+   * Only applicable when both useBetaApi and hashFile are true.
+   * @default ""
+   */
+  externalIdPrefix?: string;
 }
 
 export type { FileUploadProgress } from "./upload-progress";

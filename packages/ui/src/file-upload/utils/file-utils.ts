@@ -322,3 +322,24 @@ export const isFileApiSupported = (): boolean => {
 export const isCryptoSupported = (): boolean => {
   return typeof crypto !== "undefined" && typeof crypto.subtle !== "undefined";
 };
+
+/**
+ * Computes a SHA-256 hash of a File and returns it as a hex string.
+ * Uses the Web Crypto API for secure hashing.
+ * @param file - The file to hash
+ * @returns A promise that resolves to the hex-encoded SHA-256 hash
+ * @throws Error if Web Crypto API is not supported
+ */
+export const computeFileHash = async (file: File): Promise<string> => {
+  if (!isCryptoSupported()) {
+    throw new Error(
+      "Web Crypto API is not supported in this environment. File hashing is not available."
+    );
+  }
+
+  const arrayBuffer = await file.arrayBuffer();
+  const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  return hashHex;
+};

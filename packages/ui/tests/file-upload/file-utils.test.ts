@@ -4,6 +4,7 @@ import {
   formatFileSize,
   isFileApiSupported,
   isCryptoSupported,
+  computeFileHash,
   FileType,
   getFileTypeDefinition,
   getFileExtensions,
@@ -420,5 +421,90 @@ describe("FileType utility functions", () => {
     expect(allFileTypes).toContain("png");
     expect(allFileTypes).toContain("webp");
     expect(allFileTypes).toContain("txt");
+  });
+});
+
+describe("computeFileHash", () => {
+  // Helper to create a mock file with arrayBuffer method
+  const createMockFileWithArrayBuffer = (
+    content: string,
+    name: string,
+    type: string = "text/plain"
+  ): File => {
+    const encoder = new TextEncoder();
+    const buffer = encoder.encode(content).buffer;
+    const file = new File([content], name, { type });
+    // Add arrayBuffer method to the file mock
+    Object.defineProperty(file, "arrayBuffer", {
+      value: () => Promise.resolve(buffer),
+    });
+    return file;
+  };
+
+  it("should compute SHA-256 hash of a file", async () => {
+    // Create a mock hash result (SHA-256 produces 32 bytes = 64 hex chars)
+    const mockHashBuffer = new Uint8Array(32).fill(0xab);
+    mockCrypto.subtle.digest.mockResolvedValueOnce(mockHashBuffer.buffer);
+
+    const testFile = createMockFileWithArrayBuffer("test content", "test.txt");
+
+    const hash = await computeFileHash(testFile);
+
+    // Should produce a 64-character hex string
+    expect(hash).toHaveLength(64);
+    // Should be lowercase hex
+    expect(hash).toMatch(/^[a-f0-9]+$/);
+    // The mock returns 0xab repeated 32 times = "ab" repeated 32 times
+    expect(hash).toBe("ab".repeat(32));
+
+    // Verify digest was called with correct algorithm
+    expect(mockCrypto.subtle.digest).toHaveBeenCalled();
+    const [algorithm] = mockCrypto.subtle.digest.mock.calls[0];
+    expect(algorithm).toBe("SHA-256");
+  });
+
+  it("should throw error when crypto is not supported", async () => {
+    const originalCrypto = globalThis.crypto;
+    // @ts-expect-error - temporarily delete crypto for testing
+    delete globalThis.crypto;
+
+    const testFile = createMockFileWithArrayBuffer("test content", "test.txt");
+
+    await expect(computeFileHash(testFile)).rejects.toThrow(
+      "Web Crypto API is not supported"
+    );
+
+    // Restore
+    globalThis.crypto = originalCrypto;
+  });
+
+  it("should produce consistent hash for same content", async () => {
+    // Mock consistent hash for same content
+    const consistentHash = new Uint8Array(32);
+    for (let i = 0; i < 32; i++) {
+      consistentHash[i] = i;
+    }
+
+    mockCrypto.subtle.digest.mockResolvedValue(consistentHash.buffer);
+
+    const file1 = createMockFileWithArrayBuffer("same content", "file1.txt");
+    const file2 = createMockFileWithArrayBuffer("same content", "file2.txt");
+
+    const hash1 = await computeFileHash(file1);
+    const hash2 = await computeFileHash(file2);
+
+    expect(hash1).toBe(hash2);
+  });
+
+  it("should handle empty files", async () => {
+    const emptyHashBuffer = new Uint8Array(32).fill(0);
+    mockCrypto.subtle.digest.mockResolvedValueOnce(emptyHashBuffer.buffer);
+
+    const emptyFile = createMockFileWithArrayBuffer("", "empty.txt");
+
+    const hash = await computeFileHash(emptyFile);
+
+    expect(hash).toHaveLength(64);
+    expect(hash).toBe("00".repeat(32));
   });
 });
