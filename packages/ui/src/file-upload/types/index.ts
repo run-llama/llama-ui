@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { FileType } from "../utils/file-utils";
+import type { LlamaCloudClient } from "../../lib/clients";
 
 interface BaseFileUploadProps {
   allowedFileTypes?: FileType[];
@@ -49,6 +50,17 @@ export interface UseFileUploadOptions {
    * @default ""
    */
   externalIdPrefix?: string;
+  /**
+   * LlamaCloud client instance for file uploads.
+   * When provided, uses the new @llamaindex/llama-cloud SDK for uploads.
+   */
+  llamaCloudClient?: LlamaCloudClient;
+  /**
+   * The intended purpose of the file when using the LlamaCloud SDK.
+   * Valid values: 'user_data', 'parse', 'extract', 'split', 'classify', 'sheet', 'agent_app'
+   * @default "user_data"
+   */
+  filePurpose?: string;
 }
 
 export interface UploadFromUrlOptions {
@@ -131,6 +143,17 @@ export interface FileUploaderProps extends BaseFileUploadProps {
    * @default ""
    */
   externalIdPrefix?: string;
+  /**
+   * LlamaCloud client instance for file uploads.
+   * When provided, uses the new @llamaindex/llama-cloud SDK for uploads.
+   */
+  llamaCloudClient?: LlamaCloudClient;
+  /**
+   * The intended purpose of the file when using the LlamaCloud SDK.
+   * Valid values: 'user_data', 'parse', 'extract', 'split', 'classify', 'sheet', 'agent_app'
+   * @default "user_data"
+   */
+  filePurpose?: string;
 }
 
 export type { FileUploadProgress } from "./upload-progress";

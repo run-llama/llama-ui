@@ -1,5 +1,9 @@
 import { client as cloudApiClient } from "llama-cloud-services/api";
 import { client as workflowsClient } from "@llamaindex/workflows-client";
+import {
+  LlamaCloud,
+  type ClientOptions as LlamaCloudOptions,
+} from "@llamaindex/llama-cloud";
 
 // Export individual creator functions and types with clear names
 // Primary (new) names
@@ -18,3 +22,11 @@ export {
 
 export { cloudApiClient };
 export type CloudApiClient = typeof cloudApiClient;
+
+// New LlamaCloud SDK client
+export { LlamaCloud, type LlamaCloudOptions };
+export type LlamaCloudClient = LlamaCloud;
+
+export function createLlamaCloudClient(options?: LlamaCloudOptions): LlamaCloud {
+  return new LlamaCloud(options);
+}

@@ -15,6 +15,7 @@ import type {
   UseFileUploadReturn,
 } from "../types";
 import { computeFileHash } from "../utils/file-utils";
+import type { LlamaCloudClient } from "../../lib/clients";
 
 function deriveFileNameFromUrl(url: string): string {
   try {
@@ -37,11 +38,36 @@ export function useFileUpload({
   onUploadError,
   hashFile = false,
   externalIdPrefix = "",
+  llamaCloudClient,
+  filePurpose = "user_data",
 }: UseFileUploadOptions = {}): UseFileUploadReturn {
   const [isUploading, setIsUploading] = useState(false);
 
   const computeHash = async (file: File): Promise<string> => {
     return computeFileHash(file);
+  };
+
+  /**
+   * Uploads a file using the new LlamaCloud SDK.
+   */
+  const uploadWithLlamaCloudSdk = async (
+    client: LlamaCloudClient,
+    file: File,
+    externalFileId?: string
+  ): Promise<{ id: string; url?: string }> => {
+    const result = await client.files.create({
+      file,
+      purpose: filePurpose,
+      external_file_id: externalFileId,
+    });
+
+    // Get presigned URL for reading the file
+    const presignedUrl = await client.files.get(result.id);
+
+    return {
+      id: result.id,
+      url: presignedUrl.url,
+    };
   };
 
   /**
@@ -111,29 +137,46 @@ export function useFileUpload({
 
       onUploadStart?.(file, fileHash);
 
-      // Use beta API with external_file_id for deduplication
+      // Use external_file_id for deduplication
       const externalFileId = fileHash
         ? `${externalIdPrefix}${fileHash}`
         : undefined;
-      const result = await uploadWithBetaApi(file, externalFileId);
-      const fileId = result.id;
 
-      // Real API call with progress simulation
-      onProgress?.(file, 10);
+      let fileId: string;
+      let fileUrl: string | undefined;
 
-      // Get the file content URL using the file ID
-      const contentResponse = await readFileContentApiV1FilesIdContentGet({
-        path: {
-          id: fileId,
-        },
-      });
+      // Use LlamaCloud SDK if client is provided, otherwise fall back to beta API
+      if (llamaCloudClient) {
+        onProgress?.(file, 10);
+        const result = await uploadWithLlamaCloudSdk(
+          llamaCloudClient,
+          file,
+          externalFileId
+        );
+        fileId = result.id;
+        fileUrl = result.url;
+        onProgress?.(file, 80);
+      } else {
+        const result = await uploadWithBetaApi(file, externalFileId);
+        fileId = result.id;
 
-      if (contentResponse.error) {
-        throw contentResponse.error;
+        // Real API call with progress simulation
+        onProgress?.(file, 10);
+
+        // Get the file content URL using the file ID
+        const contentResponse = await readFileContentApiV1FilesIdContentGet({
+          path: {
+            id: fileId,
+          },
+        });
+
+        if (contentResponse.error) {
+          throw contentResponse.error;
+        }
+
+        fileUrl = contentResponse.data.url;
+        onProgress?.(file, 80);
       }
-
-      const fileUrl = contentResponse.data.url;
-      onProgress?.(file, 80);
 
       const fileData: FileUploadData = {
         file,

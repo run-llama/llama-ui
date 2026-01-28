@@ -36,6 +36,8 @@ export function FileUploader({
   selectFileDescription,
   hashFile = false,
   externalIdPrefix = "",
+  llamaCloudClient,
+  filePurpose = "user_data",
 }: FileUploaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
@@ -60,6 +62,8 @@ export function FileUploader({
     onUploadError: uploadProgress.failUpload,
     hashFile,
     externalIdPrefix,
+    llamaCloudClient,
+    filePurpose,
   });
 
   const handleClose = () => {

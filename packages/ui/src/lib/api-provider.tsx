@@ -12,12 +12,16 @@ import {
   workflowsClient,
   createCloudAgentClient,
   createWorkflowsClient,
+  LlamaCloudClient,
+  createLlamaCloudClient,
 } from "./clients";
 
 export interface ApiClients {
   workflowsClient?: WorkflowsClient;
   cloudApiClient?: CloudApiClient;
   agentDataClient?: CloudAgentClient;
+  /** New LlamaCloud SDK client for file uploads and other operations */
+  llamaCloudClient?: LlamaCloudClient;
 }
 
 export interface ApiProviderProps {
@@ -65,6 +69,8 @@ export function createMockClients(): ApiClients {
       agentUrlId: "your-agent-url-id",
       collection: "your-collection",
     }),
+    // Note: llamaCloudClient requires an API key and is not included by default
+    // Use createRealClientsForTests() with an API key to include it
   };
 }
 
@@ -112,6 +118,10 @@ export function createRealClientsForTests(params: {
       windowUrl:
         typeof window !== "undefined" ? window.location.href : undefined,
       collection: params.agent?.collection,
+    }),
+    llamaCloudClient: createLlamaCloudClient({
+      apiKey,
+      baseURL: params.baseUrl,
     }),
   };
 }
@@ -176,6 +186,28 @@ export function useAgentDataClient(): CloudAgentClient {
   }
 
   return clients.agentDataClient;
+}
+
+export function useLlamaCloudClient(): LlamaCloudClient {
+  const { clients } = useApiContext();
+
+  if (!clients.llamaCloudClient) {
+    throw new Error(
+      "No LlamaCloud client configured. " +
+        "Please ensure llamaCloudClient is configured in ApiProvider."
+    );
+  }
+
+  return clients.llamaCloudClient;
+}
+
+/**
+ * Returns the LlamaCloud client if configured, undefined otherwise.
+ * Use this when the client is optional.
+ */
+export function useLlamaCloudClientOptional(): LlamaCloudClient | undefined {
+  const { clients } = useApiContext();
+  return clients.llamaCloudClient;
 }
 
 export function useApiClients(): ApiClients {
