@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import {
   type SearchAgentDataOptions,
   AgentClient,
-} from "llama-cloud-services/beta/agent";
+} from "@/src/lib/agent-data";
 import { useAgentDataClient } from "../lib/api-provider";
 
 export interface ItemCountProps {

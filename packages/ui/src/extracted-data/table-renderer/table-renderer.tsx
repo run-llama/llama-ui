@@ -1,4 +1,4 @@
-import type { ExtractedFieldMetadata } from "llama-cloud-services/beta/agent";
+import type { ExtractedFieldMetadata } from "@/src/lib/agent-data";
 import { Plus, Trash2 } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { Button } from "@/base/button";

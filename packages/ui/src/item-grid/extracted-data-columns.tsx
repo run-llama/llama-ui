@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import type {
   TypedAgentData,
   ExtractedData,
-} from "llama-cloud-services/beta/agent";
+} from "@/src/lib/agent-data";
 import { STATUS_OPTIONS } from "./built-in-columns";
 import { DEFAULT_CONFIDENCE_THRESHOLD } from "@/src/store/ui-config-store";
 

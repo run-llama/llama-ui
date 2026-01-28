@@ -4,7 +4,7 @@ import { within, userEvent, screen } from "@storybook/test";
 import { useState } from "react";
 import { EditableField } from "../../src/extracted-data/editable-field";
 import { PrimitiveType } from "../../src/extracted-data/primitive-validation";
-import type { ExtractedFieldMetadata } from "llama-cloud-services/beta/agent";
+import type { ExtractedFieldMetadata } from "@/src/lib/agent-data";
 
 const meta: Meta<typeof EditableField> = {
   title: "Components/ExtractedData/EditableField",

@@ -7,7 +7,7 @@ import {
 import type {
   ExtractedData,
   TypedAgentData,
-} from "llama-cloud-services/beta/agent";
+} from "@/src/lib/agent-data";
 import { type JsonObject } from "@/src";
 
 // Mock the components

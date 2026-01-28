@@ -14,7 +14,7 @@ export { workflowsClient };
 export {
   createAgentDataClient as createCloudAgentClient,
   type AgentClient as CloudAgentClient,
-} from "llama-cloud-services/beta/agent";
+} from "./agent-data";
 
 export { cloudApiClient };
 export type CloudApiClient = typeof cloudApiClient;

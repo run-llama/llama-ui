@@ -15,7 +15,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { PrimitiveType, toPrimitiveType } from "../primitive-validation";
 import type { FieldSchemaMetadata } from "../schema-reconciliation";
 import type { PrimitiveValue, RendererMetadata } from "../types";
-import type { ExtractedFieldMetadata } from "llama-cloud-services/beta/agent";
+import type { ExtractedFieldMetadata } from "@/src/lib/agent-data";
 import { findFieldSchemaMetadata } from "../metadata-path-utils";
 import { findExtractedFieldMetadata } from "../metadata-lookup";
 import { DataPagination } from "../data-pagination";

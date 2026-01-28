@@ -3,7 +3,7 @@ import {
   type ExtractedData,
   type TypedAgentData,
   type AgentClient,
-} from "llama-cloud-services/beta/agent";
+} from "@/src/lib/agent-data";
 import { getMockItemResponse } from "./mock-item-response";
 import { JSONSchema } from "zod/v4/core";
 import { JsonShape } from "./types";

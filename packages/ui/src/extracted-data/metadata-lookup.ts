@@ -1,7 +1,7 @@
 import type {
   ExtractedFieldMetadataDict,
   ExtractedFieldMetadata,
-} from "llama-cloud-services/beta/agent";
+} from "@/src/lib/agent-data";
 
 /**
  * Find metadata for a specific field path in the API metadata object

@@ -3,7 +3,7 @@ import { PropertyRenderer } from "../../src/extracted-data";
 import { userEvent, within, expect, screen } from "@storybook/test";
 import { useState } from "react";
 import type { FieldSchemaMetadata } from "../../src/extracted-data/schema-reconciliation";
-import type { ExtractedFieldMetadataDict } from "llama-cloud-services/beta/agent";
+import type { ExtractedFieldMetadataDict } from "@/src/lib/agent-data";
 import type { JsonObject } from "../../src/extracted-data/types";
 
 const meta: Meta<typeof PropertyRenderer> = {

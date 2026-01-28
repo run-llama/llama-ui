@@ -6,7 +6,7 @@ import { ApiProvider, createMockClients } from "../../src/lib";
 import type {
   ExtractedData,
   TypedAgentData,
-} from "llama-cloud-services/beta/agent";
+} from "@/src/lib/agent-data";
 
 const meta = {
   title: "Business/ExtractedDataItemGrid",

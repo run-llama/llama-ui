@@ -1,4 +1,4 @@
-import type { ExtractedFieldMetadata } from "llama-cloud-services/beta/agent";
+import type { ExtractedFieldMetadata } from "@/src/lib/agent-data";
 import type React from "react";
 import { useLayoutEffect, useRef, useState } from "react";
 import { Button } from "@/base/button";

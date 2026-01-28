@@ -4,7 +4,7 @@ import type {
   FilterOperation,
   TypedAgentData,
   AgentClient,
-} from "llama-cloud-services/beta/agent";
+} from "@/src/lib/agent-data";
 import { useAgentDataClient } from "../../lib/api-provider";
 
 type UseItemGridHandler<T = unknown> = {

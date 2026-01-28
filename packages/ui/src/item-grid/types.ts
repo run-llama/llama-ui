@@ -1,7 +1,7 @@
 import type {
   FilterOperation,
   TypedAgentData,
-} from "llama-cloud-services/beta/agent";
+} from "@/src/lib/agent-data";
 import type { ReactNode } from "react";
 
 // Types

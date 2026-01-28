@@ -2,7 +2,7 @@ import type {
   TypedAgentData,
   ExtractedData,
   FilterOperation,
-} from "llama-cloud-services/beta/agent";
+} from "@/src/lib/agent-data";
 import { ItemGrid } from "./item-grid";
 import {
   createExtractedDataColumn,

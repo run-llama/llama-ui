@@ -19,7 +19,7 @@ import type {
 import type {
   FilterOperation,
   TypedAgentData,
-} from "llama-cloud-services/beta/agent";
+} from "@/src/lib/agent-data";
 
 // Hooks
 import { useItemGridData } from "./hooks/use-item-grid-data";

@@ -1,8 +1,8 @@
 import type {
   ExtractedData,
   TypedAgentData,
-  StatusType,
-} from "llama-cloud-services/beta/agent";
+} from "@/src/lib/agent-data";
+import { StatusType } from "@/src/lib/agent-data";
 
 // Use the StatusType from llama-cloud-services instead
 export type ProcessingStatus =
