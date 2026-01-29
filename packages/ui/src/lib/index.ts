@@ -23,8 +23,8 @@ export {
 export {
   createAgentDataConfig,
   workflowsClient,
-  getStainlessClient,
-  configureStainlessClient,
+  getCloudClient,
+  configureCloudClient,
   createWorkflowsClient,
   createWorkflowsConfig,
   type WorkflowsClient,

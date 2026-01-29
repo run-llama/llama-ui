@@ -3,7 +3,7 @@ import type { PaginationState } from "../types";
 import type { FilterOperation, AgentDataItem } from "@/src/lib/agent-data";
 import { useAgentDataConfig, useCloudApiClient } from "../../lib/api-provider";
 
-type UseItemGridHandler<T = unknown> = {
+type UseItemGridHandler = {
   data: AgentDataItem[];
   loading: boolean;
   error: string | null;
@@ -13,11 +13,11 @@ type UseItemGridHandler<T = unknown> = {
 };
 
 // Custom hook for data fetching
-export function useItemGridData<T = unknown>(
+export function useItemGridData(
   paginationState: PaginationState,
   filterFields: Record<string, FilterOperation> = {},
   sortSpec: string | undefined = undefined
-): UseItemGridHandler<T> {
+): UseItemGridHandler {
   const client = useCloudApiClient();
   const config = useAgentDataConfig();
   const [data, setData] = useState<AgentDataItem[]>([]);

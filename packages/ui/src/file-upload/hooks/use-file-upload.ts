@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { logger } from "@shared/logger";
-import { getStainlessClient } from "../../lib/stainless-client";
+import { getCloudClient } from "../../lib/cloud-client";
 
 import type {
   FileUploadData,
@@ -22,7 +22,7 @@ export function useFileUpload({
     onUploadStart?.(file);
 
     try {
-      const client = getStainlessClient();
+      const client = getCloudClient();
 
       const response = await client.files.create({
         file: file,

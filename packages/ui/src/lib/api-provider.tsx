@@ -8,8 +8,8 @@ import {
   WorkflowsClient,
   workflowsClient,
   createWorkflowsClient,
-  getStainlessClient,
-  configureStainlessClient,
+  getCloudClient,
+  configureCloudClient,
   createAgentDataConfig,
   type AgentDataConfig,
   type CloudApiClient,
@@ -59,16 +59,16 @@ export function ApiProvider({ children, clients, project }: ApiProviderProps) {
 // ===== Mock Clients Factory for Testing/Storybook =====
 
 export function createMockClients(): ApiClients {
-  // In mock/test mode, we need to configure the Stainless client with a dummy API key
+  // In mock/test mode, we need to configure the cloud client with a dummy API key
   // so that it doesn't throw during instantiation. MSW will intercept actual API calls.
-  configureStainlessClient({
+  configureCloudClient({
     apiKey: "test-api-key",
     baseURL: "https://api.cloud.llamaindex.ai",
   });
 
   return {
     workflowsClient: workflowsClient,
-    cloudApiClient: getStainlessClient(),
+    cloudApiClient: getCloudClient(),
     agentDataConfig: createAgentDataConfig({
       deploymentName: "your-agent-url-id",
       collection: "your-collection",
@@ -105,15 +105,15 @@ export function createRealClientsForTests(params: {
       Authorization: `Bearer ${apiKey}`,
     },
   });
-  // Configure the Stainless client with API key and base URL
-  configureStainlessClient({
+  // Configure the cloud client with API key and base URL
+  configureCloudClient({
     apiKey: apiKey,
     baseURL: params.baseUrl,
   });
 
   return {
     workflowsClient,
-    cloudApiClient: getStainlessClient(),
+    cloudApiClient: getCloudClient(),
     agentDataConfig: createAgentDataConfig({
       deploymentName: params.agent?.agentUrlId,
       windowUrl:

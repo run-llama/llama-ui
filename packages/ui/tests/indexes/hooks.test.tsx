@@ -1,29 +1,29 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { act } from "@testing-library/react";
-import * as stainlessClient from "../../src/lib/stainless-client";
+import * as cloudClient from "../../src/lib/cloud-client";
 import { __resetIndexStore } from "../../src/indexes/hooks/use-index-store";
 import { useIndexList } from "../../src/indexes/hooks/use-index-list";
 import { useIndex } from "../../src/indexes/hooks/use-index";
 import { renderHookWithProvider } from "../test-utils";
 
-// Mock the stainless client module
-vi.mock("../../src/lib/stainless-client", () => {
+// Mock the cloud client module
+vi.mock("../../src/lib/cloud-client", () => {
   const mockPipelines = {
     list: vi.fn(),
     get: vi.fn(),
   };
   return {
-    getStainlessClient: () => ({
+    getCloudClient: () => ({
       pipelines: mockPipelines,
     }),
-    configureStainlessClient: vi.fn(),
-    resetStainlessClient: vi.fn(),
+    configureCloudClient: vi.fn(),
+    resetCloudClient: vi.fn(),
     __mockPipelines: mockPipelines,
   };
 });
 
 // Get access to mock functions
-const { __mockPipelines } = vi.mocked(stainlessClient) as unknown as {
+const { __mockPipelines } = vi.mocked(cloudClient) as unknown as {
   __mockPipelines: {
     list: ReturnType<typeof vi.fn>;
     get: ReturnType<typeof vi.fn>;

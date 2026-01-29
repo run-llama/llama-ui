@@ -4,11 +4,11 @@ let clientInstance: LlamaCloud | null = null;
 let currentConfig: { apiKey?: string; baseURL?: string } = {};
 
 /**
- * Get the configured Stainless client instance.
+ * Get the configured cloud client instance.
  * Will create a new instance with the current config if not yet configured.
  * Note: This may throw if no API key is configured and LLAMA_CLOUD_API_KEY env var is not set.
  */
-export function getStainlessClient(): LlamaCloud {
+export function getCloudClient(): LlamaCloud {
   if (!clientInstance) {
     clientInstance = new LlamaCloud({
       apiKey: currentConfig.apiKey,
@@ -19,10 +19,10 @@ export function getStainlessClient(): LlamaCloud {
 }
 
 /**
- * Configure the Stainless client with API key and/or base URL.
+ * Configure the cloud client with API key and/or base URL.
  * This will replace any existing client instance.
  */
-export function configureStainlessClient(options: {
+export function configureCloudClient(options: {
   apiKey?: string;
   baseURL?: string;
 }): void {
@@ -36,7 +36,7 @@ export function configureStainlessClient(options: {
 /**
  * Reset the client instance (useful for testing).
  */
-export function resetStainlessClient(): void {
+export function resetCloudClient(): void {
   clientInstance = null;
   currentConfig = {};
 }

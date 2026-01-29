@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getStainlessClient } from "../lib/stainless-client";
+import { getCloudClient } from "../lib/cloud-client";
 
 export interface FileData {
   url?: string;
@@ -30,7 +30,7 @@ export function useFileData(fileId: string, mockData?: FileData) {
       setError(null);
 
       try {
-        const client = getStainlessClient();
+        const client = getCloudClient();
 
         // Get file content URL (presigned URL)
         const contentResponse = await client.files.get(fileId);

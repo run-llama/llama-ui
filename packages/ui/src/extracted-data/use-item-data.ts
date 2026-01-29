@@ -3,7 +3,7 @@ import { type ExtractedData, type AgentDataItem } from "@/src/lib/agent-data";
 import { getMockItemResponse } from "./mock-item-response";
 import { JSONSchema } from "zod/v4/core";
 import { JsonShape } from "./types";
-import { useAgentDataConfig, useCloudApiClient } from "../lib/api-provider";
+import { useCloudApiClient } from "../lib/api-provider";
 import { NotFoundError } from "@llamaindex/llama-cloud";
 
 export interface ItemHookData<T extends JsonShape<T>> {
@@ -37,7 +37,6 @@ export function useItemData<T extends JsonShape<T>>({
   isMock,
 }: UseItemDataOptions<T>): ItemHookData<T> {
   const client = useCloudApiClient();
-  const config = useAgentDataConfig();
 
   // Single source of truth - contains both original predictions and user corrections
   const [item, setItem] = useState<AgentDataItem | null>(null);

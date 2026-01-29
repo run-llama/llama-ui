@@ -33,8 +33,7 @@ export const createIndexStore = (
 
     refresh: async (id: string) => {
       try {
-        const { id: projectId } = options?.getProject?.() ?? {};
-        const pipeline = await getPipeline(id, { projectId });
+        const pipeline = await getPipeline(id);
         set((state) => ({ indexes: { ...state.indexes, [id]: pipeline } }));
       } catch (error) {
         // eslint-disable-next-line no-console
