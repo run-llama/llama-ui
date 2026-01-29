@@ -20,7 +20,7 @@ export interface ItemGridHooks {
   ) => Promise<{ success: boolean; error?: string }>;
 }
 
-export interface Column<T = unknown> {
+export interface Column {
   key: string;
   header: string;
   getValue: (item: AgentDataItem) => unknown;
@@ -31,12 +31,12 @@ export interface Column<T = unknown> {
   filterOptions?: string[];
 }
 
-export interface BuiltInColumnConfig<T = unknown> {
-  fileName?: boolean | Partial<Column<T>>;
-  status?: boolean | Partial<Column<T>>;
-  createdAt?: boolean | Partial<Column<T>>;
-  itemsToReview?: boolean | Partial<Column<T>>;
-  actions?: boolean | Partial<Column<T>>;
+export interface BuiltInColumnConfig {
+  fileName?: boolean | Partial<Column>;
+  status?: boolean | Partial<Column>;
+  createdAt?: boolean | Partial<Column>;
+  itemsToReview?: boolean | Partial<Column>;
+  actions?: boolean | Partial<Column>;
 }
 
 export interface BusinessConfig {
