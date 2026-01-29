@@ -131,20 +131,30 @@ export function FileDropzone({
     return renderFileRow(selectedFiles[0]);
   };
 
+  // Custom dashed border with wider spacing (8px dash, 8px gap)
+  const borderColor =
+    hasFiles && !disabled && isDragging ? "%23737373" : "%23a3a3a3";
+  const dashedBorderStyle = hasFiles
+    ? {
+        backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='16' ry='16' stroke='${borderColor}' stroke-width='1' stroke-dasharray='8%2c 8' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e")`,
+      }
+    : undefined;
+
   return (
     <div
       className={cn(
         "flex h-full flex-1 flex-col",
         disabled ? "opacity-60" : "cursor-pointer",
         hasFiles &&
-          "gap-4 rounded-lg border border-dashed p-4 transition-all items-stretch text-left",
+          "gap-4 rounded-2xl px-4 py-6 transition-all items-stretch text-left",
         hasFiles &&
           "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-neutral-950/10",
         hasFiles &&
           (!disabled && isDragging
-            ? "border-neutral-400 bg-neutral-100 ring-[3px] ring-neutral-950/10"
-            : "border-neutral-300 bg-white hover:border-neutral-400")
+            ? "bg-neutral-100 ring-[3px] ring-neutral-950/10"
+            : "bg-white")
       )}
+      style={dashedBorderStyle}
       onDragEnter={disabled ? undefined : handleDragEnter}
       onDragLeave={disabled ? undefined : handleDragLeave}
       onDragOver={disabled ? undefined : handleDragOver}

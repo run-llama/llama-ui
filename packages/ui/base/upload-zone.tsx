@@ -38,14 +38,21 @@ export function UploadZone({
   supportedFiles,
   state = "default",
 }: UploadZoneProps) {
+  // Custom dashed border with wider spacing (8px dash, 8px gap)
+  const borderColor = state === "focus" ? "%23737373" : "%23a3a3a3";
+  const dashedBorderStyle = {
+    backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='16' ry='16' stroke='${borderColor}' stroke-width='1' stroke-dasharray='8%2c 8' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e")`,
+  };
+
   return (
     <div
       className={cn(
-        "flex h-full min-h-[200px] w-full flex-1 flex-col items-center rounded-lg border border-dashed p-4 text-center transition-all",
+        "flex h-full min-h-[200px] w-full flex-1 flex-col items-center rounded-2xl px-4 py-6 text-center transition-all",
         state === "focus"
-          ? "border-neutral-400 bg-neutral-100 ring-[3px] ring-neutral-950/10"
-          : "border-neutral-300 bg-white"
+          ? "bg-neutral-100 ring-[3px] ring-neutral-950/10"
+          : "bg-white"
       )}
+      style={dashedBorderStyle}
     >
       {/* Centered main content */}
       <div className="flex flex-1 flex-col items-center justify-center gap-4">
