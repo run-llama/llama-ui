@@ -365,7 +365,7 @@ export function DocumentPreview(props: DocumentPreviewProps) {
     }
 
     return (
-      <div className="flex h-full flex-1 flex-col items-center justify-start px-20 py-4">
+      <div className="flex h-full flex-1 flex-col items-center justify-start px-4 py-4">
         <FileUpload
           className="h-full max-w-4xl"
           variant={options?.variant ?? "normal"}
