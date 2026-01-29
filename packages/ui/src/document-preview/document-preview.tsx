@@ -307,21 +307,17 @@ export function DocumentPreview(props: DocumentPreviewProps) {
     }
   };
 
-  const handleContentChange = (newContent: File[] | string) => {
+  const handleContentChange = (newContent: File[]) => {
+    if (newContent.length === 0) return;
+
     if (!allowMultiple) {
-      const value = Array.isArray(newContent)
-        ? (newContent[0] ?? null)
-        : newContent;
-      singleProps?.onChange?.(value);
+      singleProps?.onChange?.(newContent[0] ?? null);
       return;
     }
 
-    const newContents = Array.isArray(newContent) ? newContent : [newContent];
-    if (newContents.length === 0) return;
-
     const newItems = [
       ...multiValues,
-      ...newContents.map((content) => ({ content })),
+      ...newContent.map((content) => ({ content })),
     ];
     void multiProps?.onChange?.(newItems);
     setPreviewIndex(newItems.length - 1);

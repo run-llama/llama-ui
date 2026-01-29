@@ -39,7 +39,6 @@ export function FileUploader({
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [fileUrl, setFileUrl] = useState("");
 
   // Dynamic title and description based on multiple setting
   const titleOrDefault = title || (multiple ? "Upload Files" : "Upload File");
@@ -51,7 +50,7 @@ export function FileUploader({
 
   const uploadProgress = useUploadProgress();
 
-  const { uploadAndReturn, uploadFromUrl } = useFileUpload({
+  const { uploadAndReturn } = useFileUpload({
     onUploadStart: uploadProgress.startUpload,
     onProgress: uploadProgress.updateProgress,
     onUploadComplete: uploadProgress.completeUpload,
@@ -63,7 +62,6 @@ export function FileUploader({
     setFieldValues({});
     setSelectedFiles([]);
     setFieldErrors({});
-    setFileUrl("");
   };
 
   const handleFieldChange = (key: string, value: string) => {
@@ -118,36 +116,22 @@ export function FileUploader({
       } else {
         setSelectedFiles(validFiles.slice(0, 1)); // Only take the first file for single upload
       }
-      setFileUrl("");
     }
   };
 
-  const handleContentChange = (content: File | string | null) => {
-    if (content instanceof File) {
+  const handleContentChange = (content: File | null) => {
+    if (content) {
       handleFileSelect([content]);
-      return;
-    }
-
-    if (typeof content === "string") {
+    } else {
       setSelectedFiles([]);
-      setFileUrl(content);
-      return;
     }
-
-    setSelectedFiles([]);
-    setFileUrl("");
   };
 
   const handleUpload = async () => {
     const hasFiles = selectedFiles.length > 0;
-    const trimmedUrl = fileUrl.trim();
     const currentFieldValues = { ...fieldValues };
 
-    if (multiple) {
-      if (!hasFiles) {
-        return;
-      }
-    } else if (!hasFiles && trimmedUrl.length === 0) {
+    if (!hasFiles) {
       return;
     }
 
@@ -155,56 +139,34 @@ export function FileUploader({
       return;
     }
 
-    const uploadFiles = async (files: File[]) => {
-      handleClose();
+    handleClose();
 
-      try {
-        const results = await Promise.all(
-          files.map((file) => uploadAndReturn(file))
-        );
-        const successfulData = results
-          .filter((result) => result.success && result.data)
-          .map((result) => result.data!);
+    try {
+      const results = await Promise.all(
+        (multiple ? selectedFiles : selectedFiles.slice(0, 1)).map((file) =>
+          uploadAndReturn(file)
+        )
+      );
+      const successfulData = results
+        .filter((result) => result.success && result.data)
+        .map((result) => result.data!);
 
-        if (successfulData.length > 0) {
-          await onSuccess(successfulData, currentFieldValues);
-        }
-      } catch (error) {
-        logger.error("FileUploader uploadFiles failed", {
-          error,
-          fileCount: files.length,
-        });
+      if (successfulData.length > 0) {
+        await onSuccess(successfulData, currentFieldValues);
       }
-    };
-
-    if (!multiple && trimmedUrl.length > 0 && !hasFiles) {
-      handleClose();
-
-      try {
-        const result = await uploadFromUrl(trimmedUrl);
-        if (result.success && result.data) {
-          await onSuccess([result.data], {
-            ...currentFieldValues,
-            fileUrl: trimmedUrl,
-          });
-        }
-      } catch (error) {
-        logger.error("FileUploader uploadFromUrl failed", {
-          error,
-          url: trimmedUrl,
-        });
-      }
-      return;
+    } catch (error) {
+      logger.error("FileUploader uploadFiles failed", {
+        error,
+        fileCount: selectedFiles.length,
+      });
     }
-
-    await uploadFiles(multiple ? selectedFiles : selectedFiles.slice(0, 1));
   };
 
   const removeFile = (fileToRemove: File) => {
     setSelectedFiles((prev) => prev.filter((file) => file !== fileToRemove));
   };
 
-  const singleUploadContent = selectedFiles[0] ?? (fileUrl ? fileUrl : null);
+  const singleUploadContent = selectedFiles[0] ?? null;
 
   const canSubmit = () => {
     const requiredFieldsSatisfied =
@@ -220,11 +182,7 @@ export function FileUploader({
       return false;
     }
 
-    if (multiple) {
-      return selectedFiles.length > 0;
-    }
-
-    return selectedFiles.length > 0 || fileUrl.trim().length > 0;
+    return selectedFiles.length > 0;
   };
   return (
     <>
@@ -290,7 +248,6 @@ export function FileUploader({
                   allowFileRemoval
                   showHeader={false}
                   allowedFileTypes={allowedFileTypes}
-                  disableWhenHasSelection
                   footer={null}
                   onSelectFile={onSelectFile}
                   selectFileLabel={selectFileLabel}
