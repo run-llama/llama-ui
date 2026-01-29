@@ -1,7 +1,4 @@
-import type {
-  FilterOperation,
-  TypedAgentData,
-} from "@/src/lib/agent-data";
+import type { FilterOperation, TypedAgentData } from "@/src/lib/agent-data";
 import type { ReactNode } from "react";
 
 // Types

@@ -16,10 +16,7 @@ import type {
   PaginationState,
   Column,
 } from "./types";
-import type {
-  FilterOperation,
-  TypedAgentData,
-} from "@/src/lib/agent-data";
+import type { FilterOperation, TypedAgentData } from "@/src/lib/agent-data";
 
 // Hooks
 import { useItemGridData } from "./hooks/use-item-grid-data";

@@ -5,10 +5,7 @@ import {
 } from "./components/status-components";
 import { ActionButton } from "./components/action-button";
 import { toast } from "sonner";
-import type {
-  TypedAgentData,
-  ExtractedData,
-} from "@/src/lib/agent-data";
+import type { TypedAgentData, ExtractedData } from "@/src/lib/agent-data";
 import { STATUS_OPTIONS } from "./built-in-columns";
 import { DEFAULT_CONFIDENCE_THRESHOLD } from "@/src/store/ui-config-store";
 

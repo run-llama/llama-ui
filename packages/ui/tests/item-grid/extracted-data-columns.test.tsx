@@ -4,10 +4,7 @@ import {
   EXTRACTED_DATA_COLUMN_NAMES,
   getExtractedDataItemsToReviewCount,
 } from "../../src/item-grid/extracted-data-columns";
-import type {
-  ExtractedData,
-  TypedAgentData,
-} from "@/src/lib/agent-data";
+import type { ExtractedData, TypedAgentData } from "@/src/lib/agent-data";
 import { type JsonObject } from "@/src";
 
 // Mock the components

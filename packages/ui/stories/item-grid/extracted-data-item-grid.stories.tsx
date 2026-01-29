@@ -3,10 +3,7 @@ import React from "react";
 import { within, userEvent, expect } from "@storybook/test";
 import { ExtractedDataItemGrid } from "../../src/item-grid";
 import { ApiProvider, createMockClients } from "../../src/lib";
-import type {
-  ExtractedData,
-  TypedAgentData,
-} from "@/src/lib/agent-data";
+import type { ExtractedData, TypedAgentData } from "@/src/lib/agent-data";
 
 const meta = {
   title: "Business/ExtractedDataItemGrid",

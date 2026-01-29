@@ -3,10 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/base/card";
 import { cn } from "@/lib/utils";
-import {
-  type SearchAgentDataOptions,
-  AgentClient,
-} from "@/src/lib/agent-data";
+import { type SearchAgentDataOptions, AgentClient } from "@/src/lib/agent-data";
 import { useAgentDataClient } from "../lib/api-provider";
 
 export interface ItemCountProps {

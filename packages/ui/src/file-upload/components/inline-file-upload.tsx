@@ -1,6 +1,5 @@
 "use client";
 
-import { Input } from "@/base/input";
 import { Button } from "@/base/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/base/tabs";
 import { cn } from "@/lib/utils";
@@ -21,8 +20,6 @@ export function FileUpload({
   uploadTitle = "Drag files here to upload",
   uploadDescription,
   supportedFiles,
-  fileUrlPlaceholder = "Paste the file link here",
-  disableWhenHasSelection = false,
   footer,
   onSelectFile,
   selectFileLabel = "Select file",
@@ -48,6 +45,20 @@ export function FileUpload({
     }
   };
 
+  const dropzoneContent = (
+    <FileDropzone
+      selectedFiles={selectedFile ? [selectedFile] : []}
+      onFilesSelected={handleFilesSelected}
+      onRemoveFile={allowFileRemoval ? handleRemoveFile : undefined}
+      allowedFileTypes={allowedFileTypes}
+      maxFileSizeBytes={maxFileSizeBytes}
+      title={uploadTitle}
+      description={uploadDescription}
+      supportedFiles={supportedFiles}
+      showRemoveButton={allowFileRemoval}
+    />
+  );
+
   return (
     <div className={cn("flex h-full w-full flex-col", className)}>
       {showHeader && (
@@ -64,53 +75,23 @@ export function FileUpload({
         </div>
       )}
 
-      <Tabs
-        defaultValue="upload"
-        className="flex h-full flex-1 flex-col items-center"
-      >
-        <TabsList>
-          <TabsTrigger value="upload" label="Upload file" />
-          <TabsTrigger value="url" label="File URL" />
-          {onSelectFile && <TabsTrigger value="select" label="Select file" />}
-        </TabsList>
-
-        <TabsContent
-          value="upload"
-          className="mt-4 flex w-full flex-1 flex-col"
+      {onSelectFile ? (
+        <Tabs
+          defaultValue="upload"
+          className="flex h-full flex-1 flex-col items-center"
         >
-          <FileDropzone
-            selectedFiles={selectedFile ? [selectedFile] : []}
-            onFilesSelected={handleFilesSelected}
-            onRemoveFile={allowFileRemoval ? handleRemoveFile : undefined}
-            allowedFileTypes={allowedFileTypes}
-            maxFileSizeBytes={maxFileSizeBytes}
-            title={uploadTitle}
-            description={uploadDescription}
-            supportedFiles={supportedFiles}
-            showRemoveButton={allowFileRemoval}
-            disabled={
-              disableWhenHasSelection &&
-              typeof content === "string" &&
-              content.trim().length > 0
-            }
-          />
-        </TabsContent>
+          <TabsList>
+            <TabsTrigger value="upload" label="Upload file" />
+            <TabsTrigger value="select" label="Select file" />
+          </TabsList>
 
-        <TabsContent value="url" className="mt-4 flex w-full flex-1 flex-col">
-          <div className="flex h-full min-h-[200px] flex-1 flex-col items-center justify-center gap-4 rounded-lg border border-dashed border-neutral-300 bg-white p-4">
-            <div className="w-full max-w-md">
-              <Input
-                type="url"
-                placeholder={fileUrlPlaceholder}
-                value={typeof content === "string" ? content : ""}
-                onChange={(event) => onContentChange(event.target.value)}
-                disabled={disableWhenHasSelection && selectedFile !== null}
-              />
-            </div>
-          </div>
-        </TabsContent>
+          <TabsContent
+            value="upload"
+            className="mt-4 flex w-full flex-1 flex-col"
+          >
+            {dropzoneContent}
+          </TabsContent>
 
-        {onSelectFile && (
           <TabsContent
             value="select"
             className="mt-4 flex w-full flex-1 flex-col"
@@ -133,8 +114,10 @@ export function FileUpload({
               </div>
             </div>
           </TabsContent>
-        )}
-      </Tabs>
+        </Tabs>
+      ) : (
+        <div className="flex h-full flex-1 flex-col">{dropzoneContent}</div>
+      )}
 
       {footer}
     </div>
