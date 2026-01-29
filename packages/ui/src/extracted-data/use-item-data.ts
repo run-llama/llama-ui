@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
-import { type ExtractedData } from "@/src/lib/agent-data";
-import { getMockItemResponse, type AgentDataItem } from "./mock-item-response";
+import { type ExtractedData, type AgentDataItem } from "@/src/lib/agent-data";
+import { getMockItemResponse } from "./mock-item-response";
 import { JSONSchema } from "zod/v4/core";
 import { JsonShape } from "./types";
 import { useAgentDataConfig, useCloudApiClient } from "../lib/api-provider";

@@ -17,6 +17,3 @@ export type {
 
 // Export the const objects (their types are automatically exported with the same name)
 export { StatusType, ComparisonOperator } from "./types";
-
-// Legacy alias for backwards compatibility
-export { StatusType as StatusTypeEnum } from "./types";

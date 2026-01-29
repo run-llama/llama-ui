@@ -1,9 +1,6 @@
 import type { ExtractedData, AgentDataItem } from "@/src/lib/agent-data";
 import { StatusType } from "@/src/lib/agent-data";
 
-// Re-export AgentDataItem for backward compatibility
-export type { AgentDataItem };
-
 // Use the StatusType from the local agent-data types
 export type ProcessingStatus =
   | StatusType
