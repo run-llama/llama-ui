@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 4.0.3
+
+### Patch Changes
+
+- 8a3aa29: remove fileurl upload
+
 ## 4.0.2
 
 ### Patch Changes
