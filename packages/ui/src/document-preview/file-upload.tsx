@@ -1,25 +1,23 @@
 "use client";
 
 import { FolderOpen } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import Dropzone, {
   type DropzoneProps,
   type FileRejection,
 } from "react-dropzone";
 import { toast } from "sonner";
 import { Button } from "@/base/button";
-import { Input } from "@/base/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/base/tabs";
 import { UploadZone } from "@/base/upload-zone";
 import { cn } from "@/lib/utils";
 
 interface FileUploadProps {
   className?: string;
-  onContentChange: (content: File[] | string) => void;
+  onContentChange: (content: File[]) => void;
   title?: string;
   description?: string;
   supportedFiles?: string;
-  fileUrlPlaceholder?: string;
   variant?: "small" | "normal";
   accept?: DropzoneProps["accept"];
   maxSize?: DropzoneProps["maxSize"];
@@ -35,7 +33,6 @@ export function FileUpload({
   title = "Drag files here to upload",
   description = "Up to 20 files, 315 MB total",
   supportedFiles,
-  fileUrlPlaceholder = "Paste the file link here",
   variant = "normal",
   accept,
   maxSize,
@@ -44,47 +41,6 @@ export function FileUpload({
   selectFileLabel = "Select file",
   selectFileDescription = "Choose a file from your existing files",
 }: FileUploadProps) {
-  const [fileUrlInput, setFileUrlInput] = useState("");
-
-  const handleUrlSubmit = useCallback(() => {
-    const trimmedUrl = fileUrlInput.trim();
-    if (!trimmedUrl) {
-      return;
-    }
-
-    try {
-      new URL(trimmedUrl);
-    } catch {
-      toast.error("Please enter a valid URL.");
-      return;
-    }
-
-    if (accept && typeof accept === "object") {
-      const allowedExtensions = Object.values(accept).flat();
-      if (allowedExtensions.length > 0) {
-        const urlPath = new URL(trimmedUrl).pathname.toLowerCase();
-        const lastDotIndex = urlPath.lastIndexOf(".");
-        if (lastDotIndex === -1 || lastDotIndex === urlPath.length - 1) {
-          toast.error("This file is not supported.");
-          return;
-        }
-
-        const urlExtension = urlPath.slice(lastDotIndex).toLowerCase();
-        const isValidExtension = allowedExtensions.some(
-          (ext) => ext.toLowerCase() === urlExtension
-        );
-
-        if (!isValidExtension) {
-          toast.error("This file is not supported.");
-          return;
-        }
-      }
-    }
-
-    onContentChange(trimmedUrl);
-    setFileUrlInput("");
-  }, [fileUrlInput, onContentChange, accept]);
-
   const defaultSupportedFiles = useMemo(() => {
     if (supportedFiles) return supportedFiles;
     if (!accept || typeof accept !== "object") return null;
@@ -159,7 +115,7 @@ export function FileUpload({
 
   return (
     <div className={cn("flex h-full w-full flex-col", className)}>
-      {variant === "small" ? (
+      {variant === "small" || !onSelectFile ? (
         dropzoneContent
       ) : (
         <Tabs
@@ -168,8 +124,7 @@ export function FileUpload({
         >
           <TabsList>
             <TabsTrigger value="upload" label="Upload file" />
-            <TabsTrigger value="url" label="File URL" />
-            {onSelectFile && <TabsTrigger value="select" label="Select file" />}
+            <TabsTrigger value="select" label="Select file" />
           </TabsList>
 
           <TabsContent
@@ -179,43 +134,27 @@ export function FileUpload({
             {dropzoneContent}
           </TabsContent>
 
-          <TabsContent value="url" className="mt-4 flex w-full flex-1 flex-col">
-            <div className="flex h-full flex-1 flex-col min-h-[200px] items-center justify-center gap-4 rounded-lg border border-dashed border-neutral-300 bg-white p-4">
-              <div className="w-full max-w-md">
-                <Input
-                  type="url"
-                  placeholder={fileUrlPlaceholder}
-                  value={fileUrlInput}
-                  onChange={(event) => setFileUrlInput(event.target.value)}
-                  onBlur={handleUrlSubmit}
-                />
+          <TabsContent
+            value="select"
+            className="mt-4 flex w-full flex-1 flex-col"
+          >
+            <div className="flex h-full min-h-[200px] flex-1 flex-col items-center justify-center gap-4 p-4 text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100">
+                <FolderOpen className="h-8 w-8 text-neutral-500" />
               </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">
+                  {selectFileDescription}
+                </p>
+              </div>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={onSelectFile}
+                label={selectFileLabel}
+              />
             </div>
           </TabsContent>
-
-          {onSelectFile && (
-            <TabsContent
-              value="select"
-              className="mt-4 flex w-full flex-1 flex-col"
-            >
-              <div className="flex h-full min-h-[200px] flex-1 flex-col items-center justify-center gap-4 p-4 text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100">
-                  <FolderOpen className="h-8 w-8 text-neutral-500" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">
-                    {selectFileDescription}
-                  </p>
-                </div>
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={onSelectFile}
-                  label={selectFileLabel}
-                />
-              </div>
-            </TabsContent>
-          )}
         </Tabs>
       )}
     </div>

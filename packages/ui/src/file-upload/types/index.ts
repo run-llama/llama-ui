@@ -37,19 +37,9 @@ export interface UseFileUploadOptions {
   onUploadError?: (file: File, error: string) => void;
 }
 
-export interface UploadFromUrlOptions {
-  name?: string;
-  proxyUrl?: string;
-  requestHeaders?: Record<string, string>;
-}
-
 export interface UseFileUploadReturn {
   isUploading: boolean;
   uploadFile: (file: File) => Promise<UploadResult>;
-  uploadFromUrl: (
-    url: string,
-    options?: UploadFromUrlOptions
-  ) => Promise<UploadResult>;
   uploadAndReturn: (file: File) => Promise<UploadResult>;
 }
 
@@ -64,8 +54,8 @@ export interface InputField {
 export interface FileUploadProps extends BaseFileUploadProps {
   className?: string;
   heading: string;
-  content: File | string | null;
-  onContentChange: (content: File | string | null) => void;
+  content: File | null;
+  onContentChange: (content: File | null) => void;
   allowFileRemoval?: boolean;
   showHeader?: boolean;
   /** Title text shown in the dropzone (default: "Drag files here to upload") */
@@ -74,8 +64,6 @@ export interface FileUploadProps extends BaseFileUploadProps {
   uploadDescription?: string;
   /** Text describing supported file formats */
   supportedFiles?: string;
-  fileUrlPlaceholder?: string;
-  disableWhenHasSelection?: boolean;
   footer?: ReactNode;
   onSelectFile?: () => void;
   selectFileLabel?: string;
