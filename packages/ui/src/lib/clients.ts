@@ -1,5 +1,9 @@
-import { client as cloudApiClient } from "llama-cloud-services/api";
 import { client as workflowsClient } from "@llamaindex/workflows-client";
+import LlamaCloud from "@llamaindex/llama-cloud";
+import {
+  getStainlessClient,
+  configureStainlessClient,
+} from "./stainless-client";
 
 // Export individual creator functions and types with clear names
 // Primary (new) names
@@ -16,5 +20,8 @@ export {
   type AgentClient as CloudAgentClient,
 } from "./agent-data";
 
-export { cloudApiClient };
-export type CloudApiClient = typeof cloudApiClient;
+// Export the Stainless client getter and configurator
+export { getStainlessClient, configureStainlessClient };
+
+// Export LlamaCloud type for backward compatibility
+export type CloudApiClient = LlamaCloud;

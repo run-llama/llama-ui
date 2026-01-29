@@ -1,15 +1,6 @@
-import {
-  client as defaultClient,
-  aggregateAgentDataApiV1BetaAgentDataAggregatePost,
-  createAgentDataApiV1BetaAgentDataPost,
-  deleteAgentDataApiV1BetaAgentDataItemIdDelete,
-  deleteAgentDataByQueryApiV1BetaAgentDataDeletePost,
-  getAgentDataApiV1BetaAgentDataItemIdGet,
-  searchAgentDataApiV1BetaAgentDataSearchPost,
-  updateAgentDataApiV1BetaAgentDataItemIdPut,
-  type AgentData,
-  type AggregateGroup,
-} from "llama-cloud-services/api";
+import LlamaCloud, { NotFoundError } from "@llamaindex/llama-cloud";
+import type { Beta } from "@llamaindex/llama-cloud/resources";
+import { getStainlessClient } from "../stainless-client";
 import type {
   AggregateAgentDataOptions,
   DeleteAgentDataOptions,
@@ -20,30 +11,31 @@ import type {
   TypedAggregateGroupItems,
 } from "./types";
 
-/** Type representing the llama-cloud-services API client */
-type CloudApiClient = typeof defaultClient;
+/** Type representing the Stainless API response for agent data */
+type ApiAgentData = Beta.AgentData;
+type ApiAggregateResponse = Beta.AgentDataAggregateResponse;
 
 /**
  * Async client for agent data operations
  */
 export class AgentClient<T = unknown> {
-  private client: CloudApiClient;
+  private client: LlamaCloud;
   private collection: string;
   private deploymentName: string;
 
   constructor({
-    client = defaultClient,
+    client,
     collection = "default",
     deploymentName = "_public",
     agentUrlId,
   }: {
-    client?: CloudApiClient;
+    client?: LlamaCloud;
     collection?: string;
     deploymentName?: string;
     /** @deprecated use deploymentName instead */
     agentUrlId?: string;
   }) {
-    this.client = client;
+    this.client = client ?? getStainlessClient();
     this.collection = collection;
     this.deploymentName = agentUrlId || deploymentName;
   }
@@ -52,17 +44,13 @@ export class AgentClient<T = unknown> {
    * Create new agent data
    */
   async createItem(data: T): Promise<TypedAgentData<T>> {
-    const response = await createAgentDataApiV1BetaAgentDataPost({
-      throwOnError: true,
-      body: {
-        deployment_name: this.deploymentName,
-        collection: this.collection,
-        data: data as Record<string, unknown>,
-      },
-      client: this.client,
+    const response = await this.client.beta.agentData.agentData({
+      deployment_name: this.deploymentName,
+      collection: this.collection,
+      data: data as Record<string, unknown>,
     });
 
-    return this.transformResponse(response.data);
+    return this.transformResponse(response);
   }
 
   /**
@@ -70,19 +58,10 @@ export class AgentClient<T = unknown> {
    */
   async getItem(id: string): Promise<TypedAgentData<T> | null> {
     try {
-      const response = await getAgentDataApiV1BetaAgentDataItemIdGet({
-        throwOnError: true,
-        path: { item_id: id },
-        client: this.client,
-      });
-
-      return this.transformResponse(response.data);
+      const response = await this.client.beta.agentData.get(id);
+      return this.transformResponse(response);
     } catch (error) {
-      if (
-        error instanceof Error &&
-        "response" in error &&
-        (error as { response?: { status?: number } }).response?.status === 404
-      ) {
+      if (error instanceof NotFoundError) {
         return null;
       }
       throw error;
@@ -93,45 +72,32 @@ export class AgentClient<T = unknown> {
    * Update agent data
    */
   async updateItem(id: string, data: T): Promise<TypedAgentData<T>> {
-    const response = await updateAgentDataApiV1BetaAgentDataItemIdPut({
-      throwOnError: true,
-      path: { item_id: id },
-      body: {
-        data: data as Record<string, unknown>,
-      },
-      client: this.client,
+    const response = await this.client.beta.agentData.update(id, {
+      data: data as Record<string, unknown>,
     });
 
-    return this.transformResponse(response.data);
+    return this.transformResponse(response);
   }
 
   /**
    * Delete agent data
    */
   async deleteItem(id: string): Promise<void> {
-    await deleteAgentDataApiV1BetaAgentDataItemIdDelete({
-      throwOnError: true,
-      path: { item_id: id },
-      client: this.client,
-    });
+    await this.client.beta.agentData.delete(id);
   }
 
   /**
    * Delete all matching agent data, returns the total number of deleted items
    */
   async delete(options: DeleteAgentDataOptions): Promise<number> {
-    const response = await deleteAgentDataByQueryApiV1BetaAgentDataDeletePost({
-      throwOnError: true,
-      body: {
-        deployment_name: this.deploymentName,
-        ...(this.collection !== undefined && {
-          collection: this.collection,
-        }),
-        ...(options.filter !== undefined && { filter: options.filter }),
-      },
-      client: this.client,
+    const response = await this.client.beta.agentData.deleteByQuery({
+      deployment_name: this.deploymentName,
+      ...(this.collection !== undefined && {
+        collection: this.collection,
+      }),
+      ...(options.filter !== undefined && { filter: options.filter }),
     });
-    return response.data.deleted_count;
+    return response.deleted_count;
   }
 
   /**
@@ -140,42 +106,41 @@ export class AgentClient<T = unknown> {
   async search(
     options: SearchAgentDataOptions
   ): Promise<TypedAgentDataItems<T>> {
-    const response = await searchAgentDataApiV1BetaAgentDataSearchPost({
-      throwOnError: true,
-      body: {
-        deployment_name: this.deploymentName,
-        ...(this.collection !== undefined && {
-          collection: this.collection,
-        }),
-        ...(options.filter !== undefined && { filter: options.filter }),
-        ...(options.orderBy !== undefined && { order_by: options.orderBy }),
-        ...(options.pageSize !== undefined && { page_size: options.pageSize }),
-        ...(options.offset !== undefined && { offset: options.offset }),
-        ...(options.includeTotal !== undefined && {
-          include_total: options.includeTotal,
-        }),
-      },
-      client: this.client,
+    const pageResponse = await this.client.beta.agentData.search({
+      deployment_name: this.deploymentName,
+      ...(this.collection !== undefined && {
+        collection: this.collection,
+      }),
+      ...(options.filter !== undefined && { filter: options.filter }),
+      ...(options.orderBy !== undefined && { order_by: options.orderBy }),
+      ...(options.pageSize !== undefined && { page_size: options.pageSize }),
+      ...(options.offset !== undefined && { offset: options.offset }),
+      ...(options.includeTotal !== undefined && {
+        include_total: options.includeTotal,
+      }),
     });
 
     const result: TypedAgentDataItems<T> = {
-      items: response.data.items.map((item: AgentData) =>
+      items: pageResponse.items.map((item: ApiAgentData) =>
         this.transformResponse(item)
       ),
     };
 
-    if (
-      response.data.total_size !== null &&
-      response.data.total_size !== undefined
-    ) {
-      result.totalSize = response.data.total_size;
+    // Access total_size from the underlying response body if available
+    const body = pageResponse as unknown as {
+      total_size?: number | null;
+      next_page_token?: string | null;
+    };
+    if (body.total_size !== null && body.total_size !== undefined) {
+      result.totalSize = body.total_size;
     }
 
     if (
-      response.data.next_page_token !== null &&
-      response.data.next_page_token !== undefined
+      pageResponse.next_page_token !== null &&
+      pageResponse.next_page_token !== undefined &&
+      pageResponse.next_page_token !== ""
     ) {
-      result.nextPageToken = response.data.next_page_token;
+      result.nextPageToken = pageResponse.next_page_token;
     }
 
     return result;
@@ -187,42 +152,41 @@ export class AgentClient<T = unknown> {
   async aggregate(
     options: AggregateAgentDataOptions
   ): Promise<TypedAggregateGroupItems<T>> {
-    const response = await aggregateAgentDataApiV1BetaAgentDataAggregatePost({
-      throwOnError: true,
-      body: {
-        deployment_name: this.deploymentName,
-        ...(this.collection !== undefined && {
-          collection: this.collection,
-        }),
-        ...(options.filter !== undefined && { filter: options.filter }),
-        ...(options.groupBy !== undefined && { group_by: options.groupBy }),
-        ...(options.count !== undefined && { count: options.count }),
-        ...(options.first !== undefined && { first: options.first }),
-        ...(options.orderBy !== undefined && { order_by: options.orderBy }),
-        ...(options.offset !== undefined && { offset: options.offset }),
-        ...(options.pageSize !== undefined && { page_size: options.pageSize }),
-      },
-      client: this.client,
+    const pageResponse = await this.client.beta.agentData.aggregate({
+      deployment_name: this.deploymentName,
+      ...(this.collection !== undefined && {
+        collection: this.collection,
+      }),
+      ...(options.filter !== undefined && { filter: options.filter }),
+      ...(options.groupBy !== undefined && { group_by: options.groupBy }),
+      ...(options.count !== undefined && { count: options.count }),
+      ...(options.first !== undefined && { first: options.first }),
+      ...(options.orderBy !== undefined && { order_by: options.orderBy }),
+      ...(options.offset !== undefined && { offset: options.offset }),
+      ...(options.pageSize !== undefined && { page_size: options.pageSize }),
     });
 
     const result: TypedAggregateGroupItems<T> = {
-      items: response.data.items.map((item: AggregateGroup) =>
+      items: pageResponse.items.map((item: ApiAggregateResponse) =>
         this.transformAggregateResponse(item)
       ),
     };
 
-    if (
-      response.data.total_size !== null &&
-      response.data.total_size !== undefined
-    ) {
-      result.totalSize = response.data.total_size;
+    // Access total_size from the underlying response body if available
+    const body = pageResponse as unknown as {
+      total_size?: number | null;
+      next_page_token?: string | null;
+    };
+    if (body.total_size !== null && body.total_size !== undefined) {
+      result.totalSize = body.total_size;
     }
 
     if (
-      response.data.next_page_token !== null &&
-      response.data.next_page_token !== undefined
+      pageResponse.next_page_token !== null &&
+      pageResponse.next_page_token !== undefined &&
+      pageResponse.next_page_token !== ""
     ) {
-      result.nextPageToken = response.data.next_page_token;
+      result.nextPageToken = pageResponse.next_page_token;
     }
 
     return result;
@@ -231,7 +195,7 @@ export class AgentClient<T = unknown> {
   /**
    * Transform API response to typed data
    */
-  private transformResponse(data: AgentData): TypedAgentData<T> {
+  private transformResponse(data: ApiAgentData): TypedAgentData<T> {
     const result: TypedAgentData<T> = {
       id: data.id!,
       deploymentName: data.deployment_name,
@@ -251,7 +215,7 @@ export class AgentClient<T = unknown> {
    * Transform API aggregate response to typed data
    */
   private transformAggregateResponse(
-    data: AggregateGroup
+    data: ApiAggregateResponse
   ): TypedAggregateGroup<T> {
     const result: TypedAggregateGroup<T> = {
       groupKey: data.group_key,
@@ -289,14 +253,14 @@ export interface AgentDataClientOptions {
  * @returns A new AgentClient instance
  */
 export function createAgentDataClient<T = unknown>({
-  client = defaultClient,
+  client,
   windowUrl,
   env,
   deploymentName,
   agentUrlId,
   collection = "default",
 }: {
-  client?: CloudApiClient;
+  client?: LlamaCloud;
   windowUrl?: string;
   env?: Record<string, string>;
   deploymentName?: string;
@@ -333,6 +297,6 @@ export function createAgentDataClient<T = unknown>({
     ...(deploymentName && { deploymentName }),
     ...(agentUrlId && { agentUrlId }),
     collection,
-    client,
+    client: client ?? getStainlessClient(),
   });
 }

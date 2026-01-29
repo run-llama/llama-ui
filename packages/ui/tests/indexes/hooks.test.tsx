@@ -1,19 +1,34 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { act } from "@testing-library/react";
-import * as api from "llama-cloud-services/api";
+import * as stainlessClient from "../../src/lib/stainless-client";
 import { __resetIndexStore } from "../../src/indexes/hooks/use-index-store";
 import { useIndexList } from "../../src/indexes/hooks/use-index-list";
 import { useIndex } from "../../src/indexes/hooks/use-index";
 import { renderHookWithProvider } from "../test-utils";
 
-vi.mock("llama-cloud-services/api", async () => {
-  const actual = await vi.importActual<any>("llama-cloud-services/api");
+// Mock the stainless client module
+vi.mock("../../src/lib/stainless-client", () => {
+  const mockPipelines = {
+    list: vi.fn(),
+    get: vi.fn(),
+  };
   return {
-    ...actual,
-    searchPipelinesApiV1PipelinesGet: vi.fn(),
-    getPipelineApiV1PipelinesPipelineIdGet: vi.fn(),
+    getStainlessClient: () => ({
+      pipelines: mockPipelines,
+    }),
+    configureStainlessClient: vi.fn(),
+    resetStainlessClient: vi.fn(),
+    __mockPipelines: mockPipelines,
   };
 });
+
+// Get access to mock functions
+const { __mockPipelines } = vi.mocked(stainlessClient) as unknown as {
+  __mockPipelines: {
+    list: ReturnType<typeof vi.fn>;
+    get: ReturnType<typeof vi.fn>;
+  };
+};
 
 describe("indexes hooks: list/get", () => {
   beforeEach(() => {
@@ -29,10 +44,7 @@ describe("indexes hooks: list/get", () => {
       embedding_config: { type: "OPENAI_EMBEDDING" },
     } as any;
 
-    (api.searchPipelinesApiV1PipelinesGet as any).mockResolvedValue({
-      data: [pipeline],
-      error: undefined,
-    });
+    __mockPipelines.list.mockResolvedValue([pipeline]);
 
     const { result } = renderHookWithProvider(() => useIndexList());
 
@@ -57,10 +69,7 @@ describe("indexes hooks: list/get", () => {
       embedding_config: { type: "OPENAI_EMBEDDING" },
     } as any;
 
-    (api.getPipelineApiV1PipelinesPipelineIdGet as any).mockResolvedValue({
-      data: pipeline,
-      error: undefined,
-    });
+    __mockPipelines.get.mockResolvedValue(pipeline);
 
     const { result } = renderHookWithProvider(() => useIndex("p2"));
 

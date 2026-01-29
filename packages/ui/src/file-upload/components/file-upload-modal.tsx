@@ -51,7 +51,7 @@ export function FileUploader({
 
   const uploadProgress = useUploadProgress();
 
-  const { uploadAndReturn, uploadFromUrl } = useFileUpload({
+  const { uploadAndReturn } = useFileUpload({
     onUploadStart: uploadProgress.startUpload,
     onProgress: uploadProgress.updateProgress,
     onUploadComplete: uploadProgress.completeUpload,
@@ -176,26 +176,6 @@ export function FileUploader({
         });
       }
     };
-
-    if (!multiple && trimmedUrl.length > 0 && !hasFiles) {
-      handleClose();
-
-      try {
-        const result = await uploadFromUrl(trimmedUrl);
-        if (result.success && result.data) {
-          await onSuccess([result.data], {
-            ...currentFieldValues,
-            fileUrl: trimmedUrl,
-          });
-        }
-      } catch (error) {
-        logger.error("FileUploader uploadFromUrl failed", {
-          error,
-          url: trimmedUrl,
-        });
-      }
-      return;
-    }
 
     await uploadFiles(multiple ? selectedFiles : selectedFiles.slice(0, 1));
   };

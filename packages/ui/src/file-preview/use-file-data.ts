@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  readFileContentApiV1FilesIdContentGet,
-  getFileApiV1FilesIdGet,
-} from "llama-cloud-services/api";
+import { getStainlessClient } from "../lib/stainless-client";
 
 export interface FileData {
   url?: string;
@@ -33,38 +30,24 @@ export function useFileData(fileId: string, mockData?: FileData) {
       setError(null);
 
       try {
-        const getFilePromise = getFileApiV1FilesIdGet({
-          headers: {
-            "Content-Type": "application/json",
-          },
-          path: {
-            id: fileId,
-          },
+        const client = getStainlessClient();
+
+        // Get file content URL (presigned URL)
+        const contentResponse = await client.files.get(fileId);
+
+        // For file metadata, we need to query the files list
+        // The files.get() returns a PresignedURL, not file metadata
+        // We can use files.list() with file_ids filter to get metadata
+        const fileListResponse = await client.files.list({
+          file_ids: [fileId],
         });
 
-        const getFileContentPromise: Promise<
-          Awaited<ReturnType<typeof readFileContentApiV1FilesIdContentGet>>
-        > = readFileContentApiV1FilesIdContentGet({
-          headers: {
-            "Content-Type": "application/json",
-          },
-          path: {
-            id: fileId,
-          },
-        });
+        const fileMetadata = fileListResponse.items[0];
 
-        // Wait for both promises to resolve
-        const fileResponse = await getFilePromise;
-        const contentResponse = await getFileContentPromise;
-
-        // Transform the response to our expected format
-        const fileType = fileResponse.data?.file_type;
-
-        const url = contentResponse.data?.url;
         setData({
-          url,
-          name: fileResponse.data?.name,
-          type: fileType || undefined,
+          url: contentResponse.url,
+          name: fileMetadata?.name,
+          type: fileMetadata?.file_type || undefined,
         });
       } catch (err) {
         // eslint-disable-next-line no-console

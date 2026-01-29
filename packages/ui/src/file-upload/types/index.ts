@@ -37,19 +37,9 @@ export interface UseFileUploadOptions {
   onUploadError?: (file: File, error: string) => void;
 }
 
-export interface UploadFromUrlOptions {
-  name?: string;
-  proxyUrl?: string;
-  requestHeaders?: Record<string, string>;
-}
-
 export interface UseFileUploadReturn {
   isUploading: boolean;
   uploadFile: (file: File) => Promise<UploadResult>;
-  uploadFromUrl: (
-    url: string,
-    options?: UploadFromUrlOptions
-  ) => Promise<UploadResult>;
   uploadAndReturn: (file: File) => Promise<UploadResult>;
 }
 

@@ -4,7 +4,7 @@ import type {
 } from "@/src/lib/agent-data";
 import { StatusType } from "@/src/lib/agent-data";
 
-// Use the StatusType from llama-cloud-services instead
+// Use the StatusType from the local agent-data types
 export type ProcessingStatus =
   | StatusType
   | "pending"
