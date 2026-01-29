@@ -98,7 +98,7 @@ export function ItemGrid<T = unknown>({
   }, [sortState]);
 
   const { data, loading, error, totalSize, deleteItem, fetchData } =
-    useItemGridData<T>(paginationState, searchFilter, apiSort);
+    useItemGridData(paginationState, searchFilter, apiSort);
 
   // Create hooks object for passing to renderCell
   const hooks = useMemo(
