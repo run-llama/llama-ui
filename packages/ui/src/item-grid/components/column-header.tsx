@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { ColumnFilter } from "@/base/column-filter";
 import type { Column, SortState } from "../types";
 
-export function ColumnHeader<T = unknown>({
+export function ColumnHeader({
   column,
   sortState,
   onSort,
@@ -11,7 +11,7 @@ export function ColumnHeader<T = unknown>({
   selectedFilters,
   onFilterChange,
 }: {
-  column: Column<T>;
+  column: Column;
   sortState?: SortState;
   onSort?: (columnKey: string) => void;
   filterOptions?: string[];
@@ -20,7 +20,7 @@ export function ColumnHeader<T = unknown>({
 }) {
   const sortKey = column.sortKey ?? column.key;
   const sortDirection =
-    sortState?.column === sortKey ? sortState.direction : null;
+    sortState?.column === sortKey ? sortState?.direction : null;
 
   return (
     <div className="flex items-center">

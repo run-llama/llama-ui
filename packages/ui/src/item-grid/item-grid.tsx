@@ -25,9 +25,9 @@ import { useItemGridData } from "./hooks/use-item-grid-data";
 import { ColumnHeader } from "./components/column-header";
 import { PaginationControls } from "./components/pagination-controls";
 
-export interface ItemGridProp<T = unknown> {
+export interface ItemGridProp {
   // Custom columns (displayed first)
-  customColumns?: Column<T>[];
+  customColumns?: Column[];
   // Row click event
   onRowClick?: (item: AgentDataItem) => void;
   // Other configurations
@@ -40,14 +40,14 @@ export interface ItemGridProp<T = unknown> {
 }
 
 // Main Business Component
-export function ItemGrid<T = unknown>({
+export function ItemGrid({
   customColumns = [],
   onRowClick,
   defaultPageSize = 20,
   filter,
   className,
   style,
-}: ItemGridProp<T>) {
+}: ItemGridProp) {
   const [paginationState, setPaginationState] = useState<PaginationState>({
     page: 0,
     size: defaultPageSize,
@@ -63,7 +63,7 @@ export function ItemGrid<T = unknown>({
 
   // Generate final columns array
   const columns = useMemo(() => {
-    const finalColumns: Column<T>[] = [];
+    const finalColumns: Column[] = [];
 
     // Add custom columns first
     finalColumns.push(...customColumns);

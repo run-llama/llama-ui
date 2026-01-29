@@ -1,8 +1,4 @@
-import type {
-  ExtractedData,
-  FilterOperation,
-  AgentDataItem,
-} from "@/src/lib/agent-data";
+import type { FilterOperation, AgentDataItem } from "@/src/lib/agent-data";
 import { ItemGrid } from "./item-grid";
 import {
   createExtractedDataColumn,
@@ -11,11 +7,11 @@ import {
 import type { Column, BuiltInColumnConfig } from "./types";
 import { useUIConfigStore } from "../store/ui-config-store";
 
-export interface ExtractedDataItemGridProps<T> {
+export interface ExtractedDataItemGridProps {
   // Custom columns (displayed first)
-  customColumns?: Column<ExtractedData<T>>[];
+  customColumns?: Column[];
   // Built-in columns configuration
-  builtInColumns?: BuiltInColumnConfig<ExtractedData<T>>;
+  builtInColumns?: BuiltInColumnConfig;
   // Row click event
   onRowClick?: (item: AgentDataItem) => void;
   // Other configurations
@@ -27,7 +23,7 @@ export interface ExtractedDataItemGridProps<T> {
   style?: React.CSSProperties;
 }
 
-export function ExtractedDataItemGrid<T>({
+export function ExtractedDataItemGrid({
   customColumns = [],
   builtInColumns = {},
   onRowClick,
@@ -35,12 +31,12 @@ export function ExtractedDataItemGrid<T>({
   filter,
   className,
   style,
-}: ExtractedDataItemGridProps<T>) {
+}: ExtractedDataItemGridProps) {
   const confidenceThreshold = useUIConfigStore(
     (state) => state.confidenceThreshold
   );
   // Generate final columns array
-  const columns: Column<ExtractedData<T>>[] = [];
+  const columns: Column[] = [];
 
   // Add custom columns first
   columns.push(...customColumns);
@@ -50,7 +46,7 @@ export function ExtractedDataItemGrid<T>({
     const config = builtInColumns[name as keyof typeof builtInColumns];
     if (config !== false && config !== undefined) {
       try {
-        const builtInColumn = createExtractedDataColumn<T>(
+        const builtInColumn = createExtractedDataColumn(
           name,
           config,
           confidenceThreshold
@@ -63,7 +59,7 @@ export function ExtractedDataItemGrid<T>({
   });
 
   return (
-    <ItemGrid<ExtractedData<T>>
+    <ItemGrid
       customColumns={columns}
       onRowClick={onRowClick}
       defaultPageSize={defaultPageSize}

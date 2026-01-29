@@ -1,4 +1,4 @@
-import type { Column } from "./types";
+import type { Column, ItemGridHooks } from "./types";
 import {
   ReviewStatusBadge,
   FormattedDate,
@@ -22,11 +22,11 @@ export type ExtractedDataColumnName =
 
 // Helper: count low-confidence leaf metadata from extracted field metadata
 // Leaf definition: an object that contains numeric `confidence` and has no nested object properties
-export function getExtractedDataItemsToReviewCount<T>(
+export function getExtractedDataItemsToReviewCount(
   item: AgentDataItem,
   confidenceThreshold: number = DEFAULT_CONFIDENCE_THRESHOLD
 ): number {
-  const extractedData = item.data as ExtractedData<T>;
+  const extractedData = item.data as ExtractedData<unknown>;
   const metadata = extractedData.field_metadata;
   if (!metadata || typeof metadata !== "object") return 0;
 
@@ -61,13 +61,13 @@ export function getExtractedDataItemsToReviewCount<T>(
 }
 
 // Factory function to create a single extracted-data column by name
-export function createExtractedDataColumn<T>(
+export function createExtractedDataColumn(
   columnName: ExtractedDataColumnName,
-  config: boolean | Partial<Column<ExtractedData<T>>>,
+  config: boolean | Partial<Column>,
   confidenceThreshold: number = DEFAULT_CONFIDENCE_THRESHOLD
-): Column<ExtractedData<T>> {
+): Column {
   // Build base column by name
-  let baseColumn: Column<ExtractedData<T>> | undefined;
+  let baseColumn: Column | undefined;
 
   switch (columnName) {
     case "fileName":
@@ -75,7 +75,7 @@ export function createExtractedDataColumn<T>(
         key: "file_name",
         header: "File Name",
         getValue: (item: AgentDataItem) => {
-          const extractedData = item.data as ExtractedData<T>;
+          const extractedData = item.data as ExtractedData<unknown>;
           return extractedData.file_name;
         },
         sortable: true,
@@ -86,7 +86,7 @@ export function createExtractedDataColumn<T>(
         key: "status",
         header: "Status",
         getValue: (item: AgentDataItem) => {
-          const extractedData = item.data as ExtractedData<T>;
+          const extractedData = item.data as ExtractedData<unknown>;
           return extractedData.status;
         },
         renderCell: (value: unknown) => (
@@ -102,7 +102,7 @@ export function createExtractedDataColumn<T>(
         key: "items_to_review",
         header: "Items to Review",
         getValue: (item: AgentDataItem) =>
-          getExtractedDataItemsToReviewCount<T>(item, confidenceThreshold),
+          getExtractedDataItemsToReviewCount(item, confidenceThreshold),
         renderCell: (value: unknown) => {
           const count = value as number;
           return (
@@ -130,7 +130,7 @@ export function createExtractedDataColumn<T>(
         key: "actions",
         header: "",
         getValue: (item: AgentDataItem) => item,
-        renderCell: (value: unknown, hooks) => {
+        renderCell: (value: unknown, hooks?: ItemGridHooks) => {
           if (!hooks?.deleteItem) {
             return null;
           }
