@@ -16,7 +16,7 @@ import type {
   PaginationState,
   Column,
 } from "./types";
-import type { FilterOperation, TypedAgentData } from "@/src/lib/agent-data";
+import type { FilterOperation, AgentDataItem } from "@/src/lib/agent-data";
 
 // Hooks
 import { useItemGridData } from "./hooks/use-item-grid-data";
@@ -29,7 +29,7 @@ export interface ItemGridProp<T = unknown> {
   // Custom columns (displayed first)
   customColumns?: Column<T>[];
   // Row click event
-  onRowClick?: (item: TypedAgentData<T>) => void;
+  onRowClick?: (item: AgentDataItem) => void;
   // Other configurations
   defaultPageSize?: number;
   // Optional root filter passed through directly to the search API

@@ -1,4 +1,4 @@
-import type { FilterOperation, TypedAgentData } from "@/src/lib/agent-data";
+import type { FilterOperation, AgentDataItem } from "@/src/lib/agent-data";
 import type { ReactNode } from "react";
 
 // Types
@@ -23,7 +23,7 @@ export interface ItemGridHooks {
 export interface Column<T = unknown> {
   key: string;
   header: string;
-  getValue: (item: TypedAgentData<T>) => unknown;
+  getValue: (item: AgentDataItem) => unknown;
   renderCell?: (value: unknown, hooks?: ItemGridHooks) => ReactNode;
   sortable?: boolean;
   sortKey?: string;

@@ -1,20 +1,15 @@
-export { AgentClient, createAgentDataClient } from "./client";
-export type { AgentDataClientOptions } from "./client";
+export { createAgentDataConfig } from "./client";
+export type { CreateAgentDataConfigOptions } from "./client";
 
 export type {
-  AggregateAgentDataOptions,
-  DeleteAgentDataOptions,
+  AgentDataConfig,
+  AgentDataItem,
   ExtractedData,
   ExtractedFieldMetadata,
   ExtractedFieldMetadataDict,
   FieldCitation,
   FilterOperation,
   PageDimensions,
-  SearchAgentDataOptions,
-  TypedAgentData,
-  TypedAgentDataItems,
-  TypedAggregateGroup,
-  TypedAggregateGroupItems,
 } from "./types";
 
 // Note: BoundingBox is intentionally not re-exported to avoid conflict with file-preview/types.ts

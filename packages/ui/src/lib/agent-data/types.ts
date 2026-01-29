@@ -122,96 +122,26 @@ export interface ExtractedData<T = unknown> {
 }
 
 /**
- * TypedAgentData interface for typed agent data
+ * Configuration for agent data operations
  */
-export interface TypedAgentData<T = unknown> {
-  /** The unique ID of the agent data record. */
-  id: string;
-  /** The deployment name of the agent that created the data. */
+export interface AgentDataConfig {
+  /** The deployment name for agent data operations */
   deploymentName: string;
-  /** The collection of the agent data. */
-  collection?: string;
-  /** The data of the agent data. Usually an ExtractedData<SomeOtherType> */
+  /** The collection name for agent data operations, defaults to "default" */
+  collection: string;
+}
+
+/**
+ * Type representing agent data item from the SDK.
+ * This is a simplified interface matching the SDK's AgentData response type.
+ * The data field is typed as unknown to allow any data structure.
+ */
+export interface AgentDataItem<T = unknown> {
   data: T;
-  /** The date and time the data was created. */
-  createdAt: Date;
-  /** The date and time the data was last updated. */
-  updatedAt: Date;
-}
-
-/**
- * Paginated response of typed agent data items
- */
-export interface TypedAgentDataItems<T = unknown> {
-  items: TypedAgentData<T>[];
-  totalSize?: number;
-  nextPageToken?: string;
-}
-
-/**
- * Options for listing agent data
- */
-export interface SearchAgentDataOptions {
-  /** Filter options for the list. */
-  filter?: Record<string, FilterOperation>;
-  /** Order by options for the list. */
-  orderBy?: string;
-  /** Page size for the list. */
-  pageSize?: number;
-  /** Offset for the list. */
-  offset?: number;
-  /**
-   * Whether to include the total number of items in the response.
-   * Should use only for first request to build total pagination, and not subsequent requests.
-   */
-  includeTotal?: boolean;
-}
-
-/**
- * Options for deleting agent data
- */
-export interface DeleteAgentDataOptions {
-  /** Filter options for the deletion. */
-  filter?: Record<string, FilterOperation>;
-}
-
-/**
- * Options for aggregating agent data
- */
-export interface AggregateAgentDataOptions {
-  /** Filter options for the aggregation. */
-  filter?: Record<string, FilterOperation>;
-  /** Fields to group by. */
-  groupBy?: string[];
-  /** Whether to count the number of items in each group. */
-  count?: boolean;
-  /** Whether to return the first item in each group. */
-  first?: boolean;
-  /** Order by options for the aggregation. */
-  orderBy?: string;
-  /** Offset for the aggregation. */
-  offset?: number;
-  /** Page size for the aggregation. */
-  pageSize?: number;
-}
-
-/**
- * Single aggregation group result
- */
-export interface TypedAggregateGroup<T = unknown> {
-  /** The group key values */
-  groupKey: Record<string, unknown>;
-  /** Count of items in the group */
-  count?: number;
-  /** First item in the group */
-  firstItem?: T;
-}
-
-/**
- * Paginated response of aggregated agent data
- */
-export interface TypedAggregateGroupItems<T = unknown> {
-  items: TypedAggregateGroup<T>[];
-  totalSize?: number;
-  nextPageToken?: string;
+  deployment_name: string;
+  id?: string | null;
+  collection?: string;
+  created_at?: string | null;
+  project_id?: string | null;
+  updated_at?: string | null;
 }

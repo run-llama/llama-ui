@@ -1,7 +1,7 @@
 import type {
-  TypedAgentData,
   ExtractedData,
   FilterOperation,
+  AgentDataItem,
 } from "@/src/lib/agent-data";
 import { ItemGrid } from "./item-grid";
 import {
@@ -17,7 +17,7 @@ export interface ExtractedDataItemGridProps<T> {
   // Built-in columns configuration
   builtInColumns?: BuiltInColumnConfig<ExtractedData<T>>;
   // Row click event
-  onRowClick?: (item: TypedAgentData<ExtractedData<T>>) => void;
+  onRowClick?: (item: AgentDataItem) => void;
   // Other configurations
   defaultPageSize?: number;
   // Optional base filter to be passed to search API

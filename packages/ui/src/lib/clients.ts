@@ -15,10 +15,7 @@ export {
 
 export { workflowsClient };
 
-export {
-  createAgentDataClient as createCloudAgentClient,
-  type AgentClient as CloudAgentClient,
-} from "./agent-data";
+export { createAgentDataConfig, type AgentDataConfig } from "./agent-data";
 
 // Export the Stainless client getter and configurator
 export { getStainlessClient, configureStainlessClient };

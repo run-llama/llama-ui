@@ -12,10 +12,10 @@ function renderWithProvider(ui: ReactNode, clients = createMockClients()) {
 describe("ExtractedDataItemGrid baseFilter", () => {
   it("passes filter through to search API", async () => {
     const clients = createMockClients();
-    if (!clients.agentDataClient) {
-      throw new Error("AgentDataClient not found");
+    if (!clients.cloudApiClient) {
+      throw new Error("CloudApiClient not found");
     }
-    const spy = vi.spyOn(clients.agentDataClient, "search");
+    const spy = vi.spyOn(clients.cloudApiClient.beta.agentData, "search");
 
     const filter: Record<string, FilterOperation> = {
       status: { includes: ["approved"] },

@@ -3,12 +3,16 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/base/card";
 import { cn } from "@/lib/utils";
-import { type SearchAgentDataOptions, AgentClient } from "@/src/lib/agent-data";
-import { useAgentDataClient } from "../lib/api-provider";
+import {
+  type FilterOperation,
+  type AgentDataConfig,
+} from "@/src/lib/agent-data";
+import { useAgentDataConfig, useCloudApiClient } from "../lib/api-provider";
+import type LlamaCloud from "@llamaindex/llama-cloud";
 
 export interface ItemCountProps {
   title: string;
-  filter?: SearchAgentDataOptions["filter"];
+  filter?: Record<string, FilterOperation>;
   variant?: "total" | "awaiting" | "approved" | "rejected";
   subtitle?: string;
 }
@@ -30,16 +34,23 @@ const variantStyles = {
 };
 
 async function fetchCountData(params: {
-  filter?: SearchAgentDataOptions["filter"];
-  client: AgentClient;
+  filter?: Record<string, FilterOperation>;
+  client: LlamaCloud;
+  config: AgentDataConfig;
 }): Promise<number> {
-  const data = await params.client.search({
-    pageSize: 0,
+  const pageResponse = await params.client.beta.agentData.search({
+    deployment_name: params.config.deploymentName,
+    collection: params.config.collection,
+    page_size: 0,
     filter: params.filter,
-    includeTotal: true,
+    include_total: true,
   });
 
-  return data.totalSize ?? 0;
+  // Access total_size from the underlying response body
+  const body = pageResponse as unknown as {
+    total_size?: number | null;
+  };
+  return body.total_size ?? 0;
 }
 
 export function ItemCount({
@@ -48,7 +59,8 @@ export function ItemCount({
   variant = "total",
   subtitle,
 }: ItemCountProps) {
-  const client = useAgentDataClient() as AgentClient;
+  const client = useCloudApiClient();
+  const config = useAgentDataConfig();
   const [count, setCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -56,11 +68,11 @@ export function ItemCount({
   const styles = variantStyles[variant];
 
   useEffect(() => {
-    fetchCountData({ filter, client })
+    fetchCountData({ filter, client, config })
       .then(setCount)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [filter, client]);
+  }, [filter, client, config]);
 
   return (
     <Card className="p-6 bg-white border border-gray-200 hover:shadow-md transition-shadow">

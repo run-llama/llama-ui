@@ -5,20 +5,20 @@
 
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 import {
-  CloudAgentClient,
-  CloudApiClient,
   WorkflowsClient,
   workflowsClient,
-  createCloudAgentClient,
   createWorkflowsClient,
   getStainlessClient,
   configureStainlessClient,
+  createAgentDataConfig,
+  type AgentDataConfig,
+  type CloudApiClient,
 } from "./clients";
 
 export interface ApiClients {
   workflowsClient?: WorkflowsClient;
   cloudApiClient?: CloudApiClient;
-  agentDataClient?: CloudAgentClient;
+  agentDataConfig?: AgentDataConfig;
 }
 
 export interface ApiProviderProps {
@@ -69,8 +69,8 @@ export function createMockClients(): ApiClients {
   return {
     workflowsClient: workflowsClient,
     cloudApiClient: getStainlessClient(),
-    agentDataClient: createCloudAgentClient({
-      agentUrlId: "your-agent-url-id",
+    agentDataConfig: createAgentDataConfig({
+      deploymentName: "your-agent-url-id",
       collection: "your-collection",
     }),
   };
@@ -111,13 +111,11 @@ export function createRealClientsForTests(params: {
     baseURL: params.baseUrl,
   });
 
-  const cloudClient = getStainlessClient();
   return {
     workflowsClient,
-    cloudApiClient: cloudClient,
-    agentDataClient: createCloudAgentClient({
-      client: cloudClient,
-      agentUrlId: params.agent?.agentUrlId,
+    cloudApiClient: getStainlessClient(),
+    agentDataConfig: createAgentDataConfig({
+      deploymentName: params.agent?.agentUrlId,
       windowUrl:
         typeof window !== "undefined" ? window.location.href : undefined,
       collection: params.agent?.collection,
@@ -174,17 +172,17 @@ export function useCloudApiClient(): CloudApiClient {
   return clients.cloudApiClient;
 }
 
-export function useAgentDataClient(): CloudAgentClient {
+export function useAgentDataConfig(): AgentDataConfig {
   const { clients } = useApiContext();
 
-  if (!clients.agentDataClient) {
+  if (!clients.agentDataConfig) {
     throw new Error(
-      "No agent data client configured. " +
-        "Please ensure agentDataClient is configured in ApiProvider."
+      "No agent data config configured. " +
+        "Please ensure agentDataConfig is configured in ApiProvider."
     );
   }
 
-  return clients.agentDataClient;
+  return clients.agentDataConfig;
 }
 
 export function useApiClients(): ApiClients {

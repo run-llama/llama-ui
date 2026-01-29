@@ -12,7 +12,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Summary card that displays counts powered by the Agent Data client from ApiProvider.",
+          "Summary card that displays counts powered by the Agent Data API from ApiProvider.",
       },
     },
   },
@@ -23,12 +23,14 @@ type Story = StoryObj<typeof meta>;
 
 function createStubbedClients() {
   const clients = createMockClients();
-  // Override agentDataClient.search to avoid network and return deterministic totals
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (clients.agentDataClient as any).search = async () => ({
-    items: [],
-    totalSize: 123,
-  });
+  // Override the cloudApiClient's beta.agentData.search to return deterministic totals
+  if (clients.cloudApiClient) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (clients.cloudApiClient.beta.agentData as any).search = async () => ({
+      items: [],
+      total_size: 123,
+    });
+  }
   return clients;
 }
 

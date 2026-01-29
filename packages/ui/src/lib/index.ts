@@ -6,7 +6,7 @@ export {
   ApiProvider,
   useWorkflowsClient,
   useCloudApiClient,
-  useAgentDataClient,
+  useAgentDataConfig,
   useApiClients,
   createMockClients,
   type ApiClients,
@@ -21,14 +21,14 @@ export {
 } from "./shared-streaming";
 
 export {
-  createCloudAgentClient,
+  createAgentDataConfig,
   workflowsClient,
   getStainlessClient,
   configureStainlessClient,
   createWorkflowsClient,
   createWorkflowsConfig,
   type WorkflowsClient,
-  type CloudAgentClient,
+  type AgentDataConfig,
   type CloudApiClient,
 } from "./clients";
 

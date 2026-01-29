@@ -3,7 +3,7 @@ import React from "react";
 import { within, userEvent, expect } from "@storybook/test";
 import { ExtractedDataItemGrid } from "../../src/item-grid";
 import { ApiProvider, createMockClients } from "../../src/lib";
-import type { ExtractedData, TypedAgentData } from "@/src/lib/agent-data";
+import type { ExtractedData, AgentDataItem } from "@/src/lib/agent-data";
 
 const meta = {
   title: "Business/ExtractedDataItemGrid",
@@ -71,9 +71,10 @@ export const Default: Story = {
       </div>
       <ExtractedDataItemGridWrapper
         {...args}
-        onRowClick={(item: TypedAgentData<ExtractedData>) =>
-          console.log(`Clicked row: ${item.data.file_name}`)
-        }
+        onRowClick={(item: AgentDataItem) => {
+          const data = item.data as ExtractedData;
+          console.log(`Clicked row: ${data.file_name}`);
+        }}
       />
     </div>
   ),

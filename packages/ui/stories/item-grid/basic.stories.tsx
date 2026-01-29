@@ -3,7 +3,7 @@ import React from "react";
 import { within, userEvent, expect } from "@storybook/test";
 import { ItemGrid } from "../../src/item-grid";
 import { ApiProvider, createMockClients } from "../../src/lib";
-import type { ExtractedData, TypedAgentData } from "@/src/lib/agent-data";
+import type { ExtractedData, AgentDataItem } from "@/src/lib/agent-data";
 
 const meta = {
   title: "Business/ItemGrid",
@@ -50,19 +50,25 @@ export const Default: Story = {
       {
         key: "fileName",
         header: "File Name",
-        getValue: (item: TypedAgentData<ExtractedData>) => item.data.file_name,
+        getValue: (item: AgentDataItem) => {
+          const data = item.data as ExtractedData;
+          return data.file_name;
+        },
         sortable: true,
       },
       {
         key: "status",
         header: "Status",
-        getValue: (item: TypedAgentData<ExtractedData>) => item.data.status,
+        getValue: (item: AgentDataItem) => {
+          const data = item.data as ExtractedData;
+          return data.status;
+        },
         sortable: true,
       },
       {
         key: "createdAt",
         header: "Created At",
-        getValue: (item: TypedAgentData<ExtractedData>) => item.createdAt,
+        getValue: (item: AgentDataItem) => item.created_at,
         sortable: true,
       },
     ],
@@ -78,9 +84,10 @@ export const Default: Story = {
       </div>
       <ItemGridWrapper<ExtractedData>
         {...args}
-        onRowClick={(item: TypedAgentData<ExtractedData>) =>
-          console.log(`Clicked row: ${item.data.file_name}`)
-        }
+        onRowClick={(item: AgentDataItem) => {
+          const data = item.data as ExtractedData;
+          console.log(`Clicked row: ${data.file_name}`);
+        }}
       />
     </div>
   ),
@@ -104,7 +111,10 @@ export const WithCustomColumns: Story = {
       {
         key: "fileName",
         header: "File Name",
-        getValue: (item: TypedAgentData<ExtractedData>) => item.data.file_name,
+        getValue: (item: AgentDataItem) => {
+          const data = item.data as ExtractedData;
+          return data.file_name;
+        },
         sortable: true,
       },
     ],
@@ -132,13 +142,19 @@ export const WithInteraction: Story = {
       {
         key: "fileName",
         header: "File Name",
-        getValue: (item: TypedAgentData<ExtractedData>) => item.data.file_name,
+        getValue: (item: AgentDataItem) => {
+          const data = item.data as ExtractedData;
+          return data.file_name;
+        },
         sortable: true,
       },
       {
         key: "status",
         header: "Status",
-        getValue: (item: TypedAgentData<ExtractedData>) => item.data.status,
+        getValue: (item: AgentDataItem) => {
+          const data = item.data as ExtractedData;
+          return data.status;
+        },
         sortable: true,
       },
     ],
