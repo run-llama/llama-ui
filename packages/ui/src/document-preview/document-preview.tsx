@@ -26,7 +26,7 @@ import { UnsupportedPreview } from "./previews/unsupported-preview";
 import { SelectFileBar } from "./select-file-bar";
 import { UploadSkeleton } from "./upload-skeleton";
 
-type UploadableContent = File;
+type UploadableContent = File | string;
 
 const MAX_FILE_COUNT = 20;
 const DEFAULT_MAX_FILE_SIZE = 1024 * 1024 * 315;
