@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 4.0.4
+
+### Patch Changes
+
+- 5ec20cd: spacing and border change for file upload
+
 ## 4.0.3
 
 ### Patch Changes
