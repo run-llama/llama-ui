@@ -108,7 +108,7 @@ function useCompareFn(key: string) {
         return 0;
       }
     },
-    [key],
+    [key]
   );
 }
 
@@ -152,7 +152,7 @@ export function DataTable<TData>({
         return newState;
       });
     },
-    [manualPaginationProps],
+    [manualPaginationProps]
   );
 
   const initialVisibility = {};
@@ -162,7 +162,7 @@ export function DataTable<TData>({
           ...acc,
           [columnId]: false,
         }),
-        initialVisibility,
+        initialVisibility
       )
     : {};
 
@@ -232,7 +232,7 @@ export function DataTable<TData>({
                           ? null
                           : flexRender(
                               header.column.columnDef.header,
-                              header.getContext(),
+                              header.getContext()
                             )}
                       </div>
                     </th>
@@ -288,9 +288,7 @@ export function DataTable<TData>({
         <Pagination
           table={table}
           totalRows={data.length}
-          selectedCount={
-            rowSelection ? Object.keys(rowSelection).length : 0
-          }
+          selectedCount={rowSelection ? Object.keys(rowSelection).length : 0}
         />
       )}
     </div>
