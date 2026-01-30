@@ -65,6 +65,9 @@ export const Default: Story = {
 };
 
 export const WithVariants: Story = {
+  args: {
+    title: "Count Variants Demo",
+  },
   render: () => (
     <ApiProvider clients={createStubbedClients()}>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
@@ -87,5 +90,4 @@ export const WithVariants: Story = {
     const numbers = canvas.getAllByText(/123/);
     expect(numbers.length).toBeGreaterThanOrEqual(1);
   },
-  args: {} as Record<string, never>,
 };
