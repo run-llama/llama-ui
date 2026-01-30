@@ -12,7 +12,7 @@ export const LG_BREAKPOINT = 1024;
  */
 export function useIsMobile(breakpoint: number = DEFAULT_MOBILE_BREAKPOINT) {
   const [isMobile, setIsMobile] = React.useState<boolean | undefined>(
-    undefined,
+    undefined
   );
 
   React.useEffect(() => {

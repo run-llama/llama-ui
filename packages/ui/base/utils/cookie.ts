@@ -10,7 +10,7 @@ export interface CookieStorage extends StateStorage {
   setItem: (
     name: string,
     value: string,
-    options?: Cookies.CookieAttributes,
+    options?: Cookies.CookieAttributes
   ) => void;
   removeItem: (name: string) => void;
 }
@@ -19,7 +19,7 @@ export interface CookieStorage extends StateStorage {
  * Creates a cookie storage adapter for Zustand
  */
 export function createCookieStorage(
-  options: Cookies.CookieAttributes = {},
+  options: Cookies.CookieAttributes = {}
 ): CookieStorage {
   const defaultOptions: Cookies.CookieAttributes = {
     expires: 7, // 7 days by default
@@ -36,7 +36,7 @@ export function createCookieStorage(
     setItem: (
       name: string,
       value: string,
-      options?: Cookies.CookieAttributes,
+      options?: Cookies.CookieAttributes
     ) => {
       Cookies.set(name, value, {
         ...defaultOptions,
