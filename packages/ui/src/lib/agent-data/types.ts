@@ -121,7 +121,9 @@ export interface AgentDataConfig {
  */
 type DataPropertiesOnly<T> = Pick<
   T,
-  { [K in keyof T]: T[K] extends (...args: unknown[]) => unknown ? never : K }[keyof T]
+  {
+    [K in keyof T]: T[K] extends (...args: unknown[]) => unknown ? never : K;
+  }[keyof T]
 >;
 export type AgentDataItem = DataPropertiesOnly<
   Awaited<ReturnType<LlamaCloud["beta"]["agentData"]["get"]>>

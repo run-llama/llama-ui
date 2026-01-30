@@ -21,7 +21,10 @@ export type TextPart = {
 
 // Data Parts: data parts are other blocks that we want to display in the message
 // It can be artifact, event, sources, etc.
-export type DataPart<T extends `data-${string}` = `data-${string}`, D = unknown> = {
+export type DataPart<
+  T extends `data-${string}` = `data-${string}`,
+  D = unknown,
+> = {
   id?: string; // if id is provided, only last data part with the same id will be existed in message.parts
   type: T; // `data-` prefix is required for data parts
   data: D;
