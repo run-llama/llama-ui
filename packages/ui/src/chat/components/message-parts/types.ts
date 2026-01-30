@@ -21,7 +21,7 @@ export type TextPart = {
 
 // Data Parts: data parts are other blocks that we want to display in the message
 // It can be artifact, event, sources, etc.
-export type DataPart<T extends `data-${string}` = `data-${string}`, D = any> = {
+export type DataPart<T extends `data-${string}` = `data-${string}`, D = unknown> = {
   id?: string; // if id is provided, only last data part with the same id will be existed in message.parts
   type: T; // `data-` prefix is required for data parts
   data: D;
@@ -39,8 +39,8 @@ export type SuggestionPart = DataPart<
 // You can still use `usePart` hook to get data and create your own display from these parts
 // Example: dynamic events (type = 'ui_event') or specific parts from Vercel AI SDK. See more details here:
 // https://github.com/vercel/ai/blob/7948ec215d21675c1100edf58af8bb03a1f1dbe4/packages/ai/src/ui/ui-messages.ts#L75-L272
-export type AnyPart<T extends string = any> = {
+export type AnyPart<T extends string = string> = {
   id?: string;
   type: T;
-  data?: any;
+  data?: unknown;
 };

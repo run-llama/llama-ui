@@ -50,5 +50,4 @@ export function ToolTipper({
   );
 }
 
-// eslint-disable-next-line no-restricted-syntax
 export default ToolTipper;

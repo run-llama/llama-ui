@@ -51,6 +51,7 @@ export function createAgentDataConfig({
         resolvedDeploymentName = path.split("/")[2];
       }
     } catch (error) {
+      // eslint-disable-next-line no-console -- Warn about URL parsing failure during config setup
       console.warn(
         "Failed to infer deployment name from window url, falling back to default",
         error

@@ -22,7 +22,6 @@ import { sampleSources } from "../fixtures";
 export function BasicChatProvider(props: React.PropsWithChildren) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
-  const [requestData] = useState<unknown>(null);
   const [status, setStatus] = useState<ChatContext["status"]>("ready");
 
   const value = useMemo<ChatContext>(() => {
@@ -48,7 +47,7 @@ export function BasicChatProvider(props: React.PropsWithChildren) {
       // computed
       isLoading: status === "streaming" || status === "submitted",
     };
-  }, [input, messages, requestData, status]);
+  }, [input, messages, status]);
 
   return <ChatProvider value={value}>{props.children}</ChatProvider>;
 }

@@ -28,6 +28,8 @@ export function useItemGridData(
   const [error, setError] = useState<string | null>(null);
   const [totalSize, setTotalSize] = useState<number>(0);
 
+  const filterFieldsJson = JSON.stringify(filterFields);
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -54,10 +56,11 @@ export function useItemGridData(
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- filterFields is serialized to filterFieldsJson for stable comparison
   }, [
     paginationState.page,
     paginationState.size,
-    JSON.stringify(filterFields),
+    filterFieldsJson,
     sortSpec,
     client,
     config.deploymentName,
