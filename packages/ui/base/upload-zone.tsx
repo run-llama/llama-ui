@@ -47,7 +47,7 @@ export function UploadZone({
   return (
     <div
       className={cn(
-        "flex h-full min-h-[200px] w-full flex-1 flex-col items-center rounded-2xl px-4 py-6 text-center transition-all",
+        "flex h-full min-h-[200px] w-full flex-1 flex-col items-center rounded-2xl p-6 text-center transition-all",
         state === "focus"
           ? "bg-neutral-100 ring-[3px] ring-neutral-950/10"
           : "bg-white"
@@ -66,7 +66,7 @@ export function UploadZone({
       </div>
       {/* Supported files at bottom */}
       {supportedFiles && (
-        <p className="max-w-[384px] pb-4 text-center text-xs text-muted-foreground">
+        <p className="max-w-[384px] pt-2 text-center text-xs text-muted-foreground">
           {supportedFiles}
         </p>
       )}
