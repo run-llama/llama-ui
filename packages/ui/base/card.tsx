@@ -41,7 +41,7 @@ const Card = ({
     ref={ref}
     className={cn(
       "flex flex-col gap-6 rounded-xl border bg-card px-6 py-6 text-card-foreground shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)]",
-      className,
+      className
     )}
     {...props}
   />
