@@ -47,7 +47,7 @@ export function useItemData<T extends JsonShape<T>>({
   const getExtractedData = useCallback(
     (agentData: AgentDataItem | null): ExtractedData<T> | null => {
       if (!agentData) return null;
-      return agentData.data as ExtractedData<T>;
+      return agentData.data as unknown as ExtractedData<T>;
     },
     []
   );
@@ -57,7 +57,7 @@ export function useItemData<T extends JsonShape<T>>({
     setItem((currentItem) => {
       if (!currentItem) return null;
 
-      const extractedData = currentItem.data as ExtractedData<T>;
+      const extractedData = currentItem.data as unknown as ExtractedData<T>;
       return {
         ...currentItem,
         data: {
@@ -72,7 +72,7 @@ export function useItemData<T extends JsonShape<T>>({
   /** Resets the state after loading from API */
   const resetState = useCallback((newItem: AgentDataItem) => {
     try {
-      const extractedData = newItem.data as ExtractedData<T>;
+      const extractedData = newItem.data as unknown as ExtractedData<T>;
       // Validate that we have the expected data structure
       if (!extractedData.data) {
         throw new Error("Invalid item structure: missing data field");
@@ -141,7 +141,7 @@ export function useItemData<T extends JsonShape<T>>({
         throw new Error("No item to save");
       }
 
-      const extractedData = item.data as ExtractedData<T>;
+      const extractedData = item.data as unknown as ExtractedData<T>;
       const response = await client.beta.agentData.update(item.id!, {
         data: {
           ...extractedData,

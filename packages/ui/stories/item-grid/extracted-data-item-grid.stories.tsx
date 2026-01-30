@@ -72,7 +72,7 @@ export const Default: Story = {
       <ExtractedDataItemGridWrapper
         {...args}
         onRowClick={(item: AgentDataItem) => {
-          const data = item.data as ExtractedData;
+          const data = item.data as unknown as ExtractedData;
           console.log(`Clicked row: ${data.file_name}`);
         }}
       />

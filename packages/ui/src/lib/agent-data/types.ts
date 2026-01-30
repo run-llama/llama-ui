@@ -107,12 +107,12 @@ export interface AgentDataConfig {
 }
 
 /**
- * Type representing agent data item from the SDK.
- * This matches the SDK's AgentData interface (not the class).
- * The data field is typed as unknown to allow flexible casting to ExtractedData<T>.
+ * Type alias for agent data items returned from the SDK.
+ * This is a local interface that mirrors the SDK's AgentData response type,
+ * but without the class methods that cause TypeScript merge issues.
  */
 export interface AgentDataItem {
-  data: unknown;
+  data: { [key: string]: unknown };
   deployment_name: string;
   id?: string | null;
   collection?: string;

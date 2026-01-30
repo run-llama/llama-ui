@@ -49,7 +49,7 @@ export const Default: Story = {
         key: "fileName",
         header: "File Name",
         getValue: (item: AgentDataItem) => {
-          const data = item.data as ExtractedData;
+          const data = item.data as unknown as ExtractedData;
           return data.file_name;
         },
         sortable: true,
@@ -58,7 +58,7 @@ export const Default: Story = {
         key: "status",
         header: "Status",
         getValue: (item: AgentDataItem) => {
-          const data = item.data as ExtractedData;
+          const data = item.data as unknown as ExtractedData;
           return data.status;
         },
         sortable: true,
@@ -83,7 +83,7 @@ export const Default: Story = {
       <ItemGridWrapper
         {...args}
         onRowClick={(item: AgentDataItem) => {
-          const data = item.data as ExtractedData;
+          const data = item.data as unknown as ExtractedData;
           console.log(`Clicked row: ${data.file_name}`);
         }}
       />
@@ -110,7 +110,7 @@ export const WithCustomColumns: Story = {
         key: "fileName",
         header: "File Name",
         getValue: (item: AgentDataItem) => {
-          const data = item.data as ExtractedData;
+          const data = item.data as unknown as ExtractedData;
           return data.file_name;
         },
         sortable: true,
@@ -141,7 +141,7 @@ export const WithInteraction: Story = {
         key: "fileName",
         header: "File Name",
         getValue: (item: AgentDataItem) => {
-          const data = item.data as ExtractedData;
+          const data = item.data as unknown as ExtractedData;
           return data.file_name;
         },
         sortable: true,
@@ -150,7 +150,7 @@ export const WithInteraction: Story = {
         key: "status",
         header: "Status",
         getValue: (item: AgentDataItem) => {
-          const data = item.data as ExtractedData;
+          const data = item.data as unknown as ExtractedData;
           return data.status;
         },
         sortable: true,

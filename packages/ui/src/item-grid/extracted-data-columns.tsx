@@ -26,7 +26,7 @@ export function getExtractedDataItemsToReviewCount(
   item: AgentDataItem,
   confidenceThreshold: number = DEFAULT_CONFIDENCE_THRESHOLD
 ): number {
-  const extractedData = item.data as ExtractedData<unknown>;
+  const extractedData = item.data as unknown as ExtractedData<unknown>;
   const metadata = extractedData.field_metadata;
   if (!metadata || typeof metadata !== "object") return 0;
 
@@ -75,7 +75,7 @@ export function createExtractedDataColumn(
         key: "file_name",
         header: "File Name",
         getValue: (item: AgentDataItem) => {
-          const extractedData = item.data as ExtractedData<unknown>;
+          const extractedData = item.data as unknown as ExtractedData<unknown>;
           return extractedData.file_name;
         },
         sortable: true,
@@ -86,7 +86,7 @@ export function createExtractedDataColumn(
         key: "status",
         header: "Status",
         getValue: (item: AgentDataItem) => {
-          const extractedData = item.data as ExtractedData<unknown>;
+          const extractedData = item.data as unknown as ExtractedData<unknown>;
           return extractedData.status;
         },
         renderCell: (value: unknown) => (
