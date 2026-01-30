@@ -50,6 +50,7 @@ Card.displayName = "Card";
 
 const CardTitle = ({
   ref,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   className,
   ...props
 }: React.HTMLAttributes<HTMLHeadingElement> & {
@@ -65,6 +66,7 @@ CardTitle.displayName = "CardTitle";
 
 const CardDescription = ({
   ref,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   className,
   ...props
 }: React.HTMLAttributes<HTMLParagraphElement> & {
@@ -99,6 +101,7 @@ const CardHeader = ({
   title,
   description,
   action,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   className,
   ...props
 }: CardHeaderProps) => (
@@ -129,6 +132,7 @@ CardHeader.displayName = "CardHeader";
 
 const CardContent = ({
   ref,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement> & {
@@ -161,6 +165,7 @@ const CardFooter = ({
   primaryAction,
   secondaryAction,
   tertiaryAction,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   className,
   ...props
 }: CardFooterProps) => (
