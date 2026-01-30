@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { ApiProvider, createMockClients } from "../../src/lib";
 import { ExtractedDataItemGrid } from "../../src/item-grid/extracted-data-item-grid";
-import type { FilterOperation } from "@/src/lib/agent-data";
+import type { AgentDataSearchParams } from "@/src/lib/agent-data";
 import type { ReactNode } from "react";
 
 function renderWithProvider(ui: ReactNode, clients = createMockClients()) {
@@ -17,7 +17,7 @@ describe("ExtractedDataItemGrid baseFilter", () => {
     }
     const spy = vi.spyOn(clients.cloudApiClient.beta.agentData, "search");
 
-    const filter: Record<string, FilterOperation> = {
+    const filter: Record<string, AgentDataSearchParams.Filter> = {
       status: { includes: ["approved"] },
     };
 

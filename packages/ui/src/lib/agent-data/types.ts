@@ -10,31 +10,6 @@ export const StatusType = {
 
 export type StatusType = (typeof StatusType)[keyof typeof StatusType];
 
-export const ComparisonOperator = {
-  GT: "gt",
-  GTE: "gte",
-  LT: "lt",
-  LTE: "lte",
-  EQ: "eq",
-  INCLUDES: "includes",
-} as const;
-
-export type ComparisonOperator =
-  (typeof ComparisonOperator)[keyof typeof ComparisonOperator];
-
-/**
- * Filter operation for searching/filtering agent data
- * This matches the API's FilterOperation type
- */
-export type FilterOperation = {
-  eq?: number | string | null;
-  gt?: number | string | null;
-  gte?: number | string | null;
-  lt?: number | string | null;
-  lte?: number | string | null;
-  includes?: Array<number | string | null>;
-};
-
 /**
  * Bounding box coordinates for a citation location on a page
  */
@@ -133,11 +108,11 @@ export interface AgentDataConfig {
 
 /**
  * Type representing agent data item from the SDK.
- * This is a simplified interface matching the SDK's AgentData response type.
- * The data field is typed as unknown to allow any data structure.
+ * This matches the SDK's AgentData interface (not the class).
+ * The data field is typed as unknown to allow flexible casting to ExtractedData<T>.
  */
-export interface AgentDataItem<T = unknown> {
-  data: T;
+export interface AgentDataItem {
+  data: unknown;
   deployment_name: string;
   id?: string | null;
   collection?: string;

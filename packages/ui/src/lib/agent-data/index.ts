@@ -8,7 +8,6 @@ export type {
   ExtractedFieldMetadata,
   ExtractedFieldMetadataDict,
   FieldCitation,
-  FilterOperation,
   PageDimensions,
 } from "./types";
 
@@ -16,4 +15,10 @@ export type {
 // It is still available as part of the FieldCitation type
 
 // Export the const objects (their types are automatically exported with the same name)
-export { StatusType, ComparisonOperator } from "./types";
+export { StatusType } from "./types";
+
+// Re-export SDK types
+export type {
+  AgentData,
+  AgentDataSearchParams,
+} from "@llamaindex/llama-cloud/resources/beta";

@@ -16,7 +16,10 @@ import type {
   PaginationState,
   Column,
 } from "./types";
-import type { FilterOperation, AgentDataItem } from "@/src/lib/agent-data";
+import type {
+  AgentDataItem,
+  AgentDataSearchParams,
+} from "@/src/lib/agent-data";
 
 // Hooks
 import { useItemGridData } from "./hooks/use-item-grid-data";
@@ -33,7 +36,7 @@ export interface ItemGridProp {
   // Other configurations
   defaultPageSize?: number;
   // Optional root filter passed through directly to the search API
-  filter?: Record<string, FilterOperation>;
+  filter?: Record<string, AgentDataSearchParams.Filter>;
   // Styling (outermost container only)
   className?: string;
   style?: CSSProperties;
@@ -73,7 +76,7 @@ export function ItemGrid({
 
   // Convert frontend filter state to API format
   const searchFilter = useMemo(() => {
-    const result: Record<string, FilterOperation> = {
+    const result: Record<string, AgentDataSearchParams.Filter> = {
       ...(filter || {}),
     };
 

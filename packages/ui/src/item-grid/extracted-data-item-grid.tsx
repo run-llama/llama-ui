@@ -1,4 +1,7 @@
-import type { FilterOperation, AgentDataItem } from "@/src/lib/agent-data";
+import type {
+  AgentDataItem,
+  AgentDataSearchParams,
+} from "@/src/lib/agent-data";
 import { ItemGrid } from "./item-grid";
 import {
   createExtractedDataColumn,
@@ -17,7 +20,7 @@ export interface ExtractedDataItemGridProps {
   // Other configurations
   defaultPageSize?: number;
   // Optional base filter to be passed to search API
-  filter?: Record<string, FilterOperation>;
+  filter?: Record<string, AgentDataSearchParams.Filter>;
   // Styling (forwarded to ItemGrid)
   className?: string;
   style?: React.CSSProperties;

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Card } from "@/base/card";
 import { cn } from "@/lib/utils";
 import {
-  type FilterOperation,
+  type AgentDataSearchParams,
   type AgentDataConfig,
 } from "@/src/lib/agent-data";
 import { useAgentDataConfig, useCloudApiClient } from "../lib/api-provider";
@@ -12,7 +12,7 @@ import type LlamaCloud from "@llamaindex/llama-cloud";
 
 export interface ItemCountProps {
   title: string;
-  filter?: Record<string, FilterOperation>;
+  filter?: Record<string, AgentDataSearchParams.Filter>;
   variant?: "total" | "awaiting" | "approved" | "rejected";
   subtitle?: string;
 }
@@ -34,7 +34,7 @@ const variantStyles = {
 };
 
 async function fetchCountData(params: {
-  filter?: Record<string, FilterOperation>;
+  filter?: Record<string, AgentDataSearchParams.Filter>;
   client: LlamaCloud;
   config: AgentDataConfig;
 }): Promise<number> {

@@ -1,6 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import type { PaginationState } from "../types";
-import type { FilterOperation, AgentDataItem } from "@/src/lib/agent-data";
+import type {
+  AgentDataItem,
+  AgentDataSearchParams,
+} from "@/src/lib/agent-data";
 import { useAgentDataConfig, useCloudApiClient } from "../../lib/api-provider";
 
 type UseItemGridHandler = {
@@ -15,7 +18,7 @@ type UseItemGridHandler = {
 // Custom hook for data fetching
 export function useItemGridData(
   paginationState: PaginationState,
-  filterFields: Record<string, FilterOperation> = {},
+  filterFields: Record<string, AgentDataSearchParams.Filter> = {},
   sortSpec: string | undefined = undefined
 ): UseItemGridHandler {
   const client = useCloudApiClient();

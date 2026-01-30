@@ -1,4 +1,7 @@
-import type { FilterOperation, AgentDataItem } from "@/src/lib/agent-data";
+import type {
+  AgentDataItem,
+  AgentDataSearchParams,
+} from "@/src/lib/agent-data";
 import type { ReactNode } from "react";
 
 // Types
@@ -41,6 +44,6 @@ export interface BuiltInColumnConfig {
 
 export interface BusinessConfig {
   columns: Column[];
-  filterFields: Record<string, FilterOperation>;
+  filterFields: Record<string, AgentDataSearchParams.Filter>;
   defaultPageSize: number;
 }
