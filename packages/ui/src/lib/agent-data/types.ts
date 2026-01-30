@@ -1,3 +1,5 @@
+import type LlamaCloud from "@llamaindex/llama-cloud";
+
 /**
  * Status types for agent data processing
  */
@@ -108,15 +110,19 @@ export interface AgentDataConfig {
 
 /**
  * Type alias for agent data items returned from the SDK.
- * This is a local interface that mirrors the SDK's AgentData response type,
- * but without the class methods that cause TypeScript merge issues.
+ *
+ * The SDK exports `AgentData` as both a class (with methods like update/delete)
+ * and an interface (the response shape). TypeScript merges these, so importing
+ * `AgentData` directly causes type errors when spreading/assigning objects
+ * because the class methods are expected but not present.
+ *
+ * This type alias extracts just the data properties from the SDK's return type,
+ * excluding the class methods.
  */
-export interface AgentDataItem {
-  data: { [key: string]: unknown };
-  deployment_name: string;
-  id?: string | null;
-  collection?: string;
-  created_at?: string | null;
-  project_id?: string | null;
-  updated_at?: string | null;
-}
+type DataPropertiesOnly<T> = Pick<
+  T,
+  { [K in keyof T]: T[K] extends Function ? never : K }[keyof T]
+>;
+export type AgentDataItem = DataPropertiesOnly<
+  Awaited<ReturnType<LlamaCloud["beta"]["agentData"]["get"]>>
+>;
