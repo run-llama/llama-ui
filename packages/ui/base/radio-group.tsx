@@ -1,7 +1,7 @@
-import * as React from "react";
-import type { ComponentRef } from "react";
 import * as RadioGroupPrimitive from "@radix-ui/react-radio-group";
 import { cva, type VariantProps } from "class-variance-authority";
+import type { ComponentRef } from "react";
+import * as React from "react";
 
 import { cn } from "../lib/utils";
 import { Label, type LabelProps } from "./label";
@@ -20,14 +20,15 @@ const radioGroupVariants = cva("grid gap-3", {
 
 const radioIndicatorVariants = cva(
   [
-    "group peer size-4 shrink-0 rounded-full border relative",
+    "group/radio peer size-4 shrink-0 rounded-full border relative",
     // Unchecked state
     "data-[state=unchecked]:bg-background data-[state=unchecked]:border-input",
     // Checked state (default - not focused)
     "data-[state=checked]:bg-primary data-[state=checked]:border-primary",
-    // Focus state - white background/border (white ring) with blue inner indicator
-    "focus-visible:!bg-background focus-visible:!border-background",
-    "focus-visible:outline-none",
+    // Focus state - white background with gray border ring
+    "focus:!bg-background focus:!border-ring",
+    "focus-visible:!bg-background focus-visible:!border-ring",
+    "focus:outline-none focus-visible:outline-none",
     // Active state
     "active:opacity-60",
     // Disabled state
@@ -37,8 +38,8 @@ const radioIndicatorVariants = cva(
     variants: {
       variant: {
         default:
-          "shadow-xs focus-visible:!shadow-[0_0_0_3px_rgba(163,163,163,0.5)]",
-        box: "focus-visible:!shadow-[0_0_0_3px_rgba(163,163,163,0.5)]",
+          "shadow-xs focus:!shadow-[0_0_0_3px_rgba(163,163,163,0.5)] focus-visible:!shadow-[0_0_0_3px_rgba(163,163,163,0.5)]",
+        box: "focus:!shadow-[0_0_0_3px_rgba(163,163,163,0.5)] focus-visible:!shadow-[0_0_0_3px_rgba(163,163,163,0.5)]",
       },
     },
     defaultVariants: {
@@ -47,7 +48,7 @@ const radioIndicatorVariants = cva(
   }
 );
 
-const radioItemWrapperVariants = cva("inline-flex items-start gap-2", {
+const radioItemWrapperVariants = cva("inline-flex items-start gap-3", {
   variants: {
     variant: {
       default: "",
@@ -186,7 +187,7 @@ const RadioGroupItem = ({
       {...props}
     >
       <RadioGroupPrimitive.Indicator className="absolute inset-0 flex items-center justify-center">
-        <div className="bg-primary-foreground group-focus-visible:bg-primary size-2 rounded-full" />
+        <div className="size-2 rounded-full bg-primary-foreground group-focus/radio:!bg-primary group-focus-visible/radio:!bg-primary" />
       </RadioGroupPrimitive.Indicator>
     </RadioGroupPrimitive.Item>
   );
