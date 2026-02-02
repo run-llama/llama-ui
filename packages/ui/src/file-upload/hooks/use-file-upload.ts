@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { logger } from "@shared/logger";
 import { getCloudClient } from "../../lib/cloud-client";
+import { hashFile } from "../utils/file-utils";
 
 import type {
   FileUploadData,
@@ -14,6 +15,7 @@ export function useFileUpload({
   onUploadStart,
   onUploadComplete,
   onUploadError,
+  hashingOptions,
 }: UseFileUploadOptions = {}): UseFileUploadReturn {
   const [isUploading, setIsUploading] = useState(false);
 
@@ -24,9 +26,24 @@ export function useFileUpload({
     try {
       const client = getCloudClient();
 
+      // Compute file hash if hashing is enabled
+      let fileHash: string | undefined;
+      if (hashingOptions?.enabled) {
+        fileHash = await hashFile(file, {
+          algorithm: hashingOptions.algorithm,
+        });
+      }
+
+      // Build external_id from hash with optional prefix
+      const externalId =
+        fileHash && hashingOptions
+          ? `${hashingOptions.externalIdPrefix ?? ""}${fileHash}`
+          : undefined;
+
       const response = await client.files.create({
         file: file,
         purpose: "user_data",
+        ...(externalId && { external_id: externalId }),
       });
 
       const fileId = response.id;
@@ -44,10 +61,11 @@ export function useFileUpload({
         file,
         fileId,
         url: fileUrl,
+        ...(fileHash && { hash: fileHash }),
       };
 
       onProgress?.(file, 100);
-      onUploadComplete?.(file);
+      onUploadComplete?.(file, fileHash);
 
       return {
         success: true,

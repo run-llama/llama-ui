@@ -22,6 +22,8 @@ export interface FileUploadData {
   file: File;
   fileId: string;
   url?: string;
+  /** The hash of the file contents (if hashing was enabled) */
+  hash?: string;
 }
 
 export interface UploadResult {
@@ -30,11 +32,22 @@ export interface UploadResult {
   error: Error | null;
 }
 
+export interface FileHashingOptions {
+  /** Enable client-side file hashing before upload */
+  enabled: boolean;
+  /** Prefix to prepend to the hash when used as external_id (e.g., "file_") */
+  externalIdPrefix?: string;
+  /** Algorithm to use for hashing (default: SHA-256) */
+  algorithm?: "SHA-256" | "SHA-384" | "SHA-512";
+}
+
 export interface UseFileUploadOptions {
   onProgress?: (file: File, progress: number) => void;
   onUploadStart?: (file: File) => void;
-  onUploadComplete?: (file: File) => void;
+  onUploadComplete?: (file: File, hash?: string) => void;
   onUploadError?: (file: File, error: string) => void;
+  /** Options for client-side file hashing */
+  hashingOptions?: FileHashingOptions;
 }
 
 export interface UseFileUploadReturn {
@@ -87,6 +100,8 @@ export interface FileUploaderProps extends BaseFileUploadProps {
   selectFileLabel?: string;
   selectFileDescription?: string;
   maxFileSizeBytes?: number;
+  /** Options for client-side file hashing */
+  hashingOptions?: FileHashingOptions;
 }
 
 export type { FileUploadProgress } from "./upload-progress";
