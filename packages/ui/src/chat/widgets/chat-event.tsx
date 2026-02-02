@@ -18,6 +18,7 @@ export type ChatEvent = {
   title: string;
   description?: string;
   status: "pending" | "success" | "error";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- data is arbitrary from external sources
   data?: any;
 };
 

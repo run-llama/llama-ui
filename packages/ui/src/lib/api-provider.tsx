@@ -5,19 +5,20 @@
 
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 import {
-  CloudAgentClient,
-  cloudApiClient,
-  CloudApiClient,
   WorkflowsClient,
   workflowsClient,
-  createCloudAgentClient,
   createWorkflowsClient,
+  getCloudClient,
+  configureCloudClient,
+  createAgentDataConfig,
+  type AgentDataConfig,
+  type CloudApiClient,
 } from "./clients";
 
 export interface ApiClients {
   workflowsClient?: WorkflowsClient;
   cloudApiClient?: CloudApiClient;
-  agentDataClient?: CloudAgentClient;
+  agentDataConfig?: AgentDataConfig;
 }
 
 export interface ApiProviderProps {
@@ -58,11 +59,18 @@ export function ApiProvider({ children, clients, project }: ApiProviderProps) {
 // ===== Mock Clients Factory for Testing/Storybook =====
 
 export function createMockClients(): ApiClients {
+  // In mock/test mode, we need to configure the cloud client with a dummy API key
+  // so that it doesn't throw during instantiation. MSW will intercept actual API calls.
+  configureCloudClient({
+    apiKey: "test-api-key",
+    baseURL: "https://api.cloud.llamaindex.ai",
+  });
+
   return {
     workflowsClient: workflowsClient,
-    cloudApiClient: cloudApiClient,
-    agentDataClient: createCloudAgentClient({
-      agentUrlId: "your-agent-url-id",
+    cloudApiClient: getCloudClient(),
+    agentDataConfig: createAgentDataConfig({
+      deploymentName: "your-agent-url-id",
       collection: "your-collection",
     }),
   };
@@ -97,18 +105,17 @@ export function createRealClientsForTests(params: {
       Authorization: `Bearer ${apiKey}`,
     },
   });
-  cloudApiClient.setConfig({
-    baseUrl: params.baseUrl,
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-    },
+  // Configure the cloud client with API key and base URL
+  configureCloudClient({
+    apiKey: apiKey,
+    baseURL: params.baseUrl,
   });
+
   return {
     workflowsClient,
-    cloudApiClient,
-    agentDataClient: createCloudAgentClient({
-      client: cloudApiClient,
-      agentUrlId: params.agent?.agentUrlId,
+    cloudApiClient: getCloudClient(),
+    agentDataConfig: createAgentDataConfig({
+      deploymentName: params.agent?.agentUrlId,
       windowUrl:
         typeof window !== "undefined" ? window.location.href : undefined,
       collection: params.agent?.collection,
@@ -165,17 +172,17 @@ export function useCloudApiClient(): CloudApiClient {
   return clients.cloudApiClient;
 }
 
-export function useAgentDataClient(): CloudAgentClient {
+export function useAgentDataConfig(): AgentDataConfig {
   const { clients } = useApiContext();
 
-  if (!clients.agentDataClient) {
+  if (!clients.agentDataConfig) {
     throw new Error(
-      "No agent data client configured. " +
-        "Please ensure agentDataClient is configured in ApiProvider."
+      "No agent data config configured. " +
+        "Please ensure agentDataConfig is configured in ApiProvider."
     );
   }
 
-  return clients.agentDataClient;
+  return clients.agentDataConfig;
 }
 
 export function useApiClients(): ApiClients {

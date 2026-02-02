@@ -1,9 +1,6 @@
 import { useState } from "react";
 import { logger } from "@shared/logger";
-import {
-  uploadFileApiV1FilesPost,
-  readFileContentApiV1FilesIdContentGet,
-} from "llama-cloud-services/api";
+import { getCloudClient } from "../../lib/cloud-client";
 
 import type {
   FileUploadData,
@@ -25,33 +22,22 @@ export function useFileUpload({
     onUploadStart?.(file);
 
     try {
-      const response = await uploadFileApiV1FilesPost({
-        body: {
-          upload_file: file,
-        },
+      const client = getCloudClient();
+
+      const response = await client.files.create({
+        file: file,
+        purpose: "user_data",
       });
 
-      if (response.error) {
-        throw response.error;
-      }
-
-      const fileId = response.data.id;
+      const fileId = response.id;
 
       // Real API call with progress simulation
       onProgress?.(file, 10);
 
       // Get the file content URL using the file ID
-      const contentResponse = await readFileContentApiV1FilesIdContentGet({
-        path: {
-          id: fileId,
-        },
-      });
+      const contentResponse = await client.files.get(fileId);
 
-      if (contentResponse.error) {
-        throw contentResponse.error;
-      }
-
-      const fileUrl = contentResponse.data.url;
+      const fileUrl = contentResponse.url;
       onProgress?.(file, 80);
 
       const fileData: FileUploadData = {

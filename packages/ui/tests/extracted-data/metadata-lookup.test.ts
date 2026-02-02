@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { findExtractedFieldMetadata } from "../../src/extracted-data/metadata-lookup";
-import type { ExtractedFieldMetadataDict } from "llama-cloud-services/beta/agent";
+import type { ExtractedFieldMetadataDict } from "@/src/lib/agent-data";
 
 describe("findExtractedFieldMetadata", () => {
   // Mock API-style tree metadata structure (mirrors data structure)

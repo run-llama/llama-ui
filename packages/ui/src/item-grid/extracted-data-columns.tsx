@@ -1,14 +1,11 @@
-import type { Column } from "./types";
+import type { Column, ItemGridHooks } from "./types";
 import {
   ReviewStatusBadge,
   FormattedDate,
 } from "./components/status-components";
 import { ActionButton } from "./components/action-button";
 import { toast } from "sonner";
-import type {
-  TypedAgentData,
-  ExtractedData,
-} from "llama-cloud-services/beta/agent";
+import type { ExtractedData, AgentDataItem } from "@/src/lib/agent-data";
 import { STATUS_OPTIONS } from "./built-in-columns";
 import { DEFAULT_CONFIDENCE_THRESHOLD } from "@/src/store/ui-config-store";
 
@@ -25,11 +22,12 @@ export type ExtractedDataColumnName =
 
 // Helper: count low-confidence leaf metadata from extracted field metadata
 // Leaf definition: an object that contains numeric `confidence` and has no nested object properties
-export function getExtractedDataItemsToReviewCount<T>(
-  item: TypedAgentData<ExtractedData<T>>,
+export function getExtractedDataItemsToReviewCount(
+  item: AgentDataItem,
   confidenceThreshold: number = DEFAULT_CONFIDENCE_THRESHOLD
 ): number {
-  const metadata = item.data.field_metadata;
+  const extractedData = item.data as unknown as ExtractedData<unknown>;
+  const metadata = extractedData.field_metadata;
   if (!metadata || typeof metadata !== "object") return 0;
 
   let lowConfidenceCount = 0;
@@ -63,21 +61,23 @@ export function getExtractedDataItemsToReviewCount<T>(
 }
 
 // Factory function to create a single extracted-data column by name
-export function createExtractedDataColumn<T>(
+export function createExtractedDataColumn(
   columnName: ExtractedDataColumnName,
-  config: boolean | Partial<Column<ExtractedData<T>>>,
+  config: boolean | Partial<Column>,
   confidenceThreshold: number = DEFAULT_CONFIDENCE_THRESHOLD
-): Column<ExtractedData<T>> {
+): Column {
   // Build base column by name
-  let baseColumn: Column<ExtractedData<T>> | undefined;
+  let baseColumn: Column | undefined;
 
   switch (columnName) {
     case "fileName":
       baseColumn = {
         key: "file_name",
         header: "File Name",
-        getValue: (item: TypedAgentData<ExtractedData<T>>) =>
-          item.data.file_name,
+        getValue: (item: AgentDataItem) => {
+          const extractedData = item.data as unknown as ExtractedData<unknown>;
+          return extractedData.file_name;
+        },
         sortable: true,
       };
       break;
@@ -85,7 +85,10 @@ export function createExtractedDataColumn<T>(
       baseColumn = {
         key: "status",
         header: "Status",
-        getValue: (item: TypedAgentData<ExtractedData<T>>) => item.data.status,
+        getValue: (item: AgentDataItem) => {
+          const extractedData = item.data as unknown as ExtractedData<unknown>;
+          return extractedData.status;
+        },
         renderCell: (value: unknown) => (
           <ReviewStatusBadge value={value as string} />
         ),
@@ -98,7 +101,7 @@ export function createExtractedDataColumn<T>(
       baseColumn = {
         key: "items_to_review",
         header: "Items to Review",
-        getValue: (item: TypedAgentData<ExtractedData<T>>) =>
+        getValue: (item: AgentDataItem) =>
           getExtractedDataItemsToReviewCount(item, confidenceThreshold),
         renderCell: (value: unknown) => {
           const count = value as number;
@@ -115,8 +118,7 @@ export function createExtractedDataColumn<T>(
       baseColumn = {
         key: "created_at",
         header: "Created At",
-        getValue: (item: TypedAgentData<ExtractedData<T>>) =>
-          item.createdAt.toISOString(),
+        getValue: (item: AgentDataItem) => item.created_at,
         renderCell: (value: unknown) => (
           <FormattedDate value={value as string} />
         ),
@@ -127,19 +129,19 @@ export function createExtractedDataColumn<T>(
       baseColumn = {
         key: "actions",
         header: "",
-        getValue: (item: TypedAgentData<ExtractedData<T>>) => item,
-        renderCell: (value: unknown, hooks) => {
+        getValue: (item: AgentDataItem) => item,
+        renderCell: (value: unknown, hooks?: ItemGridHooks) => {
           if (!hooks?.deleteItem) {
             return null;
           }
 
-          const item = value as TypedAgentData<ExtractedData<T>>;
+          const item = value as AgentDataItem;
           const deleteItem = hooks.deleteItem;
 
           return (
             <ActionButton
               onDelete={async () => {
-                const result = await deleteItem(item.id);
+                const result = await deleteItem(item.id!);
                 if (!result.success && result.error) {
                   toast.error(result.error);
                 }

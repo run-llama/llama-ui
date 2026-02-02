@@ -12,7 +12,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Summary card that displays counts powered by the Agent Data client from ApiProvider.",
+          "Summary card that displays counts powered by the Agent Data API from ApiProvider.",
       },
     },
   },
@@ -23,12 +23,14 @@ type Story = StoryObj<typeof meta>;
 
 function createStubbedClients() {
   const clients = createMockClients();
-  // Override agentDataClient.search to avoid network and return deterministic totals
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (clients.agentDataClient as any).search = async () => ({
-    items: [],
-    totalSize: 123,
-  });
+  // Override the cloudApiClient's beta.agentData.search to return deterministic totals
+  if (clients.cloudApiClient) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (clients.cloudApiClient.beta.agentData as any).search = async () => ({
+      items: [],
+      total_size: 123,
+    });
+  }
   return clients;
 }
 
@@ -63,6 +65,9 @@ export const Default: Story = {
 };
 
 export const WithVariants: Story = {
+  args: {
+    title: "Count Variants Demo",
+  },
   render: () => (
     <ApiProvider clients={createStubbedClients()}>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
@@ -85,5 +90,4 @@ export const WithVariants: Story = {
     const numbers = canvas.getAllByText(/123/);
     expect(numbers.length).toBeGreaterThanOrEqual(1);
   },
-  args: {} as any,
 };

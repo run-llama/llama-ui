@@ -4,10 +4,7 @@ import {
   EXTRACTED_DATA_COLUMN_NAMES,
   getExtractedDataItemsToReviewCount,
 } from "../../src/item-grid/extracted-data-columns";
-import type {
-  ExtractedData,
-  TypedAgentData,
-} from "llama-cloud-services/beta/agent";
+import type { ExtractedData, AgentDataItem } from "@/src/lib/agent-data";
 import { type JsonObject } from "@/src";
 
 // Mock the components
@@ -44,18 +41,18 @@ vi.mock("../../src/item-grid/built-in-columns", () => ({
 }));
 
 describe("extracted-data-columns", () => {
-  const mockItem: TypedAgentData<ExtractedData<Record<string, unknown>>> = {
+  const mockItem: AgentDataItem = {
     id: "test-id",
-    deploymentName: "test-agent",
-    createdAt: new Date("2024-01-01T00:00:00Z"),
-    updatedAt: new Date("2024-01-01T00:00:00Z"),
+    deployment_name: "test-agent",
+    created_at: "2024-01-01T00:00:00.000Z",
+    updated_at: "2024-01-01T00:00:00.000Z",
     data: {
       file_name: "test-document.pdf",
       status: "pending_review",
       field_metadata: {},
       original_data: {},
       data: {},
-    } as any,
+    } as ExtractedData<Record<string, unknown>>,
   };
 
   describe("EXTRACTED_DATA_COLUMN_NAMES", () => {
@@ -164,14 +161,11 @@ describe("extracted-data-columns", () => {
       expect(value).toBe("pending_review");
     });
 
-    it("createdAt column getValue returns createdAt from item", () => {
+    it("createdAt column getValue returns created_at from item", () => {
       const column = createExtractedDataColumn("createdAt", true);
       const value = column.getValue(mockItem);
 
-      // Check that it's a valid ISO string format
-      expect(value).toMatch(/^2024-01-01T00:00:00\.\d{3}Z$/);
-      expect(value).toContain("2024-01-01T00:00:00");
-      expect(value).toContain("Z");
+      expect(value).toBe("2024-01-01T00:00:00.000Z");
     });
 
     it("actions column getValue returns the entire item", () => {
@@ -184,16 +178,19 @@ describe("extracted-data-columns", () => {
 
   describe("getItemsToReviewCount", () => {
     it("returns 0 when no field_metadata", () => {
-      const item = { data: {}, status: "completed" } as unknown as any;
+      const item: AgentDataItem = {
+        deployment_name: "test",
+        data: { status: "completed" },
+      };
       expect(getExtractedDataItemsToReviewCount(item)).toBe(0);
     });
 
     it("counts only leaf confidence values below threshold", () => {
-      const item: TypedAgentData<ExtractedData<JsonObject>> = {
+      const item: AgentDataItem = {
         id: "test-id",
-        deploymentName: "test-agent",
-        createdAt: new Date("2024-01-01T00:00:00Z"),
-        updatedAt: new Date("2024-01-01T00:00:00Z"),
+        deployment_name: "test-agent",
+        created_at: "2024-01-01T00:00:00Z",
+        updated_at: "2024-01-01T00:00:00Z",
         data: {
           data: {},
           original_data: {},
@@ -215,7 +212,7 @@ describe("extracted-data-columns", () => {
               { confidence: 0.99 }, // leaf in array, high
             ],
           },
-        },
+        } as ExtractedData<JsonObject>,
       };
 
       expect(getExtractedDataItemsToReviewCount(item)).toBe(3);

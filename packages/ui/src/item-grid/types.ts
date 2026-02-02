@@ -1,7 +1,7 @@
 import type {
-  FilterOperation,
-  TypedAgentData,
-} from "llama-cloud-services/beta/agent";
+  AgentDataItem,
+  AgentDataSearchParams,
+} from "@/src/lib/agent-data";
 import type { ReactNode } from "react";
 
 // Types
@@ -23,10 +23,10 @@ export interface ItemGridHooks {
   ) => Promise<{ success: boolean; error?: string }>;
 }
 
-export interface Column<T = unknown> {
+export interface Column {
   key: string;
   header: string;
-  getValue: (item: TypedAgentData<T>) => unknown;
+  getValue: (item: AgentDataItem) => unknown;
   renderCell?: (value: unknown, hooks?: ItemGridHooks) => ReactNode;
   sortable?: boolean;
   sortKey?: string;
@@ -34,16 +34,16 @@ export interface Column<T = unknown> {
   filterOptions?: string[];
 }
 
-export interface BuiltInColumnConfig<T = unknown> {
-  fileName?: boolean | Partial<Column<T>>;
-  status?: boolean | Partial<Column<T>>;
-  createdAt?: boolean | Partial<Column<T>>;
-  itemsToReview?: boolean | Partial<Column<T>>;
-  actions?: boolean | Partial<Column<T>>;
+export interface BuiltInColumnConfig {
+  fileName?: boolean | Partial<Column>;
+  status?: boolean | Partial<Column>;
+  createdAt?: boolean | Partial<Column>;
+  itemsToReview?: boolean | Partial<Column>;
+  actions?: boolean | Partial<Column>;
 }
 
 export interface BusinessConfig {
   columns: Column[];
-  filterFields: Record<string, FilterOperation>;
+  filterFields: Record<string, AgentDataSearchParams.Filter>;
   defaultPageSize: number;
 }

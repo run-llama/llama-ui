@@ -1,10 +1,7 @@
-import type {
-  ExtractedData,
-  TypedAgentData,
-  StatusType,
-} from "llama-cloud-services/beta/agent";
+import type { ExtractedData, AgentDataItem } from "@/src/lib/agent-data";
+import { StatusType } from "@/src/lib/agent-data";
 
-// Use the StatusType from llama-cloud-services instead
+// Use the StatusType from the local agent-data types
 export type ProcessingStatus =
   | StatusType
   | "pending"
@@ -44,13 +41,10 @@ export type GenericDocumentData = {
 export type DocumentData = InvoiceData | ContractData | GenericDocumentData;
 
 // Mock item data by ID
-const mockItemData: Record<
-  string,
-  TypedAgentData<ExtractedData<InvoiceData | ContractData>>
-> = {
+const mockItemData: Record<string, AgentDataItem> = {
   "invoice-001": {
     id: "invoice-001",
-    deploymentName: "extraction-agent",
+    deployment_name: "extraction-agent",
     collection: "mock-collection",
     data: {
       file_name: "acme-corp-invoice-2024-001.pdf",
@@ -173,13 +167,13 @@ const mockItemData: Record<
           },
         ],
       },
-    },
-    createdAt: new Date("2024-01-15T10:30:00Z"),
-    updatedAt: new Date("2024-01-15T14:22:00Z"),
+    } as ExtractedData<InvoiceData>,
+    created_at: "2024-01-15T10:30:00Z",
+    updated_at: "2024-01-15T14:22:00Z",
   },
   "contract-002": {
     id: "contract-002",
-    deploymentName: "extraction-agent",
+    deployment_name: "extraction-agent",
     collection: "mock-collection",
     data: {
       file_name: "tech-solutions-contract-2024.pdf",
@@ -296,18 +290,16 @@ const mockItemData: Record<
           ],
         },
       },
-    },
-    createdAt: new Date("2024-02-28T09:15:00Z"),
-    updatedAt: new Date("2024-03-01T11:45:00Z"),
+    } as ExtractedData<ContractData>,
+    created_at: "2024-02-28T09:15:00Z",
+    updated_at: "2024-03-01T11:45:00Z",
   },
 };
 
 // Default fallback item
-const defaultMockItem = (
-  itemId: string
-): TypedAgentData<ExtractedData<GenericDocumentData>> => ({
+const defaultMockItem = (itemId: string): AgentDataItem => ({
   id: itemId,
-  deploymentName: "extraction-agent",
+  deployment_name: "extraction-agent",
   collection: "mock-collection",
   data: {
     file_name: `document-${itemId}.pdf`,
@@ -349,14 +341,16 @@ const defaultMockItem = (
         ],
       },
     },
-  },
-  createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
-  updatedAt: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000),
+  } as ExtractedData<GenericDocumentData>,
+  created_at: new Date(
+    Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000
+  ).toISOString(),
+  updated_at: new Date(
+    Date.now() - Math.random() * 24 * 60 * 60 * 1000
+  ).toISOString(),
 });
 
-export const getMockItemResponse = (
-  itemId: string
-): TypedAgentData<ExtractedData<DocumentData>> => {
+export const getMockItemResponse = (itemId: string): AgentDataItem => {
   // First try to find by string key (for backward compatibility)
   if (mockItemData[itemId]) {
     return mockItemData[itemId];

@@ -17,7 +17,7 @@ import type {
   JsonValue,
   JsonObject,
 } from "../types";
-import type { ExtractedFieldMetadata } from "llama-cloud-services/beta/agent";
+import type { ExtractedFieldMetadata } from "@/src/lib/agent-data";
 import {
   getFieldDisplayInfo,
   getFieldLabelClasses,

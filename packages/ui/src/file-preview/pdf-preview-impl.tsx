@@ -261,7 +261,7 @@ export const PdfPreviewImpl = ({
         [page.pageNumber]: scaledHeight,
       }));
     },
-    [scale, fitMode]
+    [scale]
   );
 
   const firstPageDims = pageBaseDims[1];

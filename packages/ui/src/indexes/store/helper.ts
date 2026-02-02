@@ -1,43 +1,20 @@
-import {
-  searchPipelinesApiV1PipelinesGet,
-  getPipelineApiV1PipelinesPipelineIdGet,
-} from "llama-cloud-services/api";
+import { getCloudClient } from "../../lib/cloud-client";
+import type { Pipelines } from "@llamaindex/llama-cloud/resources";
 
-// Derive SDK types from function return types to avoid proxy types
-export type PipelinesResponseData = NonNullable<
-  Awaited<ReturnType<typeof searchPipelinesApiV1PipelinesGet>>["data"]
->;
-export type Pipeline = NonNullable<
-  Awaited<ReturnType<typeof getPipelineApiV1PipelinesPipelineIdGet>>["data"]
->;
+// Derive SDK types from the LlamaCloud SDK
+export type PipelinesResponseData = Pipelines.PipelineListResponse;
+export type Pipeline = Pipelines.Pipeline;
 
 export async function fetchPipelines(params?: {
-  organizationId?: string | null;
   projectId?: string | null;
 }): Promise<PipelinesResponseData> {
-  const resp = await searchPipelinesApiV1PipelinesGet({
-    query: {
-      organization_id: params?.organizationId ?? undefined,
-      project_id: params?.projectId ?? undefined,
-    },
+  const client = getCloudClient();
+  return client.pipelines.list({
+    project_id: params?.projectId ?? undefined,
   });
-  if (resp.error) throw resp.error;
-  // SDK returns Array<PipelineReadable> on 200
-  return (resp.data ?? []) as PipelinesResponseData;
 }
 
-export async function getPipeline(
-  id: string,
-  params?: { organizationId?: string | null; projectId?: string | null }
-): Promise<Pipeline> {
-  const resp = await getPipelineApiV1PipelinesPipelineIdGet({
-    path: { pipeline_id: id },
-    query: {
-      organization_id: params?.organizationId ?? undefined,
-      project_id: params?.projectId ?? undefined,
-    },
-  });
-  if (resp.error) throw resp.error;
-  if (!resp.data) throw new Error("Pipeline not found");
-  return resp.data as Pipeline;
+export async function getPipeline(id: string): Promise<Pipeline> {
+  const client = getCloudClient();
+  return client.pipelines.get(id);
 }

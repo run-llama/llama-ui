@@ -17,9 +17,9 @@ import type {
   Column,
 } from "./types";
 import type {
-  FilterOperation,
-  TypedAgentData,
-} from "llama-cloud-services/beta/agent";
+  AgentDataItem,
+  AgentDataSearchParams,
+} from "@/src/lib/agent-data";
 
 // Hooks
 import { useItemGridData } from "./hooks/use-item-grid-data";
@@ -28,29 +28,29 @@ import { useItemGridData } from "./hooks/use-item-grid-data";
 import { ColumnHeader } from "./components/column-header";
 import { PaginationControls } from "./components/pagination-controls";
 
-export interface ItemGridProp<T = unknown> {
+export interface ItemGridProp {
   // Custom columns (displayed first)
-  customColumns?: Column<T>[];
+  customColumns?: Column[];
   // Row click event
-  onRowClick?: (item: TypedAgentData<T>) => void;
+  onRowClick?: (item: AgentDataItem) => void;
   // Other configurations
   defaultPageSize?: number;
   // Optional root filter passed through directly to the search API
-  filter?: Record<string, FilterOperation>;
+  filter?: Record<string, AgentDataSearchParams.Filter>;
   // Styling (outermost container only)
   className?: string;
   style?: CSSProperties;
 }
 
 // Main Business Component
-export function ItemGrid<T = unknown>({
+export function ItemGrid({
   customColumns = [],
   onRowClick,
   defaultPageSize = 20,
   filter,
   className,
   style,
-}: ItemGridProp<T>) {
+}: ItemGridProp) {
   const [paginationState, setPaginationState] = useState<PaginationState>({
     page: 0,
     size: defaultPageSize,
@@ -66,7 +66,7 @@ export function ItemGrid<T = unknown>({
 
   // Generate final columns array
   const columns = useMemo(() => {
-    const finalColumns: Column<T>[] = [];
+    const finalColumns: Column[] = [];
 
     // Add custom columns first
     finalColumns.push(...customColumns);
@@ -76,7 +76,7 @@ export function ItemGrid<T = unknown>({
 
   // Convert frontend filter state to API format
   const searchFilter = useMemo(() => {
-    const result: Record<string, FilterOperation> = {
+    const result: Record<string, AgentDataSearchParams.Filter> = {
       ...(filter || {}),
     };
 
@@ -101,7 +101,7 @@ export function ItemGrid<T = unknown>({
   }, [sortState]);
 
   const { data, loading, error, totalSize, deleteItem, fetchData } =
-    useItemGridData<T>(paginationState, searchFilter, apiSort);
+    useItemGridData(paginationState, searchFilter, apiSort);
 
   // Create hooks object for passing to renderCell
   const hooks = useMemo(

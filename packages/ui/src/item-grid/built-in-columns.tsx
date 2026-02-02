@@ -9,7 +9,7 @@ export const STATUS_OPTIONS = [
 export type StatusValue = (typeof STATUS_OPTIONS)[number]["value"];
 
 // Built-in column definition with name and configuration
-export interface BuiltInColumnDef<T = unknown> {
+export interface BuiltInColumnDef {
   name: string;
-  column: Column<T>;
+  column: Column;
 }

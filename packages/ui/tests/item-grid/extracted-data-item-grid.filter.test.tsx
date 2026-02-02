@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { ApiProvider, createMockClients } from "../../src/lib";
 import { ExtractedDataItemGrid } from "../../src/item-grid/extracted-data-item-grid";
-import type { FilterOperation } from "llama-cloud-services/beta/agent";
+import type { AgentDataSearchParams } from "@/src/lib/agent-data";
 import type { ReactNode } from "react";
 
 function renderWithProvider(ui: ReactNode, clients = createMockClients()) {
@@ -12,12 +12,12 @@ function renderWithProvider(ui: ReactNode, clients = createMockClients()) {
 describe("ExtractedDataItemGrid baseFilter", () => {
   it("passes filter through to search API", async () => {
     const clients = createMockClients();
-    if (!clients.agentDataClient) {
-      throw new Error("AgentDataClient not found");
+    if (!clients.cloudApiClient) {
+      throw new Error("CloudApiClient not found");
     }
-    const spy = vi.spyOn(clients.agentDataClient, "search");
+    const spy = vi.spyOn(clients.cloudApiClient.beta.agentData, "search");
 
-    const filter: Record<string, FilterOperation> = {
+    const filter: Record<string, AgentDataSearchParams.Filter> = {
       status: { includes: ["approved"] },
     };
 

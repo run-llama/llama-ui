@@ -1,5 +1,6 @@
-import { client as cloudApiClient } from "llama-cloud-services/api";
 import { client as workflowsClient } from "@llamaindex/workflows-client";
+import LlamaCloud from "@llamaindex/llama-cloud";
+import { getCloudClient, configureCloudClient } from "./cloud-client";
 
 // Export individual creator functions and types with clear names
 // Primary (new) names
@@ -11,10 +12,10 @@ export {
 
 export { workflowsClient };
 
-export {
-  createAgentDataClient as createCloudAgentClient,
-  type AgentClient as CloudAgentClient,
-} from "llama-cloud-services/beta/agent";
+export { createAgentDataConfig, type AgentDataConfig } from "./agent-data";
 
-export { cloudApiClient };
-export type CloudApiClient = typeof cloudApiClient;
+// Export the cloud client getter and configurator
+export { getCloudClient, configureCloudClient };
+
+// Export CloudApiClient type - aliased from the underlying LlamaCloud SDK type
+export type CloudApiClient = LlamaCloud;

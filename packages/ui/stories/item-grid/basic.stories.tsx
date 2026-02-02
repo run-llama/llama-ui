@@ -3,14 +3,11 @@ import React from "react";
 import { within, userEvent, expect } from "@storybook/test";
 import { ItemGrid } from "../../src/item-grid";
 import { ApiProvider, createMockClients } from "../../src/lib";
-import type {
-  ExtractedData,
-  TypedAgentData,
-} from "llama-cloud-services/beta/agent";
+import type { ExtractedData, AgentDataItem } from "@/src/lib/agent-data";
 
 const meta = {
   title: "Business/ItemGrid",
-  component: ItemGrid<ExtractedData>,
+  component: ItemGrid,
   parameters: {
     layout: "fullscreen",
     docs: {
@@ -30,18 +27,16 @@ const meta = {
       control: { type: "number" },
     },
   },
-} satisfies Meta<typeof ItemGrid<ExtractedData>>;
+} satisfies Meta<typeof ItemGrid>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 // Wrapper component that provides ApiProvider
-function ItemGridWrapper<T = unknown>(
-  props: React.ComponentProps<typeof ItemGrid<T>>
-) {
+function ItemGridWrapper(props: React.ComponentProps<typeof ItemGrid>) {
   return (
     <ApiProvider clients={createMockClients()}>
-      <ItemGrid<T> {...props} />
+      <ItemGrid {...props} />
     </ApiProvider>
   );
 }
@@ -53,19 +48,25 @@ export const Default: Story = {
       {
         key: "fileName",
         header: "File Name",
-        getValue: (item: TypedAgentData<ExtractedData>) => item.data.file_name,
+        getValue: (item: AgentDataItem) => {
+          const data = item.data as unknown as ExtractedData;
+          return data.file_name;
+        },
         sortable: true,
       },
       {
         key: "status",
         header: "Status",
-        getValue: (item: TypedAgentData<ExtractedData>) => item.data.status,
+        getValue: (item: AgentDataItem) => {
+          const data = item.data as unknown as ExtractedData;
+          return data.status;
+        },
         sortable: true,
       },
       {
         key: "createdAt",
         header: "Created At",
-        getValue: (item: TypedAgentData<ExtractedData>) => item.createdAt,
+        getValue: (item: AgentDataItem) => item.created_at,
         sortable: true,
       },
     ],
@@ -79,11 +80,12 @@ export const Default: Story = {
           Flexible grid component with custom column definitions
         </p>
       </div>
-      <ItemGridWrapper<ExtractedData>
+      <ItemGridWrapper
         {...args}
-        onRowClick={(item: TypedAgentData<ExtractedData>) =>
-          console.log(`Clicked row: ${item.data.file_name}`)
-        }
+        onRowClick={(item: AgentDataItem) => {
+          const data = item.data as unknown as ExtractedData;
+          console.log(`Clicked row: ${data.file_name}`);
+        }}
       />
     </div>
   ),
@@ -107,7 +109,10 @@ export const WithCustomColumns: Story = {
       {
         key: "fileName",
         header: "File Name",
-        getValue: (item: TypedAgentData<ExtractedData>) => item.data.file_name,
+        getValue: (item: AgentDataItem) => {
+          const data = item.data as unknown as ExtractedData;
+          return data.file_name;
+        },
         sortable: true,
       },
     ],
@@ -123,7 +128,7 @@ export const WithCustomColumns: Story = {
           Generic grid component with custom column definitions
         </p>
       </div>
-      <ItemGridWrapper<ExtractedData> {...args} />
+      <ItemGridWrapper {...args} />
     </div>
   ),
 };
@@ -135,13 +140,19 @@ export const WithInteraction: Story = {
       {
         key: "fileName",
         header: "File Name",
-        getValue: (item: TypedAgentData<ExtractedData>) => item.data.file_name,
+        getValue: (item: AgentDataItem) => {
+          const data = item.data as unknown as ExtractedData;
+          return data.file_name;
+        },
         sortable: true,
       },
       {
         key: "status",
         header: "Status",
-        getValue: (item: TypedAgentData<ExtractedData>) => item.data.status,
+        getValue: (item: AgentDataItem) => {
+          const data = item.data as unknown as ExtractedData;
+          return data.status;
+        },
         sortable: true,
       },
     ],
@@ -157,7 +168,7 @@ export const WithInteraction: Story = {
           Test sorting and pagination functionality
         </p>
       </div>
-      <ItemGridWrapper<ExtractedData> {...args} />
+      <ItemGridWrapper {...args} />
     </div>
   ),
   play: async ({ canvasElement }) => {

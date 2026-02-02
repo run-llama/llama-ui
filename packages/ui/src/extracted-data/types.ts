@@ -9,7 +9,7 @@ import type {
   ExtractedData,
   ExtractedFieldMetadataDict,
   ExtractedFieldMetadata,
-} from "llama-cloud-services/beta/agent";
+} from "@/src/lib/agent-data";
 import type { FieldSchemaMetadata } from "./schema-reconciliation";
 
 export interface ExtractedDataDisplayProps<S extends JsonShape<S>> {
