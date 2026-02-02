@@ -76,7 +76,7 @@ function AccordionTrigger({
         )}
         {...props}
       >
-        <div className="flex min-w-0 flex-1 items-center gap-3">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
           {Icon && (
             <div className="flex shrink-0">
               <Icon className="size-4 text-foreground" aria-hidden="true" />
