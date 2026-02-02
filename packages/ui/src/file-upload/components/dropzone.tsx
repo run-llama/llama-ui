@@ -132,11 +132,15 @@ export function FileDropzone({
   };
 
   // Custom dashed border with wider spacing (8px dash, 8px gap)
+  // Uses explicit background properties for reliable cross-browser rendering
   const borderColor =
     hasFiles && !disabled && isDragging ? "%23737373" : "%23a3a3a3";
   const dashedBorderStyle = hasFiles
     ? {
         backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='16' ry='16' stroke='${borderColor}' stroke-width='1' stroke-dasharray='8%2c 8' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e")`,
+        backgroundSize: "100% 100%",
+        backgroundPosition: "0 0",
+        backgroundRepeat: "no-repeat",
       }
     : undefined;
 
