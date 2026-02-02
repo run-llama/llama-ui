@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 4.1.0
+
+### Minor Changes
+
+- ee5f162: Replace llama-cloud-services with @llamaindex/llama-cloud
+
 ## 4.0.4
 
 ### Patch Changes
