@@ -442,7 +442,11 @@ describe("hashFile", () => {
   it("should compute SHA-256 hash of file contents", async () => {
     // Create a file with known content
     const content = "Hello, World!";
-    const file = createMockFileWithArrayBuffer(content, "test.txt", "text/plain");
+    const file = createMockFileWithArrayBuffer(
+      content,
+      "test.txt",
+      "text/plain"
+    );
 
     // Known SHA-256 hash of "Hello, World!"
     const expectedHash =
@@ -454,8 +458,16 @@ describe("hashFile", () => {
 
   it("should produce consistent hashes for same content", async () => {
     const content = "Test content for hashing";
-    const file1 = createMockFileWithArrayBuffer(content, "file1.txt", "text/plain");
-    const file2 = createMockFileWithArrayBuffer(content, "file2.txt", "text/plain");
+    const file1 = createMockFileWithArrayBuffer(
+      content,
+      "file1.txt",
+      "text/plain"
+    );
+    const file2 = createMockFileWithArrayBuffer(
+      content,
+      "file2.txt",
+      "text/plain"
+    );
 
     const hash1 = await hashFile(file1);
     const hash2 = await hashFile(file2);
@@ -464,8 +476,16 @@ describe("hashFile", () => {
   });
 
   it("should produce different hashes for different content", async () => {
-    const file1 = createMockFileWithArrayBuffer("Content A", "file1.txt", "text/plain");
-    const file2 = createMockFileWithArrayBuffer("Content B", "file2.txt", "text/plain");
+    const file1 = createMockFileWithArrayBuffer(
+      "Content A",
+      "file1.txt",
+      "text/plain"
+    );
+    const file2 = createMockFileWithArrayBuffer(
+      "Content B",
+      "file2.txt",
+      "text/plain"
+    );
 
     const hash1 = await hashFile(file1);
     const hash2 = await hashFile(file2);
@@ -474,7 +494,11 @@ describe("hashFile", () => {
   });
 
   it("should return a 64-character hex string (SHA-256)", async () => {
-    const file = createMockFileWithArrayBuffer("any content", "test.txt", "text/plain");
+    const file = createMockFileWithArrayBuffer(
+      "any content",
+      "test.txt",
+      "text/plain"
+    );
 
     const hash = await hashFile(file);
 
@@ -511,7 +535,11 @@ describe("hashFile", () => {
     // @ts-expect-error - temporarily delete crypto for testing
     delete globalThis.crypto;
 
-    const file = createMockFileWithArrayBuffer("test", "test.txt", "text/plain");
+    const file = createMockFileWithArrayBuffer(
+      "test",
+      "test.txt",
+      "text/plain"
+    );
 
     await expect(hashFile(file)).rejects.toThrow(
       "Web Crypto API is not supported in this environment"
