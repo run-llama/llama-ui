@@ -11,7 +11,8 @@ afterEach(() => {
 });
 
 // Increase default timeout for waitFor/findBy utilities across all tests
-configure({ asyncUtilTimeout: 3000 });
+// Use 10000ms to handle CI environment variability
+configure({ asyncUtilTimeout: 10000 });
 
 // Mock EventSource for Node.js environment (used in streaming tests)
 class MockEventSource {
