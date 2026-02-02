@@ -1,8 +1,9 @@
+import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Info, OctagonAlert, TriangleAlert } from "lucide-react";
 
 import { cn } from "../lib/utils";
-import { Button } from "./button";
+import { Button, type ButtonProps } from "./button";
 
 const alertVariants = cva(
   "relative w-full rounded-lg border bg-card px-4 py-3 text-sm",
@@ -10,17 +11,16 @@ const alertVariants = cva(
     variants: {
       variant: {
         default:
-          "text-foreground [&_[data-slot=alert-description]]:text-muted-foreground [&_[data-slot=button]]:text-foreground",
+          "text-foreground [&_[data-slot=alert-description]]:text-muted-foreground",
         error:
-          "text-destructive [&_[data-slot=alert-description]]:text-destructive [&_[data-slot=button]]:text-foreground",
-        warning:
-          "text-warning [&_[data-slot=alert-description]]:text-warning [&_[data-slot=button]]:text-foreground",
+          "text-destructive [&_[data-slot=alert-description]]:text-destructive",
+        warning: "text-warning [&_[data-slot=alert-description]]:text-warning",
       },
     },
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 const variantIcons = {
@@ -40,6 +40,8 @@ export interface AlertProps extends VariantProps<typeof alertVariants> {
   buttonLabel?: string;
   /** Callback fired when the action button is clicked */
   onButtonClick?: () => void;
+  /** The variant style for the action button (default: "default") */
+  buttonVariant?: ButtonProps["variant"];
 }
 
 /**
@@ -58,6 +60,7 @@ function Alert({
   showIcon = true,
   buttonLabel,
   onButtonClick,
+  buttonVariant = "outline",
 }: AlertProps) {
   const Icon = variantIcons[variant ?? "default"];
 
@@ -83,7 +86,7 @@ function Alert({
           {description && (
             <p
               data-slot="alert-description"
-              className="text-sm font-normal leading-5"
+              className="whitespace-pre-line text-sm font-normal leading-5"
             >
               {description}
             </p>
@@ -91,12 +94,14 @@ function Alert({
         </div>
       </div>
       {buttonLabel && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onButtonClick}
-          label={buttonLabel}
-        />
+        <div className="shrink-0 text-foreground">
+          <Button
+            variant={buttonVariant}
+            size="sm"
+            onClick={onButtonClick}
+            label={buttonLabel}
+          />
+        </div>
       )}
     </div>
   );
