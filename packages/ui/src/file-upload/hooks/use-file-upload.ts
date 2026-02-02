@@ -29,9 +29,7 @@ export function useFileUpload({
       // Compute file hash if hashing is enabled
       let fileHash: string | undefined;
       if (hashingOptions?.enabled) {
-        fileHash = await hashFile(file, {
-          algorithm: hashingOptions.algorithm,
-        });
+        fileHash = await hashFile(file);
       }
 
       // Build external_id from hash with optional prefix

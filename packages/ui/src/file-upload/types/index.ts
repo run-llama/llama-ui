@@ -33,12 +33,10 @@ export interface UploadResult {
 }
 
 export interface FileHashingOptions {
-  /** Enable client-side file hashing before upload */
+  /** Enable client-side SHA-256 file hashing before upload */
   enabled: boolean;
   /** Prefix to prepend to the hash when used as external_id (e.g., "file_") */
   externalIdPrefix?: string;
-  /** Algorithm to use for hashing (default: SHA-256) */
-  algorithm?: "SHA-256" | "SHA-384" | "SHA-512";
 }
 
 export interface UseFileUploadOptions {

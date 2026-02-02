@@ -1,9 +1,10 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import {
   validateFile,
   formatFileSize,
   isFileApiSupported,
   isCryptoSupported,
+  hashFile,
   FileType,
   getFileTypeDefinition,
   getFileExtensions,
@@ -14,18 +15,8 @@ import {
   createFileTypeValidator,
 } from "@/src/file-upload/utils/file-utils";
 
-// Mock crypto.subtle for testing
-const mockCrypto = {
-  subtle: {
-    digest: vi.fn(),
-  },
-};
-
-// Mock global crypto
-Object.defineProperty(globalThis, "crypto", {
-  value: mockCrypto,
-  writable: true,
-});
+// Store the original crypto for restoration
+const originalCrypto = globalThis.crypto;
 
 // Mock FileReader
 class MockFileReader {
@@ -174,25 +165,25 @@ describe("isCryptoSupported", () => {
   });
 
   it("should return false when crypto is not available", () => {
-    const originalCrypto = globalThis.crypto;
+    const savedCrypto = globalThis.crypto;
     // @ts-expect-error - temporarily delete crypto for testing
     delete globalThis.crypto;
 
     expect(isCryptoSupported()).toBe(false);
 
     // Restore
-    globalThis.crypto = originalCrypto;
+    globalThis.crypto = savedCrypto;
   });
 
   it("should return false when crypto.subtle is not available", () => {
-    const originalCrypto = globalThis.crypto;
+    const savedCrypto = globalThis.crypto;
     // @ts-expect-error - temporarily replace crypto for testing
     globalThis.crypto = {};
 
     expect(isCryptoSupported()).toBe(false);
 
     // Restore
-    globalThis.crypto = originalCrypto;
+    globalThis.crypto = savedCrypto;
   });
 });
 
@@ -420,5 +411,113 @@ describe("FileType utility functions", () => {
     expect(allFileTypes).toContain("png");
     expect(allFileTypes).toContain("webp");
     expect(allFileTypes).toContain("txt");
+  });
+});
+
+describe("hashFile", () => {
+  // Helper to create a mock file with arrayBuffer support
+  const createMockFileWithArrayBuffer = (
+    content: string | Uint8Array,
+    name: string,
+    type: string
+  ): File => {
+    const blob =
+      typeof content === "string"
+        ? new Blob([content], { type })
+        : new Blob([content], { type });
+    const file = new File([blob], name, { type });
+
+    // Add arrayBuffer method that jsdom doesn't support
+    file.arrayBuffer = async () => {
+      if (typeof content === "string") {
+        const encoder = new TextEncoder();
+        return encoder.encode(content).buffer as ArrayBuffer;
+      }
+      return content.buffer as ArrayBuffer;
+    };
+
+    return file;
+  };
+
+  it("should compute SHA-256 hash of file contents", async () => {
+    // Create a file with known content
+    const content = "Hello, World!";
+    const file = createMockFileWithArrayBuffer(content, "test.txt", "text/plain");
+
+    // Known SHA-256 hash of "Hello, World!"
+    const expectedHash =
+      "dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f";
+
+    const hash = await hashFile(file);
+    expect(hash).toBe(expectedHash);
+  });
+
+  it("should produce consistent hashes for same content", async () => {
+    const content = "Test content for hashing";
+    const file1 = createMockFileWithArrayBuffer(content, "file1.txt", "text/plain");
+    const file2 = createMockFileWithArrayBuffer(content, "file2.txt", "text/plain");
+
+    const hash1 = await hashFile(file1);
+    const hash2 = await hashFile(file2);
+
+    expect(hash1).toBe(hash2);
+  });
+
+  it("should produce different hashes for different content", async () => {
+    const file1 = createMockFileWithArrayBuffer("Content A", "file1.txt", "text/plain");
+    const file2 = createMockFileWithArrayBuffer("Content B", "file2.txt", "text/plain");
+
+    const hash1 = await hashFile(file1);
+    const hash2 = await hashFile(file2);
+
+    expect(hash1).not.toBe(hash2);
+  });
+
+  it("should return a 64-character hex string (SHA-256)", async () => {
+    const file = createMockFileWithArrayBuffer("any content", "test.txt", "text/plain");
+
+    const hash = await hashFile(file);
+
+    expect(hash).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  it("should handle empty files", async () => {
+    const file = createMockFileWithArrayBuffer("", "empty.txt", "text/plain");
+
+    // Known SHA-256 hash of empty string
+    const expectedHash =
+      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
+
+    const hash = await hashFile(file);
+    expect(hash).toBe(expectedHash);
+  });
+
+  it("should handle binary files", async () => {
+    const binaryData = new Uint8Array([0x00, 0x01, 0x02, 0x03, 0xff]);
+    const file = createMockFileWithArrayBuffer(
+      binaryData,
+      "binary.bin",
+      "application/octet-stream"
+    );
+
+    const hash = await hashFile(file);
+
+    // Should return a valid hex string
+    expect(hash).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  it("should throw error when crypto is not supported", async () => {
+    const savedCrypto = globalThis.crypto;
+    // @ts-expect-error - temporarily delete crypto for testing
+    delete globalThis.crypto;
+
+    const file = createMockFileWithArrayBuffer("test", "test.txt", "text/plain");
+
+    await expect(hashFile(file)).rejects.toThrow(
+      "Web Crypto API is not supported in this environment"
+    );
+
+    // Restore
+    globalThis.crypto = savedCrypto;
   });
 });
