@@ -1,7 +1,7 @@
 "use client";
 
-import * as React from "react";
 import type {
+  Column,
   ColumnDef,
   OnChangeFn,
   PaginationState,
@@ -17,9 +17,12 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
+import * as React from "react";
 import type { MouseEvent, ReactNode } from "react";
 import { Suspense, useCallback, useMemo, useRef, useState } from "react";
+import { Button } from "./button";
 import { LoadingStatus } from "./loading";
 import {
   Table,
@@ -30,6 +33,53 @@ import {
   TableRow,
 } from "./table";
 import { Pagination } from "./table/pagination";
+
+/**
+ * DataTableColumnHeader - A sortable header component for DataTable columns.
+ *
+ * Usage in column definitions:
+ * ```tsx
+ * {
+ *   accessorKey: "email",
+ *   header: ({ column }) => (
+ *     <DataTableColumnHeader column={column} title="Email" />
+ *   ),
+ * }
+ * ```
+ */
+interface DataTableColumnHeaderProps<TData, TValue> {
+  column: Column<TData, TValue>;
+  title: string;
+}
+
+export function DataTableColumnHeader<TData, TValue>({
+  column,
+  title,
+}: DataTableColumnHeaderProps<TData, TValue>) {
+  if (!column.getCanSort()) {
+    return <div>{title}</div>;
+  }
+
+  const sorted = column.getIsSorted();
+
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      label={title}
+      endIcon={
+        sorted === "asc" ? (
+          <ArrowUp className="size-4" />
+        ) : sorted === "desc" ? (
+          <ArrowDown className="size-4" />
+        ) : (
+          <ArrowUpDown className="size-4" />
+        )
+      }
+      onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    />
+  );
+}
 
 export type ManualPaginationProps = {
   pageIndex: number;
@@ -108,7 +158,7 @@ function useCompareFn(key: string) {
         return 0;
       }
     },
-    [key]
+    [key],
   );
 }
 
@@ -152,7 +202,7 @@ export function DataTable<TData>({
         return newState;
       });
     },
-    [manualPaginationProps]
+    [manualPaginationProps],
   );
 
   const initialVisibility = {};
@@ -162,7 +212,7 @@ export function DataTable<TData>({
           ...acc,
           [columnId]: false,
         }),
-        initialVisibility
+        initialVisibility,
       )
     : {};
 
@@ -232,7 +282,7 @@ export function DataTable<TData>({
                           ? null
                           : flexRender(
                               header.column.columnDef.header,
-                              header.getContext()
+                              header.getContext(),
                             )}
                       </div>
                     </th>
