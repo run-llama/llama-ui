@@ -1,5 +1,12 @@
 # @llamaindex/ui
 
+## 4.1.4
+
+### Patch Changes
+
+- 78f258a: Fix total_size access in paginated agent data API responses
+- 1a49ef2: Fix Enter key behavior in file upload modal to submit form after file is selected instead of reopening file picker
+
 ## 4.1.3
 
 ### Patch Changes
