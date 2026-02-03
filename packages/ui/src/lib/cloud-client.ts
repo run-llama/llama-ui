@@ -15,7 +15,9 @@ let currentConfig: CloudClientConfig = {};
 /**
  * Build the default headers object from config options.
  */
-function buildDefaultHeaders(config: CloudClientConfig): Record<string, string> {
+function buildDefaultHeaders(
+  config: CloudClientConfig
+): Record<string, string> {
   const headers: Record<string, string> = {};
 
   if (config.projectId) {
