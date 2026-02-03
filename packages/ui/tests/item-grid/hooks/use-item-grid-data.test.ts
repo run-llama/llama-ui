@@ -108,7 +108,9 @@ describe("useItemGridData", () => {
 
     expect(Array.isArray(result.current.data)).toBe(true);
     // Search should have been called twice (initial + manual)
-    expect(mockClients.cloudApiClient!.beta.agentData.search).toHaveBeenCalledTimes(2);
+    expect(
+      mockClients.cloudApiClient!.beta.agentData.search
+    ).toHaveBeenCalledTimes(2);
   });
 
   it("should provide deleteItem function", async () => {
@@ -137,15 +139,17 @@ describe("useItemGridData", () => {
 
     // Item should be removed from local state
     expect(result.current.data.length).toBe(initialLength - 1);
-    expect(mockClients.cloudApiClient!.beta.agentData.delete).toHaveBeenCalledWith(
-      firstItemId
-    );
+    expect(
+      mockClients.cloudApiClient!.beta.agentData.delete
+    ).toHaveBeenCalledWith(firstItemId);
   });
 
   it("should apply pagination correctly", async () => {
     const paginatedItems = mockItems.slice(0, 2);
     const mockClients = createTestMockClients();
-    (mockClients.cloudApiClient!.beta.agentData.search as any).mockResolvedValue({
+    (
+      mockClients.cloudApiClient!.beta.agentData.search as any
+    ).mockResolvedValue({
       items: paginatedItems,
       total_size: mockItems.length,
     });
@@ -175,7 +179,9 @@ describe("useItemGridData", () => {
     });
 
     expect(Array.isArray(result.current.data)).toBe(true);
-    expect(mockClients.cloudApiClient!.beta.agentData.search).toHaveBeenCalledWith(
+    expect(
+      mockClients.cloudApiClient!.beta.agentData.search
+    ).toHaveBeenCalledWith(
       expect.objectContaining({ order_by: "file_name asc" })
     );
   });
@@ -197,16 +203,20 @@ describe("useItemGridData", () => {
     });
 
     expect(result.current.data).toBeTruthy();
-    expect(mockClients.cloudApiClient!.beta.agentData.search).toHaveBeenCalledWith(
-      expect.objectContaining({ filter: { status: { includes: ["approved"] } } })
+    expect(
+      mockClients.cloudApiClient!.beta.agentData.search
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filter: { status: { includes: ["approved"] } },
+      })
     );
   });
 
   it("should handle delete errors gracefully", async () => {
     const mockClients = createTestMockClients();
-    (mockClients.cloudApiClient!.beta.agentData.delete as any).mockRejectedValue(
-      new Error("Delete failed")
-    );
+    (
+      mockClients.cloudApiClient!.beta.agentData.delete as any
+    ).mockRejectedValue(new Error("Delete failed"));
 
     const { result } = renderHookWithProvider(
       () => useItemGridData({ page: 0, size: 20 }, {}, undefined),
@@ -222,7 +232,9 @@ describe("useItemGridData", () => {
     await act(async () => {
       const deleteResult = await result.current.deleteItem("item-1");
       expect(deleteResult.success).toBe(false);
-      expect(deleteResult.error).toBe("Failed to delete item. Please try again.");
+      expect(deleteResult.error).toBe(
+        "Failed to delete item. Please try again."
+      );
     });
 
     // Data should not change on error
@@ -231,9 +243,9 @@ describe("useItemGridData", () => {
 
   it("should handle fetch errors gracefully", async () => {
     const mockClients = createTestMockClients();
-    (mockClients.cloudApiClient!.beta.agentData.search as any).mockRejectedValue(
-      new Error("Network error")
-    );
+    (
+      mockClients.cloudApiClient!.beta.agentData.search as any
+    ).mockRejectedValue(new Error("Network error"));
 
     const { result } = renderHookWithProvider(
       () => useItemGridData({ page: 0, size: 20 }, {}, undefined),
