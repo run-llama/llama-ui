@@ -23,12 +23,12 @@ type Story = StoryObj<typeof meta>;
 
 function createStubbedClients() {
   const clients = createMockClients();
-  // Override the cloudApiClient's beta.agentData.search to return deterministic totals
+  // Override the cloudApiClient's beta.agentData.aggregate to return deterministic counts.
+  // The aggregate API returns items via getPaginatedItems() with a count property.
   if (clients.cloudApiClient) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (clients.cloudApiClient.beta.agentData as any).search = async () => ({
-      items: [],
-      total_size: 123,
+    (clients.cloudApiClient.beta.agentData as any).aggregate = async () => ({
+      getPaginatedItems: () => [{ group_key: {}, count: 123 }],
     });
   }
   return clients;

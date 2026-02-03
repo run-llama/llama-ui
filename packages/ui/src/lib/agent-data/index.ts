@@ -17,5 +17,8 @@ export type {
 // Export the const objects (their types are automatically exported with the same name)
 export { StatusType } from "./types";
 
-// Re-export SDK types for filtering
-export type { AgentDataSearchParams } from "@llamaindex/llama-cloud/resources/beta";
+// Re-export SDK types for filtering and aggregation
+export type {
+  AgentDataSearchParams,
+  AgentDataAggregateParams,
+} from "@llamaindex/llama-cloud/resources/beta";
