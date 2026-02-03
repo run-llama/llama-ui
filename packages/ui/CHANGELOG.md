@@ -1,5 +1,12 @@
 # @llamaindex/ui
 
+## 4.1.3
+
+### Patch Changes
+
+- f2e81c0: Add client-side file hashing support to file upload
+- 4d716f3: Add support for projectId and custom headers in cloud api client
+
 ## 4.1.2
 
 ### Patch Changes
