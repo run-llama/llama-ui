@@ -281,6 +281,7 @@
     "build": "tsup && npm run build:css",
     "build:css": "postcss src/styles.css -o dist/styles.css",
     "lint": "eslint",
+    "lint:fix": "eslint --fix",
     "format": "prettier --write .",
     "format-check": "prettier --check .",
     "typecheck": "tsc --noEmit",
