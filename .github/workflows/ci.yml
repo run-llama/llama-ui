@@ -42,7 +42,6 @@ jobs:
           private-key: ${{ secrets.CI_BOT_PRIVATE_KEY }}
           add-paths: |
             packages/
-            examples/
           check-name: "Code Quality"
           fix-command: "pnpm lint:fix && pnpm format"
 
