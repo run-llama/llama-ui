@@ -28,6 +28,12 @@ export interface FileUploadData {
    * Can be used to identify duplicate files by content.
    */
   contentHash?: string;
+  /**
+   * External ID used when creating the file in the API.
+   * When contentHash is enabled, this is the hash with the optional prefix applied.
+   * Can be used to look up files by their external identifier.
+   */
+  externalId?: string;
 }
 
 export interface UploadResult {

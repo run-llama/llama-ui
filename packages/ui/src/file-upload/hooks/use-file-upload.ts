@@ -60,6 +60,7 @@ export function useFileUpload({
         fileId,
         url: fileUrl,
         ...(fileContentHash && { contentHash: fileContentHash }),
+        ...(externalId && { externalId }),
       };
 
       onProgress?.(file, 100);

@@ -53,7 +53,7 @@ export function WorkflowTrigger({
                 url: file.url,
                 name: file.file.name,
                 type: file.file.type,
-                ...(file.contentHash && { contentHash: file.contentHash }),
+                ...(file.externalId && { externalId: file.externalId }),
               })),
               ...fieldValues,
             } as JSONValue);
