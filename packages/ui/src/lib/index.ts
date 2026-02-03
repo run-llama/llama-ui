@@ -30,6 +30,7 @@ export {
   type WorkflowsClient,
   type AgentDataConfig,
   type CloudApiClient,
+  type CloudClientConfig,
 } from "./clients";
 
 export type {
