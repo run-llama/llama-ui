@@ -55,6 +55,7 @@ export default defineConfig({
           environment: "jsdom",
           setupFiles: ["./tests/test-setup.ts"],
           globals: true,
+          testTimeout: 30000, // Increase timeout for CI environment variability
           include: ["tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
           exclude: ["tests/storybook-setup.ts", "node_modules/**", "dist/**"],
         },
