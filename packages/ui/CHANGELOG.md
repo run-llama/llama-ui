@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 4.1.2
+
+### Patch Changes
+
+- 2ba3dbd: update uploadzone border stying
+
 ## 4.1.1
 
 ### Patch Changes
