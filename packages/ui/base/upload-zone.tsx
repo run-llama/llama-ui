@@ -39,25 +39,36 @@ export function UploadZone({
   state = "default",
 }: UploadZoneProps) {
   // Custom dashed border with wider spacing (8px dash, 8px gap)
-  // Uses explicit background properties for reliable cross-browser rendering
-  const borderColor = state === "focus" ? "%23737373" : "%23a3a3a3";
-  const dashedBorderStyle = {
-    backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='16' ry='16' stroke='${borderColor}' stroke-width='1' stroke-dasharray='8%2c 8' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e")`,
-    backgroundSize: "100% 100%",
-    backgroundPosition: "0 0",
-    backgroundRepeat: "no-repeat",
-  };
+  const borderColor = state === "focus" ? "#737373" : "#a3a3a3";
 
   return (
     <div
       className={cn(
-        "flex h-full min-h-[200px] w-full flex-1 flex-col items-center rounded-2xl p-6 text-center transition-all",
+        "relative flex h-full min-h-[200px] w-full flex-1 flex-col items-center rounded-2xl p-6 text-center transition-all",
         state === "focus"
           ? "bg-neutral-100 ring-[3px] ring-neutral-950/10"
           : "bg-white"
       )}
-      style={dashedBorderStyle}
     >
+      {/* SVG dashed border - uses absolute positioning to avoid background-image subpixel issues */}
+      <svg
+        className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
+        fill="none"
+      >
+        <rect
+          x="0"
+          y="0"
+          width="100%"
+          height="100%"
+          rx="16"
+          ry="16"
+          stroke={borderColor}
+          strokeWidth="1"
+          strokeDasharray="8 8"
+          strokeLinecap="square"
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
       {/* Centered main content */}
       <div className="flex flex-1 flex-col items-center justify-center gap-4">
         <Upload className="h-5 w-5 text-neutral-500" />
