@@ -11,10 +11,89 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run linting (with auto-fix)
+        run: pnpm run lint:fix
+
+      - name: Auto-fix PR
+        if: github.event_name == 'pull_request'
+        uses: ./.github/actions/autofix-pr
+        with:
+          app-id: ${{ secrets.AUTOFIX_APP_ID }}
+          private-key: ${{ secrets.AUTOFIX_APP_PRIVATE_KEY }}
+          add-paths: |
+            packages/
+            examples/
+          check-name: "Lint"
+          fix-command: "pnpm lint:fix"
+
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run formatting (with auto-fix)
+        run: pnpm run format
+
+      - name: Auto-fix PR
+        if: github.event_name == 'pull_request'
+        uses: ./.github/actions/autofix-pr
+        with:
+          app-id: ${{ secrets.AUTOFIX_APP_ID }}
+          private-key: ${{ secrets.AUTOFIX_APP_PRIVATE_KEY }}
+          add-paths: |
+            packages/
+            examples/
+          check-name: "Format"
+          fix-command: "pnpm format"
+
   test:
     name: Test and Build
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    needs: [lint, format]
     env:
       STORYBOOK_LLAMA_CLOUD_API_KEY: ${{ secrets.STORYBOOK_LLAMA_CLOUD_API_KEY }}
     container:
@@ -41,12 +120,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Run linting
-        run: pnpm run lint
-
-      - name: Check code formatting
-        run: pnpm run format-check
 
       - name: Build packages
         run: pnpm run build:all
