@@ -322,3 +322,33 @@ export const isFileApiSupported = (): boolean => {
 export const isCryptoSupported = (): boolean => {
   return typeof crypto !== "undefined" && typeof crypto.subtle !== "undefined";
 };
+
+/**
+ * Computes a SHA-256 hash of the file contents for content-based identification.
+ *
+ * This enables file deduplication: files with identical content produce the same
+ * hash regardless of filename. The hash can be used as an external_id when uploading
+ * to detect and handle duplicate files on the backend.
+ *
+ * @param file - The file to hash
+ * @returns Promise resolving to the 64-character hex-encoded SHA-256 hash
+ * @throws Error if Web Crypto API is not supported
+ *
+ * @example
+ * const hash = await hashFile(file);
+ * // hash: "dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f"
+ */
+export const hashFile = async (file: File): Promise<string> => {
+  if (!isCryptoSupported()) {
+    throw new Error("Web Crypto API is not supported in this environment");
+  }
+
+  const arrayBuffer = await file.arrayBuffer();
+  const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
+  return hashHex;
+};
