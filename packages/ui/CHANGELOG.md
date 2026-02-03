@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 4.1.1
+
+### Patch Changes
+
+- f9e4279: updating component discrepencies
+
 ## 4.1.0
 
 ### Minor Changes
