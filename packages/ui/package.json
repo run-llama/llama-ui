@@ -1,6 +1,6 @@
 {
   "name": "@llamaindex/ui",
-  "version": "4.1.2",
+  "version": "4.1.3",
   "description": "A comprehensive UI component library built with React, TypeScript, and Tailwind CSS for LlamaIndex applications",
   "keywords": [
     "react",
@@ -281,6 +281,7 @@
     "build": "tsup && npm run build:css",
     "build:css": "postcss src/styles.css -o dist/styles.css",
     "lint": "eslint",
+    "lint:fix": "eslint --fix",
     "format": "prettier --write .",
     "format-check": "prettier --check .",
     "typecheck": "tsc --noEmit",
