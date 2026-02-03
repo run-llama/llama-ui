@@ -161,7 +161,9 @@ export function FileDropzone({
         disabled
           ? undefined
           : (event) => {
-              if (event.key === "Enter" || event.key === " ") {
+              // Only open file picker if no files are selected
+              // When files are selected, allow Enter to bubble up for form submission
+              if (event.key === " " || (event.key === "Enter" && !hasFiles)) {
                 event.preventDefault();
                 handleClick();
               }
