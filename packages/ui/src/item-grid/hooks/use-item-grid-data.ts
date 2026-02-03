@@ -46,11 +46,14 @@ export function useItemGridData(
 
       setData(pageResponse.items || []);
 
-      // Access total_size from the underlying response body if available
-      const body = pageResponse as unknown as {
-        total_size?: number | null;
+      // The SDK's PaginatedCursorPost class stores the raw response in a protected 'body' property.
+      // The total_size field is part of the raw API response but not exposed as a typed property
+      // on the paginated response class. We need to access it through the body property.
+      const response = pageResponse as unknown as {
+        body?: { total_size?: number | null };
       };
-      setTotalSize(body.total_size ?? 0);
+
+      setTotalSize(response.body?.total_size ?? 0);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {

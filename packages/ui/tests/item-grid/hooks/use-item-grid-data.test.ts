@@ -27,14 +27,20 @@ const mockItems = [
   },
 ];
 
-// Create mock cloud client that resolves immediately
+// Create mock cloud client that resolves immediately.
+// The SDK's PaginatedCursorPost class stores the raw response in a 'body' property.
 function createMockCloudClient() {
   return {
     beta: {
       agentData: {
         search: vi.fn().mockResolvedValue({
           items: mockItems,
-          total_size: mockItems.length,
+          next_page_token: "",
+          body: {
+            items: mockItems,
+            next_page_token: "",
+            total_size: mockItems.length,
+          },
         }),
         delete: vi.fn().mockResolvedValue(undefined),
       },
@@ -151,7 +157,12 @@ describe("useItemGridData", () => {
       mockClients.cloudApiClient!.beta.agentData.search as any
     ).mockResolvedValue({
       items: paginatedItems,
-      total_size: mockItems.length,
+      next_page_token: "",
+      body: {
+        items: paginatedItems,
+        next_page_token: "",
+        total_size: mockItems.length,
+      },
     });
 
     const { result } = renderHookWithProvider(

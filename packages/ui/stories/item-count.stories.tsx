@@ -23,12 +23,18 @@ type Story = StoryObj<typeof meta>;
 
 function createStubbedClients() {
   const clients = createMockClients();
-  // Override the cloudApiClient's beta.agentData.search to return deterministic totals
+  // Override the cloudApiClient's beta.agentData.search to return deterministic totals.
+  // The SDK's PaginatedCursorPost class stores total_size in the body property.
   if (clients.cloudApiClient) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (clients.cloudApiClient.beta.agentData as any).search = async () => ({
       items: [],
-      total_size: 123,
+      next_page_token: "",
+      body: {
+        items: [],
+        next_page_token: "",
+        total_size: 123,
+      },
     });
   }
   return clients;
