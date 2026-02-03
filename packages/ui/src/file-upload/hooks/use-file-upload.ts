@@ -15,7 +15,7 @@ export function useFileUpload({
   onUploadStart,
   onUploadComplete,
   onUploadError,
-  hashingOptions,
+  contentHash,
 }: UseFileUploadOptions = {}): UseFileUploadReturn {
   const [isUploading, setIsUploading] = useState(false);
 
@@ -26,16 +26,16 @@ export function useFileUpload({
     try {
       const client = getCloudClient();
 
-      // Compute file hash if hashing is enabled
-      let fileHash: string | undefined;
-      if (hashingOptions?.enabled) {
-        fileHash = await hashFile(file);
+      // Compute SHA-256 hash of file contents for deduplication
+      let fileContentHash: string | undefined;
+      if (contentHash?.enabled) {
+        fileContentHash = await hashFile(file);
       }
 
-      // Build external_id from hash with optional prefix
+      // Use content hash as external_id so backend can identify duplicates
       const externalId =
-        fileHash && hashingOptions
-          ? `${hashingOptions.externalIdPrefix ?? ""}${fileHash}`
+        fileContentHash && contentHash
+          ? `${contentHash.externalIdPrefix ?? ""}${fileContentHash}`
           : undefined;
 
       const response = await client.files.create({
@@ -59,11 +59,11 @@ export function useFileUpload({
         file,
         fileId,
         url: fileUrl,
-        ...(fileHash && { hash: fileHash }),
+        ...(fileContentHash && { contentHash: fileContentHash }),
       };
 
       onProgress?.(file, 100);
-      onUploadComplete?.(file, fileHash);
+      onUploadComplete?.(file, fileContentHash);
 
       return {
         success: true,

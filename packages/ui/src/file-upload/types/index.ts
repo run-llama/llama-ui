@@ -22,8 +22,12 @@ export interface FileUploadData {
   file: File;
   fileId: string;
   url?: string;
-  /** The hash of the file contents (if hashing was enabled) */
-  hash?: string;
+  /**
+   * SHA-256 hash of the file contents, hex-encoded.
+   * Present when contentHash option is enabled during upload.
+   * Can be used to identify duplicate files by content.
+   */
+  contentHash?: string;
 }
 
 export interface UploadResult {
@@ -32,20 +36,38 @@ export interface UploadResult {
   error: Error | null;
 }
 
-export interface FileHashingOptions {
-  /** Enable client-side SHA-256 file hashing before upload */
+/**
+ * Options for content-based file identification.
+ *
+ * When enabled, computes a SHA-256 hash of the file contents before upload.
+ * This hash uniquely identifies the file by its content (not its name),
+ * enabling deduplication - files with identical content will have the same hash.
+ *
+ * The hash is sent as the `external_id` when creating the file in the API,
+ * allowing the backend to detect and handle duplicate uploads.
+ */
+export interface ContentHashOptions {
+  /** Enable content hashing for file identification */
   enabled: boolean;
-  /** Prefix to prepend to the hash when used as external_id (e.g., "file_") */
+  /**
+   * Prefix to prepend to the hash when setting external_id.
+   * Useful for namespacing (e.g., "doc_", "img_") to distinguish
+   * file types or sources in the backend.
+   */
   externalIdPrefix?: string;
 }
 
 export interface UseFileUploadOptions {
   onProgress?: (file: File, progress: number) => void;
   onUploadStart?: (file: File) => void;
-  onUploadComplete?: (file: File, hash?: string) => void;
+  onUploadComplete?: (file: File, contentHash?: string) => void;
   onUploadError?: (file: File, error: string) => void;
-  /** Options for client-side file hashing */
-  hashingOptions?: FileHashingOptions;
+  /**
+   * Enable content-based file identification.
+   * When enabled, computes a SHA-256 hash of file contents and uses it
+   * as the external_id for deduplication.
+   */
+  contentHash?: ContentHashOptions;
 }
 
 export interface UseFileUploadReturn {
@@ -98,8 +120,12 @@ export interface FileUploaderProps extends BaseFileUploadProps {
   selectFileLabel?: string;
   selectFileDescription?: string;
   maxFileSizeBytes?: number;
-  /** Options for client-side file hashing */
-  hashingOptions?: FileHashingOptions;
+  /**
+   * Enable content-based file identification.
+   * When enabled, computes a SHA-256 hash of file contents and uses it
+   * as the external_id for deduplication.
+   */
+  contentHash?: ContentHashOptions;
 }
 
 export type { FileUploadProgress } from "./upload-progress";

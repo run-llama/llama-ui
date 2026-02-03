@@ -324,12 +324,19 @@ export const isCryptoSupported = (): boolean => {
 };
 
 /**
- * Computes a SHA-256 hash of the file contents using the Web Crypto API.
- * Returns a hex-encoded string of the hash.
+ * Computes a SHA-256 hash of the file contents for content-based identification.
+ *
+ * This enables file deduplication: files with identical content produce the same
+ * hash regardless of filename. The hash can be used as an external_id when uploading
+ * to detect and handle duplicate files on the backend.
  *
  * @param file - The file to hash
- * @returns Promise resolving to the hex-encoded SHA-256 hash string
+ * @returns Promise resolving to the 64-character hex-encoded SHA-256 hash
  * @throws Error if Web Crypto API is not supported
+ *
+ * @example
+ * const hash = await hashFile(file);
+ * // hash: "dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f"
  */
 export const hashFile = async (file: File): Promise<string> => {
   if (!isCryptoSupported()) {
