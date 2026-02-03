@@ -40,7 +40,10 @@ function createTestMockClients(
   };
 }
 
-function renderItemCount(props: React.ComponentProps<typeof ItemCount>, mockClients: ApiClients) {
+function renderItemCount(
+  props: React.ComponentProps<typeof ItemCount>,
+  mockClients: ApiClients
+) {
   return render(
     <ApiProvider clients={mockClients}>
       <ItemCount {...props} />
@@ -58,7 +61,9 @@ describe("ItemCount", () => {
 
   it("should display count from API response body.total_size", async () => {
     const expectedCount = 42;
-    const mockClients = createTestMockClients(createMockCloudClient(expectedCount));
+    const mockClients = createTestMockClients(
+      createMockCloudClient(expectedCount)
+    );
     renderItemCount({ title: "Test Count" }, mockClients);
 
     await waitFor(() => {
