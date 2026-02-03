@@ -27,14 +27,18 @@ const mockItems = [
   },
 ];
 
-// Create mock cloud client that resolves immediately
+// Create mock cloud client that resolves immediately.
+// Uses aggregate API for total count and search API for paginated data.
 function createMockCloudClient() {
   return {
     beta: {
       agentData: {
         search: vi.fn().mockResolvedValue({
           items: mockItems,
-          total_size: mockItems.length,
+          next_page_token: "",
+        }),
+        aggregate: vi.fn().mockResolvedValue({
+          getPaginatedItems: () => [{ group_key: {}, count: mockItems.length }],
         }),
         delete: vi.fn().mockResolvedValue(undefined),
       },
@@ -151,7 +155,7 @@ describe("useItemGridData", () => {
       mockClients.cloudApiClient!.beta.agentData.search as any
     ).mockResolvedValue({
       items: paginatedItems,
-      total_size: mockItems.length,
+      next_page_token: "",
     });
 
     const { result } = renderHookWithProvider(

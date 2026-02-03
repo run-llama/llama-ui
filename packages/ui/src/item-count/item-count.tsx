@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Card } from "@/base/card";
 import { cn } from "@/lib/utils";
 import {
-  type AgentDataSearchParams,
+  type AgentDataAggregateParams,
   type AgentDataConfig,
 } from "@/src/lib/agent-data";
 import { useAgentDataConfig, useCloudApiClient } from "../lib/api-provider";
@@ -12,7 +12,7 @@ import type LlamaCloud from "@llamaindex/llama-cloud";
 
 export interface ItemCountProps {
   title: string;
-  filter?: Record<string, AgentDataSearchParams.Filter>;
+  filter?: Record<string, AgentDataAggregateParams.Filter>;
   variant?: "total" | "awaiting" | "approved" | "rejected";
   subtitle?: string;
 }
@@ -34,23 +34,26 @@ const variantStyles = {
 };
 
 async function fetchCountData(params: {
-  filter?: Record<string, AgentDataSearchParams.Filter>;
+  filter?: Record<string, AgentDataAggregateParams.Filter>;
   client: LlamaCloud;
   config: AgentDataConfig;
 }): Promise<number> {
-  const pageResponse = await params.client.beta.agentData.search({
+  // Use the aggregate API with count=true and no grouping to get total count
+  const aggregateResponse = await params.client.beta.agentData.aggregate({
     deployment_name: params.config.deploymentName,
     collection: params.config.collection,
-    page_size: 0,
     filter: params.filter,
-    include_total: true,
+    count: true,
+    group_by: [], // Empty array = count entire dataset without grouping
   });
 
-  // Access total_size from the underlying response body
-  const body = pageResponse as unknown as {
-    total_size?: number | null;
-  };
-  return body.total_size ?? 0;
+  // The aggregate response is an array of groups. With no group_by,
+  // we get a single result with the total count.
+  const items = aggregateResponse.getPaginatedItems();
+  if (items.length > 0 && items[0].count != null) {
+    return items[0].count;
+  }
+  return 0;
 }
 
 export function ItemCount({
