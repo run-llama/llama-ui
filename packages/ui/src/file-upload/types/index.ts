@@ -3,20 +3,9 @@ import type { FileCreateParams } from "@llamaindex/llama-cloud/resources";
 import type { FileType } from "../utils/file-utils";
 
 /**
- * The intended purpose of the file.
- * Narrows the SDK's `FileCreateParams["purpose"]` (typed as `string`)
- * to the documented valid values for better type safety.
+ * The intended purpose of the file, derived from the SDK's FileCreateParams.
  */
-export type FilePurpose = FileCreateParams["purpose"] &
-  (
-    | "user_data"
-    | "parse"
-    | "extract"
-    | "split"
-    | "classify"
-    | "sheet"
-    | "agent_app"
-  );
+export type FilePurpose = FileCreateParams["purpose"];
 
 interface BaseFileUploadProps {
   allowedFileTypes?: FileType[];
