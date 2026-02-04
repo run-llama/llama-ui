@@ -437,7 +437,7 @@ function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="sidebar-footer"
       data-sidebar="footer"
-      className={cn("mb-2 flex flex-col gap-2", className)}
+      className={cn("flex flex-col", className)}
       {...props}
     />
   );
@@ -481,7 +481,7 @@ function SidebarGroup({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="sidebar-group"
       data-sidebar="group"
       className={cn(
-        "relative flex w-full min-w-0 flex-col px-2 group-data-[collapsible=icon]:items-center",
+        "relative flex w-full min-w-0 flex-col p-2 group-data-[collapsible=icon]:items-center",
         className
       )}
       {...props}
