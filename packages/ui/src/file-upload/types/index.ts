@@ -1,5 +1,11 @@
 import type { ReactNode } from "react";
+import type { FileCreateParams } from "@llamaindex/llama-cloud/resources";
 import type { FileType } from "../utils/file-utils";
+
+/**
+ * The intended purpose of the file, derived from the SDK's FileCreateParams.
+ */
+export type FilePurpose = FileCreateParams["purpose"];
 
 interface BaseFileUploadProps {
   allowedFileTypes?: FileType[];
@@ -68,6 +74,12 @@ export interface UseFileUploadOptions {
    * as the external_id for deduplication.
    */
   contentHash?: ContentHashOptions;
+  /**
+   * The intended purpose of the file.
+   * Determines how the file will be processed by the backend.
+   * @default "user_data"
+   */
+  purpose?: FilePurpose;
 }
 
 export interface UseFileUploadReturn {
@@ -126,6 +138,12 @@ export interface FileUploaderProps extends BaseFileUploadProps {
    * as the external_id for deduplication.
    */
   contentHash?: ContentHashOptions;
+  /**
+   * The intended purpose of the file.
+   * Determines how the file will be processed by the backend.
+   * @default "user_data"
+   */
+  purpose?: FilePurpose;
 }
 
 export type { FileUploadProgress } from "./upload-progress";

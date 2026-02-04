@@ -16,6 +16,7 @@ export function useFileUpload({
   onUploadComplete,
   onUploadError,
   contentHash,
+  purpose = "user_data",
 }: UseFileUploadOptions = {}): UseFileUploadReturn {
   const [isUploading, setIsUploading] = useState(false);
 
@@ -40,7 +41,7 @@ export function useFileUpload({
 
       const response = await client.files.create({
         file: file,
-        purpose: "user_data",
+        purpose,
         ...(externalId && { external_id: externalId }),
       });
 
