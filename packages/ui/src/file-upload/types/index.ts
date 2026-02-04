@@ -1,6 +1,19 @@
 import type { ReactNode } from "react";
 import type { FileType } from "../utils/file-utils";
 
+/**
+ * The intended purpose of the file.
+ * Determines how the file will be processed by the backend.
+ */
+export type FilePurpose =
+  | "user_data"
+  | "parse"
+  | "extract"
+  | "split"
+  | "classify"
+  | "sheet"
+  | "agent_app";
+
 interface BaseFileUploadProps {
   allowedFileTypes?: FileType[];
 }
@@ -68,6 +81,12 @@ export interface UseFileUploadOptions {
    * as the external_id for deduplication.
    */
   contentHash?: ContentHashOptions;
+  /**
+   * The intended purpose of the file.
+   * Determines how the file will be processed by the backend.
+   * @default "user_data"
+   */
+  purpose?: FilePurpose;
 }
 
 export interface UseFileUploadReturn {
@@ -126,6 +145,12 @@ export interface FileUploaderProps extends BaseFileUploadProps {
    * as the external_id for deduplication.
    */
   contentHash?: ContentHashOptions;
+  /**
+   * The intended purpose of the file.
+   * Determines how the file will be processed by the backend.
+   * @default "user_data"
+   */
+  purpose?: FilePurpose;
 }
 
 export type { FileUploadProgress } from "./upload-progress";
