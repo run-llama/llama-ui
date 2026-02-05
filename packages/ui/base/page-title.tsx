@@ -8,8 +8,8 @@ const pageTitleVariants = cva("flex flex-col gap-6", {
   variants: {
     align: {
       start: "items-start",
-      center: "items-center",
-      end: "items-end",
+      center: "items-center text-center",
+      end: "items-end text-end",
     },
   },
   defaultVariants: {
