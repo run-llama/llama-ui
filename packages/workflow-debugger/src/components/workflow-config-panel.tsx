@@ -118,7 +118,7 @@ export function WorkflowConfigPanel({
   };
 
   const hasSchemaFields = Boolean(
-    schema?.properties && Object.keys(schema.properties).length > 0,
+    schema?.properties && Object.keys(schema.properties).length > 0
   );
 
   if (!selectedWorkflow) {

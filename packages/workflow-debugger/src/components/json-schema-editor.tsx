@@ -118,7 +118,7 @@ export function JsonSchemaEditor({
   const required = new Set(schema?.required || []);
 
   const [rawJsonValues, setRawJsonValues] = useState<Record<string, string>>(
-    {},
+    {}
   );
   const [rawJsonErrors, setRawJsonErrors] = useState<
     Record<string, string | null>
@@ -237,7 +237,7 @@ export function JsonSchemaEditor({
                     fieldName,
                     Number.isNaN(parsed)
                       ? null
-                      : (parsed as unknown as JSONValue),
+                      : (parsed as unknown as JSONValue)
                   );
                 }}
                 placeholder={

@@ -292,7 +292,7 @@ export function WorkflowVisualization({
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges],
+    [setEdges]
   );
 
   // Simple left-to-right DAG layout (no external deps)
@@ -379,7 +379,7 @@ export function WorkflowVisualization({
 
       return { nodes: positionedNodes, edges: positionedEdges };
     },
-    [],
+    []
   );
 
   const fetchWorkflowVisualization = useCallback(async () => {
@@ -416,7 +416,7 @@ export function WorkflowVisualization({
       setError(
         err instanceof Error
           ? err.message
-          : "Failed to load workflow visualization",
+          : "Failed to load workflow visualization"
       );
       setNodes([]);
       setEdges([]);
@@ -442,7 +442,7 @@ export function WorkflowVisualization({
           delete newData.workerCount;
           delete newData.fadeTimestamp;
           return { ...n, data: newData } as Node;
-        }),
+        })
       );
       return;
     }
@@ -504,10 +504,10 @@ export function WorkflowVisualization({
       ) {
         const stepName = String((payload as { name?: unknown })?.name || "");
         const stepState = String(
-          (payload as { step_state?: unknown })?.step_state || "",
+          (payload as { step_state?: unknown })?.step_state || ""
         );
         const workerId = String(
-          (payload as { worker_id?: unknown })?.worker_id || "",
+          (payload as { worker_id?: unknown })?.worker_id || ""
         );
         const color = stateColor(stepState);
 
@@ -518,7 +518,7 @@ export function WorkflowVisualization({
             if (n.id === stepName) {
               // Track active workers for this step
               const activeWorkers = new Set<string>(
-                (newData.activeWorkers as string[]) || [],
+                (newData.activeWorkers as string[]) || []
               );
 
               // Update worker set based on state
@@ -570,17 +570,17 @@ export function WorkflowVisualization({
                           return { ...n, data: newData } as Node;
                         }
                         return n;
-                      }),
+                      })
                     );
                   }, 1000);
                 }
               }
 
               newData.lastInputEvent = getSimpleName(
-                (payload as { input_event_name?: unknown })?.input_event_name,
+                (payload as { input_event_name?: unknown })?.input_event_name
               );
               newData.lastOutputEvent = getSimpleName(
-                (payload as { output_event_name?: unknown })?.output_event_name,
+                (payload as { output_event_name?: unknown })?.output_event_name
               );
               newData.status = stepState;
               return { ...n, data: newData } as Node;
@@ -588,7 +588,7 @@ export function WorkflowVisualization({
 
             // Keep other nodes unchanged (don't clear their highlights)
             return n;
-          }),
+          })
         );
       } else if (
         type &&
@@ -596,7 +596,7 @@ export function WorkflowVisualization({
       ) {
         // Handle user-defined events (like ProgressEvent)
         const eventName = getSimpleName(
-          type.replace("__main__.", "").replace("workflows.events.", ""),
+          type.replace("__main__.", "").replace("workflows.events.", "")
         );
 
         setNodes((prev) =>
@@ -608,7 +608,7 @@ export function WorkflowVisualization({
               return { ...n, data: newData } as Node;
             }
             return n;
-          }),
+          })
         );
 
         // Clear the event highlight after 1 second
@@ -623,7 +623,7 @@ export function WorkflowVisualization({
                 return { ...n, data: newData } as Node;
               }
               return n;
-            }),
+            })
           );
         }, 1000);
       }

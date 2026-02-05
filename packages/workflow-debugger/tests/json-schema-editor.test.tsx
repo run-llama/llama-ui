@@ -22,7 +22,7 @@ describe("JsonSchemaEditor (debugger)", () => {
         values={{}}
         onChange={onChange}
         onErrorsChange={onErrors}
-      />,
+      />
     );
 
     // string
@@ -30,7 +30,7 @@ describe("JsonSchemaEditor (debugger)", () => {
       target: { value: "x" },
     });
     expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ title: "x" }),
+      expect.objectContaining({ title: "x" })
     );
 
     // number
@@ -38,25 +38,25 @@ describe("JsonSchemaEditor (debugger)", () => {
       target: { value: "1" },
     });
     expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ count: 1 }),
+      expect.objectContaining({ count: 1 })
     );
 
     // boolean
     fireEvent.click(screen.getByRole("combobox"));
     fireEvent.click(screen.getByText("True"));
     expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ enabled: true }),
+      expect.objectContaining({ enabled: true })
     );
 
     // array invalid then valid
     const tags = screen.getByLabelText(/Tags \(JSON\)/i);
     fireEvent.change(tags, { target: { value: "[" } });
     expect(onErrors).toHaveBeenCalledWith(
-      expect.objectContaining({ tags: "Invalid JSON" }),
+      expect.objectContaining({ tags: "Invalid JSON" })
     );
     fireEvent.change(tags, { target: { value: '["a"]' } });
     expect(onErrors).toHaveBeenLastCalledWith(
-      expect.objectContaining({ tags: null }),
+      expect.objectContaining({ tags: null })
     );
   });
 
@@ -67,7 +67,7 @@ describe("JsonSchemaEditor (debugger)", () => {
         schema={baseSchema}
         values={{ enabled: false }}
         onChange={onChange}
-      />,
+      />
     );
 
     // Boolean false should display as "False"
@@ -80,7 +80,7 @@ describe("JsonSchemaEditor (debugger)", () => {
         schema={baseSchema}
         values={{ enabled: "false" as unknown as boolean }}
         onChange={onChange}
-      />,
+      />
     );
     expect(combobox).toHaveTextContent("False");
 
@@ -90,7 +90,7 @@ describe("JsonSchemaEditor (debugger)", () => {
         schema={baseSchema}
         values={{ enabled: true }}
         onChange={onChange}
-      />,
+      />
     );
     expect(combobox).toHaveTextContent("True");
 
@@ -100,7 +100,7 @@ describe("JsonSchemaEditor (debugger)", () => {
         schema={baseSchema}
         values={{ enabled: "true" as unknown as boolean }}
         onChange={onChange}
-      />,
+      />
     );
     expect(combobox).toHaveTextContent("True");
   });
@@ -120,13 +120,13 @@ describe("JsonSchemaEditor (debugger)", () => {
         schema={schemaWithRequiredBoolean}
         values={{}}
         onChange={onChange}
-      />,
+      />
     );
 
     // Required boolean fields should be initialized to false when undefined
     // This ensures they are always included in the payload (fixes Pydantic validation errors)
     expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ enabled: false }),
+      expect.objectContaining({ enabled: false })
     );
   });
 
@@ -145,19 +145,19 @@ describe("JsonSchemaEditor (debugger)", () => {
         schema={schemaWithNullableBoolean}
         values={{}}
         onChange={onChange}
-      />,
+      />
     );
 
     // Required nullable boolean fields should be initialized to null
     expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ enabled: null }),
+      expect.objectContaining({ enabled: null })
     );
   });
 
   it("does not initialize optional boolean fields", () => {
     const onChange = vi.fn();
     render(
-      <JsonSchemaEditor schema={baseSchema} values={{}} onChange={onChange} />,
+      <JsonSchemaEditor schema={baseSchema} values={{}} onChange={onChange} />
     );
 
     // Optional boolean fields should NOT be auto-initialized
@@ -179,7 +179,7 @@ describe("JsonSchemaEditor (debugger)", () => {
         schema={schemaWithNullableBoolean}
         values={{ flag: null }}
         onChange={onChange}
-      />,
+      />
     );
 
     // Null value should display as "None"
@@ -190,7 +190,7 @@ describe("JsonSchemaEditor (debugger)", () => {
     fireEvent.click(combobox);
     fireEvent.click(screen.getByText("True"));
     expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ flag: true }),
+      expect.objectContaining({ flag: true })
     );
 
     // Rerender with true value
@@ -199,7 +199,7 @@ describe("JsonSchemaEditor (debugger)", () => {
         schema={schemaWithNullableBoolean}
         values={{ flag: true }}
         onChange={onChange}
-      />,
+      />
     );
     expect(combobox).toHaveTextContent("True");
 
@@ -207,7 +207,7 @@ describe("JsonSchemaEditor (debugger)", () => {
     fireEvent.click(combobox);
     fireEvent.click(screen.getByText("None"));
     expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ flag: null }),
+      expect.objectContaining({ flag: null })
     );
   });
 
@@ -218,7 +218,7 @@ describe("JsonSchemaEditor (debugger)", () => {
         schema={baseSchema}
         values={{ enabled: false }}
         onChange={onChange}
-      />,
+      />
     );
 
     // Open the select dropdown
@@ -253,13 +253,13 @@ describe("JsonSchemaEditor (debugger)", () => {
         schema={pydanticSchema as any}
         values={{ a: 1, b: 2, absolute_value: null }}
         onChange={onChange}
-      />,
+      />
     );
 
     // Should render as a boolean select dropdown, NOT a JSON textarea
     // The label should NOT have "(JSON)" suffix
     expect(
-      screen.queryByLabelText(/Absolute Value \(JSON\)/i),
+      screen.queryByLabelText(/Absolute Value \(JSON\)/i)
     ).not.toBeInTheDocument();
 
     // Should have a combobox for the boolean field
@@ -293,7 +293,7 @@ describe("JsonSchemaEditor (debugger)", () => {
         schema={pydanticSchema as any}
         values={{ count: 5 }}
         onChange={onChange}
-      />,
+      />
     );
 
     // Should render as a number input, NOT a JSON textarea
@@ -323,7 +323,7 @@ describe("JsonSchemaEditor (debugger)", () => {
         schema={pydanticSchema as any}
         values={{ name: "test" }}
         onChange={onChange}
-      />,
+      />
     );
 
     // Should render as a text input, NOT a JSON textarea with "(JSON)" label

@@ -50,7 +50,7 @@ export function RunDetailsPanel({
     clear,
   } = useStreamEventBatcher<WorkflowEvent>(
     100,
-    (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+    (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
   );
 
   const formatJsonData = (data: unknown) => {
@@ -87,14 +87,14 @@ export function RunDetailsPanel({
             setFinalResult(
               ((allEvents[allEvents.length - 1] as StopEvent)?.data?.[
                 "result"
-              ] ?? null) as JSONValue | null,
+              ] ?? null) as JSONValue | null
             );
           },
           onError(error) {
             setFinalResultError(error.message);
           },
         },
-        true,
+        true
       );
       return () => {
         disconnect();
@@ -112,7 +112,7 @@ export function RunDetailsPanel({
   const displayedEvents: WorkflowEvent[] = useMemo(
     () =>
       hideInternal ? events.filter((event) => !isBuiltInEvent(event)) : events,
-    [events, hideInternal],
+    [events, hideInternal]
   );
 
   return (
