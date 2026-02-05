@@ -59,10 +59,13 @@ jobs:
         run: |
           echo "Downloading OpenAPI spec from: ${{ env.OPENAPI_URL }}"
           curl -L -o packages/workflows-client/openapi.json "${{ env.OPENAPI_URL }}"
-          
+
           cd packages/workflows-client
           pnpm run generate
           pnpm run build
+
+      - name: Format generated code
+        run: npx prettier --write packages/workflows-client/src/generated
 
       - name: Create changeset
         run: |
