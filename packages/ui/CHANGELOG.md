@@ -1,5 +1,12 @@
 # @llamaindex/ui
 
+## 4.1.5
+
+### Patch Changes
+
+- edf8c12: Increase default max file size to 100MB and propagate to components
+- c3a42c8: add file upload file purpose parameter
+
 ## 4.1.4
 
 ### Patch Changes
