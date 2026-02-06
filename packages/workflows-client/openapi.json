@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Workflows API",
-    "version": "2.14.0"
+    "version": "0.1.2"
   },
   "components": {
     "schemas": {

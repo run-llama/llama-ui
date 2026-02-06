@@ -1,5 +1,5 @@
 ---
-"@llamaindex/workflows-client": minor
+"@llamaindex/workflows-client": patch
 ---
 
 
