@@ -243,6 +243,7 @@ export function FileUploader({
                   onFilesSelected={handleFileSelect}
                   onRemoveFile={removeFile}
                   allowedFileTypes={allowedFileTypes}
+                  maxFileSizeBytes={maxFileSizeBytes}
                 />
               ) : (
                 <FileUpload
@@ -252,6 +253,7 @@ export function FileUploader({
                   allowFileRemoval
                   showHeader={false}
                   allowedFileTypes={allowedFileTypes}
+                  maxFileSizeBytes={maxFileSizeBytes}
                   footer={null}
                   onSelectFile={onSelectFile}
                   selectFileLabel={selectFileLabel}
