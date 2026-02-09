@@ -18,12 +18,13 @@ const inputVariants = cva(
       variant: {
         default: "",
         error: "border-destructive focus-visible:ring-destructive/20",
+        warning: "border-warning focus-visible:ring-warning/20",
       },
     },
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 export interface InputProps
@@ -90,9 +91,9 @@ const Input = ({ ref, variant, type, icon, ...props }: InputProps) => {
       <label
         className={cn(
           inputVariants({ variant }),
-          "border-input bg-background text-foreground flex h-9 w-full items-center gap-2 overflow-hidden rounded-md border px-3 py-1 text-sm transition-colors",
+          "flex h-9 w-full items-center gap-2 overflow-hidden rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground transition-colors",
           "focus-within:ring-ring/50 focus-within:outline-none focus-within:ring-[3px]",
-          "has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50"
+          "has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50",
         )}
       >
         <input
@@ -110,11 +111,11 @@ const Input = ({ ref, variant, type, icon, ...props }: InputProps) => {
           Choose file
         </button>
         {icon && (
-          <div className="text-muted-foreground relative flex h-4 w-4 flex-shrink-0 items-center justify-center [&>svg]:size-4">
+          <div className="relative flex h-4 w-4 flex-shrink-0 items-center justify-center text-muted-foreground [&>svg]:size-4">
             {icon}
           </div>
         )}
-        <span className="text-muted-foreground relative line-clamp-1 flex-1">
+        <span className="relative line-clamp-1 flex-1 text-muted-foreground">
           {fileName || "No file chosen"}
         </span>
       </label>
@@ -126,7 +127,7 @@ const Input = ({ ref, variant, type, icon, ...props }: InputProps) => {
       className={cn(
         inputVariants({ variant }),
         hasIcon && !isFile && "pl-9",
-        isPassword && "pr-10"
+        isPassword && "pr-10",
       )}
       ref={ref}
       type={inputType}
@@ -140,8 +141,8 @@ const Input = ({ ref, variant, type, icon, ...props }: InputProps) => {
         {icon && (
           <div
             className={cn(
-              "text-muted-foreground pointer-events-none absolute top-1/2 flex size-4 -translate-y-1/2 items-center justify-center [&>svg]:size-full",
-              "left-3"
+              "pointer-events-none absolute top-1/2 flex size-4 -translate-y-1/2 items-center justify-center text-muted-foreground [&>svg]:size-full",
+              "left-3",
             )}
           >
             {icon}
@@ -151,7 +152,7 @@ const Input = ({ ref, variant, type, icon, ...props }: InputProps) => {
         {isPassword && (
           <button
             type="button"
-            className="text-muted-foreground hover:text-foreground absolute right-3 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-focus-within:opacity-100 group-hover:opacity-100"
             onClick={togglePasswordVisibility}
             tabIndex={-1}
           >

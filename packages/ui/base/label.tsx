@@ -2,6 +2,7 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { CircleHelp } from "lucide-react";
 import { Tooltip } from "./tooltip";
+import type { AnalyticsProps } from "../types/analytics";
 
 const labelContainerVariants = cva("flex flex-col gap-3 w-full", {
   variants: {
@@ -16,7 +17,8 @@ const labelContainerVariants = cva("flex flex-col gap-3 w-full", {
 });
 
 export interface LabelProps
-  extends VariantProps<typeof labelContainerVariants> {
+  extends AnalyticsProps,
+    VariantProps<typeof labelContainerVariants> {
   /** Main label text (required) */
   label: string;
   /** Show red asterisk to indicate required field */
@@ -86,9 +88,10 @@ const Label = ({
   children,
   variant = "integrated",
   htmlFor,
+  "da-cid": cid,
 }: LabelProps) => {
   return (
-    <div className={labelContainerVariants({ variant })}>
+    <div className={labelContainerVariants({ variant })} da-cid={cid}>
       <div className="flex flex-col gap-1">
         <div className="flex min-h-5 w-full items-center gap-2">
           {icon && (

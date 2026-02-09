@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import { Button } from "./button";
+import type { AnalyticsProps } from "../types/analytics";
 
 interface EmptyActionProps {
   /** Button label text */
@@ -16,7 +17,7 @@ interface EmptyActionProps {
  * - Content: icon, title, description (shown if provided)
  * - Actions: primaryAction, secondaryAction, tertiaryAction (shown if provided)
  */
-interface EmptyProps {
+interface EmptyProps extends AnalyticsProps {
   /** Main heading text */
   title?: string;
   /** Descriptive text below the title */
@@ -59,11 +60,12 @@ function Empty({
   primaryAction,
   secondaryAction,
   tertiaryAction,
+  "da-cid": cid,
 }: EmptyProps) {
   const hasAnyAction = primaryAction || secondaryAction || tertiaryAction;
 
   return (
-    <div className="flex flex-col items-center gap-6">
+    <div className="flex flex-col items-center gap-6" da-cid={cid}>
       {/* Content section */}
       <div className="flex w-full flex-col items-center gap-4">
         {/* Icon container */}

@@ -4,7 +4,7 @@ import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 
-import { cn } from "../lib/utils";
+import { cn, normalizeCid } from "../lib/utils";
 
 /**
  * Tabs - A tab navigation component for organizing content into separate views.
@@ -43,11 +43,14 @@ import { cn } from "../lib/utils";
  * ```
  */
 
-function Tabs({ ...props }: React.ComponentProps<typeof TabsPrimitive.Root>) {
+function Tabs({
+  className,
+  ...props
+}: React.ComponentProps<typeof TabsPrimitive.Root>) {
   return (
     <TabsPrimitive.Root
       data-slot="tabs"
-      className={cn("flex flex-col gap-4")}
+      className={cn("flex flex-col gap-4", className)}
       {...props}
     />
   );
@@ -102,7 +105,7 @@ const tabsTriggerVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 export interface TabsTriggerProps
@@ -133,8 +136,9 @@ function TabsTrigger({ label, icon: Icon, badge, ...props }: TabsTriggerProps) {
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        tabsTriggerVariants({ variant: variant as "default" | "underline" })
+        tabsTriggerVariants({ variant: variant as "default" | "underline" }),
       )}
+      da-cid={label ? normalizeCid(label) : undefined}
       {...props}
     >
       {Icon && <Icon aria-hidden="true" />}

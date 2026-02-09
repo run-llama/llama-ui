@@ -4,6 +4,7 @@ import { Info, OctagonAlert, TriangleAlert } from "lucide-react";
 
 import { cn } from "../lib/utils";
 import { Button, type ButtonProps } from "./button";
+import type { AnalyticsProps } from "../types/analytics";
 
 const alertVariants = cva(
   "relative w-full rounded-lg border bg-card px-4 py-3 text-sm",
@@ -20,7 +21,7 @@ const alertVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 const variantIcons = {
@@ -29,7 +30,9 @@ const variantIcons = {
   warning: TriangleAlert,
 } as const;
 
-export interface AlertProps extends VariantProps<typeof alertVariants> {
+export interface AlertProps
+  extends AnalyticsProps,
+    VariantProps<typeof alertVariants> {
   /** The title text displayed prominently in the alert */
   title: string;
   /** Optional description text displayed below the title */
@@ -61,6 +64,7 @@ function Alert({
   buttonLabel,
   onButtonClick,
   buttonVariant = "outline",
+  "da-cid": cid,
 }: AlertProps) {
   const Icon = variantIcons[variant ?? "default"];
 
@@ -69,6 +73,7 @@ function Alert({
       data-slot="alert"
       role="alert"
       className={cn(alertVariants({ variant }), "flex items-center gap-3")}
+      da-cid={cid}
     >
       <div className="flex flex-1 items-start gap-3">
         {showIcon && (

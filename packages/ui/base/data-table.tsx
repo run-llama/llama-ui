@@ -65,7 +65,6 @@ export function DataTableColumnHeader<TData, TValue>({
   return (
     <Button
       variant="ghost"
-      size="sm"
       label={title}
       endIcon={
         sorted === "asc" ? (
@@ -73,7 +72,7 @@ export function DataTableColumnHeader<TData, TValue>({
         ) : sorted === "desc" ? (
           <ArrowDown className="size-4" />
         ) : (
-          <ArrowUpDown className="size-4" />
+          <ArrowUpDown className="size-4 opacity-30" />
         )
       }
       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -158,7 +157,7 @@ function useCompareFn(key: string) {
         return 0;
       }
     },
-    [key]
+    [key],
   );
 }
 
@@ -202,7 +201,7 @@ export function DataTable<TData>({
         return newState;
       });
     },
-    [manualPaginationProps]
+    [manualPaginationProps],
   );
 
   const initialVisibility = {};
@@ -212,7 +211,7 @@ export function DataTable<TData>({
           ...acc,
           [columnId]: false,
         }),
-        initialVisibility
+        initialVisibility,
       )
     : {};
 
@@ -270,7 +269,7 @@ export function DataTable<TData>({
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={`${headerGroup.id}-${JSON.stringify(sorting)}`}>
                 {headerGroup.headers.map((header) => {
                   return (
                     <th
@@ -282,7 +281,7 @@ export function DataTable<TData>({
                           ? null
                           : flexRender(
                               header.column.columnDef.header,
-                              header.getContext()
+                              header.getContext(),
                             )}
                       </div>
                     </th>

@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 
 import { cn } from "../lib/utils";
 import { Button } from "./button";
+import type { AnalyticsProps } from "../types/analytics";
 
 /**
  * Dialog - A modal dialog component for user interactions and confirmations.
@@ -63,7 +64,7 @@ const DialogOverlay = ({
     ref={ref}
     className={cn(
       "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/80",
-      className
+      className,
     )}
     {...props}
   />
@@ -92,7 +93,7 @@ const DialogContent = ({
       ref={ref}
       className={cn(
         "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] fixed left-1/2 top-1/2 z-50 flex w-full max-w-[425px] -translate-x-1/2 -translate-y-1/2 flex-col gap-4 rounded-lg border bg-background p-6 shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1),0_4px_6px_-4px_rgba(0,0,0,0.1)]",
-        className
+        className,
       )}
       data-breakpoint={breakpoint}
       {...props}
@@ -111,9 +112,9 @@ DialogContent.displayName = DialogPrimitive.Content.displayName;
 /*                                  Header                                    */
 /* -------------------------------------------------------------------------- */
 
-export interface DialogHeaderProps {
+export interface DialogHeaderProps extends AnalyticsProps {
   /** Main heading text */
-  title?: string;
+  title?: React.ReactNode;
   /** Descriptive text below the title */
   description?: React.ReactNode;
   /** Icon to display at the top of the header */
@@ -127,6 +128,7 @@ const DialogHeader = ({
   description,
   icon,
   breakpoint = "lg",
+  "da-cid": cid,
 }: DialogHeaderProps) => {
   if (!title && !description && !icon) return null;
 
@@ -134,14 +136,15 @@ const DialogHeader = ({
     <div
       className={cn(
         "flex flex-col gap-4",
-        breakpoint === "sm" && "text-center"
+        breakpoint === "sm" && "text-center",
       )}
+      da-cid={cid}
     >
       {icon && (
         <div
           className={cn(
             "shadow-xs flex size-8 items-center justify-center rounded-sm border bg-background p-2 [&_svg]:size-4",
-            breakpoint === "sm" && "mx-auto"
+            breakpoint === "sm" && "mx-auto",
           )}
         >
           {icon}
@@ -191,7 +194,7 @@ export type DialogAction = {
   form?: string;
 };
 
-export interface DialogFooterProps {
+export interface DialogFooterProps extends AnalyticsProps {
   /** Primary call-to-action button (displayed rightmost on both lg and sm breakpoints) */
   primary?: DialogAction;
   /** Secondary action button (displayed between primary and tertiary on lg, left of primary on sm) */
@@ -208,7 +211,7 @@ export interface DialogFooterProps {
 const renderActionButton = (
   action: DialogAction,
   variant: "default" | "outline" | "ghost" | "destructive",
-  fullWidth?: boolean
+  fullWidth?: boolean,
 ) => {
   const button = (
     <Button
@@ -237,13 +240,14 @@ const DialogFooter = ({
   tertiary,
   breakpoint = "lg",
   children,
+  "da-cid": cid,
 }: DialogFooterProps) => {
   if (!primary && !secondary && !tertiary && !children) return null;
 
   // Large breakpoint: Tertiary left, Secondary + Primary right
   if (breakpoint === "lg") {
     return (
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6" da-cid={cid}>
         {children}
         {(primary || secondary || tertiary) && (
           <div className="flex items-center gap-6">
@@ -260,7 +264,7 @@ const DialogFooter = ({
 
   // Small breakpoint: Stacked layout with Secondary + Primary in a row, Tertiary below
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6" da-cid={cid}>
       {children}
       {(primary || secondary || tertiary) && (
         <div className="flex flex-col items-center gap-2">

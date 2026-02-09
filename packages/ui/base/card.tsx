@@ -2,6 +2,7 @@ import * as React from "react";
 
 import { Button, type ButtonProps } from "./button";
 import { cn } from "../lib/utils";
+import type { AnalyticsProps } from "../types/analytics";
 
 /**
  * Card - A container component for grouping related content.
@@ -41,7 +42,7 @@ const Card = ({
     ref={ref}
     className={cn(
       "flex flex-col gap-6 rounded-xl border bg-card px-6 py-6 text-card-foreground shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)]",
-      className
+      className,
     )}
     {...props}
   />
@@ -50,7 +51,6 @@ Card.displayName = "Card";
 
 const CardTitle = ({
   ref,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   className,
   ...props
 }: React.HTMLAttributes<HTMLHeadingElement> & {
@@ -66,7 +66,6 @@ CardTitle.displayName = "CardTitle";
 
 const CardDescription = ({
   ref,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   className,
   ...props
 }: React.HTMLAttributes<HTMLParagraphElement> & {
@@ -83,7 +82,8 @@ CardDescription.displayName = "CardDescription";
  * - `description` - Secondary descriptive text
  */
 interface CardHeaderProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "title">,
+    AnalyticsProps {
   ref?: React.RefObject<HTMLDivElement | null>;
   /** Icon component to display at the top of the header */
   icon?: React.ReactNode;
@@ -101,11 +101,11 @@ const CardHeader = ({
   title,
   description,
   action,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   className,
+  "da-cid": cid,
   ...props
 }: CardHeaderProps) => (
-  <div ref={ref} className="flex flex-col gap-4" {...props}>
+  <div ref={ref} className="flex flex-col gap-4" da-cid={cid} {...props}>
     <div className="flex w-full items-start justify-between gap-3">
       <div className="flex w-full flex-col gap-4">
         {icon && (
@@ -132,7 +132,6 @@ CardHeader.displayName = "CardHeader";
 
 const CardContent = ({
   ref,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement> & {
@@ -147,7 +146,9 @@ CardContent.displayName = "CardContent";
  * - `secondaryAction` - Secondary action button (displayed right of center)
  * - `tertiaryAction` - Tertiary action button (displayed leftmost)
  */
-interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
+interface CardFooterProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    AnalyticsProps {
   ref?: React.RefObject<HTMLDivElement | null>;
   /** Custom content to render before the action buttons */
   customContent?: React.ReactNode;
@@ -165,11 +166,11 @@ const CardFooter = ({
   primaryAction,
   secondaryAction,
   tertiaryAction,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   className,
+  "da-cid": cid,
   ...props
 }: CardFooterProps) => (
-  <div ref={ref} className="flex flex-col gap-6" {...props}>
+  <div ref={ref} className="flex flex-col gap-6" da-cid={cid} {...props}>
     {customContent}
     {(primaryAction || secondaryAction || tertiaryAction) && (
       <div className="flex w-full items-center gap-4">

@@ -25,7 +25,7 @@ const switchRootVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 const switchThumbVariants = cva(
@@ -40,7 +40,7 @@ const switchThumbVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 const switchWrapperVariants = cva("inline-flex items-start gap-3", {
@@ -181,7 +181,7 @@ const Switch = ({
       className={cn(
         switchWrapperVariants({ variant, controlPlacement }),
         disabled ? "cursor-not-allowed" : "cursor-pointer",
-        disabled && "opacity-70"
+        disabled && "opacity-70",
       )}
       onClick={(e) => {
         // For box variant, allow clicking anywhere in the box to toggle
