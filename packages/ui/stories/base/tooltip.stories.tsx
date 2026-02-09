@@ -10,7 +10,7 @@ const meta: Meta<typeof Tooltip> = {
   tags: ["autodocs"],
 };
 
-// eslint-disable-next-line no-restricted-syntax
+ 
 export default meta;
 type Story = StoryObj<typeof Tooltip>;
 

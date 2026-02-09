@@ -18,7 +18,7 @@ const meta = {
   },
 } satisfies Meta<typeof PageTitle>;
 
-// eslint-disable-next-line no-restricted-syntax
+ 
 export default meta;
 type Story = StoryObj<typeof meta>;
 

@@ -38,7 +38,7 @@ const meta: Meta<typeof Label> = {
   },
 };
 
-// eslint-disable-next-line no-restricted-syntax
+ 
 export default meta;
 type Story = StoryObj<StoryArgs>;
 

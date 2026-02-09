@@ -61,7 +61,7 @@ const meta: Meta<CardStoryProps> = {
   },
 };
 
-// eslint-disable-next-line no-restricted-syntax
+ 
 export default meta;
 type Story = StoryObj<CardStoryProps>;
 

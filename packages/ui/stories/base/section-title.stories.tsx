@@ -13,7 +13,7 @@ const meta = {
   tags: ["autodocs"],
 } satisfies Meta<typeof SectionTitle>;
 
-// eslint-disable-next-line no-restricted-syntax
+ 
 export default meta;
 type Story = StoryObj<typeof meta>;
 

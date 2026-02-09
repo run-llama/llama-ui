@@ -32,7 +32,7 @@ const meta: Meta<typeof Button> = {
   },
 };
 
-// eslint-disable-next-line no-restricted-syntax
+ 
 export default meta;
 type Story = StoryObj<typeof Button>;
 

@@ -91,7 +91,7 @@ const meta: Meta<typeof DialogPlayground> = {
   },
 };
 
-// eslint-disable-next-line no-restricted-syntax
+ 
 export default meta;
 type Story = StoryObj<typeof DialogPlayground>;
 

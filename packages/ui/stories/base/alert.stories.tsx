@@ -21,7 +21,7 @@ const meta: Meta<typeof Alert> = {
   },
 };
 
-// eslint-disable-next-line no-restricted-syntax
+ 
 export default meta;
 type Story = StoryObj<typeof Alert>;
 

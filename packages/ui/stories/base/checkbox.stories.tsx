@@ -76,7 +76,7 @@ const meta: Meta<typeof Checkbox> = {
   },
 };
 
-// eslint-disable-next-line no-restricted-syntax
+ 
 export default meta;
 type Story = StoryObj<typeof Checkbox>;
 

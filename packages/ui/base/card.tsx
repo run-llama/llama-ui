@@ -51,7 +51,6 @@ Card.displayName = "Card";
 
 const CardTitle = ({
   ref,
-  className,
   ...props
 }: React.HTMLAttributes<HTMLHeadingElement> & {
   ref?: React.RefObject<HTMLParagraphElement | null>;
@@ -66,7 +65,6 @@ CardTitle.displayName = "CardTitle";
 
 const CardDescription = ({
   ref,
-  className,
   ...props
 }: React.HTMLAttributes<HTMLParagraphElement> & {
   ref?: React.RefObject<HTMLParagraphElement | null>;
@@ -101,7 +99,6 @@ const CardHeader = ({
   title,
   description,
   action,
-  className,
   "da-cid": cid,
   ...props
 }: CardHeaderProps) => (
@@ -132,7 +129,6 @@ CardHeader.displayName = "CardHeader";
 
 const CardContent = ({
   ref,
-  className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement> & {
   ref?: React.RefObject<HTMLDivElement | null>;
@@ -166,7 +162,6 @@ const CardFooter = ({
   primaryAction,
   secondaryAction,
   tertiaryAction,
-  className,
   "da-cid": cid,
   ...props
 }: CardFooterProps) => (

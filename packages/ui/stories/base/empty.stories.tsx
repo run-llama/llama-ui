@@ -59,7 +59,7 @@ const meta: Meta<StoryArgs> = {
   },
 };
 
-// eslint-disable-next-line no-restricted-syntax
+ 
 export default meta;
 type Story = StoryObj<StoryArgs>;
 

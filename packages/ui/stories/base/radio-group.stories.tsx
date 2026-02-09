@@ -1,28 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import {
-  AlertCircle,
-  Bell,
-  CheckCircle,
-  Circle,
-  Info,
-  Mail,
-  Settings,
-} from "lucide-react";
+import { Settings } from "lucide-react";
 import * as React from "react";
 import { Badge } from "../../base/badge";
 import { RadioGroup, RadioGroupItem } from "../../base/radio-group";
 
-// Icon mapping for Storybook controls
-const iconMap: Record<string, React.ReactNode> = {
-  none: undefined,
-  circle: <Circle className="size-4" />,
-  mail: <Mail className="size-4" />,
-  settings: <Settings className="size-4" />,
-  bell: <Bell className="size-4" />,
-  checkCircle: <CheckCircle className="size-4" />,
-  alertCircle: <AlertCircle className="size-4" />,
-  info: <Info className="size-4" />,
-};
 
 const meta: Meta<typeof RadioGroup> = {
   title: "Base/RadioGroup",
@@ -45,7 +26,7 @@ const meta: Meta<typeof RadioGroup> = {
   },
 };
 
-// eslint-disable-next-line no-restricted-syntax
+ 
 export default meta;
 type Story = StoryObj<typeof RadioGroup>;
 

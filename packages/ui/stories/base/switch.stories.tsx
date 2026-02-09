@@ -5,7 +5,7 @@ import * as React from "react";
 import { Badge } from "../../base/badge";
 import { Switch, SwitchGroup } from "../../base/switch";
 
-// eslint-disable-next-line no-restricted-syntax
+ 
 export default {
   title: "Base/Switch",
   component: Switch,

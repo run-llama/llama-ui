@@ -46,7 +46,7 @@ const meta: Meta<typeof AccordionTrigger> = {
   },
 };
 
-// eslint-disable-next-line no-restricted-syntax
+ 
 export default meta; // Storybook requires default export
 type Story = StoryObj<typeof meta>;
 

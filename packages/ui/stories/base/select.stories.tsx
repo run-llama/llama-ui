@@ -56,7 +56,7 @@ const meta: Meta<SelectStoryProps> = {
   },
 };
 
-// eslint-disable-next-line no-restricted-syntax
+ 
 export default meta;
 type Story = StoryObj<SelectStoryProps>;
 

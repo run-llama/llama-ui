@@ -8,7 +8,7 @@ const meta: Meta<typeof Input> = {
   component: Input,
 };
 
-// eslint-disable-next-line no-restricted-syntax
+ 
 export default meta;
 type Story = StoryObj<typeof Input>;
 

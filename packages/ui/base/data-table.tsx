@@ -88,6 +88,7 @@ export type ManualPaginationProps = {
 };
 
 interface BaseDataTableProps<TData> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   columns: ColumnDef<TData, any>[];
   data: TData[];
   getDataId: (row: TData) => string;
@@ -135,6 +136,7 @@ const dateRegex =
 
 function useCompareFn(key: string) {
   return useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (a: Row<any>, b: Row<any>) => {
       const valueA = a.getValue(key);
       const valueB = b.getValue(key);
