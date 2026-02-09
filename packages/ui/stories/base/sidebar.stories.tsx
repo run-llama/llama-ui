@@ -83,7 +83,6 @@ const meta: Meta<SidebarStoryProps> = {
   ],
 };
 
- 
 export default meta;
 type Story = StoryObj<SidebarStoryProps>;
 
@@ -352,7 +351,7 @@ const NestedNavigationDemo = () => {
 
   const toggleItem = (item: string) => {
     setOpenItems((prev) =>
-      prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item],
+      prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]
     );
   };
 

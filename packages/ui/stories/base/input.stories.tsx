@@ -8,7 +8,6 @@ const meta: Meta<typeof Input> = {
   component: Input,
 };
 
- 
 export default meta;
 type Story = StoryObj<typeof Input>;
 

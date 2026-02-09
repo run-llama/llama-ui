@@ -19,7 +19,6 @@ const meta: Meta<typeof Table> = {
   tags: ["autodocs"],
 };
 
- 
 export default meta;
 type Story = StoryObj<typeof Table>;
 

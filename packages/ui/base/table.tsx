@@ -76,7 +76,7 @@ const TableHeader = ({ ref, sticky, ...props }: TableHeaderProps) => (
     ref={ref}
     className={cn(
       "[&_tr]:border-b [&_tr]:hover:bg-transparent",
-      sticky && "sticky top-0 z-10 bg-background",
+      sticky && "sticky top-0 z-10 bg-background"
     )}
     {...props}
   />
@@ -150,7 +150,7 @@ const tableRowVariants = cva(
       isDropZone: false,
       isLastItemDraggingBehind: false,
     },
-  },
+  }
 );
 
 export interface TableRowProps
@@ -187,7 +187,7 @@ const TableRow = ({
           isDropZone,
           isLastItemDraggingBehind,
         }),
-        draggable && "cursor-grab transition-all duration-200 ease-in-out",
+        draggable && "cursor-grab transition-all duration-200 ease-in-out"
       )}
       {...props}
     />
@@ -209,7 +209,7 @@ const tableHeadVariants = cva(
     defaultVariants: {
       alignment: "left",
     },
-  },
+  }
 );
 
 export interface TableHeadProps
@@ -279,7 +279,7 @@ const tableCellVariants = cva(
       alignment: "left",
       strong: false,
     },
-  },
+  }
 );
 
 export interface TableCellProps

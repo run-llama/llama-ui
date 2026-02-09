@@ -46,7 +46,6 @@ const meta: Meta<typeof AccordionTrigger> = {
   },
 };
 
- 
 export default meta; // Storybook requires default export
 type Story = StoryObj<typeof meta>;
 

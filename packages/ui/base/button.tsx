@@ -33,7 +33,7 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  },
+  }
 );
 
 export interface ButtonProps
@@ -108,7 +108,7 @@ function Button({
       {label && (
         <span
           className={cn(
-            size === "icon" || size === "icon-sm" ? "sr-only" : undefined,
+            size === "icon" || size === "icon-sm" ? "sr-only" : undefined
           )}
         >
           {label}

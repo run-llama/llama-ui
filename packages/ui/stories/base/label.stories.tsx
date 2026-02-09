@@ -38,7 +38,6 @@ const meta: Meta<typeof Label> = {
   },
 };
 
- 
 export default meta;
 type Story = StoryObj<StoryArgs>;
 

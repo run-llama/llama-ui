@@ -4,7 +4,6 @@ import * as React from "react";
 import { Badge } from "../../base/badge";
 import { RadioGroup, RadioGroupItem } from "../../base/radio-group";
 
-
 const meta: Meta<typeof RadioGroup> = {
   title: "Base/RadioGroup",
   component: RadioGroup,
@@ -26,7 +25,6 @@ const meta: Meta<typeof RadioGroup> = {
   },
 };
 
- 
 export default meta;
 type Story = StoryObj<typeof RadioGroup>;
 
@@ -121,10 +119,10 @@ export const Playground: Story = {
 
 // Interactive Box story with full controls
 const BoxPlaygroundComponent = (
-  args: React.ComponentProps<typeof RadioGroup>,
+  args: React.ComponentProps<typeof RadioGroup>
 ) => {
   const [selectedValue, setSelectedValue] = React.useState(
-    args.defaultValue ?? "document",
+    args.defaultValue ?? "document"
   );
 
   return (

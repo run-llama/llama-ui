@@ -14,7 +14,6 @@ const meta: Meta<typeof Separator> = {
   },
 };
 
- 
 export default meta;
 type Story = StoryObj<typeof Separator>;
 

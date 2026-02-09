@@ -5,7 +5,6 @@ import * as React from "react";
 import { Badge } from "../../base/badge";
 import { Switch, SwitchGroup } from "../../base/switch";
 
- 
 export default {
   title: "Base/Switch",
   component: Switch,

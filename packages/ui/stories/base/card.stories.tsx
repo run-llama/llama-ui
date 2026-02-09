@@ -61,7 +61,6 @@ const meta: Meta<CardStoryProps> = {
   },
 };
 
- 
 export default meta;
 type Story = StoryObj<CardStoryProps>;
 

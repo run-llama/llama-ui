@@ -27,7 +27,7 @@ const checkboxVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  },
+  }
 );
 
 const checkboxWrapperVariants = cva("inline-flex items-start gap-2", {
@@ -159,7 +159,7 @@ const Checkbox = ({
       className={cn(
         checkboxWrapperVariants({ variant }),
         disabled ? "cursor-not-allowed" : "cursor-pointer",
-        disabled && "opacity-70",
+        disabled && "opacity-70"
       )}
       onClick={(e) => {
         // For box variant, allow clicking anywhere in the box to select
