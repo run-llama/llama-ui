@@ -44,7 +44,6 @@ const meta: Meta<TabsStoryProps> = {
   },
 };
 
- 
 export default meta;
 type Story = StoryObj<TabsStoryProps>;
 

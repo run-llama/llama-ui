@@ -24,7 +24,7 @@ const inputVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  },
+  }
 );
 
 export interface InputProps
@@ -93,7 +93,7 @@ const Input = ({ ref, variant, type, icon, ...props }: InputProps) => {
           inputVariants({ variant }),
           "flex h-9 w-full items-center gap-2 overflow-hidden rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground transition-colors",
           "focus-within:ring-ring/50 focus-within:outline-none focus-within:ring-[3px]",
-          "has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50",
+          "has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50"
         )}
       >
         <input
@@ -127,7 +127,7 @@ const Input = ({ ref, variant, type, icon, ...props }: InputProps) => {
       className={cn(
         inputVariants({ variant }),
         hasIcon && !isFile && "pl-9",
-        isPassword && "pr-10",
+        isPassword && "pr-10"
       )}
       ref={ref}
       type={inputType}
@@ -142,7 +142,7 @@ const Input = ({ ref, variant, type, icon, ...props }: InputProps) => {
           <div
             className={cn(
               "pointer-events-none absolute top-1/2 flex size-4 -translate-y-1/2 items-center justify-center text-muted-foreground [&>svg]:size-full",
-              "left-3",
+              "left-3"
             )}
           >
             {icon}

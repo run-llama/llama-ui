@@ -101,7 +101,7 @@ const paymentsData: Payment[] = [
 
 // Column definitions
 const createColumns = (
-  enableSelection: boolean,
+  enableSelection: boolean
 ): ColumnDef<Payment, unknown>[] => {
   const columns: ColumnDef<Payment, unknown>[] = [];
 
@@ -151,7 +151,7 @@ const createColumns = (
         return <div className="font-medium">{formatted}</div>;
       },
       meta: { align: "right" as const },
-    },
+    }
   );
 
   // Actions column - always included in this demo
@@ -224,7 +224,6 @@ const meta: Meta<StoryProps> = {
   },
 };
 
- 
 export default meta;
 type Story = StoryObj<StoryProps>;
 
@@ -250,7 +249,7 @@ const DataTableStory = ({
     if (showEmptyState) return [];
     if (!filterValue) return paymentsData;
     return paymentsData.filter((payment) =>
-      payment.email.toLowerCase().includes(filterValue.toLowerCase()),
+      payment.email.toLowerCase().includes(filterValue.toLowerCase())
     );
   }, [filterValue, showEmptyState]);
 

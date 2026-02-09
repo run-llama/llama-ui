@@ -45,7 +45,7 @@ const radioIndicatorVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  },
+  }
 );
 
 const radioItemWrapperVariants = cva("inline-flex items-start gap-3", {
@@ -202,7 +202,7 @@ const RadioGroupItem = ({
       className={cn(
         radioItemWrapperVariants({ variant, controlPlacement }),
         disabled ? "cursor-not-allowed" : "cursor-pointer",
-        disabled && "opacity-70",
+        disabled && "opacity-70"
       )}
       onClick={(e) => {
         // For box variant, allow clicking anywhere in the box to select

@@ -18,7 +18,6 @@ const meta = {
   },
 } satisfies Meta<typeof PageTitle>;
 
- 
 export default meta;
 type Story = StoryObj<typeof meta>;
 

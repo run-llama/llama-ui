@@ -59,7 +59,6 @@ const meta: Meta<StoryArgs> = {
   },
 };
 
- 
 export default meta;
 type Story = StoryObj<StoryArgs>;
 

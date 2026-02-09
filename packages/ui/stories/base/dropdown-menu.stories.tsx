@@ -105,7 +105,6 @@ const meta: Meta<typeof DropdownMenuItemPlayground> = {
   tags: ["autodocs"],
 };
 
- 
 export default meta;
 type Story = StoryObj<typeof DropdownMenuItemPlayground>;
 

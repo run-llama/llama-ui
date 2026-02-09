@@ -91,7 +91,6 @@ const meta: Meta<typeof DialogPlayground> = {
   },
 };
 
- 
 export default meta;
 type Story = StoryObj<typeof DialogPlayground>;
 

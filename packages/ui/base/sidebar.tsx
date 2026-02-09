@@ -12,7 +12,10 @@ import {
   PanelLeftIcon,
 } from "lucide-react";
 import * as React from "react";
-import { DEFAULT_MOBILE_BREAKPOINT, useIsMobile } from "./utils/hooks/use-mobile";
+import {
+  DEFAULT_MOBILE_BREAKPOINT,
+  useIsMobile,
+} from "./utils/hooks/use-mobile";
 import { cn, normalizeCid } from "../lib/utils";
 import { Button } from "./button";
 import { Input } from "./input";
@@ -101,7 +104,7 @@ function SidebarProvider({
         expires: SIDEBAR_COOKIE_EXPIRES_IN_DAYS,
       });
     },
-    [setOpenProp, open, setItem, cookieOptions],
+    [setOpenProp, open, setItem, cookieOptions]
   );
 
   // Helper to toggle the sidebar.
@@ -139,7 +142,7 @@ function SidebarProvider({
       setOpenMobile,
       toggleSidebar,
     }),
-    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
+    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
   );
 
   return (
@@ -156,7 +159,7 @@ function SidebarProvider({
           }
           className={cn(
             "group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full",
-            className,
+            className
           )}
           {...props}
         >
@@ -188,7 +191,7 @@ function Sidebar({
         data-slot="sidebar"
         className={cn(
           "w-(--sidebar-width) flex h-full flex-col bg-sidebar text-sidebar-foreground",
-          className,
+          className
         )}
         {...props}
       >
@@ -240,7 +243,7 @@ function Sidebar({
           "group-data-[side=right]:rotate-180",
           variant === "floating" || variant === "inset"
             ? "group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))]"
-            : "group-data-[collapsible=icon]:w-(--sidebar-width-icon)",
+            : "group-data-[collapsible=icon]:w-(--sidebar-width-icon)"
         )}
       />
       <div
@@ -254,7 +257,7 @@ function Sidebar({
           variant === "floating" || variant === "inset"
             ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]"
             : "group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l",
-          className,
+          className
         )}
         {...props}
       >
@@ -264,7 +267,7 @@ function Sidebar({
           className={cn(
             "relative flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow-sm",
             // When collapsed, show expand cursor on background areas
-            "group-data-[collapsible=icon]:cursor-col-resize",
+            "group-data-[collapsible=icon]:cursor-col-resize"
           )}
           onClick={
             state === "collapsed"
@@ -289,7 +292,7 @@ function Sidebar({
           <div
             className={cn(
               "absolute bottom-0 right-0 top-0 w-1 cursor-w-resize opacity-0 transition-opacity hover:opacity-100",
-              "group-data-[collapsible=icon]:hidden",
+              "group-data-[collapsible=icon]:hidden"
             )}
             data-slot="sidebar-resize-handle"
             onClick={(event) => {
@@ -405,7 +408,7 @@ function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
       className={cn(
         "relative flex w-full flex-1 flex-col bg-background",
         "md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm",
-        className,
+        className
       )}
       {...props}
     />
@@ -423,7 +426,7 @@ function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {
       data-sidebar="header"
       className={cn(
         "flex items-center justify-between p-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
-        className,
+        className
       )}
       {...props}
     />
@@ -452,7 +455,7 @@ function SidebarSeparator({
       data-sidebar="separator"
       className={cn(
         "w-full shrink-0 border-b border-sidebar-border",
-        className,
+        className
       )}
       {...props}
     />
@@ -465,7 +468,7 @@ function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="sidebar-content"
       className={cn(
         "flex min-h-0 flex-1 flex-col overflow-auto group-data-[collapsible=icon]:overflow-hidden",
-        className,
+        className
       )}
       {...props}
     />
@@ -479,7 +482,7 @@ function SidebarGroup({ className, ...props }: React.ComponentProps<"div">) {
       data-sidebar="group"
       className={cn(
         "relative flex w-full min-w-0 flex-col p-2 group-data-[collapsible=icon]:items-center",
-        className,
+        className
       )}
       {...props}
     />
@@ -507,7 +510,7 @@ const sidebarGroupLabelVariants = cva(
     defaultVariants: {
       labelType: "default",
     },
-  },
+  }
 );
 
 function SidebarGroupLabel({
@@ -547,7 +550,7 @@ function SidebarGroupAction({
         // Increases the hit area of the button on mobile.
         "after:absolute after:-inset-2 md:after:hidden",
         "group-data-[collapsible=icon]:hidden",
-        className,
+        className
       )}
       {...props}
     />
@@ -564,7 +567,7 @@ function SidebarGroupContent({
       data-sidebar="group-content"
       className={cn(
         "w-full text-sm group-data-[collapsible=icon]:w-8",
-        className,
+        className
       )}
       {...props}
     />
@@ -578,7 +581,7 @@ function SidebarMenu({ className, ...props }: React.ComponentProps<"ul">) {
       data-sidebar="menu"
       className={cn(
         "flex w-full min-w-0 flex-col group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:items-center",
-        className,
+        className
       )}
       {...props}
     />
@@ -645,7 +648,7 @@ const sidebarMenuButtonVariants = cva(
       size: "default",
       menuType: "simple",
     },
-  },
+  }
 );
 
 type SidebarMenuButtonProps = AnalyticsProps &
@@ -723,7 +726,7 @@ function SidebarMenuButton({
             <ChevronRight
               className={cn(
                 "ml-auto size-4 transition-transform group-data-[collapsible=icon]:hidden",
-                isOpen && "rotate-90",
+                isOpen && "rotate-90"
               )}
             />
           </>
@@ -735,7 +738,7 @@ function SidebarMenuButton({
             <ChevronRight
               className={cn(
                 "size-4 transition-transform",
-                isOpen && "rotate-90",
+                isOpen && "rotate-90"
               )}
             />
             {icon}
@@ -764,7 +767,7 @@ function SidebarMenuButton({
                 "flex size-4 items-center justify-center rounded border border-primary",
                 isActive
                   ? "bg-primary text-primary-foreground"
-                  : "bg-background",
+                  : "bg-background"
               )}
             >
               {isActive && <Check className="size-3" />}
@@ -833,7 +836,7 @@ function SidebarMenuAction({
         "group-data-[collapsible=icon]:hidden",
         showOnHover &&
           "group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-sidebar-accent-foreground md:opacity-0",
-        className,
+        className
       )}
       {...props}
     />
@@ -855,7 +858,7 @@ function SidebarMenuBadge({
         "peer-data-[size=default]/menu-button:top-1.5",
         "peer-data-[size=lg]/menu-button:top-2.5",
         "group-data-[collapsible=icon]:hidden",
-        className,
+        className
       )}
       {...props}
     />
@@ -921,7 +924,7 @@ const sidebarMenuSubVariants = cva(
     defaultVariants: {
       subType: "border",
     },
-  },
+  }
 );
 
 function SidebarMenuSub({
@@ -967,7 +970,7 @@ const sidebarMenuSubButtonVariants = cva(
     defaultVariants: {
       size: "md",
     },
-  },
+  }
 );
 
 function SidebarMenuSubButton({

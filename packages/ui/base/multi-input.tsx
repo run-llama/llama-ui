@@ -63,7 +63,7 @@ export const MultiInput = ({
           label: v,
           value: v,
         })) ?? [],
-    [inputs],
+    [inputs]
   );
   return (
     <>

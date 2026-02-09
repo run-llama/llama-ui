@@ -56,7 +56,6 @@ const meta: Meta<SelectStoryProps> = {
   },
 };
 
- 
 export default meta;
 type Story = StoryObj<SelectStoryProps>;
 
