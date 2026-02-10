@@ -155,23 +155,26 @@ function ChatInputField(props: ChatInputFieldProps) {
   };
 
   return (
-    <Textarea
-      ref={textareaRef}
-      name="input"
-      placeholder={props.placeholder ?? "Type a message..."}
+    <div
       className={cn(
         "bg-secondary h-[100px] max-h-[400px] min-h-0 flex-1 resize-none overflow-y-auto rounded-2xl p-4",
         props.className
       )}
-      value={input}
-      onChange={handleInputChange}
-      onKeyDown={handleKeyDown}
-      onCompositionStart={() => setIsComposing(true)}
-      onCompositionEnd={() => {
-        setTimeout(() => setIsComposing(false), 100);
-      }}
-      spellCheck={false}
-    />
+    >
+      <Textarea
+        ref={textareaRef}
+        name="input"
+        placeholder={props.placeholder ?? "Type a message..."}
+        value={input}
+        onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
+        onCompositionStart={() => setIsComposing(true)}
+        onCompositionEnd={() => {
+          setTimeout(() => setIsComposing(false), 100);
+        }}
+        spellCheck={false}
+      />
+    </div>
   );
 }
 
