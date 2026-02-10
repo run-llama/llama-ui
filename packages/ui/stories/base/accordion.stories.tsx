@@ -54,7 +54,7 @@ export const Default: Story = {
     return (
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="item-1">
-          <AccordionTrigger title="" {...args} />
+          <AccordionTrigger {...args} />
           <AccordionContent>This is an accordion content.</AccordionContent>
         </AccordionItem>
       </Accordion>
@@ -71,7 +71,7 @@ export const WithAllFeatures: Story = {
     return (
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="item-1">
-          <AccordionTrigger title="" {...args} />
+          <AccordionTrigger {...args} />
           <AccordionContent>This is an accordion content.</AccordionContent>
         </AccordionItem>
       </Accordion>
