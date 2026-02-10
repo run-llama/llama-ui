@@ -26,6 +26,7 @@ export default defineConfig({
   entry: {
     index: "src/index.ts",
     lib: "lib/index.ts",
+    "base/index": "base/index.ts",
     ...businessComponents,
     ...baseComponents,
   },
