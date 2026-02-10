@@ -198,7 +198,7 @@ export function JsonSchemaEditor({
                 placeholder={
                   fieldDescription || `Enter ${fieldTitle.toLowerCase()}`
                 }
-                rows={3}
+                minRows={3}
               />
               {fieldDescription && (
                 <p className="text-xs text-muted-foreground">
@@ -315,35 +315,37 @@ export function JsonSchemaEditor({
               label={`${fieldTitle} (JSON)`}
               required={required.has(fieldName)}
             />
-            <Textarea
-              id={fieldId}
-              value={raw}
-              onChange={(e) => {
-                const text = e.target.value;
-                setRawJsonValues((prev) => ({ ...prev, [fieldName]: text }));
-                if (text.trim() === "") {
-                  setRawJsonErrors((prev) => ({ ...prev, [fieldName]: null }));
-                  // Clear value when empty
-                  const next = { ...values };
-                  delete next[fieldName];
-                  onChange(next);
-                  return;
-                }
-                try {
-                  const parsed = JSON.parse(text);
-                  setRawJsonErrors((prev) => ({ ...prev, [fieldName]: null }));
-                  handleValueChange(fieldName, parsed);
-                } catch {
-                  setRawJsonErrors((prev) => ({
-                    ...prev,
-                    [fieldName]: "Invalid JSON",
-                  }));
-                }
-              }}
-              placeholder={fieldDescription || placeholder}
-              className={`font-mono ${hasError ? "border-destructive focus-visible:ring-destructive" : ""}`}
-              rows={3}
-            />
+            <div className="font-mono">
+              <Textarea
+                id={fieldId}
+                value={raw}
+                onChange={(e) => {
+                  const text = e.target.value;
+                  setRawJsonValues((prev) => ({ ...prev, [fieldName]: text }));
+                  if (text.trim() === "") {
+                    setRawJsonErrors((prev) => ({ ...prev, [fieldName]: null }));
+                    // Clear value when empty
+                    const next = { ...values };
+                    delete next[fieldName];
+                    onChange(next);
+                    return;
+                  }
+                  try {
+                    const parsed = JSON.parse(text);
+                    setRawJsonErrors((prev) => ({ ...prev, [fieldName]: null }));
+                    handleValueChange(fieldName, parsed);
+                  } catch {
+                    setRawJsonErrors((prev) => ({
+                      ...prev,
+                      [fieldName]: "Invalid JSON",
+                    }));
+                  }
+                }}
+                placeholder={fieldDescription || placeholder}
+                variant={hasError ? "error" : "default"}
+                minRows={3}
+              />
+            </div>
             {hasError ? (
               <p className="text-xs text-destructive mt-1">
                 {rawJsonErrors[fieldName]}
