@@ -21,7 +21,7 @@ const textareaVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  },
+  }
 );
 
 export interface TextareaProps
@@ -61,7 +61,7 @@ const Textarea = ({
     <TextareaAutosize
       className={cn(
         textareaVariants({ variant }),
-        maxRows && "overflow-y-auto",
+        maxRows && "overflow-y-auto"
       )}
       ref={ref}
       minRows={minRows}
