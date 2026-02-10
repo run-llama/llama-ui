@@ -36,48 +36,49 @@
   "exports": {
     "./styles.css": "./dist/styles.css",
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "require": "./dist/index.cjs"
     },
     "./lib": {
       "types": "./dist/lib.d.ts",
       "import": "./dist/lib.mjs",
-      "require": "./dist/lib.js"
+      "require": "./dist/lib.cjs"
     },
     "./file-upload": {
-      "types": "./dist/file-upload/index.d.ts",
-      "import": "./dist/file-upload/index.mjs",
-      "require": "./dist/file-upload/index.js"
+      "types": "./dist/file-upload.d.ts",
+      "import": "./dist/file-upload.mjs",
+      "require": "./dist/file-upload.cjs"
     },
     "./extracted-data": {
-      "types": "./dist/extracted-data/index.d.ts",
-      "import": "./dist/extracted-data/index.mjs",
-      "require": "./dist/extracted-data/index.js"
+      "types": "./dist/extracted-data.d.ts",
+      "import": "./dist/extracted-data.mjs",
+      "require": "./dist/extracted-data.cjs"
     },
     "./file-preview": {
-      "types": "./dist/file-preview/index.d.ts",
-      "import": "./dist/file-preview/index.mjs",
-      "require": "./dist/file-preview/index.js"
+      "types": "./dist/file-preview.d.ts",
+      "import": "./dist/file-preview.mjs",
+      "require": "./dist/file-preview.cjs"
     },
     "./document-preview": {
       "types": "./dist/document-preview/index.d.ts",
       "import": "./dist/document-preview/index.mjs",
-      "require": "./dist/document-preview/index.js"
+      "require": "./dist/document-preview/index.cjs"
     },
     "./item-grid": {
-      "types": "./dist/item-grid/index.d.ts",
-      "import": "./dist/item-grid/index.mjs",
-      "require": "./dist/item-grid/index.js"
+      "types": "./dist/item-grid.d.ts",
+      "import": "./dist/item-grid.mjs",
+      "require": "./dist/item-grid.cjs"
     },
     "./item-count": {
-      "types": "./dist/item-count/index.d.ts",
-      "import": "./dist/item-count/index.mjs",
-      "require": "./dist/item-count/index.js"
+      "types": "./dist/item-count.d.ts",
+      "import": "./dist/item-count.mjs",
+      "require": "./dist/item-count.cjs"
     },
     "./workflows": {
-      "types": "./dist/workflows/index.d.ts",
-      "import": "./dist/workflows/index.mjs",
-      "require": "./dist/workflows/index.js"
+      "types": "./dist/workflows.d.ts",
+      "import": "./dist/workflows.mjs",
+      "require": "./dist/workflows.cjs"
     },
     "./chat": {
       "types": "./dist/chat/index.d.ts",
