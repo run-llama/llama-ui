@@ -73,7 +73,7 @@ export function FileSystemPreview({
           {fileCount} {label} selected from your file system
         </span>
       </div>
-      <ScrollArea className="flex-1" viewportClassName="[&>div]:!block">
+      <ScrollArea className="flex-1">
         <div className="flex flex-col gap-1 p-4">
           {files.map((file) => (
             <div
