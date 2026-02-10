@@ -1,29 +1,16 @@
 import * as React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
-// update after button is updated
-// import { Button, type ButtonProps } from "./button";
-import { Separator } from "./separator";
 
-const pageTitleVariants = cva("flex flex-col gap-6", {
-  variants: {
-    align: {
-      start: "items-start",
-      center: "items-center",
-      end: "items-end",
-    },
-  },
-  defaultVariants: {
-    align: "start",
-  },
-});
+import { Button, type ButtonProps } from "./button";
+import { Separator } from "./separator";
+import type { AnalyticsProps } from "../types/analytics";
 
 interface PageTitleProps
   extends Omit<React.ComponentProps<"div">, "className">,
-    VariantProps<typeof pageTitleVariants> {
+    AnalyticsProps {
   title: string;
   subtitle?: string;
-  //   primaryAction?: ButtonProps;
-  //   secondaryAction?: ButtonProps;
+  primaryAction?: ButtonProps;
+  secondaryAction?: ButtonProps;
   separator?: boolean;
 }
 
@@ -45,18 +32,13 @@ interface PageTitleProps
 function PageTitle({
   title,
   subtitle,
-  //   primaryAction,
-  //   secondaryAction,
+  primaryAction,
+  secondaryAction,
   separator = true,
-  align,
   ...props
 }: PageTitleProps) {
   return (
-    <div
-      className={pageTitleVariants({ align })}
-      data-slot="page-title"
-      {...props}
-    >
+    <div className="flex flex-col gap-6" data-slot="page-title" {...props}>
       <div className="flex w-full items-start justify-between gap-6">
         <div className="flex flex-col gap-2">
           <h1 className="text-2xl font-medium text-foreground">{title}</h1>
@@ -64,14 +46,14 @@ function PageTitle({
             <p className="text-sm text-muted-foreground">{subtitle}</p>
           )}
         </div>
-        {/* {(primaryAction || secondaryAction) && (
+        {(primaryAction || secondaryAction) && (
           <div className="flex items-center gap-2">
             {secondaryAction && (
               <Button variant="outline" {...secondaryAction} />
             )}
             {primaryAction && <Button variant="default" {...primaryAction} />}
           </div>
-        )} */}
+        )}
       </div>
       {separator && <Separator />}
     </div>

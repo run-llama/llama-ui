@@ -15,8 +15,8 @@ import * as React from "react";
 import {
   DEFAULT_MOBILE_BREAKPOINT,
   useIsMobile,
-} from "./utils//hooks/use-mobile";
-import { cn } from "../lib/utils";
+} from "./utils/hooks/use-mobile";
+import { cn, normalizeCid } from "../lib/utils";
 import { Button } from "./button";
 import { Input } from "./input";
 import {
@@ -28,6 +28,7 @@ import {
 } from "./sheet";
 import { Skeleton } from "./skeleton";
 import { Tooltip, TooltipProvider } from "./tooltip";
+import type { AnalyticsProps } from "../types/analytics";
 
 const SIDEBAR_COOKIE_EXPIRES_IN_DAYS = 7;
 const SIDEBAR_WIDTH = "16rem";
@@ -424,7 +425,7 @@ function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="sidebar-header"
       data-sidebar="header"
       className={cn(
-        "mt-2 flex h-[39px] items-center justify-between px-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+        "flex items-center justify-between p-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
         className
       )}
       {...props}
@@ -465,7 +466,6 @@ function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="sidebar-content"
-      data-sidebar="content"
       className={cn(
         "flex min-h-0 flex-1 flex-col overflow-auto group-data-[collapsible=icon]:overflow-hidden",
         className
@@ -651,27 +651,26 @@ const sidebarMenuButtonVariants = cva(
   }
 );
 
-type SidebarMenuButtonProps = Omit<
-  React.ComponentProps<"button">,
-  "className"
-> & {
-  asChild?: boolean;
-  isActive?: boolean;
-  tooltip?: string;
-  menuType?: SidebarMenuButtonType;
-  /** Icon to display (for simple, collapsible, dropdown, badge variants) */
-  icon?: React.ReactNode;
-  /** Main label text */
-  label?: string;
-  /** Subtitle text (for bigIcon variant) */
-  subtitle?: string;
-  /** Badge content (for badge variant) */
-  badge?: React.ReactNode;
-  /** Whether the collapsible is open (for collapsible variant) */
-  isOpen?: boolean;
-} & VariantProps<typeof sidebarMenuButtonVariants>;
+type SidebarMenuButtonProps = AnalyticsProps &
+  Omit<React.ComponentProps<"button">, "className"> & {
+    asChild?: boolean;
+    isActive?: boolean;
+    tooltip?: string;
+    menuType?: SidebarMenuButtonType;
+    /** Icon to display (for simple, collapsible, dropdown, badge variants) */
+    icon?: React.ReactNode;
+    /** Main label text */
+    label?: string;
+    /** Subtitle text (for bigIcon variant) */
+    subtitle?: string;
+    /** Badge content (for badge variant) */
+    badge?: React.ReactNode;
+    /** Whether the collapsible is open (for collapsible variant) */
+    isOpen?: boolean;
+  } & VariantProps<typeof sidebarMenuButtonVariants>;
 
 function SidebarMenuButton({
+  "da-cid": cid,
   asChild = false,
   isActive = false,
   variant = "default",
@@ -796,6 +795,7 @@ function SidebarMenuButton({
       data-active={isActive}
       data-menu-type={menuType}
       className={sidebarMenuButtonVariants({ variant, size, menuType })}
+      da-cid={cid ?? (label ? normalizeCid(label) : undefined)}
       {...props}
     >
       {renderContent()}

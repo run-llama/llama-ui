@@ -192,24 +192,26 @@ export function WorkflowConfigPanel({
               ) : (
                 <div className="space-y-2">
                   <Label htmlFor="raw-input" label="Input (JSON)" />
-                  <Textarea
-                    id="raw-input"
-                    value={rawInput}
-                    onChange={(e) => {
-                      setRawInput(e.target.value);
-                      try {
-                        const parsed = JSON.parse(e.target.value);
-                        setFormData(parsed);
-                        setRawInputError(null);
-                      } catch {
-                        // Keep editing raw input until valid JSON
-                        setRawInputError("Invalid JSON");
-                      }
-                    }}
-                    placeholder='{"key": "value"}'
-                    className={`font-mono ${rawInputError ? "border-destructive focus-visible:ring-destructive" : ""}`}
-                    rows={8}
-                  />
+                  <div className="font-mono">
+                    <Textarea
+                      id="raw-input"
+                      value={rawInput}
+                      onChange={(e) => {
+                        setRawInput(e.target.value);
+                        try {
+                          const parsed = JSON.parse(e.target.value);
+                          setFormData(parsed);
+                          setRawInputError(null);
+                        } catch {
+                          // Keep editing raw input until valid JSON
+                          setRawInputError("Invalid JSON");
+                        }
+                      }}
+                      placeholder='{"key": "value"}'
+                      variant={rawInputError ? "error" : "default"}
+                      minRows={8}
+                    />
+                  </div>
                   {rawInputError && (
                     <p className="text-xs text-destructive mt-1">
                       {rawInputError}

@@ -30,7 +30,7 @@ export const SelectFileBar = ({
     };
 
   return (
-    <ScrollArea className="h-12 border-b" viewportClassName="flex items-center">
+    <ScrollArea className="h-12 border-b">
       <div className="flex items-center gap-3 px-6">
         {onToggleFileUpload && (
           <Button

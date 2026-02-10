@@ -2,7 +2,7 @@ import * as React from "react";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { ChevronDownIcon, Info } from "lucide-react";
 
-import { cn } from "../lib/utils";
+import { cn, normalizeCid } from "../lib/utils";
 import { Tooltip } from "./tooltip";
 import { Badge } from "./badge";
 
@@ -74,6 +74,7 @@ function AccordionTrigger({
           "[&:active_.accordion-trigger-text>span]:opacity-60",
           "[&:active>div:last-child>svg]:opacity-60"
         )}
+        da-cid={normalizeCid(title)}
         {...props}
       >
         <div className="flex min-w-0 flex-1 items-center gap-2">

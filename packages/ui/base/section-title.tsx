@@ -1,28 +1,15 @@
 import * as React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
-// update after button is updated
-// import { Button, type ButtonProps } from "./button";
 
-const sectionTitleVariants = cva("flex flex-col gap-6", {
-  variants: {
-    align: {
-      start: "items-start",
-      center: "items-center",
-      end: "items-end",
-    },
-  },
-  defaultVariants: {
-    align: "start",
-  },
-});
+import { Button, type ButtonProps } from "./button";
+import type { AnalyticsProps } from "../types/analytics";
 
 interface SectionTitleProps
   extends Omit<React.ComponentProps<"div">, "className">,
-    VariantProps<typeof sectionTitleVariants> {
+    AnalyticsProps {
   title: string;
   subtitle?: string;
-  //   primaryAction?: ButtonProps;
-  //   secondaryAction?: ButtonProps;
+  primaryAction?: ButtonProps;
+  secondaryAction?: ButtonProps;
 }
 
 /**
@@ -42,15 +29,16 @@ interface SectionTitleProps
 function SectionTitle({
   title,
   subtitle,
-  //   primaryAction,
-  //   secondaryAction,
-  align,
+  primaryAction,
+  secondaryAction,
+  "da-cid": cid,
   ...props
 }: SectionTitleProps) {
   return (
     <div
-      className={sectionTitleVariants({ align })}
+      className="flex flex-col gap-6"
       data-slot="section-title"
+      da-cid={cid}
       {...props}
     >
       <div className="flex w-full items-start justify-between gap-6">
@@ -62,14 +50,14 @@ function SectionTitle({
             <p className="text-sm text-muted-foreground">{subtitle}</p>
           )}
         </div>
-        {/* {(primaryAction || secondaryAction) && (
+        {(primaryAction || secondaryAction) && (
           <div className="flex items-center gap-2">
             {secondaryAction && (
               <Button variant="outline" {...secondaryAction} />
             )}
             {primaryAction && <Button variant="default" {...primaryAction} />}
           </div>
-        )} */}
+        )}
       </div>
     </div>
   );

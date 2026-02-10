@@ -5,6 +5,7 @@ import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 
 import { Badge } from "./badge";
+import { normalizeCid } from "../lib/utils";
 
 /**
  * Select - A dropdown component for organizing content into separate views.
@@ -275,6 +276,7 @@ const SelectItem = ({
   <SelectPrimitive.Item
     ref={ref}
     className="group relative flex w-full cursor-default select-none items-start gap-2 rounded-sm py-1.5 pl-8 pr-2 text-sm font-normal outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+    da-cid={normalizeCid(label)}
     {...props}
   >
     <span className="absolute left-2 flex size-5 items-center justify-center">

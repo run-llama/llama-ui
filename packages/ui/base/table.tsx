@@ -114,9 +114,41 @@ const tableRowVariants = cva(
         default: "",
         hover: "hover:bg-muted/50",
       },
+      isDraggingOver: {
+        true: "border-t-2 border-t-blue-600 bg-blue-50/30",
+        false: "",
+      },
+      isDropZone: {
+        true: "transition-all border-t-2",
+        false: "",
+      },
+      isLastItemDraggingBehind: {
+        true: "border-b-2 border-b-blue-600",
+        false: "",
+      },
     },
+    compoundVariants: [
+      {
+        isDraggingOver: true,
+        isDropZone: false,
+        class: "opacity-50",
+      },
+      {
+        isDropZone: true,
+        isDraggingOver: false,
+        class: "border-t-transparent",
+      },
+      {
+        isDropZone: true,
+        isDraggingOver: true,
+        class: "border-t-blue-600 bg-blue-50/30",
+      },
+    ],
     defaultVariants: {
       state: "default",
+      isDraggingOver: false,
+      isDropZone: false,
+      isLastItemDraggingBehind: false,
     },
   }
 );
@@ -127,22 +159,51 @@ export interface TableRowProps
   ref?: React.Ref<HTMLTableRowElement | null>;
   /** Row state - 'default' has no hover effect, 'hover' adds background on hover */
   state?: "default" | "hover";
+  /** Whether this row is being dragged over */
+  isDraggingOver?: boolean;
+  /** Whether this row is a drop zone (for drag and drop) */
+  isDropZone?: boolean;
+  /** Whether this is the last item and dragging is happening behind it */
+  isLastItemDraggingBehind?: boolean;
 }
 
-const TableRow = ({ ref, state, ...props }: TableRowProps) => (
-  <tr ref={ref} className={tableRowVariants({ state })} {...props} />
-);
+const TableRow = ({
+  ref,
+  state,
+  isDraggingOver,
+  isDropZone,
+  isLastItemDraggingBehind,
+  draggable,
+  ...props
+}: TableRowProps) => {
+  return (
+    <tr
+      ref={ref}
+      draggable={draggable}
+      className={cn(
+        tableRowVariants({
+          state,
+          isDraggingOver,
+          isDropZone,
+          isLastItemDraggingBehind,
+        }),
+        draggable && "cursor-grab transition-all duration-200 ease-in-out"
+      )}
+      {...props}
+    />
+  );
+};
 TableRow.displayName = "TableRow";
 
 // TableHead variants for alignment
 const tableHeadVariants = cva(
-  "h-10 px-2 align-middle font-medium text-foreground [&:has([role=checkbox])]:pr-0 [&>div]:flex [&>div]:items-center [&>div]:gap-2 [&_svg]:size-4 [&_svg]:shrink-0",
+  "h-11 px-3 align-middle font-medium text-foreground [&:has([role=checkbox])]:pr-0 [&>div]:flex [&>div]:items-center [&>div]:gap-2 [&_svg]:size-4 [&_svg]:shrink-0 [&_button]:-ml-2 [&_button]:px-2",
   {
     variants: {
       alignment: {
         left: "text-left [&>div]:justify-start",
         center: "text-center [&>div]:justify-center",
-        right: "text-right [&>div]:justify-end [&>div]:flex-row-reverse",
+        right: "text-right [&>div]:justify-start [&>div]:flex-row-reverse",
       },
     },
     defaultVariants: {
@@ -201,13 +262,13 @@ TableHead.displayName = "TableHead";
 
 // TableCell variants for alignment and strong text
 const tableCellVariants = cva(
-  "p-2 align-middle [&:has([role=checkbox])]:pr-0 [&>div]:flex [&>div]:items-center [&>div]:gap-2",
+  "p-2 px-3 align-middle [&:has([role=checkbox])]:pr-0 [&>div]:flex [&>div]:items-center [&>div]:gap-2",
   {
     variants: {
       alignment: {
         left: "text-left [&>div]:justify-start",
         center: "text-center [&>div]:justify-center",
-        right: "text-right [&>div]:justify-end [&>div]:flex-row-reverse",
+        right: "text-right [&>div]:justify-start [&>div]:flex-row-reverse",
       },
       strong: {
         true: "font-semibold",

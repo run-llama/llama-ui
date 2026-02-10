@@ -65,7 +65,6 @@ export function DataTableColumnHeader<TData, TValue>({
   return (
     <Button
       variant="ghost"
-      size="sm"
       label={title}
       endIcon={
         sorted === "asc" ? (
@@ -73,7 +72,7 @@ export function DataTableColumnHeader<TData, TValue>({
         ) : sorted === "desc" ? (
           <ArrowDown className="size-4" />
         ) : (
-          <ArrowUpDown className="size-4" />
+          <ArrowUpDown className="size-4 opacity-30" />
         )
       }
       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -89,6 +88,7 @@ export type ManualPaginationProps = {
 };
 
 interface BaseDataTableProps<TData> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   columns: ColumnDef<TData, any>[];
   data: TData[];
   getDataId: (row: TData) => string;
@@ -136,6 +136,7 @@ const dateRegex =
 
 function useCompareFn(key: string) {
   return useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (a: Row<any>, b: Row<any>) => {
       const valueA = a.getValue(key);
       const valueB = b.getValue(key);
@@ -270,7 +271,7 @@ export function DataTable<TData>({
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={`${headerGroup.id}-${JSON.stringify(sorting)}`}>
                 {headerGroup.headers.map((header) => {
                   return (
                     <th

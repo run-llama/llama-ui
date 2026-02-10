@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 
 import { cn } from "../lib/utils";
 import { Button } from "./button";
+import type { AnalyticsProps } from "../types/analytics";
 
 /**
  * Dialog - A modal dialog component for user interactions and confirmations.
@@ -111,9 +112,9 @@ DialogContent.displayName = DialogPrimitive.Content.displayName;
 /*                                  Header                                    */
 /* -------------------------------------------------------------------------- */
 
-export interface DialogHeaderProps {
+export interface DialogHeaderProps extends AnalyticsProps {
   /** Main heading text */
-  title?: string;
+  title?: React.ReactNode;
   /** Descriptive text below the title */
   description?: React.ReactNode;
   /** Icon to display at the top of the header */
@@ -127,6 +128,7 @@ const DialogHeader = ({
   description,
   icon,
   breakpoint = "lg",
+  "da-cid": cid,
 }: DialogHeaderProps) => {
   if (!title && !description && !icon) return null;
 
@@ -136,6 +138,7 @@ const DialogHeader = ({
         "flex flex-col gap-4",
         breakpoint === "sm" && "text-center"
       )}
+      da-cid={cid}
     >
       {icon && (
         <div
@@ -191,7 +194,7 @@ export type DialogAction = {
   form?: string;
 };
 
-export interface DialogFooterProps {
+export interface DialogFooterProps extends AnalyticsProps {
   /** Primary call-to-action button (displayed rightmost on both lg and sm breakpoints) */
   primary?: DialogAction;
   /** Secondary action button (displayed between primary and tertiary on lg, left of primary on sm) */
@@ -237,13 +240,14 @@ const DialogFooter = ({
   tertiary,
   breakpoint = "lg",
   children,
+  "da-cid": cid,
 }: DialogFooterProps) => {
   if (!primary && !secondary && !tertiary && !children) return null;
 
   // Large breakpoint: Tertiary left, Secondary + Primary right
   if (breakpoint === "lg") {
     return (
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6" da-cid={cid}>
         {children}
         {(primary || secondary || tertiary) && (
           <div className="flex items-center gap-6">
@@ -260,7 +264,7 @@ const DialogFooter = ({
 
   // Small breakpoint: Stacked layout with Secondary + Primary in a row, Tertiary below
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6" da-cid={cid}>
       {children}
       {(primary || secondary || tertiary) && (
         <div className="flex flex-col items-center gap-2">
