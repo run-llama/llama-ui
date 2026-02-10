@@ -323,7 +323,10 @@ export function JsonSchemaEditor({
                   const text = e.target.value;
                   setRawJsonValues((prev) => ({ ...prev, [fieldName]: text }));
                   if (text.trim() === "") {
-                    setRawJsonErrors((prev) => ({ ...prev, [fieldName]: null }));
+                    setRawJsonErrors((prev) => ({
+                      ...prev,
+                      [fieldName]: null,
+                    }));
                     // Clear value when empty
                     const next = { ...values };
                     delete next[fieldName];
@@ -332,7 +335,10 @@ export function JsonSchemaEditor({
                   }
                   try {
                     const parsed = JSON.parse(text);
-                    setRawJsonErrors((prev) => ({ ...prev, [fieldName]: null }));
+                    setRawJsonErrors((prev) => ({
+                      ...prev,
+                      [fieldName]: null,
+                    }));
                     handleValueChange(fieldName, parsed);
                   } catch {
                     setRawJsonErrors((prev) => ({
