@@ -214,7 +214,7 @@ export const Basic: Story = {
 
     // Find all inputs with orange background
     const allInputs = canvasElement.querySelectorAll(
-      '[data-slot="popover-trigger"]'
+      '[data-testid="editable-field-trigger"]'
     );
     let orangeBackgroundCount = 0;
 
