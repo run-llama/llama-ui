@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 4.1.6
+
+### Patch Changes
+
+- 78cdb71: update and add more base components
+
 ## 4.1.5
 
 ### Patch Changes
