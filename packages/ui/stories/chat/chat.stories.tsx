@@ -8,6 +8,13 @@ import { useChat } from "../../src/chat/hooks/use-chat";
 import { ApiProvider } from "../../src/lib/api-provider";
 import { createWorkflowsClient } from "../../src/lib/clients";
 import ChatSection from "../../src/chat/components/chat-section";
+import ChatMessages from "../../src/chat/components/chat-messages";
+import ChatInput from "../../src/chat/components/chat-input";
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "../../base/resizable";
 
 // Mock client
 const mockClient = createWorkflowsClient({
@@ -17,14 +24,41 @@ const mockClient = createWorkflowsClient({
 /**
  * Chat Component using ChatSection
  */
-function ChatDemo() {
+function ChatDemo({ withCanvas }: { withCanvas?: boolean }) {
   const chat = useChat({
     workflowName: "chat_agent",
   });
 
+  const chatContent = (
+    <div className="flex w-full h-full min-h-0 flex-1 flex-col overflow-hidden">
+      <ChatMessages />
+      <div className="shrink-0">
+        <ChatInput />
+      </div>
+    </div>
+  );
+
+  if (!withCanvas) {
+    return (
+      <div className="h-screen w-screen">
+        <ChatSection handler={chat}>{chatContent}</ChatSection>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen w-screen">
-      <ChatSection handler={chat} />
+      <ResizablePanelGroup direction="horizontal">
+        <ResizablePanel defaultSize={60} minSize={30}>
+          <ChatSection handler={chat}>{chatContent}</ChatSection>
+        </ResizablePanel>
+        <ResizableHandle withHandle />
+        <ResizablePanel defaultSize={40} minSize={20}>
+          <div className="h-full bg-muted/50 p-4">
+            <p className="font-medium">Sidebar</p>
+          </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 }
@@ -32,10 +66,16 @@ function ChatDemo() {
 /**
  * Wrapper with ApiProvider
  */
-function ChatWrapper({ storyId }: { storyId?: string }) {
+function ChatWrapper({
+  storyId,
+  withCanvas,
+}: {
+  storyId?: string;
+  withCanvas?: boolean;
+}) {
   return (
     <ApiProvider key={storyId} clients={{ workflowsClient: mockClient }}>
-      <ChatDemo />
+      <ChatDemo withCanvas={withCanvas} />
     </ApiProvider>
   );
 }
@@ -85,5 +125,15 @@ export const WithXMLMarkers: Story = {
 export const WithCodeBlock: Story = {
   args: {
     storyId: "with-code-block",
+  },
+};
+
+/**
+ * With resizable canvas - test that chat input height stays stable when resizing
+ */
+export const WithCanvas: Story = {
+  args: {
+    storyId: "with-canvas",
+    withCanvas: true,
   },
 };

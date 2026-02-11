@@ -2,7 +2,6 @@ import { Send, Square, Plus } from "lucide-react";
 import { createContext, useContext, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/base/button";
-import { Textarea } from "@/base/textarea";
 import { FileUploader, FileType } from "../../file-upload";
 import { useChatUI } from "./chat.context";
 import { Message, MessageRole } from "./chat.interface";
@@ -146,10 +145,7 @@ function ChatInputField(props: ChatInputFieldProps) {
     setInput(e.target.value);
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
-      let newHeight = Math.max(textareaRef.current.scrollHeight, 100);
-      if (textareaRef.current.scrollHeight > 80) {
-        newHeight += 40; // offset for the textarea padding
-      }
+      const newHeight = Math.max(textareaRef.current.scrollHeight, 60);
       textareaRef.current.style.height = `${newHeight}px`;
     }
   };
@@ -157,11 +153,11 @@ function ChatInputField(props: ChatInputFieldProps) {
   return (
     <div
       className={cn(
-        "bg-secondary h-[100px] max-h-[400px] min-h-0 flex-1 resize-none overflow-y-auto rounded-2xl p-4",
+        "bg-secondary max-h-[400px] flex-1 rounded-2xl p-4",
         props.className
       )}
     >
-      <Textarea
+      <textarea
         ref={textareaRef}
         name="input"
         placeholder={props.placeholder ?? "Type a message..."}
@@ -173,6 +169,7 @@ function ChatInputField(props: ChatInputFieldProps) {
           setTimeout(() => setIsComposing(false), 100);
         }}
         spellCheck={false}
+        className="h-[60px] flex w-full resize-none rounded-md border border-input bg-background px-3 py-[6.5px] text-sm leading-normal shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
       />
     </div>
   );
