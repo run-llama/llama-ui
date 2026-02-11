@@ -66,7 +66,13 @@ function ChatDemo({ withCanvas }: { withCanvas?: boolean }) {
 /**
  * Wrapper with ApiProvider
  */
-function ChatWrapper({ storyId, withCanvas }: { storyId?: string; withCanvas?: boolean }) {
+function ChatWrapper({
+  storyId,
+  withCanvas,
+}: {
+  storyId?: string;
+  withCanvas?: boolean;
+}) {
   return (
     <ApiProvider key={storyId} clients={{ workflowsClient: mockClient }}>
       <ChatDemo withCanvas={withCanvas} />

@@ -2,7 +2,6 @@ import { Send, Square, Plus } from "lucide-react";
 import { createContext, useContext, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/base/button";
-import { Textarea } from "@/base/textarea";
 import { FileUploader, FileType } from "../../file-upload";
 import { useChatUI } from "./chat.context";
 import { Message, MessageRole } from "./chat.interface";
