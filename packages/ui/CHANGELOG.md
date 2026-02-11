@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 4.1.7
+
+### Patch Changes
+
+- 7dac626: Fix ChatInput resizing issue
+
 ## 4.1.6
 
 ### Patch Changes
