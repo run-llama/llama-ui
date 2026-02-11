@@ -16,6 +16,7 @@ export function useFileUpload({
   onUploadComplete,
   onUploadError,
   contentHash,
+  useLlamaCloud = true,
   purpose = "user_data",
 }: UseFileUploadOptions = {}): UseFileUploadReturn {
   const [isUploading, setIsUploading] = useState(false);
@@ -25,36 +26,42 @@ export function useFileUpload({
     onUploadStart?.(file);
 
     try {
-      const client = getCloudClient();
-
       // Compute SHA-256 hash of file contents for deduplication
       let fileContentHash: string | undefined;
       if (contentHash?.enabled) {
         fileContentHash = await hashFile(file);
       }
+      let fileId = "";
+      let fileUrl = "";
 
-      // Use content hash as external_id so backend can identify duplicates
-      const externalId =
-        fileContentHash && contentHash
-          ? `${contentHash.externalIdPrefix ?? ""}${fileContentHash}`
-          : undefined;
+      onProgress?.(file, 5);
 
-      const response = await client.files.create({
-        file: file,
-        purpose,
-        ...(externalId && { external_id: externalId }),
-      });
+      if (useLlamaCloud) {
+        const client = getCloudClient();
 
-      const fileId = response.id;
+        // Use content hash as external_id so backend can identify duplicates
+        const externalId =
+          fileContentHash && contentHash
+            ? `${contentHash.externalIdPrefix ?? ""}${fileContentHash}`
+            : undefined;
 
-      // Real API call with progress simulation
-      onProgress?.(file, 10);
+        const response = await client.files.create({
+          file: file,
+          purpose,
+          ...(externalId && { external_id: externalId }),
+        });
 
-      // Get the file content URL using the file ID
-      const contentResponse = await client.files.get(fileId);
+        fileId = response.id;
 
-      const fileUrl = contentResponse.url;
-      onProgress?.(file, 80);
+        // Real API call with progress simulation
+        onProgress?.(file, 10);
+
+        // Get the file content URL using the file ID
+        const contentResponse = await client.files.get(fileId);
+
+        fileUrl = contentResponse.url;
+        onProgress?.(file, 80);
+      }
 
       const fileData: FileUploadData = {
         file,

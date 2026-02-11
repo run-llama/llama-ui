@@ -80,6 +80,12 @@ export interface UseFileUploadOptions {
    * @default "user_data"
    */
   purpose?: FilePurpose;
+
+  /**
+   * Whether to use the LlamaCloud client to upload files to S3 Storage or not
+   * @default true
+   */
+  useLlamaCloud?: boolean;
 }
 
 export interface UseFileUploadReturn {
@@ -144,6 +150,12 @@ export interface FileUploaderProps extends BaseFileUploadProps {
    * @default "user_data"
    */
   purpose?: FilePurpose;
+
+  /**
+   * Whether to use the LlamaCloud client to upload files to S3 Storage or not
+   * @default true
+   */
+  useLlamaCloud?: boolean;
 }
 
 export type { FileUploadProgress } from "./upload-progress";

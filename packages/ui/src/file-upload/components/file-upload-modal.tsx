@@ -36,6 +36,7 @@ export function FileUploader({
   selectFileDescription,
   contentHash,
   purpose,
+  useLlamaCloud,
 }: FileUploaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
@@ -59,6 +60,7 @@ export function FileUploader({
     onUploadError: uploadProgress.failUpload,
     contentHash,
     purpose,
+    useLlamaCloud,
   });
 
   const handleClose = () => {
