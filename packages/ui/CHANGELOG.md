@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 4.1.8
+
+### Patch Changes
+
+- 21f0eef: support encrypted passwords
+
 ## 4.1.7
 
 ### Patch Changes
