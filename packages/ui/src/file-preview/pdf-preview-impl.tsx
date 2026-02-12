@@ -163,9 +163,7 @@ export const PdfPreviewImpl = ({
         } else {
           passwordCancelled.current = true;
           setIsLoading(false);
-          setLoadError(
-            "This PDF is password-protected and was not unlocked."
-          );
+          setLoadError("This PDF is password-protected and was not unlocked.");
           callback(null);
           onRemove?.();
         }
