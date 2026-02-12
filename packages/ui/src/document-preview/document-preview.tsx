@@ -241,7 +241,7 @@ function DocumentPreviewItem({
   // Render the preview component
   const previewContent = (
     <PreviewComponent
-      fileName={fileName}
+      fileName={fileName ?? resolveFileName(value)}
       contentUrl={resolvedUrl}
       onRemove={removalHandler}
       highlights={highlights}
