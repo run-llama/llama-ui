@@ -50,6 +50,9 @@ const pdfOptions = {
   wasmUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/wasm/`,
 };
 
+// Cache passwords for encrypted PDFs so remounts don't re-prompt
+const pdfPasswordCache = new Map<string, string>();
+
 const VIRTUALIZATION_BUFFER = 5;
 const DEFAULT_PAGE_HEIGHT = 800;
 const MIN_HIGHLIGHT_EDGE_DISTANCE = 60; // Minimum pixels from viewport edge when scrolling to highlight
@@ -124,10 +127,19 @@ export const PdfPreviewImpl = ({
       }
 
       if (reason === PasswordResponses.INCORRECT_PASSWORD) {
+        // A cached password was wrong (file may have changed) — clear it
+        pdfPasswordCache.delete(url);
         passwordCancelled.current = true;
         setIsLoading(false);
         setLoadError("Incorrect password entered for this PDF.");
         callback(null);
+        return;
+      }
+
+      // Try cached password first (e.g. after component remount)
+      const cached = pdfPasswordCache.get(url);
+      if (cached) {
+        callback(cached);
         return;
       }
 
@@ -140,11 +152,13 @@ export const PdfPreviewImpl = ({
       passwordPromptTimeout.current = setTimeout(() => {
         passwordPromptTimeout.current = null;
 
+        const displayName = fileName ?? "This PDF";
         const password = prompt(
-          "This PDF is password-protected. Please enter the password."
+          `"${displayName}" is password-protected. Please enter the password.`
         );
 
         if (password) {
+          pdfPasswordCache.set(url, password);
           callback(password);
         } else {
           passwordCancelled.current = true;
@@ -157,7 +171,7 @@ export const PdfPreviewImpl = ({
         }
       }, 50);
     },
-    [onRemove]
+    [onRemove, fileName, url]
   );
 
   // Navigate to specific page
