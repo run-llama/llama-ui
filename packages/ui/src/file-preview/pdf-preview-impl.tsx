@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Document, Page, pdfjs } from "react-pdf";
+import { Document, Page, pdfjs, PasswordResponses } from "react-pdf";
 // @ts-expect-error react-pdf types have no declarations
 import type { PageCallback } from "react-pdf/dist/shared/types";
 import { logger } from "@shared/logger";
@@ -71,6 +71,10 @@ export const PdfPreviewImpl = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const pageRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
+  const passwordCancelled = useRef(false);
+  const passwordPromptTimeout = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
   const [pageBaseDims, setPageBaseDims] = useState<PageBaseDims>({}); // store page viewport to use for bounding box overlay
   const [showHighlights, setShowHighlights] = useState<boolean>(true); // whether to show the highlights
@@ -111,6 +115,50 @@ export const PdfPreviewImpl = ({
     );
     setIsLoading(false);
   }, []);
+
+  const onPassword = useCallback(
+    (callback: (password: string | null) => void, reason: number) => {
+      if (passwordCancelled.current) {
+        callback(null);
+        return;
+      }
+
+      if (reason === PasswordResponses.INCORRECT_PASSWORD) {
+        passwordCancelled.current = true;
+        setIsLoading(false);
+        setLoadError("Incorrect password entered for this PDF.");
+        callback(null);
+        return;
+      }
+
+      // Cancel any pending prompt from a previous mount (e.g. React Strict Mode
+      // double-mounting) so the user only sees one prompt.
+      if (passwordPromptTimeout.current !== null) {
+        clearTimeout(passwordPromptTimeout.current);
+      }
+
+      passwordPromptTimeout.current = setTimeout(() => {
+        passwordPromptTimeout.current = null;
+
+        const password = prompt(
+          "This PDF is password-protected. Please enter the password."
+        );
+
+        if (password) {
+          callback(password);
+        } else {
+          passwordCancelled.current = true;
+          setIsLoading(false);
+          setLoadError(
+            "This PDF is password-protected and was not unlocked."
+          );
+          callback(null);
+          onRemove?.();
+        }
+      }, 50);
+    },
+    [onRemove]
+  );
 
   // Navigate to specific page
   const goToPage = useCallback(
@@ -386,6 +434,11 @@ export const PdfPreviewImpl = ({
       return;
     }
     lastLoadedUrl.current = url;
+    passwordCancelled.current = false;
+    if (passwordPromptTimeout.current !== null) {
+      clearTimeout(passwordPromptTimeout.current);
+      passwordPromptTimeout.current = null;
+    }
     setLoadError(null);
     setVisiblePages(new Set([1]));
     setPageHeights({});
@@ -554,9 +607,12 @@ export const PdfPreviewImpl = ({
             <p className="text-sm text-gray-600 mb-4">{loadError}</p>
             <Button
               onClick={() => {
+                passwordCancelled.current = false;
                 setLoadError(null);
-                lastLoadedUrl.current = null;
-                setFile(null);
+                if (!file) {
+                  lastLoadedUrl.current = null;
+                  setFile(null);
+                }
               }}
               label="Retry"
             />
@@ -617,6 +673,7 @@ export const PdfPreviewImpl = ({
           file={file}
           onLoadSuccess={onDocumentLoadSuccess}
           onLoadError={onDocumentLoadError}
+          onPassword={onPassword}
           loading={null}
           options={pdfOptions}
         >
