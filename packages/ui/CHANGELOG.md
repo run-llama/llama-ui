@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 4.1.9
+
+### Patch Changes
+
+- 7cb60dd: use filename for password cache
+
 ## 4.1.8
 
 ### Patch Changes
