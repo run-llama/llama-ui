@@ -121,6 +121,8 @@ export const PdfPreviewImpl = ({
 
   const onPassword = useCallback(
     (callback: (password: string | null) => void, reason: number) => {
+      const cacheKey = file?.name;
+
       if (passwordCancelled.current) {
         callback(null);
         return;
@@ -128,7 +130,7 @@ export const PdfPreviewImpl = ({
 
       if (reason === PasswordResponses.INCORRECT_PASSWORD) {
         // A cached password was wrong (file may have changed) — clear it
-        pdfPasswordCache.delete(url);
+        if (cacheKey) pdfPasswordCache.delete(cacheKey);
         passwordCancelled.current = true;
         setIsLoading(false);
         setLoadError("Incorrect password entered for this PDF.");
@@ -137,7 +139,7 @@ export const PdfPreviewImpl = ({
       }
 
       // Try cached password first (e.g. after component remount)
-      const cached = pdfPasswordCache.get(url);
+      const cached = cacheKey ? pdfPasswordCache.get(cacheKey) : undefined;
       if (cached) {
         callback(cached);
         return;
@@ -158,7 +160,7 @@ export const PdfPreviewImpl = ({
         );
 
         if (password) {
-          pdfPasswordCache.set(url, password);
+          if (cacheKey) pdfPasswordCache.set(cacheKey, password);
           callback(password);
         } else {
           passwordCancelled.current = true;
@@ -169,7 +171,7 @@ export const PdfPreviewImpl = ({
         }
       }, 50);
     },
-    [onRemove, fileName, url]
+    [onRemove, fileName, file]
   );
 
   // Navigate to specific page
