@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 4.1.10
+
+### Patch Changes
+
+- 01c84c8: Fix missalignment on SelectFileBar
+
 ## 4.1.9
 
 ### Patch Changes
