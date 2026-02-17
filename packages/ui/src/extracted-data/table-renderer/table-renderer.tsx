@@ -15,11 +15,13 @@ import { Badge } from "@/base/badge";
 import { DataPagination } from "../data-pagination";
 import { EditableField } from "../editable-field";
 import { getFieldDisplayInfo } from "../field-display-utils";
+import { getConfidenceBorderClass } from "../confidence-utils";
 import { findExtractedFieldMetadata } from "../metadata-lookup";
 import {
   buildTableHeaderMetadataPath,
   findFieldSchemaMetadata,
 } from "../metadata-path-utils";
+import { useUIConfigStore } from "@/src/store/ui-config-store";
 import { PrimitiveType, toPrimitiveType } from "../primitive-validation";
 import { isArrayOfObjects } from "../property-renderer/property-renderer-utils";
 import type {
@@ -89,6 +91,9 @@ export function TableRenderer<Row extends JsonObject>({
   tableRowsPerPage = 10,
 }: TableRendererProps<Row>) {
   const [currentPage, setCurrentPage] = useState(1);
+  const confidenceThreshold = useUIConfigStore(
+    (state) => state.confidenceThreshold
+  );
   const effectiveMetadata: RendererMetadata = {
     schema: metadata?.schema ?? ({} as Record<string, FieldSchemaMetadata>),
     extracted: metadata?.extracted ?? {},
@@ -418,7 +423,7 @@ export function TableRenderer<Row extends JsonObject>({
                             <React.Fragment key={itemIdx}>
                               {itemIdx > 0 && ", "}
                               <span
-                                className="cursor-pointer hover:bg-gray-100 rounded px-0.5"
+                                className={`cursor-pointer hover:bg-gray-100 rounded px-0.5 ${getConfidenceBorderClass(confidenceThreshold, itemMetadata?.confidence)}`}
                                 onClick={() =>
                                   onClickField?.({
                                     value: item,
