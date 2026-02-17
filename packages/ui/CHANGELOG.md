@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 4.1.12
+
+### Patch Changes
+
+- 1f50fd5: updating underline styling for editablecell
+
 ## 4.1.11
 
 ### Patch Changes
