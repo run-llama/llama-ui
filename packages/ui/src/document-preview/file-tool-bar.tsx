@@ -191,8 +191,7 @@ export const FileToolbar = ({
                 size="icon-sm"
                 onClick={handlePrevPage}
                 disabled={
-                  currentPage === undefined ||
-                  currentPage <= effectiveMinPage
+                  currentPage === undefined || currentPage <= effectiveMinPage
                 }
                 startIcon={<ChevronLeft />}
               />

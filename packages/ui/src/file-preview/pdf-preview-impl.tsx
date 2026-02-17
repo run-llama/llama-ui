@@ -100,7 +100,7 @@ export const PdfPreviewImpl = ({
   const rangeStart = pageRange ? Math.max(1, pageRange[0]) : 1;
   const rangeEnd = pageRange
     ? Math.min(pageRange[1], numPages ?? pageRange[1])
-    : numPages ?? 1;
+    : (numPages ?? 1);
 
   const highlightsByPage = useMemo(
     () => groupHighlightsByPage(highlights),
@@ -306,9 +306,7 @@ export const PdfPreviewImpl = ({
 
   useEffect(() => {
     if (!numPages) return;
-    setCurrentPage((prev) =>
-      Math.min(Math.max(prev, rangeStart), rangeEnd)
-    );
+    setCurrentPage((prev) => Math.min(Math.max(prev, rangeStart), rangeEnd));
     setVisiblePages((prev) => {
       const current = Math.min(
         Math.max(prev.size > 0 ? Math.max(...prev) : rangeStart, rangeStart),
@@ -400,7 +398,10 @@ export const PdfPreviewImpl = ({
             if (pageNumber > 0) {
               if (entry.isIntersecting) {
                 for (
-                  let i = Math.max(rangeStart, pageNumber - VIRTUALIZATION_BUFFER);
+                  let i = Math.max(
+                    rangeStart,
+                    pageNumber - VIRTUALIZATION_BUFFER
+                  );
                   i <= Math.min(rangeEnd, pageNumber + VIRTUALIZATION_BUFFER);
                   i++
                 ) {
