@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 4.1.11
+
+### Patch Changes
+
+- b4a0971: update table cell ux
+
 ## 4.1.10
 
 ### Patch Changes
