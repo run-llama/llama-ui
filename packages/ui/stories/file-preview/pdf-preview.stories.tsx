@@ -29,6 +29,11 @@ const meta: Meta<typeof PdfPreview> = {
       description:
         'How the PDF should fit on initial load. "page" fits entire page, "width" fits to container width.',
     },
+    pageRange: {
+      control: "object",
+      description:
+        "Optional page range [start, end] (1-indexed, inclusive). Only pages within this range will be rendered.",
+    },
   },
 };
 
@@ -38,6 +43,31 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     url: "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf",
+  },
+  render: (args) => (
+    <div className="h-screen">
+      <PdfPreview {...args} />
+    </div>
+  ),
+};
+
+export const PageRange: Story = {
+  args: {
+    url: "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf",
+    pageRange: [3, 7] as [number, number],
+  },
+  render: (args) => (
+    <div className="h-screen">
+      <PdfPreview {...args} />
+    </div>
+  ),
+};
+
+export const PageRangeWithHighlight: Story = {
+  args: {
+    url: "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf",
+    pageRange: [3, 7] as [number, number],
+    highlights: [{ page: 5, x: 100, y: 200, width: 300, height: 100 }],
   },
   render: (args) => (
     <div className="h-screen">
