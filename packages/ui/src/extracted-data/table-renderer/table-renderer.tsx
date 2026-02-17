@@ -12,7 +12,6 @@ import {
   TableCell,
 } from "@/base/table";
 import { Badge } from "@/base/badge";
-import { arrayToCsv } from "@/src/lib/csv-utils";
 import { DataPagination } from "../data-pagination";
 import { EditableField } from "../editable-field";
 import { getFieldDisplayInfo } from "../field-display-utils";
@@ -407,11 +406,43 @@ export function TableRenderer<Row extends JsonObject>({
                   );
                 }
 
-                // If the value is an array but not of objects, render as CSV
+                // If the value is an array but not of objects, render each item individually
                 if (Array.isArray(value)) {
-                  const csvValue = arrayToCsv(value);
-
-                  return <TableCell key={colIndex} label={csvValue} />;
+                  return (
+                    <CustomTableCell key={colIndex}>
+                      <span className="text-sm">
+                        {(value as PrimitiveValue[]).map((item, itemIdx) => {
+                          const itemPath = [...cellPath, String(itemIdx)];
+                          const itemMetadata = getMetadata(itemPath);
+                          return (
+                            <React.Fragment key={itemIdx}>
+                              {itemIdx > 0 && ", "}
+                              <span
+                                className="cursor-pointer hover:bg-gray-100 rounded px-0.5"
+                                onClick={() =>
+                                  onClickField?.({
+                                    value: item,
+                                    metadata: itemMetadata,
+                                    path: itemPath,
+                                  })
+                                }
+                                onMouseEnter={() =>
+                                  onHoverField?.({
+                                    value: item,
+                                    metadata: itemMetadata,
+                                    path: itemPath,
+                                  })
+                                }
+                                onMouseLeave={() => onHoverField?.(null)}
+                              >
+                                {String(item ?? "")}
+                              </span>
+                            </React.Fragment>
+                          );
+                        })}
+                      </span>
+                    </CustomTableCell>
+                  );
                 }
 
                 // Primitive or object leaf -> EditableField as before
