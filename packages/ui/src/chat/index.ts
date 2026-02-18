@@ -3,6 +3,7 @@
 // Components
 export { default as ChatSection } from "./components/chat-section";
 export { default as ChatInput } from "./components/chat-input";
+export { useChatInput } from "./components/chat-input";
 export { default as ChatMessages } from "./components/chat-messages";
 export { default as ChatMessage } from "./components/chat-message";
 export { default as ChatCanvas } from "./components/canvas";
