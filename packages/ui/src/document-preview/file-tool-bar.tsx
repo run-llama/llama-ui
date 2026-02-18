@@ -213,8 +213,10 @@ export const FileToolbar = ({
               />
             </div>
             <span className="text-sm text-muted-foreground">of</span>
-            <span className="flex items-center text-sm text-muted-foreground h-7 ml-1">
-              {totalPages}
+            <span className="flex items-center text-sm text-muted-foreground h-7 ml-1 whitespace-nowrap">
+              {minPage != null && maxPage != null
+                ? `${minPage}–${maxPage}`
+                : totalPages}
             </span>
           </div>
 
