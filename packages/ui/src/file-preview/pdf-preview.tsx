@@ -20,6 +20,7 @@ const PdfPreview = memo(
     toolbarClassName,
     onRemove,
     fitMode,
+    pageRange,
   }: {
     url: string;
     highlights?: Highlight[];
@@ -28,6 +29,8 @@ const PdfPreview = memo(
     onRemove?: () => void;
     /** How the PDF should fit on initial load. Defaults to "page" (fit entire page). */
     fitMode?: FitMode;
+    /** Optional page range to display (1-indexed, inclusive). Only pages within this range will be rendered. */
+    pageRange?: [number, number];
   }) => {
     if (typeof window === "undefined") {
       return null;
@@ -48,6 +51,7 @@ const PdfPreview = memo(
           toolbarClassName={toolbarClassName}
           onRemove={onRemove}
           fitMode={fitMode}
+          pageRange={pageRange}
         />
       </Suspense>
     );

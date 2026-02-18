@@ -25,6 +25,10 @@ export interface FileToolbarProps {
   onDownload?: () => void;
   currentPage?: number;
   totalPages?: number;
+  /** Minimum navigable page number (defaults to 1). Used with pageRange to restrict navigation. */
+  minPage?: number;
+  /** Maximum navigable page number (defaults to totalPages). Used with pageRange to restrict navigation. */
+  maxPage?: number;
   onPageChange?: (page: number) => void;
   className?: string;
 }
@@ -39,9 +43,13 @@ export const FileToolbar = ({
   onDownload,
   currentPage,
   totalPages,
+  minPage,
+  maxPage,
   onPageChange,
   className,
 }: FileToolbarProps) => {
+  const effectiveMinPage = minPage ?? 1;
+  const effectiveMaxPage = maxPage ?? totalPages;
   const [pageInput, setPageInput] = useState<string>(
     currentPage?.toString() ?? "1"
   );
@@ -72,7 +80,10 @@ export const FileToolbar = ({
       return;
     }
     const pageNumber = parseInt(pageInput);
-    if (pageNumber >= 1 && pageNumber <= totalPages) {
+    if (
+      pageNumber >= effectiveMinPage &&
+      pageNumber <= (effectiveMaxPage ?? totalPages)
+    ) {
       onPageChange(pageNumber);
     } else {
       setPageInput(currentPage.toString());
@@ -96,7 +107,7 @@ export const FileToolbar = ({
       currentPage !== undefined &&
       totalPages !== undefined &&
       onPageChange &&
-      currentPage > 1
+      currentPage > effectiveMinPage
     ) {
       onPageChange(currentPage - 1);
     }
@@ -108,7 +119,7 @@ export const FileToolbar = ({
       currentPage !== undefined &&
       totalPages !== undefined &&
       onPageChange &&
-      currentPage < totalPages
+      currentPage < (effectiveMaxPage ?? totalPages)
     ) {
       onPageChange(currentPage + 1);
     }
@@ -179,6 +190,9 @@ export const FileToolbar = ({
                 variant="ghost"
                 size="icon-sm"
                 onClick={handlePrevPage}
+                disabled={
+                  currentPage === undefined || currentPage <= effectiveMinPage
+                }
                 startIcon={<ChevronLeft />}
               />
             }
@@ -194,13 +208,15 @@ export const FileToolbar = ({
                 onFocus={handlePageInputFocus}
                 onBlur={handlePageInputSubmit}
                 onKeyDown={handlePageInputKeyDown}
-                min={1}
-                max={totalPages}
+                min={effectiveMinPage}
+                max={effectiveMaxPage ?? totalPages}
               />
             </div>
             <span className="text-sm text-muted-foreground">of</span>
-            <span className="flex items-center text-sm text-muted-foreground h-7 ml-1">
-              {totalPages}
+            <span className="flex items-center text-sm text-muted-foreground h-7 ml-1 whitespace-nowrap">
+              {minPage != null && maxPage != null
+                ? `${minPage}–${maxPage}`
+                : totalPages}
             </span>
           </div>
 
@@ -213,7 +229,7 @@ export const FileToolbar = ({
                 disabled={
                   currentPage === undefined ||
                   totalPages === undefined ||
-                  currentPage >= totalPages
+                  currentPage >= (effectiveMaxPage ?? totalPages)
                 }
                 startIcon={<ChevronRight />}
               />
