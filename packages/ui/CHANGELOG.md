@@ -1,5 +1,12 @@
 # @llamaindex/ui
 
+## 4.1.13
+
+### Patch Changes
+
+- 6b60ab9: Export `useChatInput` from the package chat entrypoint so consumers can directly use `const { handleSubmit } = useChatInput()` in custom chat input layouts.
+- 35d31b7: Add pageRange prop to PDF preview to restrict visible pages
+
 ## 4.1.12
 
 ### Patch Changes
