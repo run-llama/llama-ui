@@ -100,10 +100,20 @@
       "import": "./dist/base/alert.mjs",
       "require": "./dist/base/alert.js"
     },
+    "./base/alert-card": {
+      "types": "./dist/base/alert-card.d.ts",
+      "import": "./dist/base/alert-card.mjs",
+      "require": "./dist/base/alert-card.js"
+    },
     "./base/alert-dialog": {
       "types": "./dist/base/alert-dialog.d.ts",
       "import": "./dist/base/alert-dialog.mjs",
       "require": "./dist/base/alert-dialog.js"
+    },
+    "./base/aspect-ratio": {
+      "types": "./dist/base/aspect-ratio.d.ts",
+      "import": "./dist/base/aspect-ratio.mjs",
+      "require": "./dist/base/aspect-ratio.js"
     },
     "./base/avatar": {
       "types": "./dist/base/avatar.d.ts",
@@ -130,6 +140,11 @@
       "import": "./dist/base/calendar.mjs",
       "require": "./dist/base/calendar.js"
     },
+    "./base/carousel": {
+      "types": "./dist/base/carousel.d.ts",
+      "import": "./dist/base/carousel.mjs",
+      "require": "./dist/base/carousel.js"
+    },
     "./base/card": {
       "types": "./dist/base/card.d.ts",
       "import": "./dist/base/card.mjs",
@@ -139,6 +154,11 @@
       "types": "./dist/base/checkbox.d.ts",
       "import": "./dist/base/checkbox.mjs",
       "require": "./dist/base/checkbox.js"
+    },
+    "./base/command": {
+      "types": "./dist/base/command.d.ts",
+      "import": "./dist/base/command.mjs",
+      "require": "./dist/base/command.js"
     },
     "./base/collapsible": {
       "types": "./dist/base/collapsible.d.ts",
@@ -190,6 +210,16 @@
       "import": "./dist/base/hover-card.mjs",
       "require": "./dist/base/hover-card.js"
     },
+    "./base/input-group": {
+      "types": "./dist/base/input-group.d.ts",
+      "import": "./dist/base/input-group.mjs",
+      "require": "./dist/base/input-group.js"
+    },
+    "./base/input-otp": {
+      "types": "./dist/base/input-otp.d.ts",
+      "import": "./dist/base/input-otp.mjs",
+      "require": "./dist/base/input-otp.js"
+    },
     "./base/input": {
       "types": "./dist/base/input.d.ts",
       "import": "./dist/base/input.mjs",
@@ -214,6 +244,11 @@
       "types": "./dist/base/multi-input.d.ts",
       "import": "./dist/base/multi-input.mjs",
       "require": "./dist/base/multi-input.js"
+    },
+    "./base/multiple-selector": {
+      "types": "./dist/base/multiple-selector.d.ts",
+      "import": "./dist/base/multiple-selector.mjs",
+      "require": "./dist/base/multiple-selector.js"
     },
     "./base/navigation-menu": {
       "types": "./dist/base/navigation-menu.d.ts",
@@ -244,6 +279,11 @@
       "types": "./dist/base/radio-group.d.ts",
       "import": "./dist/base/radio-group.mjs",
       "require": "./dist/base/radio-group.js"
+    },
+    "./base/read-more": {
+      "types": "./dist/base/read-more.d.ts",
+      "import": "./dist/base/read-more.mjs",
+      "require": "./dist/base/read-more.js"
     },
     "./base/resizable": {
       "types": "./dist/base/resizable.d.ts",
@@ -315,6 +355,11 @@
       "import": "./dist/base/toggle.mjs",
       "require": "./dist/base/toggle.js"
     },
+    "./base/toggle-group": {
+      "types": "./dist/base/toggle-group.d.ts",
+      "import": "./dist/base/toggle-group.mjs",
+      "require": "./dist/base/toggle-group.js"
+    },
     "./base/tooltip": {
       "types": "./dist/base/tooltip.d.ts",
       "import": "./dist/base/tooltip.mjs",
@@ -359,6 +404,7 @@
     "@mdxeditor/editor": "^3.35.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
+    "@radix-ui/react-aspect-ratio": "^1.1.4",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-checkbox": "^1.3.2",
     "@radix-ui/react-collapsible": "^1.1.12",
@@ -380,6 +426,7 @@
     "@radix-ui/react-switch": "^1.2.5",
     "@radix-ui/react-tabs": "^1.1.12",
     "@radix-ui/react-toggle": "^1.1.9",
+    "@radix-ui/react-toggle-group": "^1.1.8",
     "@radix-ui/react-tooltip": "^1.2.7",
     "@tanstack/react-table": "^8.21.3",
     "@types/js-cookie": "^3.0.6",
@@ -389,7 +436,9 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
+    "embla-carousel-react": "^8.6.0",
     "highlight.js": "^11.10.0",
+    "input-otp": "^1.4.2",
     "js-cookie": "^3.0.5",
     "katex": "^0.16.22",
     "lucide-react": "^0.514.0",
