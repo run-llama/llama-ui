@@ -2,4 +2,4 @@
 "@llamaindex/ui": patch
 ---
 
-Add new base components
+Add missing base components
