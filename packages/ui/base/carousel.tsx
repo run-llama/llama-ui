@@ -214,7 +214,7 @@ const CarouselPrevious = ({
 }: React.ComponentProps<typeof Button> & {
   ref?: React.Ref<HTMLButtonElement | null>;
 }) => {
-  const { orientation, scrollPrev, canScrollPrev } = useCarousel();
+  const { scrollPrev, canScrollPrev } = useCarousel();
 
   return (
     <Button
@@ -239,7 +239,7 @@ const CarouselNext = ({
 }: React.ComponentProps<typeof Button> & {
   ref?: React.Ref<HTMLButtonElement | null>;
 }) => {
-  const { orientation, scrollNext, canScrollNext } = useCarousel();
+  const { scrollNext, canScrollNext } = useCarousel();
 
   return (
     <Button
