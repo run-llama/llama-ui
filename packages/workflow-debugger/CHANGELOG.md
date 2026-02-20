@@ -1,5 +1,12 @@
 # @llamaindex/workflow-debugger
 
+## 0.2.34
+
+### Patch Changes
+
+- Updated dependencies [5b33dff]
+  - @llamaindex/ui@4.1.14
+
 ## 0.2.33
 
 ### Patch Changes
