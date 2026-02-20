@@ -100,10 +100,25 @@
       "import": "./dist/base/alert.mjs",
       "require": "./dist/base/alert.js"
     },
+    "./base/animated-background": {
+      "types": "./dist/base/animated-background.d.ts",
+      "import": "./dist/base/animated-background.mjs",
+      "require": "./dist/base/animated-background.js"
+    },
+    "./base/alert-card": {
+      "types": "./dist/base/alert-card.d.ts",
+      "import": "./dist/base/alert-card.mjs",
+      "require": "./dist/base/alert-card.js"
+    },
     "./base/alert-dialog": {
       "types": "./dist/base/alert-dialog.d.ts",
       "import": "./dist/base/alert-dialog.mjs",
       "require": "./dist/base/alert-dialog.js"
+    },
+    "./base/aspect-ratio": {
+      "types": "./dist/base/aspect-ratio.d.ts",
+      "import": "./dist/base/aspect-ratio.mjs",
+      "require": "./dist/base/aspect-ratio.js"
     },
     "./base/avatar": {
       "types": "./dist/base/avatar.d.ts",
@@ -130,6 +145,16 @@
       "import": "./dist/base/calendar.mjs",
       "require": "./dist/base/calendar.js"
     },
+    "./base/carousel": {
+      "types": "./dist/base/carousel.d.ts",
+      "import": "./dist/base/carousel.mjs",
+      "require": "./dist/base/carousel.js"
+    },
+    "./base/chart": {
+      "types": "./dist/base/chart.d.ts",
+      "import": "./dist/base/chart.mjs",
+      "require": "./dist/base/chart.js"
+    },
     "./base/card": {
       "types": "./dist/base/card.d.ts",
       "import": "./dist/base/card.mjs",
@@ -140,6 +165,11 @@
       "import": "./dist/base/checkbox.mjs",
       "require": "./dist/base/checkbox.js"
     },
+    "./base/command": {
+      "types": "./dist/base/command.d.ts",
+      "import": "./dist/base/command.mjs",
+      "require": "./dist/base/command.js"
+    },
     "./base/collapsible": {
       "types": "./dist/base/collapsible.d.ts",
       "import": "./dist/base/collapsible.mjs",
@@ -149,6 +179,16 @@
       "types": "./dist/base/column-filter.d.ts",
       "import": "./dist/base/column-filter.mjs",
       "require": "./dist/base/column-filter.js"
+    },
+    "./base/copy-clipboard-button": {
+      "types": "./dist/base/copy-clipboard-button.d.ts",
+      "import": "./dist/base/copy-clipboard-button.mjs",
+      "require": "./dist/base/copy-clipboard-button.js"
+    },
+    "./base/custom-sheet": {
+      "types": "./dist/base/custom-sheet.d.ts",
+      "import": "./dist/base/custom-sheet.mjs",
+      "require": "./dist/base/custom-sheet.js"
     },
     "./base/context-menu": {
       "types": "./dist/base/context-menu.d.ts",
@@ -190,6 +230,21 @@
       "import": "./dist/base/hover-card.mjs",
       "require": "./dist/base/hover-card.js"
     },
+    "./base/inline-edit": {
+      "types": "./dist/base/inline-edit.d.ts",
+      "import": "./dist/base/inline-edit.mjs",
+      "require": "./dist/base/inline-edit.js"
+    },
+    "./base/input-group": {
+      "types": "./dist/base/input-group.d.ts",
+      "import": "./dist/base/input-group.mjs",
+      "require": "./dist/base/input-group.js"
+    },
+    "./base/input-otp": {
+      "types": "./dist/base/input-otp.d.ts",
+      "import": "./dist/base/input-otp.mjs",
+      "require": "./dist/base/input-otp.js"
+    },
     "./base/input": {
       "types": "./dist/base/input.d.ts",
       "import": "./dist/base/input.mjs",
@@ -199,6 +254,11 @@
       "types": "./dist/base/label.d.ts",
       "import": "./dist/base/label.mjs",
       "require": "./dist/base/label.js"
+    },
+    "./base/llama-spinner": {
+      "types": "./dist/base/llama-spinner.d.ts",
+      "import": "./dist/base/llama-spinner.mjs",
+      "require": "./dist/base/llama-spinner.js"
     },
     "./base/loading": {
       "types": "./dist/base/loading.d.ts",
@@ -215,6 +275,11 @@
       "import": "./dist/base/multi-input.mjs",
       "require": "./dist/base/multi-input.js"
     },
+    "./base/multiple-selector": {
+      "types": "./dist/base/multiple-selector.d.ts",
+      "import": "./dist/base/multiple-selector.mjs",
+      "require": "./dist/base/multiple-selector.js"
+    },
     "./base/navigation-menu": {
       "types": "./dist/base/navigation-menu.d.ts",
       "import": "./dist/base/navigation-menu.mjs",
@@ -230,10 +295,20 @@
       "import": "./dist/base/pagination.mjs",
       "require": "./dist/base/pagination.js"
     },
+    "./base/popover-trigger-button": {
+      "types": "./dist/base/popover-trigger-button.d.ts",
+      "import": "./dist/base/popover-trigger-button.mjs",
+      "require": "./dist/base/popover-trigger-button.js"
+    },
     "./base/popover": {
       "types": "./dist/base/popover.d.ts",
       "import": "./dist/base/popover.mjs",
       "require": "./dist/base/popover.js"
+    },
+    "./base/progress-bar": {
+      "types": "./dist/base/progress-bar.d.ts",
+      "import": "./dist/base/progress-bar.mjs",
+      "require": "./dist/base/progress-bar.js"
     },
     "./base/progress": {
       "types": "./dist/base/progress.d.ts",
@@ -244,6 +319,11 @@
       "types": "./dist/base/radio-group.d.ts",
       "import": "./dist/base/radio-group.mjs",
       "require": "./dist/base/radio-group.js"
+    },
+    "./base/read-more": {
+      "types": "./dist/base/read-more.d.ts",
+      "import": "./dist/base/read-more.mjs",
+      "require": "./dist/base/read-more.js"
     },
     "./base/resizable": {
       "types": "./dist/base/resizable.d.ts",
@@ -290,6 +370,16 @@
       "import": "./dist/base/slider.mjs",
       "require": "./dist/base/slider.js"
     },
+    "./base/spotlight": {
+      "types": "./dist/base/spotlight.d.ts",
+      "import": "./dist/base/spotlight.mjs",
+      "require": "./dist/base/spotlight.js"
+    },
+    "./base/success-fail-progress-bar": {
+      "types": "./dist/base/success-fail-progress-bar.d.ts",
+      "import": "./dist/base/success-fail-progress-bar.mjs",
+      "require": "./dist/base/success-fail-progress-bar.js"
+    },
     "./base/switch": {
       "types": "./dist/base/switch.d.ts",
       "import": "./dist/base/switch.mjs",
@@ -315,6 +405,11 @@
       "import": "./dist/base/toggle.mjs",
       "require": "./dist/base/toggle.js"
     },
+    "./base/toggle-group": {
+      "types": "./dist/base/toggle-group.d.ts",
+      "import": "./dist/base/toggle-group.mjs",
+      "require": "./dist/base/toggle-group.js"
+    },
     "./base/tooltip": {
       "types": "./dist/base/tooltip.d.ts",
       "import": "./dist/base/tooltip.mjs",
@@ -324,6 +419,11 @@
       "types": "./dist/base/tooltipper.d.ts",
       "import": "./dist/base/tooltipper.mjs",
       "require": "./dist/base/tooltipper.js"
+    },
+    "./base/transition-panel": {
+      "types": "./dist/base/transition-panel.d.ts",
+      "import": "./dist/base/transition-panel.mjs",
+      "require": "./dist/base/transition-panel.js"
     },
     "./base/upload-zone": {
       "types": "./dist/base/upload-zone.d.ts",
@@ -359,6 +459,7 @@
     "@mdxeditor/editor": "^3.35.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
+    "@radix-ui/react-aspect-ratio": "^1.1.4",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-checkbox": "^1.3.2",
     "@radix-ui/react-collapsible": "^1.1.12",
@@ -380,6 +481,7 @@
     "@radix-ui/react-switch": "^1.2.5",
     "@radix-ui/react-tabs": "^1.1.12",
     "@radix-ui/react-toggle": "^1.1.9",
+    "@radix-ui/react-toggle-group": "^1.1.8",
     "@radix-ui/react-tooltip": "^1.2.7",
     "@tanstack/react-table": "^8.21.3",
     "@types/js-cookie": "^3.0.6",
@@ -389,11 +491,16 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
+    "embla-carousel-react": "^8.6.0",
+    "foxact": "^0.2.41",
     "highlight.js": "^11.10.0",
+    "input-otp": "^1.4.2",
     "js-cookie": "^3.0.5",
     "katex": "^0.16.22",
+    "motion": "^12.12.1",
     "lucide-react": "^0.514.0",
     "react-day-picker": "^8.10.1",
+    "recharts": "^2.15.3",
     "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.60.0",
     "react-markdown": "^10.1.0",
