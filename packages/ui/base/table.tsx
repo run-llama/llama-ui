@@ -115,7 +115,7 @@ const tableRowVariants = cva(
         hover: "hover:bg-muted/50",
       },
       isDraggingOver: {
-        true: "border-t-2 border-t-blue-600 bg-blue-50/30",
+        true: "border-t-2 border-t-primary bg-primary/10",
         false: "",
       },
       isDropZone: {
@@ -123,7 +123,7 @@ const tableRowVariants = cva(
         false: "",
       },
       isLastItemDraggingBehind: {
-        true: "border-b-2 border-b-blue-600",
+        true: "border-b-2 border-b-primary",
         false: "",
       },
     },
@@ -141,7 +141,7 @@ const tableRowVariants = cva(
       {
         isDropZone: true,
         isDraggingOver: true,
-        class: "border-t-blue-600 bg-blue-50/30",
+        class: "border-t-primary bg-primary/10",
       },
     ],
     defaultVariants: {

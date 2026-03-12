@@ -267,7 +267,7 @@ export function DataTable<TData>({
 
   return (
     <div className="flex flex-col" {...restProps}>
-      <div className="rounded-md border border-slate-200 bg-white">
+      <div className="rounded-md border border-border bg-card">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

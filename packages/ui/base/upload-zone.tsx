@@ -38,21 +38,21 @@ export function UploadZone({
   supportedFiles,
   state = "default",
 }: UploadZoneProps) {
-  // Custom dashed border with wider spacing (8px dash, 8px gap)
-  const borderColor = state === "focus" ? "#737373" : "#a3a3a3";
-
   return (
     <div
       className={cn(
         "relative flex h-full min-h-[200px] w-full flex-1 flex-col items-center rounded-2xl p-6 text-center transition-all",
         state === "focus"
-          ? "bg-neutral-100 ring-[3px] ring-neutral-950/10"
-          : "bg-white"
+          ? "bg-muted ring-[3px] ring-ring/20"
+          : "bg-background"
       )}
     >
       {/* SVG dashed border - uses absolute positioning to avoid background-image subpixel issues */}
       <svg
-        className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
+        className={cn(
+          "pointer-events-none absolute inset-0 h-full w-full overflow-visible",
+          state === "focus" ? "text-muted-foreground" : "text-ring"
+        )}
         fill="none"
       >
         <rect
@@ -62,7 +62,7 @@ export function UploadZone({
           height="100%"
           rx="16"
           ry="16"
-          stroke={borderColor}
+          stroke="currentColor"
           strokeWidth="1"
           strokeDasharray="8 8"
           strokeLinecap="square"
@@ -71,7 +71,7 @@ export function UploadZone({
       </svg>
       {/* Centered main content */}
       <div className="flex flex-1 flex-col items-center justify-center gap-4">
-        <Upload className="h-5 w-5 text-neutral-500" />
+        <Upload className="h-5 w-5 text-muted-foreground" />
         <div className="flex max-w-[384px] flex-col items-center gap-1 text-center">
           <p className="text-base font-medium text-foreground">{title}</p>
           {description && (
