@@ -245,9 +245,14 @@ const MultipleSelector = function MultipleSelector({
     setSelected(value);
   }
 
-  if (arrayOptions || onSearch) {
-    const newOption = transToGroupOption(arrayOptions || [], groupBy);
-    if (JSON.stringify(newOption) !== JSON.stringify(options)) {
+  const prevOptionsKeyRef = React.useRef<string>("");
+  const optionsKey = arrayOptions || onSearch
+    ? JSON.stringify(arrayOptions || [])
+    : "";
+  if (optionsKey !== prevOptionsKeyRef.current) {
+    prevOptionsKeyRef.current = optionsKey;
+    if (arrayOptions || onSearch) {
+      const newOption = transToGroupOption(arrayOptions || [], groupBy);
       setOptions(newOption);
     }
   }
