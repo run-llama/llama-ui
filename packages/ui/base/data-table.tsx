@@ -19,7 +19,6 @@ import {
 } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
-import * as React from "react";
 import type { MouseEvent, ReactNode } from "react";
 import { Suspense, useCallback, useMemo, useRef, useState } from "react";
 import { Button } from "./button";
@@ -217,6 +216,13 @@ export function DataTable<TData>({
       )
     : {};
 
+  const compareCreatedAt = useCompareFn("created_at");
+  const compareUpdatedAt = useCompareFn("updated_at");
+  const sortingFns = useMemo(
+    () => ({ created_at: compareCreatedAt, updated_at: compareUpdatedAt }),
+    [compareCreatedAt, compareUpdatedAt]
+  );
+
   const table = useReactTable<TData>({
     data,
     columns: memoizedColumns,
@@ -234,10 +240,7 @@ export function DataTable<TData>({
           onPaginationChange,
         }
       : {}),
-    sortingFns: {
-      created_at: useCompareFn("created_at"),
-      updated_at: useCompareFn("updated_at"),
-    },
+    sortingFns,
     state: {
       rowSelection: rowSelection || emptyRowSelection,
       sorting,
@@ -271,7 +274,7 @@ export function DataTable<TData>({
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={`${headerGroup.id}-${JSON.stringify(sorting)}`}>
+              <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
                     <th
