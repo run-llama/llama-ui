@@ -246,9 +246,8 @@ const MultipleSelector = function MultipleSelector({
   }
 
   const prevOptionsKeyRef = React.useRef<string>("");
-  const optionsKey = arrayOptions || onSearch
-    ? JSON.stringify(arrayOptions || [])
-    : "";
+  const optionsKey =
+    arrayOptions || onSearch ? JSON.stringify(arrayOptions || []) : "";
   if (optionsKey !== prevOptionsKeyRef.current) {
     prevOptionsKeyRef.current = optionsKey;
     if (arrayOptions || onSearch) {
