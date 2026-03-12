@@ -1,6 +1,7 @@
 import * as React from "react";
 import { useMemo } from "react";
 import CreatableSelect from "react-select/creatable";
+import { cn } from "../lib/utils";
 import { useControllableState } from "./utils/hooks/use-controllable-state";
 
 interface Option {
@@ -69,6 +70,7 @@ export const MultiInput = ({
     <>
       <CreatableSelect<Option, true>
         {...props}
+        unstyled
         isMulti
         value={options}
         onChange={(newOptions) => {
@@ -86,6 +88,22 @@ export const MultiInput = ({
         isOptionDisabled={() =>
           maxOptions ? options.length >= maxOptions : false
         }
+        classNames={{
+          control: ({ isFocused }) =>
+            cn(
+              "flex min-h-9 w-full rounded-md border border-input bg-background text-sm shadow-xs transition-colors",
+              isFocused && "outline-none ring-[3px] ring-ring/50"
+            ),
+          valueContainer: () => "flex flex-wrap items-center gap-1 px-3 py-1",
+          multiValue: () =>
+            "inline-flex items-center rounded-md border border-input px-1.5 py-0.5 text-xs font-medium text-foreground",
+          multiValueLabel: () => "",
+          multiValueRemove: () =>
+            "ml-0.5 cursor-pointer rounded-full text-muted-foreground hover:text-foreground",
+          input: () =>
+            "flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground",
+          placeholder: () => "text-muted-foreground",
+        }}
       />
       <input name={name} type="hidden" value={inputs ?? value} />
     </>
