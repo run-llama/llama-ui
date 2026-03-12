@@ -19,7 +19,6 @@ import {
 } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
-import * as React from "react";
 import type { MouseEvent, ReactNode } from "react";
 import { Suspense, useCallback, useMemo, useRef, useState } from "react";
 import { Button } from "./button";
