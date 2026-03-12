@@ -171,25 +171,27 @@ export const HidePlaceholderWhenSelected: Story = {
   ),
 };
 
+const ControlledExample = () => {
+  const [value, setValue] = React.useState<Option[]>([
+    { value: "react", label: "React" },
+  ]);
+
+  return (
+    <div className="flex w-80 flex-col gap-3">
+      <MultipleSelector
+        defaultOptions={frameworkOptions}
+        value={value}
+        onChange={setValue}
+        placeholder="Controlled selector..."
+      />
+      <p className="text-xs text-muted-foreground">
+        Selected: {value.map((v) => v.label).join(", ") || "none"}
+      </p>
+    </div>
+  );
+};
+
 /** Controlled value with external state. */
 export const Controlled: Story = {
-  render: () => {
-    const [value, setValue] = React.useState<Option[]>([
-      { value: "react", label: "React" },
-    ]);
-
-    return (
-      <div className="flex w-80 flex-col gap-3">
-        <MultipleSelector
-          defaultOptions={frameworkOptions}
-          value={value}
-          onChange={setValue}
-          placeholder="Controlled selector..."
-        />
-        <p className="text-xs text-muted-foreground">
-          Selected: {value.map((v) => v.label).join(", ") || "none"}
-        </p>
-      </div>
-    );
-  },
+  render: () => <ControlledExample />,
 };
