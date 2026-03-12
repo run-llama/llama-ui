@@ -41,7 +41,7 @@ const Card = ({
   <div
     ref={ref}
     className={cn(
-      "flex flex-col gap-6 rounded-xl border bg-card px-6 py-6 text-card-foreground shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)]",
+      "flex flex-col gap-6 rounded-xl border bg-card px-6 py-6 text-card-foreground shadow-sm",
       className
     )}
     {...props}
@@ -106,7 +106,7 @@ const CardHeader = ({
     <div className="flex w-full items-start justify-between gap-3">
       <div className="flex w-full flex-col gap-4">
         {icon && (
-          <div className="flex w-fit items-center justify-center overflow-clip rounded-sm border border-border bg-background p-2 shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] [&_svg]:size-4">
+          <div className="flex w-fit items-center justify-center overflow-clip rounded-sm border border-border bg-background p-2 shadow-xs [&_svg]:size-4">
             {icon}
           </div>
         )}

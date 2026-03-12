@@ -3,6 +3,7 @@
 // Taken from https://github.com/hsuanyi-chou/shadcn-ui-expansions
 // "The same as shadcn/ui, all components are free to use for personal and commercial."
 
+import * as PopoverPrimitive from "@radix-ui/react-popover";
 import { Command as CommandPrimitive, useCommandState } from "cmdk";
 import { X } from "lucide-react";
 import type { ReactNode } from "react";
@@ -361,6 +362,7 @@ const MultipleSelector = function MultipleSelector({
   }, [creatable, commandProps?.filter]);
 
   return (
+    <PopoverPrimitive.Root open={open}>
     <Command
       {...commandProps}
       onKeyDown={(e) => {
@@ -378,6 +380,7 @@ const MultipleSelector = function MultipleSelector({
       } // When onSearch is provided, we don't want to filter the options. You can still override it.
       filter={commandFilter()}
     >
+      <PopoverPrimitive.Anchor asChild>
       <div
         className={cn(
           "min-h-10 rounded-md border border-input text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
@@ -467,9 +470,18 @@ const MultipleSelector = function MultipleSelector({
           />
         </div>
       </div>
-      <div>
-        {open && (
-          <CommandList className="animate-in absolute z-10 -mt-1 min-w-64 rounded-md border bg-popover text-popover-foreground shadow-md outline-none">
+      </PopoverPrimitive.Anchor>
+      <PopoverPrimitive.Portal>
+        <PopoverPrimitive.Content
+          align="start"
+          sideOffset={-1}
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          onCloseAutoFocus={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
+          className="z-50 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md outline-none"
+          style={{ minWidth: 'var(--radix-popover-trigger-width)' }}
+        >
+          <CommandList className="animate-in">
             {isLoading ? (
               <>{loadingIndicator}</>
             ) : (
@@ -522,9 +534,10 @@ const MultipleSelector = function MultipleSelector({
               </>
             )}
           </CommandList>
-        )}
-      </div>
+        </PopoverPrimitive.Content>
+      </PopoverPrimitive.Portal>
     </Command>
+    </PopoverPrimitive.Root>
   );
 } as <T extends string>(props: MultipleSelectorProps<T>) => ReactNode;
 
