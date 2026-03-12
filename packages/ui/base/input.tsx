@@ -103,13 +103,11 @@ const Input = ({ ref, variant, type, icon, ...props }: InputProps) => {
           onChange={handleFileChange}
           {...props}
         />
-        <button
-          type="button"
+        <span
           className="pointer-events-none flex flex-shrink-0 items-center justify-center px-1.5 py-px font-medium"
-          tabIndex={-1}
         >
           Choose file
-        </button>
+        </span>
         {icon && (
           <div className="relative flex h-4 w-4 flex-shrink-0 items-center justify-center text-muted-foreground [&>svg]:size-4">
             {icon}
@@ -152,9 +150,9 @@ const Input = ({ ref, variant, type, icon, ...props }: InputProps) => {
         {isPassword && (
           <button
             type="button"
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-focus-within:opacity-100 group-hover:opacity-100"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-sm text-muted-foreground opacity-0 transition-opacity hover:text-foreground focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-ring/50 group-focus-within:opacity-100 group-hover:opacity-100"
             onClick={togglePasswordVisibility}
-            tabIndex={-1}
+            aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? (
               <EyeOff className="size-4" />
