@@ -149,7 +149,7 @@ function InlineEdit({
             size="icon-sm"
             onClick={handleSave}
             label="Save"
-            startIcon={<Check className="text-green-500" />}
+            startIcon={<Check className="text-success" />}
             isLoading={isLoading}
             disabled={isLoading}
           />
@@ -158,7 +158,7 @@ function InlineEdit({
             size="icon-sm"
             onClick={handleCancel}
             label="Cancel"
-            startIcon={<X className="text-red-500" />}
+            startIcon={<X className="text-destructive" />}
             disabled={isLoading}
           />
         </div>

@@ -25,7 +25,7 @@ const radioIndicatorVariants = cva(
     "data-[state=unchecked]:bg-background data-[state=unchecked]:border-input",
     // Checked state (default - not focused)
     "data-[state=checked]:bg-primary data-[state=checked]:border-primary",
-    // Focus state - white background with gray border ring
+    // Focus state - white background with ring border
     "focus:!bg-background focus:!border-ring",
     "focus-visible:!bg-background focus-visible:!border-ring",
     "focus:outline-none focus-visible:outline-none",
@@ -38,8 +38,8 @@ const radioIndicatorVariants = cva(
     variants: {
       variant: {
         default:
-          "shadow-xs focus:!shadow-[0_0_0_3px_rgba(163,163,163,0.5)] focus-visible:!shadow-[0_0_0_3px_rgba(163,163,163,0.5)]",
-        box: "focus:!shadow-[0_0_0_3px_rgba(163,163,163,0.5)] focus-visible:!shadow-[0_0_0_3px_rgba(163,163,163,0.5)]",
+          "shadow-xs focus:ring-ring/50 focus:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+        box: "focus:ring-ring/50 focus:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-[3px]",
       },
     },
     defaultVariants: {

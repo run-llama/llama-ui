@@ -104,7 +104,7 @@ const Label = ({
             className="flex shrink-0 items-center text-sm font-medium"
           >
             <span className="text-foreground">{label}</span>
-            {required && <span className="text-[rgb(225,29,72)]">*</span>}
+            {required && <span className="text-destructive">*</span>}
           </label>
           {optional && (
             <span className="shrink-0 text-sm font-normal text-muted-foreground">
