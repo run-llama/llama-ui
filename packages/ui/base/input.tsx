@@ -103,9 +103,7 @@ const Input = ({ ref, variant, type, icon, ...props }: InputProps) => {
           onChange={handleFileChange}
           {...props}
         />
-        <span
-          className="pointer-events-none flex flex-shrink-0 items-center justify-center px-1.5 py-px font-medium"
-        >
+        <span className="pointer-events-none flex flex-shrink-0 items-center justify-center px-1.5 py-px font-medium">
           Choose file
         </span>
         {icon && (
