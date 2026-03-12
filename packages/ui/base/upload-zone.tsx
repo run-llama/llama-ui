@@ -42,9 +42,7 @@ export function UploadZone({
     <div
       className={cn(
         "relative flex h-full min-h-[200px] w-full flex-1 flex-col items-center rounded-2xl p-6 text-center transition-all",
-        state === "focus"
-          ? "bg-muted ring-[3px] ring-ring/20"
-          : "bg-background"
+        state === "focus" ? "bg-muted ring-[3px] ring-ring/20" : "bg-background"
       )}
     >
       {/* SVG dashed border - uses absolute positioning to avoid background-image subpixel issues */}

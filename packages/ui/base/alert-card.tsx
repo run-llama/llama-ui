@@ -41,9 +41,7 @@ export const AlertCard = ({
           )}
         </div>
       </div>
-      <div className={cn("text-sm text-foreground")}>
-        {children}
-      </div>
+      <div className={cn("text-sm text-foreground")}>{children}</div>
     </div>
   );
 };
