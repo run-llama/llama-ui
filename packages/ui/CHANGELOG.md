@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 4.1.15
+
+### Patch Changes
+
+- 7f63027: ui performance updates and dark mode support
+
 ## 4.1.14
 
 ### Patch Changes
