@@ -1,6 +1,7 @@
 import { Alert } from "../../base/alert";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
+import { ThemeComparison } from "./theme-comparison";
 
 const meta: Meta<typeof Alert> = {
   title: "Base/Alert",
@@ -29,6 +30,11 @@ export const Default: Story = {
     title: "Information",
     description: "This is an informational alert with helpful details.",
   },
+  render: (args) => (
+    <ThemeComparison>
+      <Alert {...args} />
+    </ThemeComparison>
+  ),
 };
 
 export const Error: Story = {
@@ -37,6 +43,11 @@ export const Error: Story = {
     title: "Error Occurred",
     description: "Something went wrong. Please try again later.",
   },
+  render: (args) => (
+    <ThemeComparison>
+      <Alert {...args} />
+    </ThemeComparison>
+  ),
 };
 
 export const Warning: Story = {
@@ -45,12 +56,22 @@ export const Warning: Story = {
     title: "Warning",
     description: "This action may have unintended consequences.",
   },
+  render: (args) => (
+    <ThemeComparison>
+      <Alert {...args} />
+    </ThemeComparison>
+  ),
 };
 
 export const TitleOnly: Story = {
   args: {
     title: "This alert has only a title, no description.",
   },
+  render: (args) => (
+    <ThemeComparison>
+      <Alert {...args} />
+    </ThemeComparison>
+  ),
 };
 
 export const WithoutIcon: Story = {
@@ -59,6 +80,11 @@ export const WithoutIcon: Story = {
     description: "This alert does not display an icon.",
     showIcon: false,
   },
+  render: (args) => (
+    <ThemeComparison>
+      <Alert {...args} />
+    </ThemeComparison>
+  ),
 };
 
 export const WithActionButton: Story = {
@@ -68,6 +94,11 @@ export const WithActionButton: Story = {
     buttonLabel: "Take Action",
     onButtonClick: () => alert("Action button clicked!"),
   },
+  render: (args) => (
+    <ThemeComparison>
+      <Alert {...args} />
+    </ThemeComparison>
+  ),
 };
 
 export const ErrorWithButton: Story = {
@@ -79,6 +110,11 @@ export const ErrorWithButton: Story = {
     buttonVariant: "destructive",
     onButtonClick: () => alert("Retry clicked!"),
   },
+  render: (args) => (
+    <ThemeComparison>
+      <Alert {...args} />
+    </ThemeComparison>
+  ),
 };
 
 export const WarningWithButton: Story = {
@@ -90,51 +126,60 @@ export const WarningWithButton: Story = {
     buttonVariant: "default",
     onButtonClick: () => alert("Save clicked!"),
   },
+  render: (args) => (
+    <ThemeComparison>
+      <Alert {...args} />
+    </ThemeComparison>
+  ),
 };
 
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col gap-4">
-      <Alert
-        title="Default Alert"
-        description="This is the default informational style."
-      />
-      <Alert
-        variant="error"
-        title="Error Alert"
-        description="This indicates an error or failure state."
-      />
-      <Alert
-        variant="warning"
-        title="Warning Alert"
-        description="This indicates a warning or caution."
-      />
-    </div>
+    <ThemeComparison>
+      <div className="flex flex-col gap-4">
+        <Alert
+          title="Default Alert"
+          description="This is the default informational style."
+        />
+        <Alert
+          variant="error"
+          title="Error Alert"
+          description="This indicates an error or failure state."
+        />
+        <Alert
+          variant="warning"
+          title="Warning Alert"
+          description="This indicates a warning or caution."
+        />
+      </div>
+    </ThemeComparison>
   ),
 };
 
 export const AllVariantsWithButtons: Story = {
   render: () => (
-    <div className="flex flex-col gap-4">
-      <Alert
-        title="Default Alert"
-        description="This is the default informational style."
-        buttonLabel="Learn More"
-      />
-      <Alert
-        variant="error"
-        title="Error Alert"
-        description="This indicates an error or failure state."
-        buttonLabel="Retry"
-        buttonVariant="destructive"
-      />
-      <Alert
-        variant="warning"
-        title="Warning Alert"
-        description="This indicates a warning or caution."
-        buttonLabel="Dismiss"
-        buttonVariant="outline"
-      />
-    </div>
+    <ThemeComparison>
+      <div className="flex flex-col gap-4">
+        <Alert
+          title="Default Alert"
+          description="This is the default informational style."
+          buttonLabel="Learn More"
+        />
+        <Alert
+          variant="error"
+          title="Error Alert"
+          description="This indicates an error or failure state."
+          buttonLabel="Retry"
+          buttonVariant="destructive"
+        />
+        <Alert
+          variant="warning"
+          title="Warning Alert"
+          description="This indicates a warning or caution."
+          buttonLabel="Dismiss"
+          buttonVariant="outline"
+        />
+      </div>
+    </ThemeComparison>
   ),
 };

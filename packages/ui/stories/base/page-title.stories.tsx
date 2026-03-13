@@ -3,6 +3,7 @@ import { ArrowLeft, Plus } from "lucide-react";
 import * as React from "react";
 
 import { PageTitle } from "../../base/page-title";
+import { ThemeComparison } from "./theme-comparison";
 
 const meta = {
   title: "Base/PageTitle",
@@ -26,6 +27,11 @@ export const Default: Story = {
     title: "Page Title",
     subtitle: "This is a subtitle providing context for the page.",
   },
+  render: (args) => (
+    <ThemeComparison>
+      <PageTitle {...args} />
+    </ThemeComparison>
+  ),
 };
 
 export const WithActions: Story = {
@@ -42,6 +48,11 @@ export const WithActions: Story = {
       onClick: () => alert("Back clicked"),
     },
   },
+  render: (args) => (
+    <ThemeComparison>
+      <PageTitle {...args} />
+    </ThemeComparison>
+  ),
 };
 
 export const WithoutSeparator: Story = {
@@ -53,4 +64,9 @@ export const WithoutSeparator: Story = {
       label: "Save Changes",
     },
   },
+  render: (args) => (
+    <ThemeComparison>
+      <PageTitle {...args} />
+    </ThemeComparison>
+  ),
 };

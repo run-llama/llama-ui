@@ -3,6 +3,7 @@ import { Settings } from "lucide-react";
 import * as React from "react";
 import { Badge } from "../../base/badge";
 import { RadioGroup, RadioGroupItem } from "../../base/radio-group";
+import { ThemeComparison } from "./theme-comparison";
 
 const meta: Meta<typeof RadioGroup> = {
   title: "Base/RadioGroup",
@@ -30,17 +31,19 @@ type Story = StoryObj<typeof RadioGroup>;
 
 export const Default: Story = {
   render: (args) => (
-    <RadioGroup defaultValue="page" {...args}>
-      <RadioGroupItem value="document" label="Document" />
-      <RadioGroupItem value="page" label="Page" />
-      <RadioGroupItem
-        value="section"
-        label="Section"
-        description="Extract from each section"
-        badge={<Badge label="New" variant="success" />}
-        tooltip="This is a new section"
-      />
-    </RadioGroup>
+    <ThemeComparison>
+      <RadioGroup defaultValue="page" {...args}>
+        <RadioGroupItem value="document" label="Document" />
+        <RadioGroupItem value="page" label="Page" />
+        <RadioGroupItem
+          value="section"
+          label="Section"
+          description="Extract from each section"
+          badge={<Badge label="New" variant="success" />}
+          tooltip="This is a new section"
+        />
+      </RadioGroup>
+    </ThemeComparison>
   ),
 };
 
@@ -59,18 +62,20 @@ export const BoxVariant: Story = {
     },
   },
   render: (args) => (
-    <RadioGroup {...args}>
-      <RadioGroupItem
-        value="document"
-        label="Document"
-        description="Extract from the entire document at once"
-      />
-      <RadioGroupItem
-        value="page"
-        label="Page"
-        description="Extract from each page separately"
-      />
-    </RadioGroup>
+    <ThemeComparison>
+      <RadioGroup {...args}>
+        <RadioGroupItem
+          value="document"
+          label="Document"
+          description="Extract from the entire document at once"
+        />
+        <RadioGroupItem
+          value="page"
+          label="Page"
+          description="Extract from each page separately"
+        />
+      </RadioGroup>
+    </ThemeComparison>
   ),
 };
 
@@ -93,26 +98,28 @@ export const Playground: Story = {
     // These would be controlled via Storybook args in a real scenario
     // For now, showing all props available
     return (
-      <RadioGroup {...args}>
-        <RadioGroupItem
-          value="option1"
-          label="Option 1"
-          description="Description for option 1"
-        />
-        <RadioGroupItem
-          value="option2"
-          label="Option 2"
-          description="Description for option 2"
-          badge={<Badge label="New" variant="success" />}
-        />
-        <RadioGroupItem
-          value="option3"
-          label="Option 3"
-          description="Description for option 3"
-          tooltip="This is a tooltip"
-          required
-        />
-      </RadioGroup>
+      <ThemeComparison>
+        <RadioGroup {...args}>
+          <RadioGroupItem
+            value="option1"
+            label="Option 1"
+            description="Description for option 1"
+          />
+          <RadioGroupItem
+            value="option2"
+            label="Option 2"
+            description="Description for option 2"
+            badge={<Badge label="New" variant="success" />}
+          />
+          <RadioGroupItem
+            value="option3"
+            label="Option 3"
+            description="Description for option 3"
+            tooltip="This is a tooltip"
+            required
+          />
+        </RadioGroup>
+      </ThemeComparison>
     );
   },
 };
@@ -169,88 +176,96 @@ export const BoxPlayground: Story = {
       control: "text",
     },
   },
-  render: (args) => <BoxPlaygroundComponent {...args} />,
+  render: (args) => (
+    <ThemeComparison>
+      <BoxPlaygroundComponent {...args} />
+    </ThemeComparison>
+  ),
 };
 
 export const ControlPlacementEnd: Story = {
   render: (args) => (
-    <RadioGroup defaultValue="page" variant="box" {...args}>
-      <RadioGroupItem
-        value="page"
-        label="Page"
-        description="Extract from each page separately"
-        controlPlacement="end"
-      />
-      <RadioGroupItem
-        value="section"
-        label="Section"
-        description="Extract from each section"
-        controlPlacement="end"
-      />
-    </RadioGroup>
+    <ThemeComparison>
+      <RadioGroup defaultValue="page" variant="box" {...args}>
+        <RadioGroupItem
+          value="page"
+          label="Page"
+          description="Extract from each page separately"
+          controlPlacement="end"
+        />
+        <RadioGroupItem
+          value="section"
+          label="Section"
+          description="Extract from each section"
+          controlPlacement="end"
+        />
+      </RadioGroup>
+    </ThemeComparison>
   ),
 };
 
 export const AllFeatures: Story = {
   render: () => (
-    <div className="flex flex-col gap-8">
-      {/* Default variant with all features */}
-      <div>
-        <h3 className="mb-4 text-sm font-medium text-muted-foreground">
-          Default Variant
-        </h3>
-        <RadioGroup defaultValue="option1">
-          <RadioGroupItem
-            value="option1"
-            label="Label"
-            description="This is a field description."
-            icon={<Settings className="size-4" />}
-            badge={<Badge label="Badge" variant="outline" />}
-            tooltip="This is a tooltip with additional context"
-            required
-            optional
-          />
-          <RadioGroupItem
-            value="option2"
-            label="Label"
-            description="This is a field description."
-            icon={<Settings className="size-4" />}
-            badge={<Badge label="Badge" variant="outline" />}
-            tooltip="This is a tooltip with additional context"
-            required
-            optional
-          />
-        </RadioGroup>
-      </div>
+    <ThemeComparison>
+      <div className="flex flex-col gap-8">
+        {/* Default variant with all features */}
+        <div>
+          <h3 className="mb-4 text-sm font-medium text-muted-foreground">
+            Default Variant
+          </h3>
+          <RadioGroup defaultValue="option1">
+            <RadioGroupItem
+              value="option1"
+              label="Label"
+              description="This is a field description."
+              icon={<Settings className="size-4" />}
+              badge={<Badge label="Badge" variant="outline" />}
+              tooltip="This is a tooltip with additional context"
+              required
+              optional
+            />
+            <RadioGroupItem
+              value="option2"
+              label="Label"
+              description="This is a field description."
+              icon={<Settings className="size-4" />}
+              badge={<Badge label="Badge" variant="outline" />}
+              tooltip="This is a tooltip with additional context"
+              required
+              optional
+            />
+          </RadioGroup>
+        </div>
 
-      {/* Box variant with all features */}
-      <div>
-        <h3 className="mb-4 text-sm font-medium text-muted-foreground">
-          Box Variant
-        </h3>
-        <RadioGroup defaultValue="option1" variant="box">
-          <RadioGroupItem
-            value="option1"
-            label="Label"
-            description="This is a field description."
-            icon={<Settings className="size-4" />}
-            badge={<Badge label="Badge" variant="outline" />}
-            tooltip="This is a tooltip with additional context"
-            required
-            optional
-          />
-          <RadioGroupItem
-            value="option2"
-            label="Label"
-            description="This is a field description."
-            icon={<Settings className="size-4" />}
-            badge={<Badge label="Badge" variant="outline" />}
-            tooltip="This is a tooltip with additional context"
-            required
-            optional
-          />
-        </RadioGroup>
+        {/* Box variant with all features */}
+        <div>
+          <h3 className="mb-4 text-sm font-medium text-muted-foreground">
+            Box Variant
+          </h3>
+          <RadioGroup defaultValue="option1" variant="box">
+            <RadioGroupItem
+              value="option1"
+              label="Label"
+              description="This is a field description."
+              icon={<Settings className="size-4" />}
+              badge={<Badge label="Badge" variant="outline" />}
+              tooltip="This is a tooltip with additional context"
+              required
+              optional
+            />
+            <RadioGroupItem
+              value="option2"
+              label="Label"
+              description="This is a field description."
+              icon={<Settings className="size-4" />}
+              badge={<Badge label="Badge" variant="outline" />}
+              tooltip="This is a tooltip with additional context"
+              required
+              optional
+            />
+          </RadioGroup>
+        </div>
       </div>
-    </div>
+    </ThemeComparison>
   ),
 };

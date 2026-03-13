@@ -1,12 +1,29 @@
 import * as React from "react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import { MultiInput } from "../../base/multi-input";
+import { ThemeComparison } from "./theme-comparison";
 
-export default {
+const meta: Meta<typeof MultiInput> = {
   title: "Base/MultiInput",
   component: MultiInput,
 };
 
-export const Default = () => <MultiInput placeholder="Enter something" />;
+export default meta;
+type Story = StoryObj<typeof MultiInput>;
 
-export const Empty = () => <MultiInput defaultValue="" />;
+export const Default: Story = {
+  render: () => (
+    <ThemeComparison>
+      <MultiInput placeholder="Enter something" />
+    </ThemeComparison>
+  ),
+};
+
+export const Empty: Story = {
+  render: () => (
+    <ThemeComparison>
+      <MultiInput defaultValue="" />
+    </ThemeComparison>
+  ),
+};
