@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Circle } from "lucide-react";
 import { Label } from "../../base/label";
 import { Input } from "../../base/input";
+import { ThemeComparison } from "./theme-comparison";
 
 interface StoryArgs {
   label?: string;
@@ -59,40 +60,46 @@ export const Playground: Story = {
     const badge = <div>Badge</div>;
 
     return (
-      <Label
-        icon={<Circle />}
-        label={args.label ?? "Label"}
-        required={args.required}
-        optional={args.optional}
-        badge={badge}
-        tooltip={args.tooltip}
-        description={args.description}
-      />
+      <ThemeComparison>
+        <Label
+          icon={<Circle />}
+          label={args.label ?? "Label"}
+          required={args.required}
+          optional={args.optional}
+          badge={badge}
+          tooltip={args.tooltip}
+          description={args.description}
+        />
+      </ThemeComparison>
     );
   },
 };
 
 export const WithInput: Story = {
   render: () => (
-    <Label label="Email" required description="We'll never share your email.">
-      <Input placeholder="example@email.com" />
-    </Label>
+    <ThemeComparison>
+      <Label label="Email" required description="We'll never share your email.">
+        <Input placeholder="example@email.com" />
+      </Label>
+    </ThemeComparison>
   ),
 };
 
 export const WithRadioGroup: Story = {
   render: () => (
-    <Label
-      label="Notifications"
-      optional
-      description="Select your preferred notification method."
-    >
-      {/* TODO reenable after adding radiogroup */}
-      {/* <RadioGroup defaultValue="email" variant="box">
+    <ThemeComparison>
+      <Label
+        label="Notifications"
+        optional
+        description="Select your preferred notification method."
+      >
+        {/* TODO reenable after adding radiogroup */}
+        {/* <RadioGroup defaultValue="email" variant="box">
         <RadioGroupItem value="email" label="Email" />
         <RadioGroupItem value="sms" label="SMS" />
         <RadioGroupItem value="push" label="Push Notification" />
       </RadioGroup> */}
-    </Label>
+      </Label>
+    </ThemeComparison>
   ),
 };

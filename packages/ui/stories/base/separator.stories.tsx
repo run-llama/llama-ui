@@ -1,6 +1,7 @@
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Separator } from "../../base/separator";
+import { ThemeComparison } from "./theme-comparison";
 
 const meta: Meta<typeof Separator> = {
   title: "Base/Separator",
@@ -24,29 +25,35 @@ export const Default: Story = {
   render: (args) => {
     if (args.orientation === "vertical") {
       return (
-        <div className="flex h-20 items-center gap-4">
-          <div>Left content</div>
-          <Separator {...args} />
-          <div>Right content</div>
-        </div>
+        <ThemeComparison>
+          <div className="flex h-20 items-center gap-4">
+            <div>Left content</div>
+            <Separator {...args} />
+            <div>Right content</div>
+          </div>
+        </ThemeComparison>
       );
     }
     return (
-      <div className="flex flex-col gap-4">
-        <div>Content above</div>
-        <Separator {...args} />
-        <div>Content below</div>
-      </div>
+      <ThemeComparison>
+        <div className="flex flex-col gap-4">
+          <div>Content above</div>
+          <Separator {...args} />
+          <div>Content below</div>
+        </div>
+      </ThemeComparison>
     );
   },
 };
 
 export const Vertical: Story = {
   render: () => (
-    <div className="flex h-20 items-center gap-4">
-      <div>Left content</div>
-      <Separator orientation="vertical" />
-      <div>Right content</div>
-    </div>
+    <ThemeComparison>
+      <div className="flex h-20 items-center gap-4">
+        <div>Left content</div>
+        <Separator orientation="vertical" />
+        <div>Right content</div>
+      </div>
+    </ThemeComparison>
   ),
 };

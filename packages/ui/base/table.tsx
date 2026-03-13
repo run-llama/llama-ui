@@ -197,7 +197,7 @@ TableRow.displayName = "TableRow";
 
 // TableHead variants for alignment
 const tableHeadVariants = cva(
-  "h-11 px-3 align-middle font-medium text-foreground [&:has([role=checkbox])]:pr-0 [&>div]:flex [&>div]:items-center [&>div]:gap-2 [&_svg]:size-4 [&_svg]:shrink-0 [&_button]:-ml-2 [&_button]:px-2",
+  "h-11 px-3 align-middle font-medium text-foreground [&:has([role=checkbox])]:pr-0 [&>div]:flex [&>div]:items-center [&>div]:gap-2 [&_svg]:size-4 [&_svg]:shrink-0 [&_button:not([role=checkbox])]:-ml-2 [&_button:not([role=checkbox])]:px-2",
   {
     variants: {
       alignment: {

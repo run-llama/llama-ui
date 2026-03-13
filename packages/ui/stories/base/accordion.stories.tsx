@@ -1,6 +1,7 @@
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { FileText, Folder, Settings, User, Database, Code } from "lucide-react";
+import { ThemeComparison } from "./theme-comparison";
 
 import {
   Accordion,
@@ -52,12 +53,14 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: (args) => {
     return (
-      <Accordion type="single" collapsible className="w-full">
-        <AccordionItem value="item-1">
-          <AccordionTrigger {...args} />
-          <AccordionContent>This is an accordion content.</AccordionContent>
-        </AccordionItem>
-      </Accordion>
+      <ThemeComparison>
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="item-1">
+            <AccordionTrigger {...args} />
+            <AccordionContent>This is an accordion content.</AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </ThemeComparison>
     );
   },
   args: {
@@ -69,12 +72,14 @@ export const Default: Story = {
 export const WithAllFeatures: Story = {
   render: (args) => {
     return (
-      <Accordion type="single" collapsible className="w-full">
-        <AccordionItem value="item-1">
-          <AccordionTrigger {...args} />
-          <AccordionContent>This is an accordion content.</AccordionContent>
-        </AccordionItem>
-      </Accordion>
+      <ThemeComparison>
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="item-1">
+            <AccordionTrigger {...args} />
+            <AccordionContent>This is an accordion content.</AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </ThemeComparison>
     );
   },
   args: {
@@ -92,55 +97,57 @@ export const MultipleItems: Story = {
     title: "Multiple Items Example",
   },
   render: () => (
-    <Accordion type="single" collapsible className="w-full">
-      <AccordionItem value="item-1">
-        <AccordionTrigger
-          title="Documents"
-          caption="12 files"
-          icon={FileText}
-          showTooltip
-          tooltipContent="View and manage your documents"
-          badge="New"
-        />
-        <AccordionContent>
-          This section contains all your documents and files.
-        </AccordionContent>
-      </AccordionItem>
-      <AccordionItem value="item-2">
-        <AccordionTrigger title="Folders" caption="5 folders" icon={Folder} />
-        <AccordionContent>
-          Organize your files into folders for better management.
-        </AccordionContent>
-      </AccordionItem>
-      <AccordionItem value="item-3">
-        <AccordionTrigger
-          title="Settings"
-          caption="Preferences"
-          icon={Settings}
-          badge="2"
-        />
-        <AccordionContent>
-          Configure your application settings and preferences.
-        </AccordionContent>
-      </AccordionItem>
-      <AccordionItem value="item-4">
-        <AccordionTrigger title="User Profile" icon={User} />
-        <AccordionContent>
-          Manage your user profile and account information.
-        </AccordionContent>
-      </AccordionItem>
-      <AccordionItem value="item-5">
-        <AccordionTrigger title="Database" icon={Database} />
-        <AccordionContent>
-          View and manage your database connections and queries.
-        </AccordionContent>
-      </AccordionItem>
-      <AccordionItem value="item-6">
-        <AccordionTrigger title="Code Editor" icon={Code} />
-        <AccordionContent>
-          Configure your code editor settings and themes.
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+    <ThemeComparison>
+      <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="item-1">
+          <AccordionTrigger
+            title="Documents"
+            caption="12 files"
+            icon={FileText}
+            showTooltip
+            tooltipContent="View and manage your documents"
+            badge="New"
+          />
+          <AccordionContent>
+            This section contains all your documents and files.
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="item-2">
+          <AccordionTrigger title="Folders" caption="5 folders" icon={Folder} />
+          <AccordionContent>
+            Organize your files into folders for better management.
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="item-3">
+          <AccordionTrigger
+            title="Settings"
+            caption="Preferences"
+            icon={Settings}
+            badge="2"
+          />
+          <AccordionContent>
+            Configure your application settings and preferences.
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="item-4">
+          <AccordionTrigger title="User Profile" icon={User} />
+          <AccordionContent>
+            Manage your user profile and account information.
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="item-5">
+          <AccordionTrigger title="Database" icon={Database} />
+          <AccordionContent>
+            View and manage your database connections and queries.
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="item-6">
+          <AccordionTrigger title="Code Editor" icon={Code} />
+          <AccordionContent>
+            Configure your code editor settings and themes.
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </ThemeComparison>
   ),
 };
