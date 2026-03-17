@@ -60,7 +60,7 @@ function ButtonGroup({
       className={cn(
         "inline-flex",
         orientation === "horizontal" ? "flex-row" : "flex-col",
-        className,
+        className
       )}
       {...props}
     >
@@ -115,7 +115,7 @@ function ButtonGroupItem({
 
   const positionClasses = getPositionClasses(
     context.position,
-    context.orientation,
+    context.orientation
   );
 
   return (
@@ -128,7 +128,7 @@ function ButtonGroupItem({
           size: resolvedSize,
           fullWidth,
         }),
-        positionClasses,
+        positionClasses
       )}
       disabled={isLoading || disabled}
       da-cid={label ? normalizeCid(label) : undefined}
@@ -140,7 +140,7 @@ function ButtonGroupItem({
           className={cn(
             resolvedSize === "icon" || resolvedSize === "icon-sm"
               ? "sr-only"
-              : undefined,
+              : undefined
           )}
         >
           {label}
@@ -153,7 +153,7 @@ function ButtonGroupItem({
 
 function getPositionClasses(
   position: ButtonGroupContextValue["position"],
-  orientation: "horizontal" | "vertical",
+  orientation: "horizontal" | "vertical"
 ): string {
   if (position === "only") return "";
 
