@@ -9,7 +9,7 @@ describe("ButtonGroup", () => {
         <ButtonGroupItem label="First" />
         <ButtonGroupItem label="Second" />
         <ButtonGroupItem label="Third" />
-      </ButtonGroup>,
+      </ButtonGroup>
     );
 
     expect(screen.getByText("First")).toBeInTheDocument();
@@ -22,7 +22,7 @@ describe("ButtonGroup", () => {
       <ButtonGroup>
         <ButtonGroupItem label="A" />
         <ButtonGroupItem label="B" />
-      </ButtonGroup>,
+      </ButtonGroup>
     );
 
     expect(screen.getByRole("group")).toBeInTheDocument();
@@ -33,7 +33,7 @@ describe("ButtonGroup", () => {
       <ButtonGroup>
         <ButtonGroupItem label="A" />
         <ButtonGroupItem label="B" />
-      </ButtonGroup>,
+      </ButtonGroup>
     );
 
     const group = screen.getByRole("group");
@@ -45,7 +45,7 @@ describe("ButtonGroup", () => {
       <ButtonGroup orientation="vertical">
         <ButtonGroupItem label="A" />
         <ButtonGroupItem label="B" />
-      </ButtonGroup>,
+      </ButtonGroup>
     );
 
     const group = screen.getByRole("group");
@@ -57,7 +57,7 @@ describe("ButtonGroup", () => {
       <ButtonGroup variant="outline">
         <ButtonGroupItem label="A" />
         <ButtonGroupItem label="B" />
-      </ButtonGroup>,
+      </ButtonGroup>
     );
 
     const buttons = screen.getAllByRole("button");
@@ -71,7 +71,7 @@ describe("ButtonGroup", () => {
       <ButtonGroup size="sm">
         <ButtonGroupItem label="A" />
         <ButtonGroupItem label="B" />
-      </ButtonGroup>,
+      </ButtonGroup>
     );
 
     const buttons = screen.getAllByRole("button");
@@ -85,7 +85,7 @@ describe("ButtonGroup", () => {
       <ButtonGroup variant="outline">
         <ButtonGroupItem label="Default" />
         <ButtonGroupItem label="Override" variant="default" />
-      </ButtonGroup>,
+      </ButtonGroup>
     );
 
     const overrideBtn = screen.getByText("Override").closest("button")!;
@@ -97,7 +97,7 @@ describe("ButtonGroup", () => {
     render(
       <ButtonGroup>
         <ButtonGroupItem label="Click me" onClick={onClick} />
-      </ButtonGroup>,
+      </ButtonGroup>
     );
 
     fireEvent.click(screen.getByText("Click me"));
@@ -109,7 +109,7 @@ describe("ButtonGroup", () => {
       <ButtonGroup>
         <ButtonGroupItem label="Enabled" />
         <ButtonGroupItem label="Disabled" disabled />
-      </ButtonGroup>,
+      </ButtonGroup>
     );
 
     expect(screen.getByText("Enabled").closest("button")).not.toBeDisabled();
@@ -122,7 +122,7 @@ describe("ButtonGroup", () => {
         <ButtonGroupItem label="First" />
         <ButtonGroupItem label="Middle" />
         <ButtonGroupItem label="Last" />
-      </ButtonGroup>,
+      </ButtonGroup>
     );
 
     const buttons = container.querySelectorAll("button");
@@ -140,7 +140,7 @@ describe("ButtonGroup", () => {
         <ButtonGroupItem label="First" />
         <ButtonGroupItem label="Middle" />
         <ButtonGroupItem label="Last" />
-      </ButtonGroup>,
+      </ButtonGroup>
     );
 
     const buttons = container.querySelectorAll("button");
@@ -156,7 +156,7 @@ describe("ButtonGroup", () => {
     render(
       <ButtonGroup>
         <ButtonGroupItem label="Only" />
-      </ButtonGroup>,
+      </ButtonGroup>
     );
 
     const button = screen.getByRole("button");
@@ -173,7 +173,7 @@ describe("ButtonGroup", () => {
           startIcon={<span data-testid="start-icon">S</span>}
           endIcon={<span data-testid="end-icon">E</span>}
         />
-      </ButtonGroup>,
+      </ButtonGroup>
     );
 
     expect(screen.getByTestId("start-icon")).toBeInTheDocument();
@@ -184,7 +184,7 @@ describe("ButtonGroup", () => {
     render(
       <ButtonGroup>
         <ButtonGroupItem label="Loading" isLoading />
-      </ButtonGroup>,
+      </ButtonGroup>
     );
 
     const button = screen.getByRole("button");
