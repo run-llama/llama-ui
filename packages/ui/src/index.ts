@@ -19,6 +19,7 @@ export * from "../base/avatar";
 export * from "../base/badge";
 export * from "../base/breadcrumb";
 export * from "../base/button";
+export * from "../base/button-group";
 export * from "../base/calendar";
 export * from "../base/card";
 export * from "../base/checkbox";

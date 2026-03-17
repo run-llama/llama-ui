@@ -140,6 +140,11 @@
       "import": "./dist/base/button.mjs",
       "require": "./dist/base/button.js"
     },
+    "./base/button-group": {
+      "types": "./dist/base/button-group.d.ts",
+      "import": "./dist/base/button-group.mjs",
+      "require": "./dist/base/button-group.js"
+    },
     "./base/calendar": {
       "types": "./dist/base/calendar.d.ts",
       "import": "./dist/base/calendar.mjs",
