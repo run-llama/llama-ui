@@ -51,9 +51,7 @@ type ResizablePanelProps = {
 const ResizablePanel = ({ onResize, ...props }: ResizablePanelProps) => (
   <ResizablePrimitive.Panel
     onResize={
-      onResize
-        ? (panelSize) => onResize(panelSize.asPercentage)
-        : undefined
+      onResize ? (panelSize) => onResize(panelSize.asPercentage) : undefined
     }
     {...props}
   />
