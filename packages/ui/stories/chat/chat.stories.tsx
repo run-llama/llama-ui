@@ -48,7 +48,7 @@ function ChatDemo({ withCanvas }: { withCanvas?: boolean }) {
 
   return (
     <div className="h-screen w-screen">
-      <ResizablePanelGroup direction="horizontal">
+      <ResizablePanelGroup orientation="horizontal">
         <ResizablePanel defaultSize={60} minSize={30}>
           <ChatSection handler={chat}>{chatContent}</ChatSection>
         </ResizablePanel>

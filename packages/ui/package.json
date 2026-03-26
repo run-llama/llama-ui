@@ -510,7 +510,7 @@
     "react-hook-form": "^7.60.0",
     "react-markdown": "^10.1.0",
     "react-pdf": "^10.0.1",
-    "react-resizable-panels": "^3.0.3",
+    "react-resizable-panels": "^4.1.0",
     "react-select": "^5.10.2",
     "react-textarea-autosize": "^8.5.9",
     "rehype-katex": "^7.0.0",
