@@ -271,9 +271,10 @@ export type GetEventsByHandlerIdData = {
      */
     include_internal?: boolean;
     /**
-     * Timeout for acquiring the lock to iterate over the events.
+     * Resume streaming after this event sequence number. Use -1 to start from the beginning, or "now" (default) to skip historical events and only receive events appended after the request is made. In SSE mode, the Last-Event-ID request header takes priority over this parameter.
+     *
      */
-    acquire_timeout?: number;
+    after_sequence?: number | "now";
     /**
      * If true, include the qualified name of the event in the response body.
      */
@@ -313,6 +314,10 @@ export type GetEventsByHandlerIdResponses = {
      */
     qualified_name?: string;
   };
+  /**
+   * Handler completed and all events already consumed
+   */
+  204: void;
 };
 
 export type GetEventsByHandlerIdResponse =
@@ -336,13 +341,7 @@ export type PostEventsByHandlerIdData = {
           value?: {
             [key: string]: unknown;
           };
-          [key: string]:
-            | unknown
-            | string
-            | {
-                [key: string]: unknown;
-              }
-            | undefined;
+          [key: string]: unknown;
         };
     /**
      * Optional target step name. If not provided, event is sent to all steps.
@@ -399,18 +398,6 @@ export type GetHealthResponses = {
    */
   200: {
     status: string;
-    /**
-     * Number of workflow handlers currently loaded in memory
-     */
-    loaded_workflows: number;
-    /**
-     * Number of workflow handlers that are active (not idle)
-     */
-    active_workflows: number;
-    /**
-     * Number of workflow handlers that are idle
-     */
-    idle_workflows: number;
   };
 };
 
