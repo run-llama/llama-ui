@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Workflows API",
-    "version": "0.1.2"
+    "version": "0.3.2"
   },
   "components": {
     "schemas": {
@@ -370,7 +370,7 @@
     "/events/{handler_id}": {
       "get": {
         "summary": "Stream workflow events",
-        "description": "Streams events produced by a workflow execution. Events are emitted as\nnewline-delimited JSON by default, or as Server-Sent Events when `sse=true`.\nEvent data is returned as an envelope that preserves backward-compatible fields\nand adds metadata for type-safety on the client:\n{\n  \"value\": <pydantic serialized value>,\n  \"types\": [<class names from MRO excluding the event class and base Event>],\n  \"type\": <class name>,\n  \"qualified_name\": <python module path + class name>,\n}\n\nEvent queue is mutable. Elements are added to the queue by the workflow handler, and removed by any consumer of the queue.\nThe queue is protected by a lock that is acquired by the consumer, so only one consumer of the queue at a time is allowed.\n",
+        "description": "Streams events produced by a workflow execution. Events are emitted as\nnewline-delimited JSON by default, or as Server-Sent Events when `sse=true`.\nMultiple clients can stream the same handler concurrently. Disconnected\nclients can resume from their last-seen position via `after_sequence`.\n\nEvent data is returned as an envelope:\n{\n  \"value\": <pydantic serialized value>,\n  \"types\": [<class names from MRO excluding the event class and base Event>],\n  \"type\": <class name>,\n  \"qualified_name\": <python module path + class name>,\n}\n",
         "parameters": [
           {
             "in": "path",
@@ -403,13 +403,23 @@
           },
           {
             "in": "query",
-            "name": "acquire_timeout",
+            "name": "after_sequence",
             "required": false,
             "schema": {
-              "type": "number",
-              "default": 1
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string",
+                  "enum": [
+                    "now"
+                  ]
+                }
+              ],
+              "default": "now"
             },
-            "description": "Timeout for acquiring the lock to iterate over the events."
+            "description": "Resume streaming after this event sequence number. Use -1 to start from the beginning, or \"now\" (default) to skip historical events and only receive events appended after the request is made. In SSE mode, the Last-Event-ID request header takes priority over this parameter.\n"
           },
           {
             "in": "query",
@@ -458,6 +468,9 @@
                 }
               }
             }
+          },
+          "204": {
+            "description": "Handler completed and all events already consumed"
           },
           "404": {
             "description": "Handler not found"
@@ -572,25 +585,10 @@
                     "status": {
                       "type": "string",
                       "example": "healthy"
-                    },
-                    "loaded_workflows": {
-                      "type": "integer",
-                      "description": "Number of workflow handlers currently loaded in memory"
-                    },
-                    "active_workflows": {
-                      "type": "integer",
-                      "description": "Number of workflow handlers that are active (not idle)"
-                    },
-                    "idle_workflows": {
-                      "type": "integer",
-                      "description": "Number of workflow handlers that are idle"
                     }
                   },
                   "required": [
-                    "status",
-                    "loaded_workflows",
-                    "active_workflows",
-                    "idle_workflows"
+                    "status"
                   ]
                 }
               }

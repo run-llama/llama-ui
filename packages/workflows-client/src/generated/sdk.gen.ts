@@ -5,6 +5,7 @@ import { client } from "./client.gen";
 import type {
   GetEventsByHandlerIdData,
   GetEventsByHandlerIdErrors,
+  GetEventsByHandlerIdResponse,
   GetEventsByHandlerIdResponses,
   GetHandlersByHandlerIdData,
   GetHandlersByHandlerIdErrors,
@@ -43,7 +44,8 @@ import type {
 export type Options<
   TData extends TDataShape = TDataShape,
   ThrowOnError extends boolean = boolean,
-> = Options2<TData, ThrowOnError> & {
+  TResponse = unknown,
+> = Options2<TData, ThrowOnError, TResponse> & {
   /**
    * You can provide a client instance returned by `createClient()` instead of
    * individual options. This might be also useful if you want to implement a
@@ -155,8 +157,10 @@ export const getResultsByHandlerId = <ThrowOnError extends boolean = false>(
  *
  * Streams events produced by a workflow execution. Events are emitted as
  * newline-delimited JSON by default, or as Server-Sent Events when `sse=true`.
- * Event data is returned as an envelope that preserves backward-compatible fields
- * and adds metadata for type-safety on the client:
+ * Multiple clients can stream the same handler concurrently. Disconnected
+ * clients can resume from their last-seen position via `after_sequence`.
+ *
+ * Event data is returned as an envelope:
  * {
  * "value": <pydantic serialized value>,
  * "types": [<class names from MRO excluding the event class and base Event>],
@@ -164,12 +168,13 @@ export const getResultsByHandlerId = <ThrowOnError extends boolean = false>(
  * "qualified_name": <python module path + class name>,
  * }
  *
- * Event queue is mutable. Elements are added to the queue by the workflow handler, and removed by any consumer of the queue.
- * The queue is protected by a lock that is acquired by the consumer, so only one consumer of the queue at a time is allowed.
- *
  */
 export const getEventsByHandlerId = <ThrowOnError extends boolean = false>(
-  options: Options<GetEventsByHandlerIdData, ThrowOnError>
+  options: Options<
+    GetEventsByHandlerIdData,
+    ThrowOnError,
+    GetEventsByHandlerIdResponse
+  >
 ) =>
   (options.client ?? client).sse.get<
     GetEventsByHandlerIdResponses,
