@@ -1,5 +1,12 @@
 # @llamaindex/ui
 
+## 4.2.0
+
+### Minor Changes
+
+- b1f48a1: Add ButtonGroup component for grouping buttons with connected styling. Supports horizontal/vertical orientation, shared variant/size context, and per-item overrides.
+- 09b3dae: Upgrade react-resizable-panels from v3 to v4, fixing intermittent "No group found for id" SSR hydration errors. Define owned prop types for ResizablePanelGroup, ResizablePanel, and ResizableHandle to encapsulate the dependency. ResizablePanelGroup now accepts both `direction` (existing) and `orientation` (new) props. No breaking changes for consumers.
+
 ## 4.1.15
 
 ### Patch Changes
