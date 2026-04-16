@@ -19,8 +19,8 @@ const SAMPLE_MARKDOWN_DATA_URL =
 const SAMPLE_JSON_DATA_URL =
   "data:application/json;base64,ewogICJuYW1lIjogIkpvaG4gRG9lIiwKICAiYWdlIjogMzAsCiAgImNpdHkiOiAiTmV3IFlvcmsiCn0=";
 
-const SAMPLE_DOCX_DATA_URL =
-  "data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,UEsDBBQAAAAIAF";
+const SAMPLE_DOC_DATA_URL =
+  "data:application/msword;base64,0M8R4KGxGuEAAAAAAAAAAAAAAAAAAAAAPgADAP7/CQAGAAAAAAAAAAAAAAABAAAAAQAAAAAAAAAAEAAA";
 
 const SAMPLE_HTML_DATA_URL =
   "data:text/html;base64,PGh0bWw+PGhlYWQ+PHRpdGxlPlNhbXBsZSBIVE1MPC90aXRsZT48L2hlYWQ+PGJvZHk+PGgxPkhlbGxvIFdvcmxkPC9oMT48cD5UaGlzIGlzIGEgc2FtcGxlIEhUTUwgZmlsZS48L3A+PC9ib2R5PjwvaHRtbD4=";
@@ -115,8 +115,8 @@ export const JsonPreview: Story = {
   },
 };
 
-export const FileObjectPreview: Story = {
-  name: "File Object Preview",
+export const HtmlPreview: Story = {
+  name: "HTML Preview",
   args: {
     value: SAMPLE_HTML_DATA_URL,
     fileName: "sample.html",
@@ -132,10 +132,10 @@ export const FileObjectPreviewFallback: Story = {
 };
 
 export const UnsupportedPreview: Story = {
-  name: "Unsupported Preview",
+  name: "Unsupported Preview (legacy .doc)",
   args: {
-    value: SAMPLE_DOCX_DATA_URL,
-    fileName: "document.docx",
+    value: SAMPLE_DOC_DATA_URL,
+    fileName: "legacy-document.doc",
   },
 };
 

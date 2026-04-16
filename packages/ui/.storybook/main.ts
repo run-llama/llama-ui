@@ -44,6 +44,16 @@ const config: StorybookConfig = {
       "process.env.NODE_ENV": JSON.stringify("development"),
     };
 
+    // pptx-svg ships a sibling main.wasm that is resolved via
+    // `new URL('./main.wasm', import.meta.url)`. Vite's dep pre-bundler
+    // relocates the JS into sb-vite/deps/ but does not copy the .wasm,
+    // causing a 404. Excluding it from optimizeDeps preserves the
+    // module's original location and the WASM resolves correctly.
+    config.optimizeDeps = {
+      ...config.optimizeDeps,
+      exclude: [...(config.optimizeDeps?.exclude ?? []), "pptx-svg"],
+    };
+
     return config;
   },
 };

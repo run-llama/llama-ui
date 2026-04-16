@@ -20,7 +20,10 @@ import {
   FileSystemPreview,
   type FileSystemItem,
 } from "./previews/file-system-preview";
+import { DocxPreview } from "./previews/docx-preview";
+import { HtmlPreview } from "./previews/html-preview";
 import { ImagePreview } from "./previews/image-preview";
+import { PptxPreview } from "./previews/pptx-preview";
 import { TextPreview } from "./previews/text-preview";
 import { UnsupportedPreview } from "./previews/unsupported-preview";
 import { SelectFileBar } from "./select-file-bar";
@@ -79,11 +82,13 @@ const DEFAULT_MIME_TYPE_MAP: Record<string, PreviewComponent> = {
   "image/x-icon": ImagePreview,
   "image/vnd.microsoft.icon": ImagePreview,
   "image/webp": ImagePreview,
+  "text/html": HtmlPreview,
+  "application/xhtml+xml": HtmlPreview,
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-    UnsupportedPreview,
+    DocxPreview,
   "application/vnd.ms-powerpoint": UnsupportedPreview,
   "application/vnd.openxmlformats-officedocument.presentationml.presentation":
-    UnsupportedPreview,
+    PptxPreview,
 };
 
 const DEFAULT_EXTENSION_MAP: Record<string, PreviewComponent> = {
@@ -99,9 +104,12 @@ const DEFAULT_EXTENSION_MAP: Record<string, PreviewComponent> = {
   tiff: ImagePreview,
   ico: ImagePreview,
   webp: ImagePreview,
-  docx: UnsupportedPreview,
+  html: HtmlPreview,
+  htm: HtmlPreview,
+  xhtml: HtmlPreview,
+  docx: DocxPreview,
   ppt: UnsupportedPreview,
-  pptx: UnsupportedPreview,
+  pptx: PptxPreview,
 };
 
 export type PreviewsMap = {
