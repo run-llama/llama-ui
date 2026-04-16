@@ -1,5 +1,11 @@
 # @llamaindex/workflows-client
 
+## 1.8.5
+
+### Patch Changes
+
+- 9df4b5c:
+
 ## 1.8.4
 
 ### Patch Changes
