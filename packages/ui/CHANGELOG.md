@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 4.3.0
+
+### Minor Changes
+
+- f485dca: add support for pptx,docx,html in docpreview
+
 ## 4.2.0
 
 ### Minor Changes
