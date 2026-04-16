@@ -41,12 +41,8 @@ describe("HtmlPreview", () => {
 
     render(<HtmlPreview contentUrl="https://example.com/broken.html" />);
 
-    expect(
-      await screen.findByText(/failed to load html/i)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Download File" })
-    ).toBeTruthy();
+    expect(await screen.findByText(/failed to load html/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Download File" })).toBeTruthy();
   });
 
   it("shows loading state before fetch resolves", () => {
