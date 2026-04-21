@@ -169,100 +169,111 @@ export function createActions(state: HandlerState, client: Client) {
         state.loading = false;
       }
     },
-    /**
-     * Subscribe to the SSE event stream for this handler.
-     *
-     * Passing a boolean as the second argument is deprecated — use
-     * `{ includeInternal }` instead. When no `afterSequence` is provided the
-     * client auto-resumes from the last event id observed for this handler
-     * (within the current session) so that tearing down and re-subscribing
-     * doesn't drop events emitted in between.
-     */
-    subscribeToEvents(
-      callbacks?: StreamSubscriber<WorkflowEvent>,
-      optionsOrIncludeInternal?: SubscribeToEventsOptions | boolean
-    ): StreamOperation<WorkflowEvent> {
-      if (!state.handler_id) {
-        throw new Error("Handler ID is not yet initialized");
-      }
-      const options: SubscribeToEventsOptions =
-        typeof optionsOrIncludeInternal === "boolean"
-          ? { includeInternal: optionsOrIncludeInternal }
-          : (optionsOrIncludeInternal ?? {});
-      const streamKey = `handler:${state.handler_id}`;
+  };
 
-      // Convert callback to SharedStreamingManager subscriber
-      // Be aware that all datetimes below are not synced with server, only client local state update
-      const subscriber: StreamSubscriber<WorkflowEvent> = {
-        onStart: () => {
-          state.status = "running";
-          callbacks?.onStart?.();
-        },
-        onData: (event) => {
-          state.updated_at = new Date();
-          callbacks?.onData?.(event);
-        },
-        onError: (error) => {
-          state.status = "failed";
-          state.completed_at = new Date();
-          state.updated_at = new Date();
-          state.error = error.message;
-          callbacks?.onError?.(error);
-        },
-        onSuccess: (events) => {
-          state.status = "completed";
-          state.completed_at = new Date();
-          state.updated_at = new Date();
-          state.result = events[events.length - 1] as StopEvent;
-          callbacks?.onSuccess?.(events);
-        },
-        onComplete: () => {
-          state.completed_at = new Date();
-          state.updated_at = new Date();
-          callbacks?.onComplete?.();
-        },
-      };
+  /**
+   * Subscribe to the SSE event stream for this handler.
+   *
+   * When no `afterSequence` is provided the client auto-resumes from the last
+   * event id observed for this handler (within the current session) so that
+   * tearing down and re-subscribing doesn't drop events emitted in between.
+   */
+  function subscribeToEvents(
+    callbacks?: StreamSubscriber<WorkflowEvent>,
+    options?: SubscribeToEventsOptions
+  ): StreamOperation<WorkflowEvent>;
+  /**
+   * @deprecated Pass `{ includeInternal }` as the second argument instead.
+   */
+  function subscribeToEvents(
+    callbacks: StreamSubscriber<WorkflowEvent> | undefined,
+    includeInternal: boolean
+  ): StreamOperation<WorkflowEvent>;
+  function subscribeToEvents(
+    callbacks?: StreamSubscriber<WorkflowEvent>,
+    optionsOrIncludeInternal?: SubscribeToEventsOptions | boolean
+  ): StreamOperation<WorkflowEvent> {
+    if (!state.handler_id) {
+      throw new Error("Handler ID is not yet initialized");
+    }
+    const options: SubscribeToEventsOptions =
+      typeof optionsOrIncludeInternal === "boolean"
+        ? { includeInternal: optionsOrIncludeInternal }
+        : (optionsOrIncludeInternal ?? {});
+    const streamKey = `handler:${state.handler_id}`;
 
-      const canceler = async () => {
-        await postHandlersByHandlerIdCancel({
-          client: client,
-          path: {
-            handler_id: state.handler_id,
-          },
-        });
-      };
+    // Convert callback to SharedStreamingManager subscriber
+    // Be aware that all datetimes below are not synced with server, only client local state update
+    const subscriber: StreamSubscriber<WorkflowEvent> = {
+      onStart: () => {
+        state.status = "running";
+        callbacks?.onStart?.();
+      },
+      onData: (event) => {
+        state.updated_at = new Date();
+        callbacks?.onData?.(event);
+      },
+      onError: (error) => {
+        state.status = "failed";
+        state.completed_at = new Date();
+        state.updated_at = new Date();
+        state.error = error.message;
+        callbacks?.onError?.(error);
+      },
+      onSuccess: (events) => {
+        state.status = "completed";
+        state.completed_at = new Date();
+        state.updated_at = new Date();
+        state.result = events[events.length - 1] as StopEvent;
+        callbacks?.onSuccess?.(events);
+      },
+      onComplete: () => {
+        state.completed_at = new Date();
+        state.updated_at = new Date();
+        callbacks?.onComplete?.();
+      },
+    };
 
-      const resolvedAfterSequence = resolveAfterSequence(
-        options.afterSequence,
-        handlerCursors.get(state.handler_id)
+    const canceler = async () => {
+      await postHandlersByHandlerIdCancel({
+        client: client,
+        path: {
+          handler_id: state.handler_id,
+        },
+      });
+    };
+
+    const resolvedAfterSequence = resolveAfterSequence(
+      options.afterSequence,
+      handlerCursors.get(state.handler_id)
+    );
+
+    const { promise, unsubscribe, disconnect, cancel } =
+      workflowStreamingManager.subscribe(
+        streamKey,
+        subscriber,
+        async (subscriber, signal) => {
+          return streamByEventSource(
+            {
+              client: client,
+              handlerId: state.handler_id,
+              includeInternal: options.includeInternal,
+              afterSequence: resolvedAfterSequence,
+              abortSignal: signal,
+            },
+            subscriber,
+            fullActions,
+            state
+          );
+        },
+        canceler
       );
 
-      // Use SharedStreamingManager to handle the streaming with deduplication
-      const { promise, unsubscribe, disconnect, cancel } =
-        workflowStreamingManager.subscribe(
-          streamKey,
-          subscriber,
-          async (subscriber, signal) => {
-            return streamByEventSource(
-              {
-                client: client,
-                handlerId: state.handler_id,
-                includeInternal: options.includeInternal,
-                afterSequence: resolvedAfterSequence,
-                abortSignal: signal,
-              },
-              subscriber,
-              actions,
-              state
-            );
-          },
-          canceler
-        );
+    return { promise, unsubscribe, disconnect, cancel };
+  }
 
-      return { promise, unsubscribe, disconnect, cancel };
-    },
-  };
-  return actions;
+  const fullActions = { ...actions, subscribeToEvents };
+  return fullActions;
 }
 
 function resolveAfterSequence(
@@ -328,10 +339,12 @@ function streamByEventSource(
       } else if (state.status === "cancelled") {
         callbacks.onCancel?.();
       } else {
-        // Fall back to onSuccess for unknown terminal states so subscribers
-        // don't hang. This covers drained handlers where the server closed
-        // the stream (204) before we observed a StopEvent.
-        callbacks.onSuccess?.(accumulatedEvents);
+        // Stream closed but the handler isn't in a terminal state. Shouldn't
+        // happen in practice; surface as an error rather than silently
+        // succeeding.
+        callbacks.onError?.(
+          new Error(`Stream closed while handler status was ${state.status}`)
+        );
       }
       resolve(accumulatedEvents);
     };
@@ -356,16 +369,19 @@ function streamByEventSource(
       }
     });
     eventSource.addEventListener("error", (event) => {
-      // The Python server closes the SSE connection by surfacing an `error`
-      // event with readyState === CLOSED, including for the 204 "handler
-      // drained" response. Treat that as a clean close and flush whatever we
-      // accumulated so re-subscribes to a drained handler don't hang.
-      logger.warn("[streamByEventSource] error", event);
       if (settled) return;
+      // The workflow server closes the SSE connection by surfacing an `error`
+      // event with readyState === CLOSED, including for the 204 "handler
+      // drained" response. That's a clean close — flush what we have and
+      // don't log, otherwise every drained re-subscribe spams a warning.
+      // A non-CLOSED readyState means the browser will auto-reconnect; log
+      // because that's genuinely unexpected here.
       if (eventSource.readyState === EventSource.CLOSED) {
         settled = true;
         void finish();
+        return;
       }
+      logger.warn("[streamByEventSource] error", event);
     });
     eventSource.addEventListener("open", () => {
       logger.debug("[streamByEventSource] open");

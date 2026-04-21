@@ -188,7 +188,8 @@ describe("subscribeToEvents cursor", () => {
   });
 
   it("flushes and clears the cursor when the server closes the stream (204)", async () => {
-    const { result } = await mountRunningHandler();
+    const { result, terminal } = await mountRunningHandler();
+    terminal("completed");
 
     const onSuccess = vi.fn();
     const onComplete = vi.fn();
@@ -288,6 +289,85 @@ describe("subscribeToEvents cursor", () => {
 
     expect(onSuccess).not.toHaveBeenCalled();
     expect(onError).not.toHaveBeenCalled();
+  });
+
+  it("fires onError when the stream closes and the handler isn't terminal", async () => {
+    // Leaves the mocked handler status as "running" — if the EventSource
+    // closes cleanly but the handler hasn't drained server-side, something is
+    // off; we want an error, not a silent onSuccess.
+    const { result } = await mountRunningHandler();
+
+    const onSuccess = vi.fn();
+    const onError = vi.fn();
+
+    let op!: ReturnType<typeof result.current.subscribeToEvents>;
+    await act(async () => {
+      op = result.current.subscribeToEvents({ onSuccess, onError });
+    });
+    const es = await nextEventSource();
+
+    await act(async () => {
+      es.readyState = MockEventSource.CLOSED;
+      es.dispatch("error", {});
+      await op.promise;
+    });
+
+    expect(onError).toHaveBeenCalledTimes(1);
+    expect(onError.mock.calls[0][0]).toBeInstanceOf(Error);
+    expect(onSuccess).not.toHaveBeenCalled();
+  });
+
+  it("does not log a warning on a clean close (readyState=CLOSED)", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { result, terminal } = await mountRunningHandler();
+    terminal("completed");
+
+    let op!: ReturnType<typeof result.current.subscribeToEvents>;
+    await act(async () => {
+      op = result.current.subscribeToEvents({});
+    });
+    const es = await nextEventSource();
+
+    await act(async () => {
+      es.readyState = MockEventSource.CLOSED;
+      es.dispatch("error", {});
+      await op.promise;
+    });
+
+    const streamWarnings = warnSpy.mock.calls.filter((args) =>
+      args.some(
+        (a) => typeof a === "string" && a.includes("[streamByEventSource]")
+      )
+    );
+    expect(streamWarnings).toHaveLength(0);
+
+    warnSpy.mockRestore();
+  });
+
+  it("logs a warning on a transient error (readyState=CONNECTING)", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { result } = await mountRunningHandler();
+
+    await act(async () => {
+      result.current.subscribeToEvents({});
+    });
+    const es = await nextEventSource();
+
+    await act(async () => {
+      // CONNECTING == 0, the native EventSource reconnect state
+      es.readyState = 0;
+      es.dispatch("error", {});
+      await Promise.resolve();
+    });
+
+    const streamWarnings = warnSpy.mock.calls.filter((args) =>
+      args.some(
+        (a) => typeof a === "string" && a.includes("[streamByEventSource]")
+      )
+    );
+    expect(streamWarnings.length).toBeGreaterThanOrEqual(1);
+
+    warnSpy.mockRestore();
   });
 
   it("closes the EventSource when the last subscriber unsubscribes", async () => {
