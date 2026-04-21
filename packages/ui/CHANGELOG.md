@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 4.4.0
+
+### Minor Changes
+
+- 1b66fcf: add controllable scale for doc preview
+
 ## 4.3.0
 
 ### Minor Changes
