@@ -16,11 +16,12 @@ afterEach(() => {
 configure({ asyncUtilTimeout: 10000 });
 
 // Mock EventSource for Node.js environment (used in streaming tests)
-class MockEventSource {
+export class MockEventSource {
   url: string;
   listeners: Record<string, Set<(e: any) => void>> = {
     message: new Set(),
     error: new Set(),
+    open: new Set(),
   };
   static CLOSED = 2;
   readyState = 0;
@@ -41,6 +42,10 @@ class MockEventSource {
 
   close() {
     this.readyState = MockEventSource.CLOSED;
+  }
+
+  dispatch(type: "message" | "error" | "open", event: any) {
+    this.listeners[type]?.forEach((cb) => cb(event));
   }
 }
 

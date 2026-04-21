@@ -6,6 +6,7 @@ export * from "./store/workflow-event";
 // Store classes
 export type {
   HandlerState,
+  SubscribeToEventsOptions,
   createState as createHandlerState,
   createActions as createHandlerActions,
 } from "./store/handler";

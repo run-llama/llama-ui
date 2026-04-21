@@ -94,7 +94,7 @@ export function RunDetailsPanel({
             setFinalResultError(error.message);
           },
         },
-        true,
+        { includeInternal: true },
       );
       return () => {
         disconnect();
