@@ -10,6 +10,8 @@ interface PptxPreviewProps {
   contentUrl: string;
   onRemove?: () => void;
   className?: string;
+  scale?: number;
+  onScaleChange?: (scale: number) => void;
 }
 
 interface SlideEntry {
@@ -25,6 +27,8 @@ export function PptxPreview({
   contentUrl,
   onRemove,
   className,
+  scale: scaleProp,
+  onScaleChange,
 }: PptxPreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [slides, setSlides] = useState<SlideEntry[]>([]);
@@ -49,7 +53,11 @@ export function PptxPreview({
 
   const { scale, setScale, resetScale, toggleFullscreen } = usePreviewControls(
     containerRef,
-    { onKeyDown: handleExtraKeys }
+    {
+      onKeyDown: handleExtraKeys,
+      scale: scaleProp,
+      onScaleChange,
+    }
   );
 
   useEffect(() => {

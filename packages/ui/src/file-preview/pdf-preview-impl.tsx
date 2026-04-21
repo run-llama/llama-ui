@@ -40,6 +40,10 @@ export interface PdfPreviewImplProps {
   fitMode?: FitMode;
   /** Optional page range to display (1-indexed, inclusive). Only pages within this range will be rendered. */
   pageRange?: [number, number];
+  /** Controlled zoom. When both `scale` and `onScaleChange` are provided,
+   *  the parent owns zoom state and the auto-fit-on-mount effect is skipped. */
+  scale?: number;
+  onScaleChange?: (scale: number) => void;
 }
 
 // map of page number to page viewport dimensions
@@ -69,10 +73,29 @@ export const PdfPreviewImpl = ({
   toolbarClassName,
   fitMode = "width",
   pageRange,
+  scale: scaleProp,
+  onScaleChange,
 }: PdfPreviewImplProps) => {
   const [numPages, setNumPages] = useState<number>();
   const [currentPage, setCurrentPage] = useState<number>(pageRange?.[0] ?? 1);
-  const [scale, setScale] = useState<number>(1.0);
+  const isScaleControlled =
+    scaleProp !== undefined && onScaleChange !== undefined;
+  const [internalScale, setInternalScale] = useState<number>(1.0);
+  const scale = isScaleControlled ? scaleProp : internalScale;
+  const setScale = useCallback(
+    (updater: number | ((prev: number) => number)) => {
+      if (isScaleControlled) {
+        const next =
+          typeof updater === "function"
+            ? (updater as (prev: number) => number)(scaleProp!)
+            : updater;
+        onScaleChange!(next);
+      } else {
+        setInternalScale(updater);
+      }
+    },
+    [isScaleControlled, onScaleChange, scaleProp]
+  );
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -352,6 +375,9 @@ export const PdfPreviewImpl = ({
   // The isInitialScaleSet flag prevents scale from being overwritten by page re-renders
   // (which happen on every zoom change), but allows re-scaling when fitMode is toggled
   useEffect(() => {
+    // When scale is externally controlled, the parent owns zoom — don't clobber it on mount
+    if (isScaleControlled) return;
+
     // Reset flag when fitMode changes to allow re-scaling
     if (prevFitMode.current !== fitMode) {
       isInitialScaleSet.current = false;
@@ -370,7 +396,7 @@ export const PdfPreviewImpl = ({
       setScale(newScale);
       isInitialScaleSet.current = true;
     }
-  }, [fitMode, firstPageDims]);
+  }, [fitMode, firstPageDims, isScaleControlled, setScale]);
 
   // click anywhere on the page to hide the highlights
   const handleClickOnPage = () => {
@@ -544,7 +570,7 @@ export const PdfPreviewImpl = ({
     return () => {
       container.removeEventListener("keydown", handleKeyDown);
     };
-  }, [currentPage, rangeStart, rangeEnd, goToPage]);
+  }, [currentPage, rangeStart, rangeEnd, goToPage, setScale]);
 
   const handleDownload = () => {
     if (onDownload) {

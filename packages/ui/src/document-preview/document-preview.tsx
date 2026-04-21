@@ -46,6 +46,8 @@ export type PreviewComponentProps = {
   onRemove?: () => void;
   className?: string;
   highlights?: Highlight[];
+  scale?: number;
+  onScaleChange?: (scale: number) => void;
 };
 
 export type PreviewComponent = React.ComponentType<PreviewComponentProps>;
@@ -56,6 +58,8 @@ function PdfPreviewWrapper({
   contentUrl,
   onRemove,
   highlights,
+  scale,
+  onScaleChange,
 }: PreviewComponentProps) {
   return (
     <PdfPreview
@@ -63,6 +67,8 @@ function PdfPreviewWrapper({
       onRemove={onRemove}
       fileName={fileName}
       highlights={highlights}
+      scale={scale}
+      onScaleChange={onScaleChange}
       toolbarClassName="[&>div]:border-t-0 [&>div]:border-r-0 [&>div]:border-l-0"
     />
   );
@@ -129,6 +135,8 @@ interface DocumentPreviewBaseProps
   onSelectFile?: (selectedFileIds: string[]) => void;
   selectFileLabel?: string;
   selectFileDescription?: string;
+  scale?: number;
+  onScaleChange?: (scale: number) => void;
 }
 
 export interface DocumentPreviewSingleProps extends DocumentPreviewBaseProps {
@@ -168,6 +176,8 @@ interface DocumentPreviewItemProps {
   allowRemoval?: boolean;
   highlights?: Highlight[];
   previews?: PreviewsMap;
+  scale?: number;
+  onScaleChange?: (scale: number) => void;
 }
 
 function DocumentPreviewItem({
@@ -177,6 +187,8 @@ function DocumentPreviewItem({
   fileName,
   highlights,
   previews,
+  scale,
+  onScaleChange,
 }: DocumentPreviewItemProps) {
   // Track both the blob URL and which file it was created for
   // This prevents passing stale/revoked URLs to preview components when switching files
@@ -253,6 +265,8 @@ function DocumentPreviewItem({
       contentUrl={resolvedUrl}
       onRemove={removalHandler}
       highlights={highlights}
+      scale={scale}
+      onScaleChange={onScaleChange}
     />
   );
 
@@ -279,6 +293,8 @@ export function DocumentPreview(props: DocumentPreviewProps) {
     onSelectFile,
     selectFileLabel,
     selectFileDescription,
+    scale,
+    onScaleChange,
   } = props;
 
   // Track which index should show the preview (defaults to last index)
@@ -475,6 +491,8 @@ export function DocumentPreview(props: DocumentPreviewProps) {
             allowRemoval={allowRemoval && !allowMultiple}
             highlights={props.highlights}
             previews={previews}
+            scale={scale}
+            onScaleChange={onScaleChange}
           />
         )}
       </div>

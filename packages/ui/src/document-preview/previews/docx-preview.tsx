@@ -10,6 +10,8 @@ interface DocxPreviewProps {
   contentUrl: string;
   onRemove?: () => void;
   className?: string;
+  scale?: number;
+  onScaleChange?: (scale: number) => void;
 }
 
 const IFRAME_STYLES = `
@@ -72,14 +74,18 @@ export function DocxPreview({
   contentUrl,
   onRemove,
   className,
+  scale: scaleProp,
+  onScaleChange,
 }: DocxPreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [bodyHtml, setBodyHtml] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  const { scale, setScale, resetScale, toggleFullscreen } =
-    usePreviewControls(containerRef);
+  const { scale, setScale, resetScale, toggleFullscreen } = usePreviewControls(
+    containerRef,
+    { scale: scaleProp, onScaleChange }
+  );
 
   useEffect(() => {
     let cancelled = false;

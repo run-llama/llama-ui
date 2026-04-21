@@ -9,13 +9,20 @@ export const ImagePreview = ({
   contentUrl,
   onRemove,
   highlights,
+  scale: scaleProp,
+  onScaleChange,
 }: {
   fileName?: string | null;
   contentUrl: string;
   onRemove?: () => void;
   highlights?: Highlight[];
+  scale?: number;
+  onScaleChange?: (scale: number) => void;
 }) => {
-  const [scale, setScale] = useState(1);
+  const isScaleControlled =
+    scaleProp !== undefined && onScaleChange !== undefined;
+  const [internalScale, setInternalScale] = useState(1);
+  const scale = isScaleControlled ? scaleProp : internalScale;
   const imgRef = useRef<HTMLImageElement>(null);
   const [imageDimensions, setImageDimensions] = useState({
     width: 0,
@@ -31,7 +38,11 @@ export const ImagePreview = ({
   };
 
   const handleScaleChange = (newScale: number) => {
-    setScale(newScale);
+    if (isScaleControlled) {
+      onScaleChange!(newScale);
+    } else {
+      setInternalScale(newScale);
+    }
   };
 
   const handleImageLoad = () => {
