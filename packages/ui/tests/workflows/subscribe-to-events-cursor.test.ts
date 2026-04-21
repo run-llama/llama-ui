@@ -29,6 +29,15 @@ function makeStartEnvelope(value: Record<string, unknown> = {}) {
   };
 }
 
+function makeStopEnvelope(result: unknown = null) {
+  return {
+    value: { result },
+    type: "StopEvent",
+    types: [],
+    qualified_name: "StopEvent",
+  };
+}
+
 // Each test uses a unique handler id so the module-level cursor map in
 // handler.ts doesn't leak state across tests.
 let nextHandlerId = 0;
@@ -64,7 +73,23 @@ describe("subscribeToEvents cursor", () => {
     await waitFor(() => {
       expect(result.current.state.status).toBe("running");
     });
-    return result;
+    const terminal = (
+      status: "completed" | "failed" | "cancelled",
+      extras: Record<string, unknown> = {}
+    ) => {
+      (workflowsClient.getHandlersByHandlerId as any).mockResolvedValue({
+        data: {
+          handler_id: id,
+          workflow_name: "wf",
+          status,
+          started_at: new Date().toISOString(),
+          error: "",
+          ...extras,
+        },
+        error: undefined,
+      });
+    };
+    return { result, terminal };
   };
 
   const nextEventSource = async () => {
@@ -77,7 +102,7 @@ describe("subscribeToEvents cursor", () => {
   };
 
   it("passes afterSequence through to the request URL", async () => {
-    const result = await mountRunningHandler();
+    const { result } = await mountRunningHandler();
 
     await act(async () => {
       result.current.subscribeToEvents({}, { afterSequence: 5 });
@@ -88,7 +113,7 @@ describe("subscribeToEvents cursor", () => {
   });
 
   it("supports the legacy boolean includeInternal arg", async () => {
-    const result = await mountRunningHandler();
+    const { result } = await mountRunningHandler();
 
     await act(async () => {
       result.current.subscribeToEvents({}, true);
@@ -100,7 +125,7 @@ describe("subscribeToEvents cursor", () => {
   });
 
   it("omits after_sequence when no cursor is set and none passed", async () => {
-    const result = await mountRunningHandler();
+    const { result } = await mountRunningHandler();
 
     await act(async () => {
       result.current.subscribeToEvents({});
@@ -111,7 +136,7 @@ describe("subscribeToEvents cursor", () => {
   });
 
   it("auto-resumes from the last observed sequence after teardown", async () => {
-    const result = await mountRunningHandler();
+    const { result } = await mountRunningHandler();
 
     let firstOp!: ReturnType<typeof result.current.subscribeToEvents>;
     await act(async () => {
@@ -139,7 +164,7 @@ describe("subscribeToEvents cursor", () => {
   });
 
   it("explicit afterSequence wins over the stored cursor", async () => {
-    const result = await mountRunningHandler();
+    const { result } = await mountRunningHandler();
 
     let firstOp!: ReturnType<typeof result.current.subscribeToEvents>;
     await act(async () => {
@@ -163,7 +188,7 @@ describe("subscribeToEvents cursor", () => {
   });
 
   it("flushes and clears the cursor when the server closes the stream (204)", async () => {
-    const result = await mountRunningHandler();
+    const { result } = await mountRunningHandler();
 
     const onSuccess = vi.fn();
     const onComplete = vi.fn();
@@ -190,5 +215,96 @@ describe("subscribeToEvents cursor", () => {
     const second = await nextEventSource();
     expect(second).not.toBe(first);
     expect(second.url).not.toContain("after_sequence");
+  });
+
+  it("fires onSuccess on StopEvent when the handler completes", async () => {
+    const { result, terminal } = await mountRunningHandler();
+    terminal("completed");
+
+    const onSuccess = vi.fn();
+    const onError = vi.fn();
+
+    let op!: ReturnType<typeof result.current.subscribeToEvents>;
+    await act(async () => {
+      op = result.current.subscribeToEvents({ onSuccess, onError });
+    });
+    const es = await nextEventSource();
+
+    await act(async () => {
+      es.dispatch("message", makeMessage(makeStopEnvelope("ok"), "1"));
+      await op.promise;
+    });
+
+    expect(onSuccess).toHaveBeenCalledTimes(1);
+    expect(onError).not.toHaveBeenCalled();
+  });
+
+  it("fires onError when the terminal status is failed", async () => {
+    const { result, terminal } = await mountRunningHandler();
+    terminal("failed", { error: "boom" });
+
+    const onSuccess = vi.fn();
+    const onError = vi.fn();
+
+    let op!: ReturnType<typeof result.current.subscribeToEvents>;
+    await act(async () => {
+      op = result.current.subscribeToEvents({ onSuccess, onError });
+    });
+    const es = await nextEventSource();
+
+    await act(async () => {
+      es.readyState = MockEventSource.CLOSED;
+      es.dispatch("error", {});
+      await op.promise;
+    });
+
+    expect(onError).toHaveBeenCalledTimes(1);
+    expect(onError.mock.calls[0][0]).toBeInstanceOf(Error);
+    expect(onError.mock.calls[0][0].message).toBe("boom");
+    expect(onSuccess).not.toHaveBeenCalled();
+  });
+
+  it("resolves cleanly when the terminal status is cancelled", async () => {
+    // The SharedStreamingManager composite subscriber doesn't forward
+    // onCancel today, so we can't assert the callback — just verify the
+    // cancelled branch of finish() resolves the promise without erroring.
+    const { result, terminal } = await mountRunningHandler();
+    terminal("cancelled");
+
+    const onSuccess = vi.fn();
+    const onError = vi.fn();
+
+    let op!: ReturnType<typeof result.current.subscribeToEvents>;
+    await act(async () => {
+      op = result.current.subscribeToEvents({ onSuccess, onError });
+    });
+    const es = await nextEventSource();
+
+    await act(async () => {
+      es.readyState = MockEventSource.CLOSED;
+      es.dispatch("error", {});
+      await op.promise;
+    });
+
+    expect(onSuccess).not.toHaveBeenCalled();
+    expect(onError).not.toHaveBeenCalled();
+  });
+
+  it("closes the EventSource when the last subscriber unsubscribes", async () => {
+    const { result } = await mountRunningHandler();
+
+    let op!: ReturnType<typeof result.current.subscribeToEvents>;
+    await act(async () => {
+      op = result.current.subscribeToEvents({});
+    });
+    const es = await nextEventSource();
+    expect(es.readyState).not.toBe(MockEventSource.CLOSED);
+
+    await act(async () => {
+      op.unsubscribe();
+      await Promise.resolve();
+    });
+
+    expect(es.readyState).toBe(MockEventSource.CLOSED);
   });
 });
