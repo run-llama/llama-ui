@@ -7,6 +7,8 @@ interface TextPreviewProps {
   contentUrl: string;
   onRemove?: () => void;
   className?: string;
+  scale?: number;
+  onScaleChange?: (scale: number) => void;
 }
 
 export function TextPreview({

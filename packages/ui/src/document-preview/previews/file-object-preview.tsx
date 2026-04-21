@@ -6,20 +6,31 @@ export const FileObjectPreview = ({
   fileName,
   contentUrl,
   onRemove,
+  scale: scaleProp,
+  onScaleChange,
 }: {
   fileName?: string | null;
   contentUrl: string;
   onRemove?: () => void;
+  scale?: number;
+  onScaleChange?: (scale: number) => void;
 }) => {
   const containerRef = useRef<HTMLObjectElement>(null);
-  const [scale, setScale] = useState(1);
+  const isScaleControlled =
+    scaleProp !== undefined && onScaleChange !== undefined;
+  const [internalScale, setInternalScale] = useState(1);
+  const scale = isScaleControlled ? scaleProp : internalScale;
 
   const onDownload = () => {
     downloadFile(contentUrl, fileName);
   };
 
   const handleScaleChange = (newScale: number) => {
-    setScale(newScale);
+    if (isScaleControlled) {
+      onScaleChange!(newScale);
+    } else {
+      setInternalScale(newScale);
+    }
   };
 
   return (

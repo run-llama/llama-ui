@@ -21,6 +21,8 @@ const PdfPreview = memo(
     onRemove,
     fitMode,
     pageRange,
+    scale,
+    onScaleChange,
   }: {
     url: string;
     highlights?: Highlight[];
@@ -31,6 +33,11 @@ const PdfPreview = memo(
     fitMode?: FitMode;
     /** Optional page range to display (1-indexed, inclusive). Only pages within this range will be rendered. */
     pageRange?: [number, number];
+    /** Controlled zoom. When both `scale` and `onScaleChange` are provided,
+     *  the component defers to the parent for zoom state (including skipping
+     *  the auto-fit-on-mount behavior). */
+    scale?: number;
+    onScaleChange?: (scale: number) => void;
   }) => {
     if (typeof window === "undefined") {
       return null;
@@ -52,6 +59,8 @@ const PdfPreview = memo(
           onRemove={onRemove}
           fitMode={fitMode}
           pageRange={pageRange}
+          scale={scale}
+          onScaleChange={onScaleChange}
         />
       </Suspense>
     );

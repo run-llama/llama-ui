@@ -9,6 +9,11 @@ const ZOOM_STEP = 0.25;
 interface PreviewControlsOptions {
   /** Extra key handlers (e.g. ArrowLeft/ArrowRight for page navigation). */
   onKeyDown?: (event: KeyboardEvent) => void;
+  /** When both `scale` and `onScaleChange` are provided, the hook runs in
+   *  controlled mode and defers to the parent for zoom state. Otherwise it
+   *  manages scale internally. */
+  scale?: number;
+  onScaleChange?: (scale: number) => void;
 }
 
 export interface PreviewControls {
@@ -27,9 +32,28 @@ export function usePreviewControls(
   containerRef: RefObject<HTMLElement | null>,
   options: PreviewControlsOptions = {}
 ): PreviewControls {
-  const [scale, setScale] = useState(1);
+  const {
+    onKeyDown: onExtraKeyDown,
+    scale: scaleProp,
+    onScaleChange,
+  } = options;
+  const isControlled = scaleProp !== undefined && onScaleChange !== undefined;
 
-  const resetScale = useCallback(() => setScale(1), []);
+  const [internalScale, setInternalScale] = useState(1);
+  const scale = isControlled ? scaleProp : internalScale;
+
+  const setScale = useCallback(
+    (next: number) => {
+      if (isControlled) {
+        onScaleChange!(next);
+      } else {
+        setInternalScale(next);
+      }
+    },
+    [isControlled, onScaleChange]
+  );
+
+  const resetScale = useCallback(() => setScale(1), [setScale]);
 
   const toggleFullscreen = useCallback(() => {
     const element = containerRef.current;
@@ -41,8 +65,6 @@ export function usePreviewControls(
     }
   }, [containerRef]);
 
-  const { onKeyDown: onExtraKeyDown } = options;
-
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -50,10 +72,10 @@ export function usePreviewControls(
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "=" || event.key === "+") {
         event.preventDefault();
-        setScale((prev) => Math.min(prev + ZOOM_STEP, ZOOM_MAX));
+        setScale(Math.min(scale + ZOOM_STEP, ZOOM_MAX));
       } else if (event.key === "-") {
         event.preventDefault();
-        setScale((prev) => Math.max(prev - ZOOM_STEP, ZOOM_MIN));
+        setScale(Math.max(scale - ZOOM_STEP, ZOOM_MIN));
       } else {
         onExtraKeyDown?.(event);
       }
@@ -65,7 +87,7 @@ export function usePreviewControls(
     return () => {
       container.removeEventListener("keydown", handleKeyDown);
     };
-  }, [containerRef, onExtraKeyDown]);
+  }, [containerRef, onExtraKeyDown, scale, setScale]);
 
   return { scale, setScale, resetScale, toggleFullscreen };
 }

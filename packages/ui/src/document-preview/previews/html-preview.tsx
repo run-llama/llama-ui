@@ -10,6 +10,8 @@ interface HtmlPreviewProps {
   contentUrl: string;
   onRemove?: () => void;
   className?: string;
+  scale?: number;
+  onScaleChange?: (scale: number) => void;
 }
 
 export function HtmlPreview({
@@ -17,14 +19,18 @@ export function HtmlPreview({
   contentUrl,
   onRemove,
   className,
+  scale: scaleProp,
+  onScaleChange,
 }: HtmlPreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [htmlContent, setHtmlContent] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { scale, setScale, resetScale, toggleFullscreen } =
-    usePreviewControls(containerRef);
+  const { scale, setScale, resetScale, toggleFullscreen } = usePreviewControls(
+    containerRef,
+    { scale: scaleProp, onScaleChange }
+  );
 
   useEffect(() => {
     let cancelled = false;
