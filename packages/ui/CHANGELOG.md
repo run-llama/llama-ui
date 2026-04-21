@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 4.5.0
+
+### Minor Changes
+
+- 6a4e226: `subscribeToEvents` now auto-resumes at the last-seen sequence number from workflow event stream after unmount/remount, so no events are dropped in the gap.
+
 ## 4.4.0
 
 ### Minor Changes
