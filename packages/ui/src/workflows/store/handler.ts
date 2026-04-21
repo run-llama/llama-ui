@@ -73,6 +73,28 @@ export const createState = (
   return proxy(state);
 };
 
+/**
+ * Options for `subscribeToEvents`.
+ */
+export interface SubscribeToEventsOptions {
+  /** Include internal workflow events (step state changes etc.). */
+  includeInternal?: boolean;
+  /**
+   * Sequence cursor passed to the server as `after_sequence`. Omit to let the
+   * client auto-resume from the last event it observed for this handler, or
+   * pass `"now"` to explicitly skip history. Use `-1` to replay from the
+   * beginning. Note: `SharedStreamingManager` dedupes concurrent subscribers
+   * on the same handler — only the first subscriber's cursor drives the
+   * underlying connection.
+   */
+  afterSequence?: number | "now";
+}
+
+// Module-private cursor store, keyed by handler_id. Kept off the valtio state
+// to avoid a proxy mutation per event for consumers using whole-state
+// snapshots.
+const handlerCursors = new Map<string, string>();
+
 export function createActions(state: HandlerState, client: Client) {
   const actions = {
     async sendEvent(
@@ -147,13 +169,26 @@ export function createActions(state: HandlerState, client: Client) {
         state.loading = false;
       }
     },
+    /**
+     * Subscribe to the SSE event stream for this handler.
+     *
+     * Passing a boolean as the second argument is deprecated — use
+     * `{ includeInternal }` instead. When no `afterSequence` is provided the
+     * client auto-resumes from the last event id observed for this handler
+     * (within the current session) so that tearing down and re-subscribing
+     * doesn't drop events emitted in between.
+     */
     subscribeToEvents(
       callbacks?: StreamSubscriber<WorkflowEvent>,
-      includeInternal = false
+      optionsOrIncludeInternal?: SubscribeToEventsOptions | boolean
     ): StreamOperation<WorkflowEvent> {
       if (!state.handler_id) {
         throw new Error("Handler ID is not yet initialized");
       }
+      const options: SubscribeToEventsOptions =
+        typeof optionsOrIncludeInternal === "boolean"
+          ? { includeInternal: optionsOrIncludeInternal }
+          : (optionsOrIncludeInternal ?? {});
       const streamKey = `handler:${state.handler_id}`;
 
       // Convert callback to SharedStreamingManager subscriber
@@ -197,6 +232,15 @@ export function createActions(state: HandlerState, client: Client) {
         });
       };
 
+      // Resolve the cursor once per call: explicit option wins, otherwise fall
+      // back to whatever we last observed for this handler. This is what fixes
+      // the dropped-events window when a component unmounts+remounts between
+      // emitted events.
+      const resolvedAfterSequence = resolveAfterSequence(
+        options.afterSequence,
+        handlerCursors.get(state.handler_id)
+      );
+
       // Use SharedStreamingManager to handle the streaming with deduplication
       const { promise, unsubscribe, disconnect, cancel } =
         workflowStreamingManager.subscribe(
@@ -207,7 +251,8 @@ export function createActions(state: HandlerState, client: Client) {
               {
                 client: client,
                 handlerId: state.handler_id,
-                includeInternal: includeInternal,
+                includeInternal: options.includeInternal,
+                afterSequence: resolvedAfterSequence,
                 abortSignal: signal,
               },
               subscriber,
@@ -224,11 +269,24 @@ export function createActions(state: HandlerState, client: Client) {
   return actions;
 }
 
+function resolveAfterSequence(
+  explicit: number | "now" | undefined,
+  stored: string | undefined
+): number | "now" | undefined {
+  if (explicit !== undefined) return explicit;
+  if (stored === undefined) return undefined;
+  const parsed = Number(stored);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+const EVENT_SOURCE_CLOSED = 2;
+
 function streamByEventSource(
   params: {
     client: Client;
     handlerId: string;
     includeInternal?: boolean;
+    afterSequence?: number | "now";
     abortSignal?: AbortSignal;
   },
   callbacks: StreamSubscriber<WorkflowEvent>,
@@ -245,7 +303,11 @@ function streamByEventSource(
     if (params.includeInternal) {
       urlParams.set("include_internal", "true");
     }
+    if (params.afterSequence !== undefined) {
+      urlParams.set("after_sequence", String(params.afterSequence));
+    }
     const accumulatedEvents: WorkflowEvent[] = [];
+    let settled = false;
     const eventSource = new EventSource(
       `${baseUrl}/events/${encodeURIComponent(params.handlerId)}?${urlParams.toString()}`,
       {
@@ -254,52 +316,66 @@ function streamByEventSource(
     );
     if (params.abortSignal) {
       params.abortSignal.addEventListener("abort", () => {
+        settled = true;
         eventSource.close();
       });
     }
+
+    const finish = async () => {
+      await actions.sync();
+      // Handler has drained at this point; drop any stored cursor so the next
+      // subscribe (for a fresh run that reuses the handler id, or a resubscribe
+      // to the terminal state) starts clean.
+      handlerCursors.delete(params.handlerId);
+      if (state.status === "completed") {
+        callbacks.onSuccess?.(accumulatedEvents);
+      } else if (state.status === "failed") {
+        callbacks.onError?.(new Error(state.error || "Server Error"));
+      } else if (state.status === "cancelled") {
+        callbacks.onCancel?.();
+      } else {
+        // Fall back to onSuccess for unknown terminal states so subscribers
+        // don't hang. This covers drained handlers where the server closed
+        // the stream (204) before we observed a StopEvent.
+        callbacks.onSuccess?.(accumulatedEvents);
+      }
+      resolve(accumulatedEvents);
+    };
 
     eventSource.addEventListener("message", (event) => {
       logger.debug("[streamByEventSource] message", JSON.parse(event.data));
       const workflowEvent = WorkflowEvent.fromRawEvent(
         JSON.parse(event.data) as EventEnvelopeWithMetadata
       );
+      // Record the server's sequence id so a subsequent subscribe can resume
+      // from exactly here without dropping events.
+      if (event.lastEventId) {
+        handlerCursors.set(params.handlerId, event.lastEventId);
+      }
       callbacks.onData?.(workflowEvent);
       accumulatedEvents.push(workflowEvent);
       if (isStopEvent(workflowEvent)) {
+        if (settled) return;
+        settled = true;
         eventSource.close();
-        actions.sync().then(() => {
-          if (state.status === "completed") {
-            callbacks.onSuccess?.(accumulatedEvents);
-          } else if (state.status === "failed") {
-            callbacks.onError?.(new Error(state.error || "Server Error"));
-          } else if (state.status === "cancelled") {
-            callbacks.onCancel?.();
-          } else {
-            // This should never happen
-            throw new Error(
-              `[This should never happen] Unexpected running status: ${state.status}`
-            );
-          }
-          resolve(accumulatedEvents);
-        });
+        void finish();
       }
     });
     eventSource.addEventListener("error", (event) => {
-      // Ignore error for now due to EventSource limitations.
-      // 1. Now py server close sse connection and will always trigger error event even readyState is 2 (CLOSED)
-      // 2. The error event isself is a general event without any error information
-      // TODO: swtich to more fetch + stream approach
+      // The Python server closes the SSE connection by surfacing an `error`
+      // event with readyState === CLOSED, including for the 204 "handler
+      // drained" response. Treat that as a clean close and flush whatever we
+      // accumulated so re-subscribes to a drained handler don't hang.
       logger.warn("[streamByEventSource] error", event);
-      return;
+      if (settled) return;
+      if (eventSource.readyState === EVENT_SOURCE_CLOSED) {
+        settled = true;
+        void finish();
+      }
     });
     eventSource.addEventListener("open", () => {
       logger.debug("[streamByEventSource] open");
       callbacks.onStart?.();
-    });
-    eventSource.addEventListener("close", () => {
-      logger.debug("[streamByEventSource] close");
-      callbacks.onSuccess?.(accumulatedEvents);
-      resolve(accumulatedEvents);
     });
   });
 }

@@ -42,7 +42,7 @@ export function HandlerDetails({ handlerId, onBack }: HandlerDetailsProps) {
             setIsStreaming(false);
           },
         },
-        true
+        { includeInternal: true }
       );
 
       return () => disconnect();
