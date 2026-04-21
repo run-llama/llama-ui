@@ -232,10 +232,6 @@ export function createActions(state: HandlerState, client: Client) {
         });
       };
 
-      // Resolve the cursor once per call: explicit option wins, otherwise fall
-      // back to whatever we last observed for this handler. This is what fixes
-      // the dropped-events window when a component unmounts+remounts between
-      // emitted events.
       const resolvedAfterSequence = resolveAfterSequence(
         options.afterSequence,
         handlerCursors.get(state.handler_id)
@@ -278,8 +274,6 @@ function resolveAfterSequence(
   const parsed = Number(stored);
   return Number.isFinite(parsed) ? parsed : undefined;
 }
-
-const EVENT_SOURCE_CLOSED = 2;
 
 function streamByEventSource(
   params: {
@@ -368,7 +362,7 @@ function streamByEventSource(
       // accumulated so re-subscribes to a drained handler don't hang.
       logger.warn("[streamByEventSource] error", event);
       if (settled) return;
-      if (eventSource.readyState === EVENT_SOURCE_CLOSED) {
+      if (eventSource.readyState === EventSource.CLOSED) {
         settled = true;
         void finish();
       }

@@ -3,6 +3,7 @@ import { act, waitFor } from "@testing-library/react";
 import { useHandler } from "../../src/workflows/hooks";
 import { renderHookWithProviderProps } from "../test-utils";
 import { workflowStreamingManager } from "../../src/lib/shared-streaming";
+import { MockEventSource } from "../test-setup";
 import * as workflowsClient from "@llamaindex/workflows-client";
 
 vi.mock("@llamaindex/workflows-client", async () => {
@@ -14,30 +15,6 @@ vi.mock("@llamaindex/workflows-client", async () => {
     postHandlersByHandlerIdCancel: vi.fn(),
   };
 });
-
-// Re-declared so we can reach into the captured EventSource instances the mock
-// from tests/test-setup.ts stores. Kept intentionally minimal.
-interface MockEventSourceInstance {
-  url: string;
-  readyState: number;
-  listeners: Record<string, Set<(e: any) => void>>;
-  close: () => void;
-}
-interface MockEventSourceCtor {
-  CLOSED: number;
-  instances: MockEventSourceInstance[];
-}
-
-const getEventSourceCtor = (): MockEventSourceCtor =>
-  (globalThis as any).EventSource as unknown as MockEventSourceCtor;
-
-function dispatch(
-  es: MockEventSourceInstance,
-  type: "message" | "error",
-  event: unknown
-) {
-  es.listeners[type]?.forEach((cb) => cb(event));
-}
 
 function makeMessage(data: unknown, lastEventId: string) {
   return { data: JSON.stringify(data), lastEventId };
@@ -52,17 +29,27 @@ function makeStartEnvelope(value: Record<string, unknown> = {}) {
   };
 }
 
+// Each test uses a unique handler id so the module-level cursor map in
+// handler.ts doesn't leak state across tests.
+let nextHandlerId = 0;
+const freshHandlerId = () => `h-cursor-${++nextHandlerId}`;
+
 describe("subscribeToEvents cursor", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Fresh EventSource instance array per test.
-    getEventSourceCtor().instances.length = 0;
-    // The streaming manager is a module-level singleton; close any leftovers.
+    MockEventSource.instances.length = 0;
     workflowStreamingManager.closeAllStreams();
+  });
 
+  afterEach(() => {
+    workflowStreamingManager.closeAllStreams();
+  });
+
+  const mountRunningHandler = async () => {
+    const id = freshHandlerId();
     (workflowsClient.getHandlersByHandlerId as any).mockResolvedValue({
       data: {
-        handler_id: "h-cursor",
+        handler_id: id,
         workflow_name: "wf",
         status: "running",
         started_at: new Date().toISOString(),
@@ -70,177 +57,113 @@ describe("subscribeToEvents cursor", () => {
       },
       error: undefined,
     });
-  });
-
-  afterEach(() => {
-    workflowStreamingManager.closeAllStreams();
-  });
-
-  it("passes afterSequence through to the request URL", async () => {
     const { result } = renderHookWithProviderProps<{ id: string | null }, any>(
       ({ id }: { id: string | null }) => useHandler(id),
-      {
-        initialProps: { id: "h-cursor" },
-      }
+      { initialProps: { id } }
     );
-
     await waitFor(() => {
       expect(result.current.state.status).toBe("running");
     });
+    return result;
+  };
+
+  const nextEventSource = async () => {
+    // Let the streaming manager's executor run and construct the EventSource.
+    await Promise.resolve();
+    await Promise.resolve();
+    const es = MockEventSource.instances.at(-1);
+    if (!es) throw new Error("expected an EventSource to have been created");
+    return es;
+  };
+
+  it("passes afterSequence through to the request URL", async () => {
+    const result = await mountRunningHandler();
 
     await act(async () => {
       result.current.subscribeToEvents({}, { afterSequence: 5 });
-      // let the executor kick the EventSource ctor
-      await Promise.resolve();
-      await Promise.resolve();
     });
 
-    const instances = getEventSourceCtor().instances;
-    expect(instances).toHaveLength(1);
-    expect(instances[0].url).toContain("after_sequence=5");
+    const es = await nextEventSource();
+    expect(es.url).toContain("after_sequence=5");
   });
 
   it("supports the legacy boolean includeInternal arg", async () => {
-    const { result } = renderHookWithProviderProps<{ id: string | null }, any>(
-      ({ id }: { id: string | null }) => useHandler(id),
-      {
-        initialProps: { id: "h-cursor" },
-      }
-    );
-
-    await waitFor(() => {
-      expect(result.current.state.status).toBe("running");
-    });
+    const result = await mountRunningHandler();
 
     await act(async () => {
       result.current.subscribeToEvents({}, true);
-      await Promise.resolve();
-      await Promise.resolve();
     });
 
-    const instances = getEventSourceCtor().instances;
-    expect(instances).toHaveLength(1);
-    expect(instances[0].url).toContain("include_internal=true");
-    expect(instances[0].url).not.toContain("after_sequence");
+    const es = await nextEventSource();
+    expect(es.url).toContain("include_internal=true");
+    expect(es.url).not.toContain("after_sequence");
   });
 
   it("omits after_sequence when no cursor is set and none passed", async () => {
-    const { result } = renderHookWithProviderProps<{ id: string | null }, any>(
-      ({ id }: { id: string | null }) => useHandler(id),
-      {
-        initialProps: { id: "h-cursor" },
-      }
-    );
-
-    await waitFor(() => {
-      expect(result.current.state.status).toBe("running");
-    });
+    const result = await mountRunningHandler();
 
     await act(async () => {
       result.current.subscribeToEvents({});
-      await Promise.resolve();
-      await Promise.resolve();
     });
 
-    const instances = getEventSourceCtor().instances;
-    expect(instances).toHaveLength(1);
-    expect(instances[0].url).not.toContain("after_sequence");
+    const es = await nextEventSource();
+    expect(es.url).not.toContain("after_sequence");
   });
 
   it("auto-resumes from the last observed sequence after teardown", async () => {
-    const { result } = renderHookWithProviderProps<{ id: string | null }, any>(
-      ({ id }: { id: string | null }) => useHandler(id),
-      {
-        initialProps: { id: "h-cursor" },
-      }
-    );
+    const result = await mountRunningHandler();
 
-    await waitFor(() => {
-      expect(result.current.state.status).toBe("running");
-    });
-
-    // First subscription — receive ids 1,2,3 then tear down.
     let firstOp!: ReturnType<typeof result.current.subscribeToEvents>;
     await act(async () => {
       firstOp = result.current.subscribeToEvents({});
-      await Promise.resolve();
-      await Promise.resolve();
     });
 
-    const instances = getEventSourceCtor().instances;
-    expect(instances).toHaveLength(1);
-    expect(instances[0].url).not.toContain("after_sequence");
+    const first = await nextEventSource();
+    expect(first.url).not.toContain("after_sequence");
 
     await act(async () => {
       for (const seq of ["1", "2", "3"]) {
-        dispatch(
-          instances[0],
-          "message",
-          makeMessage(makeStartEnvelope(), seq)
-        );
+        first.dispatch("message", makeMessage(makeStartEnvelope(), seq));
       }
       firstOp.unsubscribe();
       await Promise.resolve();
     });
 
-    // Second subscription — should include after_sequence=3.
     await act(async () => {
       result.current.subscribeToEvents({});
-      await Promise.resolve();
-      await Promise.resolve();
     });
 
-    expect(instances).toHaveLength(2);
-    expect(instances[1].url).toContain("after_sequence=3");
+    const second = await nextEventSource();
+    expect(second).not.toBe(first);
+    expect(second.url).toContain("after_sequence=3");
   });
 
   it("explicit afterSequence wins over the stored cursor", async () => {
-    const { result } = renderHookWithProviderProps<{ id: string | null }, any>(
-      ({ id }: { id: string | null }) => useHandler(id),
-      {
-        initialProps: { id: "h-cursor" },
-      }
-    );
-
-    await waitFor(() => {
-      expect(result.current.state.status).toBe("running");
-    });
+    const result = await mountRunningHandler();
 
     let firstOp!: ReturnType<typeof result.current.subscribeToEvents>;
     await act(async () => {
       firstOp = result.current.subscribeToEvents({});
-      await Promise.resolve();
-      await Promise.resolve();
     });
+    const first = await nextEventSource();
 
-    const instances = getEventSourceCtor().instances;
     await act(async () => {
-      dispatch(instances[0], "message", makeMessage(makeStartEnvelope(), "7"));
+      first.dispatch("message", makeMessage(makeStartEnvelope(), "7"));
       firstOp.unsubscribe();
       await Promise.resolve();
     });
 
     await act(async () => {
       result.current.subscribeToEvents({}, { afterSequence: "now" });
-      await Promise.resolve();
-      await Promise.resolve();
     });
+    const second = await nextEventSource();
 
-    expect(instances[1].url).toContain("after_sequence=now");
-    expect(instances[1].url).not.toContain("after_sequence=7");
+    expect(second.url).toContain("after_sequence=now");
+    expect(second.url).not.toContain("after_sequence=7");
   });
 
   it("flushes and clears the cursor when the server closes the stream (204)", async () => {
-    const { result } = renderHookWithProviderProps<{ id: string | null }, any>(
-      ({ id }: { id: string | null }) => useHandler(id),
-      {
-        initialProps: { id: "h-cursor" },
-      }
-    );
-
-    await waitFor(() => {
-      expect(result.current.state.status).toBe("running");
-    });
+    const result = await mountRunningHandler();
 
     const onSuccess = vi.fn();
     const onComplete = vi.fn();
@@ -248,31 +171,24 @@ describe("subscribeToEvents cursor", () => {
     let op!: ReturnType<typeof result.current.subscribeToEvents>;
     await act(async () => {
       op = result.current.subscribeToEvents({ onSuccess, onComplete });
-      await Promise.resolve();
-      await Promise.resolve();
     });
+    const first = await nextEventSource();
 
-    const instances = getEventSourceCtor().instances;
     await act(async () => {
-      dispatch(instances[0], "message", makeMessage(makeStartEnvelope(), "9"));
-      // Simulate py server closing the SSE stream: readyState CLOSED +
-      // error event with no data.
-      instances[0].readyState = getEventSourceCtor().CLOSED;
-      dispatch(instances[0], "error", {});
+      first.dispatch("message", makeMessage(makeStartEnvelope(), "9"));
+      first.readyState = MockEventSource.CLOSED;
+      first.dispatch("error", {});
       await op.promise;
     });
 
     expect(onSuccess).toHaveBeenCalledTimes(1);
     expect(onComplete).toHaveBeenCalledTimes(1);
 
-    // A fresh subscription should not carry the cleared cursor forward.
     await act(async () => {
       result.current.subscribeToEvents({});
-      await Promise.resolve();
-      await Promise.resolve();
     });
-
-    expect(instances).toHaveLength(2);
-    expect(instances[1].url).not.toContain("after_sequence");
+    const second = await nextEventSource();
+    expect(second).not.toBe(first);
+    expect(second.url).not.toContain("after_sequence");
   });
 });
