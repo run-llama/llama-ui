@@ -2,6 +2,7 @@ import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { MultipleSelector, type Option } from "../../base/multiple-selector";
 import { ThemeComparison } from "./theme-comparison";
+import { filterSupportedCodeLanguageOptions } from "../../src/lib/supported-code-languages";
 
 const frameworkOptions: Option[] = [
   { value: "react", label: "React" },
@@ -14,7 +15,7 @@ const frameworkOptions: Option[] = [
   { value: "astro", label: "Astro" },
 ];
 
-const languageOptions: Option[] = [
+const allLanguageOptions: Option[] = [
   { value: "typescript", label: "TypeScript", group: "Typed" },
   { value: "javascript", label: "JavaScript", group: "Dynamic" },
   { value: "python", label: "Python", group: "Dynamic" },
@@ -22,6 +23,8 @@ const languageOptions: Option[] = [
   { value: "go", label: "Go", group: "Typed" },
   { value: "ruby", label: "Ruby", group: "Dynamic" },
 ];
+
+const languageOptions = filterSupportedCodeLanguageOptions(allLanguageOptions);
 
 const meta: Meta<typeof MultipleSelector> = {
   title: "Base/MultipleSelector",
