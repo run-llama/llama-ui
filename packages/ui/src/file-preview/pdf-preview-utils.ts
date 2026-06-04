@@ -45,6 +45,54 @@ export function calculateVisiblePageRange(
 }
 
 /**
+ * Computes the scroll-top offset of a page within the scroll container, using a
+ * cumulative height model. Pages are laid out top-to-bottom, each occupying its
+ * measured height (or `estimatedPageHeight` if not yet rendered) plus `gap`.
+ *
+ * This is the source of truth for "where is page N" — it does not depend on the
+ * page's DOM node being mounted, so it works for far jumps where the target page
+ * has not rendered yet.
+ */
+export function scrollOffsetForPage(
+  targetPage: number,
+  pageHeights: { [key: number]: number },
+  estimatedPageHeight: number,
+  rangeStart: number,
+  gap: number
+): number {
+  let offset = 0;
+  for (let i = rangeStart; i < targetPage; i++) {
+    offset += (pageHeights[i] || estimatedPageHeight) + gap;
+  }
+  return offset;
+}
+
+/**
+ * Inverse of {@link scrollOffsetForPage}: given a scroll offset (e.g. the
+ * vertical center of the viewport), returns the page number at that offset using
+ * the same cumulative height model. Used to derive the current page from scroll
+ * position without reading the DOM.
+ */
+export function pageFromScrollOffset(
+  scrollOffset: number,
+  pageHeights: { [key: number]: number },
+  estimatedPageHeight: number,
+  rangeStart: number,
+  rangeEnd: number,
+  gap: number
+): number {
+  let offset = 0;
+  for (let i = rangeStart; i <= rangeEnd; i++) {
+    const h = (pageHeights[i] || estimatedPageHeight) + gap;
+    if (scrollOffset < offset + h) {
+      return i;
+    }
+    offset += h;
+  }
+  return rangeEnd;
+}
+
+/**
  * Finds the closest page to the center of the viewport
  */
 export function findClosestPage(

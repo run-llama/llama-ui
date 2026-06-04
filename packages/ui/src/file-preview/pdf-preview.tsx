@@ -23,6 +23,8 @@ const PdfPreview = memo(
     pageRange,
     scale,
     onScaleChange,
+    maxDevicePixelRatio,
+    renderTextLayer,
   }: {
     url: string;
     highlights?: Highlight[];
@@ -38,6 +40,12 @@ const PdfPreview = memo(
      *  the auto-fit-on-mount behavior). */
     scale?: number;
     onScaleChange?: (scale: number) => void;
+    /** Cap on the canvas backing-store pixel ratio
+     *  (`min(window.devicePixelRatio, maxDevicePixelRatio)`). Defaults to 1.5. */
+    maxDevicePixelRatio?: number;
+    /** Whether the selectable text layer is rendered (focused page only).
+     *  Set `false` to disable text selection entirely. Defaults to `true`. */
+    renderTextLayer?: boolean;
   }) => {
     if (typeof window === "undefined") {
       return null;
@@ -61,6 +69,8 @@ const PdfPreview = memo(
           pageRange={pageRange}
           scale={scale}
           onScaleChange={onScaleChange}
+          maxDevicePixelRatio={maxDevicePixelRatio}
+          renderTextLayer={renderTextLayer}
         />
       </Suspense>
     );
