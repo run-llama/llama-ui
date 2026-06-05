@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 4.5.1
+
+### Patch Changes
+
+- d1b91db: increase performance for pdf preview
+
 ## 4.5.0
 
 ### Minor Changes
