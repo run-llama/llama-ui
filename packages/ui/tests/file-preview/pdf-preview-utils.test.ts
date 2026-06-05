@@ -6,6 +6,8 @@ import {
   calculateFitToWidthScale,
   calculateInitialScale,
   calculateHighlightScrollPosition,
+  scrollOffsetForPage,
+  pageFromScrollOffset,
 } from "@/src/file-preview/pdf-preview-utils";
 import type { Highlight } from "@/src/file-preview/types";
 
@@ -476,5 +478,78 @@ describe("calculateHighlightScrollPosition", () => {
     });
     // Max scroll = 0, should clamp to 0
     expect(result).toBe(0);
+  });
+});
+
+describe("scrollOffsetForPage", () => {
+  it("returns 0 for the first page in range", () => {
+    expect(scrollOffsetForPage(1, {}, 800, 1, 16)).toBe(0);
+  });
+
+  it("returns 0 for the first page when range starts above 1", () => {
+    // With a pageRange starting at page 5, page 5 is at the top.
+    expect(scrollOffsetForPage(5, {}, 800, 5, 16)).toBe(0);
+  });
+
+  it("uses the estimate for pages with no measured height", () => {
+    // 3 pages above target, each (800 + 16 gap) = 816 → 2448
+    expect(scrollOffsetForPage(4, {}, 800, 1, 16)).toBe(2448);
+  });
+
+  it("uses measured heights when available, estimate otherwise", () => {
+    // page1 = 900, page2 = 700, page3 = estimate 800; each + 16 gap
+    // (900+16) + (700+16) + (800+16) = 916 + 716 + 816 = 2448
+    const pageHeights = { 1: 900, 2: 700 };
+    expect(scrollOffsetForPage(4, pageHeights, 800, 1, 16)).toBe(2448);
+  });
+
+  it("only counts pages from rangeStart upward", () => {
+    // rangeStart = 5: pages 1-4 are not part of the layout and must be ignored.
+    // Pages 5,6,7 above target 8 → 3 * (800 + 16) = 2448
+    const pageHeights = { 1: 5000, 2: 5000 }; // below range, must be ignored
+    expect(scrollOffsetForPage(8, pageHeights, 800, 5, 16)).toBe(2448);
+  });
+
+  it("handles zero gap", () => {
+    expect(scrollOffsetForPage(4, {}, 800, 1, 0)).toBe(2400);
+  });
+});
+
+describe("pageFromScrollOffset", () => {
+  it("returns rangeStart at offset 0", () => {
+    expect(pageFromScrollOffset(0, {}, 800, 1, 100, 16)).toBe(1);
+  });
+
+  it("returns rangeStart for a pageRange at offset 0", () => {
+    expect(pageFromScrollOffset(0, {}, 800, 3, 100, 16)).toBe(3);
+  });
+
+  it("returns the page whose band contains the offset", () => {
+    // Uniform 816px bands: page 1 = [0, 816), page 2 = [816, 1632)
+    expect(pageFromScrollOffset(100, {}, 800, 1, 100, 16)).toBe(1);
+    expect(pageFromScrollOffset(815, {}, 800, 1, 100, 16)).toBe(1);
+    expect(pageFromScrollOffset(816, {}, 800, 1, 100, 16)).toBe(2);
+  });
+
+  it("clamps to rangeEnd beyond the document", () => {
+    expect(pageFromScrollOffset(10_000_000, {}, 800, 1, 100, 16)).toBe(100);
+  });
+
+  it("respects measured heights", () => {
+    // page1 = 1000 (+16 gap) → band [0, 1016); page 2 starts at 1016
+    const pageHeights = { 1: 1000 };
+    expect(pageFromScrollOffset(1015, pageHeights, 800, 1, 100, 16)).toBe(1);
+    expect(pageFromScrollOffset(1016, pageHeights, 800, 1, 100, 16)).toBe(2);
+  });
+
+  it("round-trips with scrollOffsetForPage", () => {
+    // The top offset of page N should map back to page N.
+    const pageHeights = { 1: 900, 2: 700, 3: 850 };
+    for (const page of [1, 2, 4, 7]) {
+      const offset = scrollOffsetForPage(page, pageHeights, 800, 1, 16);
+      expect(pageFromScrollOffset(offset, pageHeights, 800, 1, 100, 16)).toBe(
+        page
+      );
+    }
   });
 });

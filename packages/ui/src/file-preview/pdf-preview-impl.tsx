@@ -13,6 +13,8 @@ import {
   calculateVisiblePageRange,
   findClosestPage,
   groupHighlightsByPage,
+  pageFromScrollOffset,
+  scrollOffsetForPage,
   type FitMode,
 } from "./pdf-preview-utils";
 
@@ -44,6 +46,16 @@ export interface PdfPreviewImplProps {
    *  the parent owns zoom state and the auto-fit-on-mount effect is skipped. */
   scale?: number;
   onScaleChange?: (scale: number) => void;
+  /** Cap on the canvas backing-store pixel ratio. The effective ratio is
+   *  `min(window.devicePixelRatio, maxDevicePixelRatio)`. Lower values render
+   *  fewer canvas pixels per page (faster) at the cost of slightly softer text
+   *  on high-DPI screens. Defaults to 1.5. */
+  maxDevicePixelRatio?: number;
+  /** Whether the selectable text layer is rendered. The text layer is only
+   *  built for the focused page(s), never the whole virtualization buffer, so
+   *  it stays cheap. Set to `false` to disable text selection entirely (e.g.
+   *  for surfaces that only need visual preview). Defaults to `true`. */
+  renderTextLayer?: boolean;
 }
 
 // map of page number to page viewport dimensions
@@ -61,6 +73,9 @@ const pdfPasswordCache = new Map<string, string>();
 
 const VIRTUALIZATION_BUFFER = 5;
 const DEFAULT_PAGE_HEIGHT = 800;
+// Vertical gap between page elements, matching the `mb-4` (1rem) class on each
+// page wrapper. Used by the cumulative-height scroll model.
+const PAGE_GAP = 16;
 const MIN_HIGHLIGHT_EDGE_DISTANCE = 60; // Minimum pixels from viewport edge when scrolling to highlight
 const PENDING_HIGHLIGHT_TIMEOUT_MS = 2000; // Max time to wait for page dimensions before giving up
 
@@ -75,6 +90,8 @@ export const PdfPreviewImpl = ({
   pageRange,
   scale: scaleProp,
   onScaleChange,
+  maxDevicePixelRatio = 1.5,
+  renderTextLayer = true,
 }: PdfPreviewImplProps) => {
   const [numPages, setNumPages] = useState<number>();
   const [currentPage, setCurrentPage] = useState<number>(pageRange?.[0] ?? 1);
@@ -112,6 +129,10 @@ export const PdfPreviewImpl = ({
   );
   const [pageHeights, setPageHeights] = useState<{ [key: number]: number }>({});
   const [loadError, setLoadError] = useState<string | null>(null);
+  // When a programmatic page jump is in flight, this holds the target page so a
+  // settle effect can keep it aligned while neighbouring pages render and the
+  // layout reflows. Cleared once the position stabilises.
+  const [scrollTargetPage, setScrollTargetPage] = useState<number | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const [pendingHighlight, setPendingHighlight] = useState<Highlight | null>(
     null
@@ -129,6 +150,39 @@ export const PdfPreviewImpl = ({
     () => groupHighlightsByPage(highlights),
     [highlights]
   );
+
+  // Cap the canvas backing-store pixel ratio. On a 2x retina display this
+  // renders ~44% fewer canvas pixels per page at 1.5 vs the default 2.0.
+  const devicePixelRatio = Math.min(
+    globalThis.devicePixelRatio || 1,
+    maxDevicePixelRatio
+  );
+
+  // Average height (in scaled px) used for pages that haven't rendered yet, so
+  // the cumulative-height scroll model has a value for every page.
+  const estimatedPageHeight = useMemo(() => {
+    const knownHeights = Object.values(pageHeights);
+    return knownHeights.length > 0
+      ? knownHeights.reduce((a, b) => a + b, 0) / knownHeights.length
+      : DEFAULT_PAGE_HEIGHT * scale;
+  }, [pageHeights, scale]);
+
+  // Latest layout model, mirrored into a ref so the scroll listener can read it
+  // without re-subscribing on every page-height change.
+  const layoutRef = useRef({
+    pageHeights,
+    estimatedPageHeight,
+    rangeStart: 1,
+    rangeEnd: 1,
+  });
+  useEffect(() => {
+    layoutRef.current = {
+      pageHeights,
+      estimatedPageHeight,
+      rangeStart,
+      rangeEnd,
+    };
+  });
 
   const onDocumentLoadSuccess = useCallback(
     ({ numPages }: { numPages: number }) => {
@@ -213,7 +267,10 @@ export const PdfPreviewImpl = ({
     [onRemove, fileName, file]
   );
 
-  // Navigate to specific page
+  // Navigate to specific page. Computes the scroll position from the cumulative
+  // height model rather than relying on the target page's DOM node (which may
+  // not be mounted yet on a far jump), so jumps land reliably without the
+  // reflow/observer cascade that a late scrollIntoView caused.
   const goToPage = useCallback(
     (pageNumber: number) => {
       const targetPage = Math.min(Math.max(pageNumber, rangeStart), rangeEnd);
@@ -226,18 +283,65 @@ export const PdfPreviewImpl = ({
       );
       setVisiblePages(new Set(visibleRange));
 
-      setTimeout(() => {
-        const pageElement = pageRefs.current[targetPage];
-        if (pageElement && containerRef.current) {
-          pageElement.scrollIntoView({
-            behavior: "instant",
-            block: "center",
-          });
-        }
-      }, 0);
+      const container = containerRef.current;
+      if (container) {
+        // Immediate approximate jump from the cumulative model...
+        const pageTop = scrollOffsetForPage(
+          targetPage,
+          pageHeights,
+          estimatedPageHeight,
+          rangeStart,
+          PAGE_GAP
+        );
+        const pageHeight = pageHeights[targetPage] || estimatedPageHeight;
+        const top =
+          pageTop - Math.max(0, (container.clientHeight - pageHeight) / 2);
+        container.scrollTo({ top: Math.max(0, top), behavior: "instant" });
+      }
+      // ...then settle to the page's real position as it (and its neighbours)
+      // render and the layout reflows.
+      setScrollTargetPage(targetPage);
     },
-    [rangeStart, rangeEnd]
+    [rangeStart, rangeEnd, pageHeights, estimatedPageHeight]
   );
+
+  // Keep a programmatic jump locked onto its target page while nearby pages
+  // render and resize the layout. Re-aligns to the target's real offsetTop each
+  // frame until it stops moving (or a safety cap), then releases control so the
+  // user can scroll freely.
+  useEffect(() => {
+    if (scrollTargetPage == null) return;
+    const container = containerRef.current;
+    if (!container) {
+      setScrollTargetPage(null);
+      return;
+    }
+    let rafId = 0;
+    let frames = 0;
+    let lastTop = -1;
+    let stableFrames = 0;
+    const align = () => {
+      const el = pageRefs.current[scrollTargetPage];
+      if (el) {
+        const top = Math.max(
+          0,
+          el.offsetTop -
+            Math.max(0, (container.clientHeight - el.offsetHeight) / 2)
+        );
+        container.scrollTop = top;
+        stableFrames = Math.abs(top - lastTop) < 1 ? stableFrames + 1 : 0;
+        lastTop = top;
+      }
+      frames++;
+      if (stableFrames < 4 && frames < 40) {
+        rafId = requestAnimationFrame(align);
+      } else {
+        setScrollTargetPage(null);
+      }
+    };
+    rafId = requestAnimationFrame(align);
+    return () => cancelAnimationFrame(rafId);
+  }, [scrollTargetPage]);
 
   // Scroll to show a highlight with smart positioning
   const scrollToHighlight = useCallback(
@@ -471,22 +575,33 @@ export const PdfPreviewImpl = ({
   }, [numPages, rangeStart, rangeEnd]);
 
   useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    let rafId: number | null = null;
     const handleScroll = () => {
-      if (!containerRef.current) return;
-
-      const containerRect = containerRef.current.getBoundingClientRect();
-      const closestPage = findClosestPage(pageRefs.current, containerRect);
-
-      const clampedPage = Math.min(Math.max(closestPage, rangeStart), rangeEnd);
-
-      setCurrentPage(clampedPage);
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        const model = layoutRef.current;
+        const scrollCenter = container.scrollTop + container.clientHeight / 2;
+        const page = pageFromScrollOffset(
+          scrollCenter,
+          model.pageHeights,
+          model.estimatedPageHeight,
+          model.rangeStart,
+          model.rangeEnd,
+          PAGE_GAP
+        );
+        setCurrentPage(Math.min(Math.max(page, rangeStart), rangeEnd));
+      });
     };
 
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener("scroll", handleScroll);
-      return () => container.removeEventListener("scroll", handleScroll);
-    }
+    container.addEventListener("scroll", handleScroll);
+    return () => {
+      container.removeEventListener("scroll", handleScroll);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
   }, [numPages, rangeStart, rangeEnd]);
 
   const lastLoadedUrl = useRef<string | null>(null);
@@ -612,44 +727,6 @@ export const PdfPreviewImpl = ({
     }
   };
 
-  const pagesToRender = useMemo((): {
-    pages: number[];
-    estimatedPageHeight: number;
-  } => {
-    if (!numPages)
-      return { pages: [], estimatedPageHeight: DEFAULT_PAGE_HEIGHT * scale };
-
-    const knownHeights = Object.values(pageHeights);
-    const estimatedPageHeight =
-      knownHeights.length > 0
-        ? knownHeights.reduce((a, b) => a + b, 0) / knownHeights.length
-        : DEFAULT_PAGE_HEIGHT * scale;
-
-    const minVisible = Math.min(...visiblePages);
-    const maxVisible = Math.max(...visiblePages);
-
-    const pagesToInclude = new Set<number>();
-
-    // Pre-load first few pages of the range (instead of always pages 1-3)
-    for (let i = rangeStart; i <= Math.min(rangeStart + 2, rangeEnd); i++) {
-      pagesToInclude.add(i);
-    }
-
-    const bufferSize = 5;
-    for (
-      let i = Math.max(rangeStart, minVisible - bufferSize);
-      i <= Math.min(rangeEnd, maxVisible + bufferSize);
-      i++
-    ) {
-      pagesToInclude.add(i);
-    }
-
-    return {
-      pages: Array.from(pagesToInclude).sort((a, b) => a - b),
-      estimatedPageHeight,
-    };
-  }, [numPages, visiblePages, pageHeights, scale, rangeStart, rangeEnd]);
-
   const showLoadingOverlay = isLoading || (file && !numPages);
 
   if (loadError) {
@@ -747,12 +824,14 @@ export const PdfPreviewImpl = ({
               rangeStart={rangeStart}
               rangeEnd={rangeEnd}
               visiblePages={visiblePages}
-              pagesToRender={pagesToRender.pages}
-              estimatedPageHeight={pagesToRender.estimatedPageHeight}
+              estimatedPageHeight={estimatedPageHeight}
               pageHeights={pageHeights}
               pageRefs={pageRefs}
               observerRef={observerRef}
               scale={scale}
+              devicePixelRatio={devicePixelRatio}
+              currentPage={currentPage}
+              renderTextLayer={renderTextLayer}
               handleLoadPage={handleLoadPage}
               handleClickOnPage={handleClickOnPage}
               showHighlights={showHighlights}
@@ -770,12 +849,14 @@ function VirtualizedPageList({
   rangeStart,
   rangeEnd,
   visiblePages,
-  pagesToRender,
   estimatedPageHeight,
   pageHeights,
   pageRefs,
   observerRef,
   scale,
+  devicePixelRatio,
+  currentPage,
+  renderTextLayer,
   handleLoadPage,
   handleClickOnPage,
   showHighlights,
@@ -785,46 +866,39 @@ function VirtualizedPageList({
   rangeStart: number;
   rangeEnd: number;
   visiblePages: Set<number>;
-  pagesToRender: number[];
   estimatedPageHeight: number;
   pageHeights: { [key: number]: number };
   pageRefs: React.MutableRefObject<{ [key: number]: HTMLDivElement | null }>;
   observerRef: React.MutableRefObject<IntersectionObserver | null>;
   scale: number;
+  devicePixelRatio: number;
+  currentPage: number;
+  renderTextLayer: boolean;
   handleLoadPage: (page: PageCallback) => void;
   handleClickOnPage: () => void;
   showHighlights: boolean;
   highlightsByPage: { [page: number]: BoundingBox[] };
   pageBaseDims: PageBaseDims;
 }) {
-  const firstRenderedPage = pagesToRender[0] || rangeStart;
-  const lastRenderedPage = pagesToRender[pagesToRender.length - 1] || rangeEnd;
-
-  const heightBefore = useMemo(() => {
-    let height = 0;
-    for (let i = rangeStart; i < firstRenderedPage; i++) {
-      height += (pageHeights[i] || estimatedPageHeight) + 16;
+  // A lightweight placeholder div is rendered for EVERY page in range so the
+  // document height is always correct and the IntersectionObserver always has a
+  // target at any scroll position. Only pages in `visiblePages` mount the heavy
+  // <Page> (canvas + text layer); the rest are cheap sized placeholders.
+  const allPages = useMemo(() => {
+    const pages: number[] = [];
+    for (let i = rangeStart; i <= rangeEnd; i++) {
+      pages.push(i);
     }
-    return height;
-  }, [rangeStart, firstRenderedPage, pageHeights, estimatedPageHeight]);
-
-  const heightAfter = useMemo(() => {
-    let height = 0;
-    for (let i = lastRenderedPage + 1; i <= rangeEnd; i++) {
-      height += (pageHeights[i] || estimatedPageHeight) + 16;
-    }
-    return height;
-  }, [lastRenderedPage, rangeEnd, pageHeights, estimatedPageHeight]);
+    return pages;
+  }, [rangeStart, rangeEnd]);
 
   return (
     <>
-      {heightBefore > 0 && (
-        <div style={{ height: `${heightBefore}px` }} aria-hidden="true" />
-      )}
-
-      {pagesToRender.map((pageNumber) => {
+      {allPages.map((pageNumber) => {
         const isVisible = visiblePages.has(pageNumber);
-        const pageHeight = pageHeights[pageNumber];
+        // Reserve the page's known height, or the estimate, so placeholder and
+        // rendered layouts agree with the cumulative-height scroll model.
+        const reservedHeight = pageHeights[pageNumber] || estimatedPageHeight;
 
         return (
           <div
@@ -842,12 +916,12 @@ function VirtualizedPageList({
             data-page-number={pageNumber}
             className="mb-4 flex justify-center min-w-max"
             style={
-              !isVisible && pageHeight
-                ? {
-                    height: `${pageHeight}px`,
-                    minHeight: `${pageHeight}px`,
+              isVisible
+                ? undefined
+                : {
+                    height: `${reservedHeight}px`,
+                    minHeight: `${reservedHeight}px`,
                   }
-                : undefined
             }
           >
             {isVisible ? (
@@ -855,7 +929,10 @@ function VirtualizedPageList({
                 <Page
                   pageNumber={pageNumber}
                   scale={scale}
-                  renderTextLayer={true}
+                  devicePixelRatio={devicePixelRatio}
+                  renderTextLayer={
+                    renderTextLayer && Math.abs(pageNumber - currentPage) <= 1
+                  }
                   renderAnnotationLayer={true}
                   onLoadSuccess={handleLoadPage}
                   onClick={handleClickOnPage}
@@ -874,29 +951,13 @@ function VirtualizedPageList({
                   )}
               </div>
             ) : (
-              <div
-                className="relative inline-block bg-gray-100 flex items-center justify-center"
-                style={
-                  pageHeight
-                    ? {
-                        width: "100%",
-                        height: `${pageHeight}px`,
-                        minHeight: `${pageHeight}px`,
-                      }
-                    : { minHeight: `${estimatedPageHeight}px` }
-                }
-              >
+              <div className="relative inline-block w-full h-full bg-gray-100 flex items-center justify-center">
                 <span className="text-gray-400 text-sm">Page {pageNumber}</span>
               </div>
             )}
           </div>
         );
       })}
-
-      {/* Spacer for pages after rendered range */}
-      {heightAfter > 0 && (
-        <div style={{ height: `${heightAfter}px` }} aria-hidden="true" />
-      )}
     </>
   );
 }
