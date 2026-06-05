@@ -294,7 +294,8 @@ export const PdfPreviewImpl = ({
           PAGE_GAP
         );
         const pageHeight = pageHeights[targetPage] || estimatedPageHeight;
-        const top = pageTop - Math.max(0, (container.clientHeight - pageHeight) / 2);
+        const top =
+          pageTop - Math.max(0, (container.clientHeight - pageHeight) / 2);
         container.scrollTo({ top: Math.max(0, top), behavior: "instant" });
       }
       // ...then settle to the page's real position as it (and its neighbours)
@@ -324,7 +325,8 @@ export const PdfPreviewImpl = ({
       if (el) {
         const top = Math.max(
           0,
-          el.offsetTop - Math.max(0, (container.clientHeight - el.offsetHeight) / 2)
+          el.offsetTop -
+            Math.max(0, (container.clientHeight - el.offsetHeight) / 2)
         );
         container.scrollTop = top;
         stableFrames = Math.abs(top - lastTop) < 1 ? stableFrames + 1 : 0;
@@ -916,7 +918,10 @@ function VirtualizedPageList({
             style={
               isVisible
                 ? undefined
-                : { height: `${reservedHeight}px`, minHeight: `${reservedHeight}px` }
+                : {
+                    height: `${reservedHeight}px`,
+                    minHeight: `${reservedHeight}px`,
+                  }
             }
           >
             {isVisible ? (
