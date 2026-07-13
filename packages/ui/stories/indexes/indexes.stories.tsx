@@ -18,7 +18,7 @@ function IndexListDemo() {
         </button>
       </div>
       {loading && <div>Loading...</div>}
-      {error && <div className="text-red-600">Error: {error}</div>}
+      {error && <div className="text-destructive">Error: {error}</div>}
       {!loading && !error && (
         <ul className="list-disc pl-5">
           {indexes.map((p) => (
@@ -46,7 +46,7 @@ function IndexDetailDemo(props: { id: string }) {
         </button>
       </div>
       {loading && <div>Loading...</div>}
-      {error && <div className="text-red-600">Error: {error}</div>}
+      {error && <div className="text-destructive">Error: {error}</div>}
       {index && (
         <pre className="bg-muted p-3 rounded text-xs overflow-auto">
           {JSON.stringify(index, null, 2)}

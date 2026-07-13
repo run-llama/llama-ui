@@ -131,11 +131,11 @@ export function FileDropzone({
     return renderFileRow(selectedFiles[0]);
   };
 
-  // Custom dashed border with wider spacing (8px dash, 8px gap)
-  const borderColor =
-    hasFiles && !disabled && isDragging
-      ? "var(--muted-foreground)"
-      : "var(--ring)";
+  // Custom dashed border with wider spacing (8px dash, 8px gap).
+  // Applied via `currentColor` + a token text-color class because SVG
+  // presentation attributes (stroke="…") do not resolve CSS var() references.
+  const borderColorClass =
+    hasFiles && !disabled && isDragging ? "text-muted-foreground" : "text-ring";
 
   return (
     <div
@@ -179,13 +179,14 @@ export function FileDropzone({
           fill="none"
         >
           <rect
+            className={borderColorClass}
             x="0"
             y="0"
             width="100%"
             height="100%"
             rx="16"
             ry="16"
-            stroke={borderColor}
+            stroke="currentColor"
             strokeWidth="1"
             strokeDasharray="8 8"
             strokeLinecap="square"
