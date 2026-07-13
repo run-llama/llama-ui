@@ -41,8 +41,8 @@ export const Basic: Story = {
       <div className="space-y-4">
         <FileUploader {...args} onSuccess={handleSuccess} />
         {isSubmitted && (
-          <div className="p-4 bg-green-50 rounded-lg">
-            <p className="text-green-700">File uploaded successfully!</p>
+          <div className="p-4 bg-success-muted rounded-lg">
+            <p className="text-success">File uploaded successfully!</p>
           </div>
         )}
       </div>
@@ -98,11 +98,11 @@ export const MultipleFiles: Story = {
       <div className="space-y-4">
         <FileUploader {...args} onSuccess={handleSuccess} />
         {submissions.length > 0 && (
-          <div className="p-4 bg-green-50 rounded-lg">
-            <h3 className="font-semibold text-green-700 mb-2">
+          <div className="p-4 bg-success-muted rounded-lg">
+            <h3 className="font-semibold text-success mb-2">
               Successfully uploaded files:
             </h3>
-            <ul className="text-green-600 text-sm">
+            <ul className="text-success text-sm">
               {submissions.map((fileName, index) => (
                 <li key={index}>✓ {fileName}</li>
               ))}
@@ -142,8 +142,8 @@ export const WithSelectFile: Story = {
 
     return (
       <div className="space-y-4">
-        <div className="p-4 bg-blue-50 rounded-lg">
-          <p className="text-blue-700 text-sm">
+        <div className="p-4 bg-info-muted rounded-lg">
+          <p className="text-info text-sm">
             <strong>Note:</strong> This story demonstrates the &quot;Select
             file&quot; tab. Click the button in the &quot;Select file&quot; tab
             to see the callback in action.
@@ -151,8 +151,8 @@ export const WithSelectFile: Story = {
         </div>
         <FileUploader {...args} onSuccess={handleSuccess} />
         {isSubmitted && (
-          <div className="p-4 bg-green-50 rounded-lg">
-            <p className="text-green-700">File uploaded successfully!</p>
+          <div className="p-4 bg-success-muted rounded-lg">
+            <p className="text-success">File uploaded successfully!</p>
           </div>
         )}
       </div>
@@ -253,11 +253,11 @@ export const WithAPIErrors: StoryObj<typeof FileUploader> = {
         <FileUploader {...args} onSuccess={handleSuccess} />
 
         {successfulUploads.length > 0 && (
-          <div className="p-4 bg-green-50 rounded-lg">
-            <h3 className="font-semibold text-green-700 mb-2">
+          <div className="p-4 bg-success-muted rounded-lg">
+            <h3 className="font-semibold text-success mb-2">
               ✅ Successful Uploads (processed by onSuccess):
             </h3>
-            <ul className="text-green-600 text-sm">
+            <ul className="text-success text-sm">
               {successfulUploads.map((fileName, index) => (
                 <li key={index}>• {fileName}</li>
               ))}

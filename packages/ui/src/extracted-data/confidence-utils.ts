@@ -4,7 +4,7 @@ export function getConfidenceBackgroundClass(
 ): string {
   if (!confidence || confidence === 0) return "";
 
-  return confidence < threshold ? "bg-orange-50" : "";
+  return confidence < threshold ? "bg-warning-muted" : "";
 }
 
 export function getConfidenceBorderClass(
@@ -14,6 +14,6 @@ export function getConfidenceBorderClass(
   if (!confidence || confidence === 0) return "";
 
   return confidence < threshold
-    ? "border-b-2 border-orange-300"
-    : "border-b border-gray-200";
+    ? "border-b-2 border-warning"
+    : "border-b border-border";
 }

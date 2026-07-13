@@ -219,7 +219,7 @@ export const Basic: Story = {
     let orangeBackgroundCount = 0;
 
     for (const input of allInputs) {
-      if (input.classList.contains("bg-orange-50")) {
+      if (input.classList.contains("bg-warning-muted")) {
         orangeBackgroundCount++;
       }
     }
@@ -242,7 +242,7 @@ export const Basic: Story = {
 
     // High confidence fields should not have orange background
     if (highConfidenceInput) {
-      expect(highConfidenceInput).not.toHaveClass("bg-orange-50"); // Should not have orange background
+      expect(highConfidenceInput).not.toHaveClass("bg-warning-muted"); // Should not have orange background
     }
 
     // Test: Nested period required fields should show required indicator
@@ -297,12 +297,12 @@ export const Basic: Story = {
       await new Promise((resolve) => setTimeout(resolve, 500));
       const receiptFieldsRetry = canvas.getAllByText("NEW123");
       const changedReceiptField = receiptFieldsRetry[0].closest(
-        '[class*="bg-green-50"]'
+        '[class*="bg-success-muted"]'
       );
       expect(changedReceiptField).toBeInTheDocument();
     } else {
       const changedReceiptField = receiptFields[0].closest(
-        '[class*="bg-green-50"]'
+        '[class*="bg-success-muted"]'
       );
       expect(changedReceiptField).toBeInTheDocument();
     }
@@ -321,7 +321,7 @@ export const Basic: Story = {
     await new Promise((resolve) => setTimeout(resolve, 300));
     const merchantFields = canvas.getAllByText(/Updated Company LLC/);
     const changedMerchantField = merchantFields[0].closest(
-      '[class*="bg-green-50"]'
+      '[class*="bg-success-muted"]'
     );
     expect(changedMerchantField).toBeInTheDocument();
 
@@ -344,7 +344,7 @@ export const Basic: Story = {
 
     // Verify the updated tag has green background
     const tagGreenBg = highPriorityElements[0].closest(
-      '[class*="bg-green-50"]'
+      '[class*="bg-success-muted"]'
     );
     expect(tagGreenBg).toBeInTheDocument();
 
@@ -366,7 +366,7 @@ export const Basic: Story = {
 
     // Verify the updated table cell has green background
     const tableGreenBg = updatedLabourElements[0].closest(
-      '[class*="bg-green-50"]'
+      '[class*="bg-success-muted"]'
     );
     expect(tableGreenBg).toBeInTheDocument();
   },

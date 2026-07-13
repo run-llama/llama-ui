@@ -4,7 +4,6 @@ import { Square, Circle } from "lucide-react";
 
 import { Card, CardContent, CardFooter, CardHeader } from "../../base/card";
 import { Button } from "../../base/button";
-import { ThemeComparison } from "./theme-comparison";
 
 type CardStoryProps = {
   title: string;
@@ -135,37 +134,31 @@ export const Playground: Story = {
     showSecondaryAction: true,
     showTertiaryAction: true,
   },
-  render: (args) => (
-    <ThemeComparison>
-      <CardPlayground {...args} />
-    </ThemeComparison>
-  ),
+  render: (args) => <CardPlayground {...args} />,
 };
 
 export const Example: Story = {
   render: () => (
-    <ThemeComparison>
-      <Card className="w-[400px]">
-        <CardHeader
-          icon={<Square />}
-          title="Title Text"
-          description="This is a card description."
-          action={{
-            label: "Button",
-            variant: "outline",
-            startIcon: <Circle />,
-          }}
-        />
-        <CardContent>
-          <SlotPlaceholder />
-          <SlotPlaceholder />
-        </CardContent>
-        <CardFooter
-          tertiaryAction={<Button variant="link" label="Button" />}
-          secondaryAction={<Button variant="outline" label="Button" />}
-          primaryAction={<Button label="Button" />}
-        />
-      </Card>
-    </ThemeComparison>
+    <Card className="w-[400px]">
+      <CardHeader
+        icon={<Square />}
+        title="Title Text"
+        description="This is a card description."
+        action={{
+          label: "Button",
+          variant: "outline",
+          startIcon: <Circle />,
+        }}
+      />
+      <CardContent>
+        <SlotPlaceholder />
+        <SlotPlaceholder />
+      </CardContent>
+      <CardFooter
+        tertiaryAction={<Button variant="link" label="Button" />}
+        secondaryAction={<Button variant="outline" label="Button" />}
+        primaryAction={<Button label="Button" />}
+      />
+    </Card>
   ),
 };

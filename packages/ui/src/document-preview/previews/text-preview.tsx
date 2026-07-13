@@ -100,9 +100,9 @@ export function TextPreview({
         onDownload={onDownload}
         onRemove={onRemove}
       />
-      <div className="flex-1 overflow-auto bg-gray-50">
+      <div className="flex-1 overflow-auto bg-muted">
         <div className="relative h-full w-full">
-          <pre className="absolute inset-0 whitespace-pre-wrap bg-gray-50/80 p-6 font-mono text-sm leading-relaxed text-gray-800">
+          <pre className="absolute inset-0 whitespace-pre-wrap bg-muted/80 p-6 font-mono text-sm leading-relaxed text-foreground">
             {fileContent}
           </pre>
         </div>

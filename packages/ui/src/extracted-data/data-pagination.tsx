@@ -38,7 +38,7 @@ export function DataPagination({
             )}
           />
         </PaginationItem>
-        <span className="text-sm text-gray-500 mx-2">
+        <span className="text-sm text-muted-foreground mx-2">
           Page {currentPage} / {totalPages} - {totalItems} items
         </span>
         <PaginationItem>

@@ -222,7 +222,7 @@ function PdfHighlightTestsComponent(props: Parameters<typeof PdfPreview>[0]) {
         style={{
           width: "320px",
           padding: "16px",
-          borderRight: "1px solid #ddd",
+          borderRight: "1px solid var(--border)",
           overflowY: "auto",
         }}
       >
@@ -238,7 +238,7 @@ function PdfHighlightTestsComponent(props: Parameters<typeof PdfPreview>[0]) {
           </h3>
           <div
             data-testid="update-counter"
-            style={{ fontSize: "12px", color: "#666" }}
+            style={{ fontSize: "12px", color: "var(--muted-foreground)" }}
           >
             Updates: {updateCount}
           </div>
@@ -249,7 +249,7 @@ function PdfHighlightTestsComponent(props: Parameters<typeof PdfPreview>[0]) {
           style={{
             marginBottom: "16px",
             padding: "8px",
-            background: "#f5f5f5",
+            background: "var(--muted)",
             borderRadius: "4px",
           }}
         >
@@ -291,9 +291,10 @@ function PdfHighlightTestsComponent(props: Parameters<typeof PdfPreview>[0]) {
               style={{
                 padding: "6px 8px",
                 fontSize: "12px",
-                border: "1px solid #ddd",
+                border: "1px solid var(--border)",
                 borderRadius: "4px",
-                background: "white",
+                background: "var(--card)",
+                color: "var(--foreground)",
                 cursor: "pointer",
               }}
             >
@@ -305,9 +306,10 @@ function PdfHighlightTestsComponent(props: Parameters<typeof PdfPreview>[0]) {
               style={{
                 padding: "6px 8px",
                 fontSize: "12px",
-                border: "1px solid #ddd",
+                border: "1px solid var(--border)",
                 borderRadius: "4px",
-                background: "white",
+                background: "var(--card)",
+                color: "var(--foreground)",
                 cursor: "pointer",
               }}
             >
@@ -319,9 +321,10 @@ function PdfHighlightTestsComponent(props: Parameters<typeof PdfPreview>[0]) {
               style={{
                 padding: "6px 8px",
                 fontSize: "12px",
-                border: "1px solid #ddd",
+                border: "1px solid var(--border)",
                 borderRadius: "4px",
-                background: "white",
+                background: "var(--card)",
+                color: "var(--foreground)",
                 cursor: "pointer",
               }}
             >
@@ -333,9 +336,10 @@ function PdfHighlightTestsComponent(props: Parameters<typeof PdfPreview>[0]) {
               style={{
                 padding: "6px 8px",
                 fontSize: "12px",
-                border: "1px solid #ddd",
+                border: "1px solid var(--border)",
                 borderRadius: "4px",
-                background: "white",
+                background: "var(--card)",
+                color: "var(--foreground)",
                 cursor: "pointer",
               }}
             >
@@ -361,9 +365,10 @@ function PdfHighlightTestsComponent(props: Parameters<typeof PdfPreview>[0]) {
               style={{
                 padding: "6px 8px",
                 fontSize: "12px",
-                border: "1px solid #ddd",
+                border: "1px solid var(--border)",
                 borderRadius: "4px",
-                background: "white",
+                background: "var(--card)",
+                color: "var(--foreground)",
                 cursor: "pointer",
               }}
             >
@@ -375,9 +380,10 @@ function PdfHighlightTestsComponent(props: Parameters<typeof PdfPreview>[0]) {
               style={{
                 padding: "6px 8px",
                 fontSize: "12px",
-                border: "1px solid #ddd",
+                border: "1px solid var(--border)",
                 borderRadius: "4px",
-                background: "white",
+                background: "var(--card)",
+                color: "var(--foreground)",
                 cursor: "pointer",
               }}
             >
@@ -403,9 +409,10 @@ function PdfHighlightTestsComponent(props: Parameters<typeof PdfPreview>[0]) {
               style={{
                 padding: "6px 8px",
                 fontSize: "12px",
-                border: "1px solid #ddd",
+                border: "1px solid var(--border)",
                 borderRadius: "4px",
-                background: "white",
+                background: "var(--card)",
+                color: "var(--foreground)",
                 cursor: "pointer",
               }}
             >
@@ -417,9 +424,10 @@ function PdfHighlightTestsComponent(props: Parameters<typeof PdfPreview>[0]) {
               style={{
                 padding: "6px 8px",
                 fontSize: "12px",
-                border: "1px solid #ddd",
+                border: "1px solid var(--border)",
                 borderRadius: "4px",
-                background: "white",
+                background: "var(--card)",
+                color: "var(--foreground)",
                 cursor: "pointer",
               }}
             >
@@ -445,7 +453,8 @@ function PdfHighlightTestsComponent(props: Parameters<typeof PdfPreview>[0]) {
               maxHeight: "200px",
               overflowY: "auto",
               padding: "8px",
-              background: "#f9f9f9",
+              background: "var(--muted)",
+              color: "var(--foreground)",
               borderRadius: "4px",
               fontSize: "10px",
               fontFamily: "monospace",
@@ -650,25 +659,25 @@ function WithRemoveExample(props: Parameters<typeof PdfPreview>[0]) {
 
   if (isRemoved) {
     return (
-      <div className="h-screen flex items-center justify-center bg-gray-50">
+      <div className="h-screen flex items-center justify-center bg-muted">
         <div className="text-center">
           <div className="text-6xl mb-4">🗑️</div>
-          <h2 className="text-xl font-semibold text-gray-700 mb-2">
+          <h2 className="text-xl font-semibold text-foreground mb-2">
             PDF Removed
           </h2>
-          <p className="text-gray-500 mb-4">
+          <p className="text-muted-foreground mb-4">
             The PDF "{props.fileName || "document"}" has been removed.
           </p>
           <button
             onClick={() => setIsRemoved(false)}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90"
           >
             Restore PDF
           </button>
           {removeLog.length > 0 && (
-            <div className="mt-4 p-4 bg-gray-100 rounded text-left max-w-md">
+            <div className="mt-4 p-4 bg-muted rounded text-left max-w-md">
               <h3 className="font-semibold mb-2">Remove Log:</h3>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-muted-foreground">
                 {removeLog.map((log, index) => (
                   <div key={index}>{log}</div>
                 ))}
@@ -712,14 +721,14 @@ function UploadAndPreviewExample(props: Parameters<typeof PdfPreview>[0]) {
   return (
     <div className="h-screen flex flex-col">
       {/* Upload Section */}
-      <div className="p-4 border-b bg-gray-50">
+      <div className="p-4 border-b bg-muted">
         <h2 className="text-lg font-semibold mb-2">PDF Upload & Preview</h2>
         <input
           type="file"
           accept=".pdf,application/pdf"
           onChange={handleFileChange}
           data-testid="pdf-file-input"
-          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
         />
       </div>
 
@@ -731,7 +740,7 @@ function UploadAndPreviewExample(props: Parameters<typeof PdfPreview>[0]) {
           </div>
         ) : (
           <div
-            className="flex items-center justify-center h-full text-gray-500"
+            className="flex items-center justify-center h-full text-muted-foreground"
             data-testid="no-pdf-selected"
           >
             <div className="text-center">

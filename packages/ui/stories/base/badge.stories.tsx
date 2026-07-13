@@ -2,7 +2,6 @@ import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Check, AlertTriangle } from "lucide-react";
 import { Badge } from "../../base/badge";
-import { ThemeComparison } from "./theme-comparison";
 
 const meta: Meta<typeof Badge> = {
   title: "Base/Badge",
@@ -33,11 +32,7 @@ export const Default: Story = {
   args: {
     label: "Badge",
   },
-  render: (args) => (
-    <ThemeComparison>
-      <Badge {...args} />
-    </ThemeComparison>
-  ),
+  render: (args) => <Badge {...args} />,
 };
 
 export const WithIcon: Story = {
@@ -45,28 +40,22 @@ export const WithIcon: Story = {
     label: "Badge with Icon",
     icon: <Check />,
   },
-  render: (args) => (
-    <ThemeComparison>
-      <Badge {...args} />
-    </ThemeComparison>
-  ),
+  render: (args) => <Badge {...args} />,
 };
 
 export const Variants: Story = {
   render: () => (
-    <ThemeComparison>
-      <div className="flex gap-2">
-        <Badge variant="default" label="Default" />
-        <Badge variant="secondary" label="Secondary" />
-        <Badge variant="outline" label="Outline" />
-        <Badge
-          variant="destructive"
-          icon={<AlertTriangle />}
-          label="Destructive"
-        />
-        <Badge variant="warning" icon={<AlertTriangle />} label="Warning" />
-        <Badge variant="success" icon={<Check />} label="Success" />
-      </div>
-    </ThemeComparison>
+    <div className="flex gap-2">
+      <Badge variant="default" label="Default" />
+      <Badge variant="secondary" label="Secondary" />
+      <Badge variant="outline" label="Outline" />
+      <Badge
+        variant="destructive"
+        icon={<AlertTriangle />}
+        label="Destructive"
+      />
+      <Badge variant="warning" icon={<AlertTriangle />} label="Warning" />
+      <Badge variant="success" icon={<Check />} label="Success" />
+    </div>
   ),
 };

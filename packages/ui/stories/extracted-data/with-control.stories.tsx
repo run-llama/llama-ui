@@ -56,9 +56,9 @@ export const WithControl: Story = {
     // Wait for the UI to update
     await new Promise((resolve) => setTimeout(resolve, 200));
 
-    // Test that invoice number field has orange background (bg-orange-50)
+    // Test that invoice number field has orange background (bg-warning-muted)
     const invoiceNumberField = invoiceNumberValue.closest(
-      '[class*="bg-orange-50"]'
+      '[class*="bg-warning-muted"]'
     );
     expect(invoiceNumberField).toBeInTheDocument();
 
@@ -70,7 +70,7 @@ export const WithControl: Story = {
 
     // Test that invoice number field no longer has orange background
     const invoiceNumberFieldAfter = invoiceNumberValue.closest(
-      '[class*="bg-orange-50"]'
+      '[class*="bg-warning-muted"]'
     );
     expect(invoiceNumberFieldAfter).not.toBeInTheDocument();
   },

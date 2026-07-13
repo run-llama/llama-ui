@@ -105,7 +105,7 @@ export const Basic: Story = {
     // Test that the edited item now has green background
     const updatedItem = canvas
       .getByText("updated urgent")
-      .closest('[class*="bg-green-50"]');
+      .closest('[class*="bg-success-muted"]');
     expect(updatedItem).toBeInTheDocument();
 
     // Test adding a new item
@@ -372,7 +372,7 @@ export const NumberArray: Story = {
     // Verify the item was updated and shows green background
     const updatedItem = canvas
       .getByText("90")
-      .closest('[class*="bg-green-50"]');
+      .closest('[class*="bg-success-muted"]');
     expect(updatedItem).toBeInTheDocument();
 
     // Test that number fields cannot be saved as empty (required validation)
@@ -512,7 +512,7 @@ export const BooleanArray: Story = {
     // Verify the item was updated and shows green background
     const updatedItems = canvas.getAllByText("false");
     const hasGreenBackground = updatedItems.some((item) =>
-      item.closest('[class*="bg-green-50"]')
+      item.closest('[class*="bg-success-muted"]')
     );
     expect(hasGreenBackground).toBe(true);
   },

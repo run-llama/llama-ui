@@ -177,7 +177,7 @@ export const FileToolbar = ({
   return (
     <div
       className={cn(
-        "flex h-12 items-center justify-between gap-3 px-6 border-b bg-white",
+        "flex h-12 items-center justify-between gap-3 px-6 border-b bg-background",
         className
       )}
     >

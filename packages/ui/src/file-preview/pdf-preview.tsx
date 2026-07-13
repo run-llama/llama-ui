@@ -54,8 +54,10 @@ const PdfPreview = memo(
       <Suspense
         fallback={
           <div className="flex items-center justify-center p-8">
-            <Clock className="h-6 w-6 animate-pulse text-gray-400" />
-            <span className="ml-2 text-gray-600">Loading PDF viewer...</span>
+            <Clock className="h-6 w-6 animate-pulse text-muted-foreground" />
+            <span className="ml-2 text-muted-foreground">
+              Loading PDF viewer...
+            </span>
           </div>
         }
       >

@@ -62,10 +62,10 @@ export const Default: Story = {
   render: (args) => (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-foreground">
           Extracted Data Management
         </h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-muted-foreground mt-2">
           Pre-configured grid for extracted data with all standard columns
         </p>
       </div>
@@ -95,10 +95,10 @@ export const Customized: Story = {
   render: (args) => (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-foreground">
           Customized Extracted Data Grid
         </h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-muted-foreground mt-2">
           Built-in columns with custom headers and configuration
         </p>
       </div>
@@ -134,10 +134,10 @@ export const WithCustomColumns: Story = {
   render: (args) => (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-foreground">
           Extracted Data with Custom Columns
         </h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-muted-foreground mt-2">
           Custom columns combined with built-in extracted data columns
         </p>
       </div>
@@ -159,10 +159,10 @@ export const Minimal: Story = {
   render: (args) => (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-foreground">
           Minimal Extracted Data Grid
         </h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-muted-foreground mt-2">
           Essential columns only for basic data display
         </p>
       </div>
@@ -186,10 +186,10 @@ export const WithInteraction: Story = {
   render: (args) => (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-foreground">
           Interactive Extracted Data Grid
         </h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-muted-foreground mt-2">
           Test sorting, filtering, and pagination
         </p>
       </div>

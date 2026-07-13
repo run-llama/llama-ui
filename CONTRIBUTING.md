@@ -51,6 +51,49 @@ pnpm test
 
 CI will run these as well.
 
+## Styling & dark mode
+
+Components must render correctly in both light and dark themes. The library
+ships a `.dark` palette in `packages/ui/src/styles.css`; every surface flips
+automatically **only if you style with semantic tokens instead of raw palette
+colors**.
+
+**Never** use raw Tailwind palette utilities (`text-gray-500`, `bg-red-600`,
+`border-zinc-200`, `bg-white`, `bg-[#F3F3F3]`, …) in `src/**`. They are frozen
+to a light value and become unreadable islands in dark mode. A lint guard
+(`scripts/color-token-guard.mjs`, run as part of `pnpm lint`) enforces this.
+
+Use the semantic tokens:
+
+| Raw color                                   | Semantic token            |
+| ------------------------------------------- | ------------------------- |
+| `text-gray-400/500`, `text-zinc-500`        | `text-muted-foreground`   |
+| `text-gray-600..900`, `text-zinc-900`, `text-black` | `text-foreground` |
+| `bg-white` (page/base surface)              | `bg-background`           |
+| `bg-white` (elevated card/panel)            | `bg-card` / `bg-popover`  |
+| `bg-gray-50/100`, `bg-neutral-100`          | `bg-muted`                |
+| `border-gray-200/300`                       | `border-border`           |
+| `ring-*`, `focus-visible:ring-*`            | `ring-ring` (`ring-ring/20`) |
+| `text-red-*`                                | `text-destructive`        |
+| `bg-red-600 text-white` (button)            | `bg-destructive text-destructive-foreground` |
+| `bg-green-50` / `text-green-*`              | `bg-success-muted` / `text-success` |
+| `bg-orange-50` / `border-orange-300`        | `bg-warning-muted` / `border-warning` |
+| status dots (`bg-green-500`, `bg-red-500`)  | `bg-success` / `bg-destructive` |
+| ad-hoc chart hex                            | `var(--viz-1..6)` / `bg-viz-*` |
+
+**Adding a token:** add the CSS variable to both `:root` and `.dark` in
+`src/styles.css`, then register it under `@theme inline` as
+`--color-<name>: var(--<name>)` so the `bg-<name>` / `text-<name>` utilities
+exist.
+
+**Intentional "paper":** rendered documents (DOCX/HTML/PDF pages, image
+canvas) stay white on purpose. Tag those elements with `data-paper` and keep
+`bg-white` — the guard does not flag `bg-white` (only `bg-*-<shade>` and
+`bg-[#...]`), but the attribute documents the intent.
+
+**Testing dark mode:** run `pnpm storybook` and use the **Theme** toggle in the
+toolbar (Light / Dark) to QA every story against the dark palette.
+
 ## Naming conventions
 
 - Use clear, descriptive names; avoid abbreviations.

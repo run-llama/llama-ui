@@ -737,14 +737,14 @@ export const PdfPreviewImpl = ({
           onRemove={onRemove}
           className={toolbarClassName}
         />
-        <div className="h-3 bg-[#F3F3F3]"></div>
-        <div className="relative flex-1 flex items-center justify-center bg-gray-50">
+        <div className="h-3 bg-muted"></div>
+        <div className="relative flex-1 flex items-center justify-center bg-muted">
           <div className="text-center max-w-md px-4">
-            <div className="text-red-500 text-4xl mb-4">⚠️</div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <div className="text-destructive text-4xl mb-4">⚠️</div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">
               Failed to Load PDF
             </h3>
-            <p className="text-sm text-gray-600 mb-4">{loadError}</p>
+            <p className="text-sm text-muted-foreground mb-4">{loadError}</p>
             <Button
               onClick={() => {
                 passwordCancelled.current = false;
@@ -765,17 +765,17 @@ export const PdfPreviewImpl = ({
   return (
     <div className="relative h-full flex flex-col">
       {showLoadingOverlay && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-50 bg-opacity-90 z-50">
-          <div className="bg-white shadow-lg rounded-2xl p-6 w-80 text-center">
+        <div className="absolute inset-0 flex items-center justify-center bg-background/90 z-50">
+          <div className="bg-card shadow-lg rounded-2xl p-6 w-80 text-center">
             <div className="flex justify-center mb-4">
               <div className="animate-spin rounded-full h-10 w-10 border-4 border-primary border-t-transparent"></div>
             </div>
 
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">
+            <h2 className="text-lg font-semibold text-foreground mb-2">
               Rendering PDF…
             </h2>
 
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               Large PDFs or those with heavy images may take longer to render.
             </p>
           </div>
@@ -809,7 +809,7 @@ export const PdfPreviewImpl = ({
 
       <div
         ref={containerRef}
-        className="overflow-auto h-full bg-[#F3F3F3] flex-1 min-h-0"
+        className="overflow-auto h-full bg-muted flex-1 min-h-0"
       >
         <Document
           file={file}
@@ -951,8 +951,10 @@ function VirtualizedPageList({
                   )}
               </div>
             ) : (
-              <div className="relative inline-block w-full h-full bg-gray-100 flex items-center justify-center">
-                <span className="text-gray-400 text-sm">Page {pageNumber}</span>
+              <div className="relative inline-block w-full h-full bg-muted flex items-center justify-center">
+                <span className="text-muted-foreground text-sm">
+                  Page {pageNumber}
+                </span>
               </div>
             )}
           </div>

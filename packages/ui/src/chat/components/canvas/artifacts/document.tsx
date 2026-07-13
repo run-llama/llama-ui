@@ -28,7 +28,7 @@ export function DocumentArtifactViewer({
   return (
     <div className={cn("flex min-h-0 flex-1 flex-col", className)}>
       <div className="flex items-center justify-between border-b px-4 py-2">
-        <h3 className="flex items-center gap-4 text-gray-600">
+        <h3 className="flex items-center gap-4 text-muted-foreground">
           <FileText className="text-primary size-5" />
         </h3>
         <ChatCanvasActions />

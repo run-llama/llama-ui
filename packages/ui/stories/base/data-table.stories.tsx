@@ -14,7 +14,6 @@ import {
   DropdownMenuTrigger,
 } from "../../base/dropdown-menu";
 import { ChevronDown, MoreHorizontal } from "lucide-react";
-import { ThemeComparison } from "./theme-comparison";
 
 // Sample data type matching the screenshot
 type Payment = {
@@ -354,11 +353,7 @@ export const Default: Story = {
     showEmptyState: false,
     showToolbar: true,
   },
-  render: (args) => (
-    <ThemeComparison>
-      <DataTableStory {...args} />
-    </ThemeComparison>
-  ),
+  render: (args) => <DataTableStory {...args} />,
 };
 
 export const WithoutToolbar: Story = {
@@ -369,11 +364,7 @@ export const WithoutToolbar: Story = {
     showEmptyState: false,
     showToolbar: false,
   },
-  render: (args) => (
-    <ThemeComparison>
-      <DataTableStory {...args} />
-    </ThemeComparison>
-  ),
+  render: (args) => <DataTableStory {...args} />,
 };
 
 export const Loading: Story = {
@@ -384,11 +375,7 @@ export const Loading: Story = {
     showEmptyState: false,
     showToolbar: true,
   },
-  render: (args) => (
-    <ThemeComparison>
-      <DataTableStory {...args} />
-    </ThemeComparison>
-  ),
+  render: (args) => <DataTableStory {...args} />,
 };
 
 export const Empty: Story = {
@@ -399,9 +386,5 @@ export const Empty: Story = {
     showEmptyState: true,
     showToolbar: true,
   },
-  render: (args) => (
-    <ThemeComparison>
-      <DataTableStory {...args} />
-    </ThemeComparison>
-  ),
+  render: (args) => <DataTableStory {...args} />,
 };

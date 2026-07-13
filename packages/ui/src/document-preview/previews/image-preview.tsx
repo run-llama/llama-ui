@@ -72,7 +72,7 @@ export const ImagePreview = ({
         onScaleChange={handleScaleChange}
         onRemove={onRemove}
       />
-      <div className="h-full flex-1 overflow-auto bg-gray-50">
+      <div className="h-full flex-1 overflow-auto bg-muted">
         <div className="relative inline-block w-full h-full">
           <img
             ref={imgRef}

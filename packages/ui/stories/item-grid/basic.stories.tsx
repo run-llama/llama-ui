@@ -75,8 +75,10 @@ export const Default: Story = {
   render: (args) => (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Generic Item Grid</h1>
-        <p className="text-gray-600 mt-2">
+        <h1 className="text-2xl font-bold text-foreground">
+          Generic Item Grid
+        </h1>
+        <p className="text-muted-foreground mt-2">
           Flexible grid component with custom column definitions
         </p>
       </div>
@@ -121,10 +123,10 @@ export const WithCustomColumns: Story = {
   render: (args) => (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-foreground">
           ItemGrid with Custom Columns
         </h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-muted-foreground mt-2">
           Generic grid component with custom column definitions
         </p>
       </div>
@@ -161,10 +163,10 @@ export const WithInteraction: Story = {
   render: (args) => (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-foreground">
           Interactive ItemGrid
         </h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-muted-foreground mt-2">
           Test sorting and pagination functionality
         </p>
       </div>
