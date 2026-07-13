@@ -42,10 +42,11 @@ export const FileObjectPreview = ({
         onScaleChange={handleScaleChange}
         onRemove={onRemove}
       />
-      <div className="h-full flex-1 overflow-auto bg-gray-50">
+      <div className="h-full flex-1 overflow-auto bg-muted">
         <object
           ref={containerRef}
           data={contentUrl}
+          data-paper
           className="h-full w-full bg-white"
           style={{
             transform: `scale(${scale})`,

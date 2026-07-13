@@ -129,8 +129,8 @@ export const WithSelectFile: Story = {
   },
   render: (args) => (
     <div className="space-y-4">
-      <div className="p-4 bg-blue-50 rounded-lg mx-4 mt-4">
-        <p className="text-blue-700 text-sm">
+      <div className="p-4 bg-info-muted rounded-lg mx-4 mt-4">
+        <p className="text-info text-sm">
           <strong>Note:</strong> This story demonstrates the &quot;Select
           file&quot; tab. Click the button in the &quot;Select file&quot; tab to
           see the callback in action.

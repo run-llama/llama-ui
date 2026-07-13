@@ -95,11 +95,11 @@ export const LowConfidence: Story = {
 
     // Test low confidence styling (orange border)
     const field = canvas.getByText("Low confidence value");
-    const container = field.closest('[class*="border-orange-300"]');
+    const container = field.closest('[class*="border-warning"]');
     expect(container).toBeInTheDocument();
 
     // Test low confidence background color (orange)
-    const backgroundContainer = field.closest('[class*="bg-orange-50"]');
+    const backgroundContainer = field.closest('[class*="bg-warning-muted"]');
     expect(backgroundContainer).toBeInTheDocument();
   },
 };
@@ -119,7 +119,7 @@ export const ChangedState: Story = {
 
     // Test changed state styling (green background)
     const field = canvas.getByText("Changed value");
-    const container = field.closest('[class*="bg-green-50"]');
+    const container = field.closest('[class*="bg-success-muted"]');
     expect(container).toBeInTheDocument();
   },
 };

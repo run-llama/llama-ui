@@ -45,7 +45,7 @@ const DialogPlayground = ({
         />
         {showSlot && (
           <div className="flex min-h-[200px] items-center justify-center rounded-md border-2 border-dashed border-purple-300 bg-purple-50 p-4">
-            <span className="text-sm text-gray-700">
+            <span className="text-sm text-foreground">
               Slot (swap it with your content)
             </span>
           </div>

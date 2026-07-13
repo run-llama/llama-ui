@@ -59,7 +59,7 @@ export function ExtractedDataDisplay<S extends JsonShape<S>>({
 
   if (!displayData || Object.keys(displayData).length === 0) {
     return (
-      <div className="text-sm text-gray-500 text-center py-4">
+      <div className="text-sm text-muted-foreground text-center py-4">
         {emptyMessage}
       </div>
     );

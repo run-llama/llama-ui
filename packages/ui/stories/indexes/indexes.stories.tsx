@@ -48,7 +48,7 @@ function IndexDetailDemo(props: { id: string }) {
       {loading && <div>Loading...</div>}
       {error && <div className="text-red-600">Error: {error}</div>}
       {index && (
-        <pre className="bg-slate-50 p-3 rounded text-xs overflow-auto">
+        <pre className="bg-muted p-3 rounded text-xs overflow-auto">
           {JSON.stringify(index, null, 2)}
         </pre>
       )}

@@ -193,7 +193,8 @@ export function DocxPreview({
         onReset={resetScale}
         onFullscreen={toggleFullscreen}
       />
-      <div className="flex-1 overflow-auto bg-white">
+      {/* Intentional paper: rendered DOCX documents assume a white canvas. */}
+      <div data-paper className="flex-1 overflow-auto bg-white">
         <div
           style={{
             transform: `scale(${scale})`,

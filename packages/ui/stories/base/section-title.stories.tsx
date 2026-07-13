@@ -3,7 +3,6 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Plus, RefreshCcw } from "lucide-react";
 
 import { SectionTitle } from "../../base/section-title";
-import { ThemeComparison } from "./theme-comparison";
 
 const meta = {
   title: "Base/SectionTitle",
@@ -22,11 +21,7 @@ export const Default: Story = {
     title: "Section Title",
     subtitle: "This is a subtitle providing context for the section.",
   },
-  render: (args) => (
-    <ThemeComparison>
-      <SectionTitle {...args} />
-    </ThemeComparison>
-  ),
+  render: (args) => <SectionTitle {...args} />,
 };
 
 export const WithActions: Story = {
@@ -42,20 +37,12 @@ export const WithActions: Story = {
       startIcon: <RefreshCcw />,
     },
   },
-  render: (args) => (
-    <ThemeComparison>
-      <SectionTitle {...args} />
-    </ThemeComparison>
-  ),
+  render: (args) => <SectionTitle {...args} />,
 };
 
 export const Simple: Story = {
   args: {
     title: "Configuration",
   },
-  render: (args) => (
-    <ThemeComparison>
-      <SectionTitle {...args} />
-    </ThemeComparison>
-  ),
+  render: (args) => <SectionTitle {...args} />,
 };

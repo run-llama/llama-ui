@@ -51,7 +51,7 @@ export function ArtifactCard({
         <Icon className="text-primary size-7 shrink-0" />
         <div className="flex flex-col">
           <div className="text-sm font-semibold">Version {versionNumber}</div>
-          <div className="text-xs text-gray-600">{title}</div>
+          <div className="text-xs text-muted-foreground">{title}</div>
         </div>
       </div>
       {isLatest ? (

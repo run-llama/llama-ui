@@ -144,13 +144,13 @@ export function EditableField<S extends PrimitiveValue>({
   const displayValue =
     value === null || value === undefined || value === "" ? "" : String(value);
   const backgroundClass = isChanged
-    ? "bg-green-50"
+    ? "bg-success-muted"
     : getConfidenceBackgroundClass(confidenceThreshold, currentConfidence);
-  const hoverClass = backgroundClass.includes("bg-orange-50")
-    ? "hover:bg-orange-100"
-    : backgroundClass.includes("bg-green-50")
-      ? "hover:bg-green-100"
-      : "hover:bg-gray-100";
+  const hoverClass = backgroundClass.includes("bg-warning-muted")
+    ? "hover:bg-warning/20"
+    : backgroundClass.includes("bg-success-muted")
+      ? "hover:bg-success/20"
+      : "hover:bg-muted";
   const defaultBorderClass = showBorder
     ? getConfidenceBorderClass(confidenceThreshold, currentConfidence)
     : "";
@@ -246,7 +246,9 @@ export function EditableField<S extends PrimitiveValue>({
       <PopoverContent className="w-80" align="start">
         <div className="space-y-3" data-testid="editable-field-popover">
           <div className="flex items-center gap-2">
-            <div className="text-sm font-medium text-gray-700">Edit Value</div>
+            <div className="text-sm font-medium text-foreground">
+              Edit Value
+            </div>
           </div>
 
           {renderEditInput()}

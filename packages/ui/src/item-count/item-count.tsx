@@ -19,17 +19,17 @@ export interface ItemCountProps {
 
 const variantStyles = {
   total: {
-    dot: "bg-gray-800",
-    subtitle: "text-gray-600",
+    dot: "bg-foreground",
+    subtitle: "text-muted-foreground",
   },
   awaiting: {
-    dot: "bg-orange-500",
+    dot: "bg-warning",
   },
   approved: {
-    dot: "bg-green-500",
+    dot: "bg-success",
   },
   rejected: {
-    dot: "bg-red-500",
+    dot: "bg-destructive",
   },
 };
 
@@ -78,7 +78,7 @@ export function ItemCount({
   }, [filter, client, config]);
 
   return (
-    <Card className="p-6 bg-white border border-gray-200 hover:shadow-md transition-shadow">
+    <Card className="p-6 bg-card border border-border hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2">
@@ -88,19 +88,23 @@ export function ItemCount({
 
           {loading && (
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
-              <span className="text-gray-500 text-sm">Loading...</span>
+              <div className="w-8 h-8 border-2 border-border border-t-muted-foreground rounded-full animate-spin"></div>
+              <span className="text-muted-foreground text-sm">Loading...</span>
             </div>
           )}
 
-          {error && <div className="text-red-500 text-sm">Error: {error}</div>}
+          {error && (
+            <div className="text-destructive text-sm">Error: {error}</div>
+          )}
 
           {count !== null && (
             <div>
               {subtitle && (
-                <p className={cn("text-sm", "text-zinc-500")}>{subtitle}</p>
+                <p className={cn("text-sm", "text-muted-foreground")}>
+                  {subtitle}
+                </p>
               )}
-              <p className="text-3xl font-bold text-gray-900 mt-3">
+              <p className="text-3xl font-bold text-foreground mt-3">
                 {count.toLocaleString()}
               </p>
             </div>

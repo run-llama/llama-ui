@@ -304,7 +304,7 @@ export function PropertyRenderer<S extends JsonShape<S>>({
   if (typeof value === "object") {
     return (
       <div className="relative">
-        <div className="pl-4 border-l-2 border-gray-200">
+        <div className="pl-4 border-l-2 border-border">
           {Object.entries(value).map(([key, val]) => {
             // If the value is an array of objects or object, show key on separate line
             if (shouldShowKeyOnSeparateLine(val)) {

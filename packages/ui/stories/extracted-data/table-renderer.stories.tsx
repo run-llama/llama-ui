@@ -209,7 +209,7 @@ export const BasicTable: Story = {
     // CRITICAL TEST: Verify that the edited cell now has green background
     const updatedCell = canvas
       .getByText("Updated Labour Charges")
-      .closest('[class*="bg-green-50"]');
+      .closest('[class*="bg-success-muted"]');
     expect(updatedCell).toBeInTheDocument();
 
     // Test adding a new row
@@ -514,7 +514,7 @@ export const DeepNestedTable: Story = {
     // CRITICAL TEST: Verify that the edited cell now has green background
     const updatedEmailCell = canvas
       .getByText("john.doe@example.com")
-      .closest('[class*="bg-green-50"]');
+      .closest('[class*="bg-success-muted"]');
     expect(updatedEmailCell).toBeInTheDocument();
   },
 };

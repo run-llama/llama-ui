@@ -17,11 +17,11 @@ export function ImagePreview({
       />
       <div
         className={cn(
-          "absolute -right-2 -top-2 z-10 hidden h-6 w-6 rounded-full bg-gray-500 text-white group-hover:block"
+          "absolute -right-2 -top-2 z-10 hidden h-6 w-6 rounded-full bg-muted-foreground text-background group-hover:block"
         )}
       >
         <XCircleIcon
-          className="h-6 w-6 rounded-full bg-gray-500 text-white"
+          className="h-6 w-6 rounded-full bg-muted-foreground text-background"
           onClick={onRemove}
         />
       </div>

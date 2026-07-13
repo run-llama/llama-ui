@@ -11,7 +11,6 @@ import {
 
 import { Badge } from "../../base/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../base/tabs";
-import { ThemeComparison } from "./theme-comparison";
 
 type TabsStoryProps = {
   variant: "default" | "underline";
@@ -117,87 +116,73 @@ export const Playground: Story = {
     tabCount: 3,
     defaultTab: "tab1",
   },
-  render: (args) => (
-    <ThemeComparison>
-      <TabsPlayground {...args} />
-    </ThemeComparison>
-  ),
+  render: (args) => <TabsPlayground {...args} />,
 };
 
 export const Default: Story = {
   render: () => (
-    <ThemeComparison>
-      <Tabs defaultValue="overview">
-        <TabsList>
-          <TabsTrigger value="overview" label="Overview" />
-          <TabsTrigger value="settings" label="Settings" />
-          <TabsTrigger value="help" label="Help" />
-        </TabsList>
-        <TabsContent value="overview">Overview content</TabsContent>
-        <TabsContent value="settings">Settings content</TabsContent>
-        <TabsContent value="help">Help content</TabsContent>
-      </Tabs>
-    </ThemeComparison>
+    <Tabs defaultValue="overview">
+      <TabsList>
+        <TabsTrigger value="overview" label="Overview" />
+        <TabsTrigger value="settings" label="Settings" />
+        <TabsTrigger value="help" label="Help" />
+      </TabsList>
+      <TabsContent value="overview">Overview content</TabsContent>
+      <TabsContent value="settings">Settings content</TabsContent>
+      <TabsContent value="help">Help content</TabsContent>
+    </Tabs>
   ),
 };
 
 export const WithIcons: Story = {
   render: () => (
-    <ThemeComparison>
-      <Tabs defaultValue="bot">
-        <TabsList>
-          <TabsTrigger value="bot" label="Chatbot" icon={Bot} />
-          <TabsTrigger value="search" label="Search" icon={Search} />
-        </TabsList>
-        <TabsContent value="bot">Chatbot content</TabsContent>
-        <TabsContent value="search">Search content</TabsContent>
-      </Tabs>
-    </ThemeComparison>
+    <Tabs defaultValue="bot">
+      <TabsList>
+        <TabsTrigger value="bot" label="Chatbot" icon={Bot} />
+        <TabsTrigger value="search" label="Search" icon={Search} />
+      </TabsList>
+      <TabsContent value="bot">Chatbot content</TabsContent>
+      <TabsContent value="search">Search content</TabsContent>
+    </Tabs>
   ),
 };
 
 export const Underline: Story = {
   render: () => (
-    <ThemeComparison>
-      <Tabs defaultValue="upload">
-        <TabsList variant="underline">
-          <TabsTrigger value="upload" label="Upload" />
-          <TabsTrigger value="url" label="URL" />
-        </TabsList>
-        <TabsContent value="upload">Upload content</TabsContent>
-        <TabsContent value="url">URL content</TabsContent>
-      </Tabs>
-    </ThemeComparison>
+    <Tabs defaultValue="upload">
+      <TabsList variant="underline">
+        <TabsTrigger value="upload" label="Upload" />
+        <TabsTrigger value="url" label="URL" />
+      </TabsList>
+      <TabsContent value="upload">Upload content</TabsContent>
+      <TabsContent value="url">URL content</TabsContent>
+    </Tabs>
   ),
 };
 
 export const UnderlineWithIcons: Story = {
   render: () => (
-    <ThemeComparison>
-      <Tabs defaultValue="build">
-        <TabsList variant="underline">
-          <TabsTrigger value="build" label="Build" icon={SlidersHorizontal} />
-          <TabsTrigger value="results" label="Results" icon={FileText} />
-        </TabsList>
-        <TabsContent value="build">Build content</TabsContent>
-        <TabsContent value="results">Results content</TabsContent>
-      </Tabs>
-    </ThemeComparison>
+    <Tabs defaultValue="build">
+      <TabsList variant="underline">
+        <TabsTrigger value="build" label="Build" icon={SlidersHorizontal} />
+        <TabsTrigger value="results" label="Results" icon={FileText} />
+      </TabsList>
+      <TabsContent value="build">Build content</TabsContent>
+      <TabsContent value="results">Results content</TabsContent>
+    </Tabs>
   ),
 };
 
 export const IconOnly: Story = {
   render: () => (
-    <ThemeComparison>
-      <Tabs defaultValue="table">
-        <TabsList>
-          <TabsTrigger value="table" icon={Table} />
-          <TabsTrigger value="code" icon={Code2} />
-        </TabsList>
-        <TabsContent value="table">Table view</TabsContent>
-        <TabsContent value="code">Code view</TabsContent>
-      </Tabs>
-    </ThemeComparison>
+    <Tabs defaultValue="table">
+      <TabsList>
+        <TabsTrigger value="table" icon={Table} />
+        <TabsTrigger value="code" icon={Code2} />
+      </TabsList>
+      <TabsContent value="table">Table view</TabsContent>
+      <TabsContent value="code">Code view</TabsContent>
+    </Tabs>
   ),
 };
 
@@ -207,67 +192,61 @@ export const WithBadge: Story = {
   },
 
   render: () => (
-    <ThemeComparison>
-      <Tabs defaultValue="all">
-        <TabsList>
-          <TabsTrigger
-            value="all"
-            label="All"
-            badge={<Badge label="12" variant="default" />}
-          />
-          <TabsTrigger
-            value="active"
-            label="Active"
-            badge={<Badge label="5" variant="default" />}
-          />
-          <TabsTrigger value="archived" label="Archived" />
-        </TabsList>
-        <TabsContent value="all">All items</TabsContent>
-        <TabsContent value="active">Active items</TabsContent>
-        <TabsContent value="archived">Archived items</TabsContent>
-      </Tabs>
-    </ThemeComparison>
+    <Tabs defaultValue="all">
+      <TabsList>
+        <TabsTrigger
+          value="all"
+          label="All"
+          badge={<Badge label="12" variant="default" />}
+        />
+        <TabsTrigger
+          value="active"
+          label="Active"
+          badge={<Badge label="5" variant="default" />}
+        />
+        <TabsTrigger value="archived" label="Archived" />
+      </TabsList>
+      <TabsContent value="all">All items</TabsContent>
+      <TabsContent value="active">Active items</TabsContent>
+      <TabsContent value="archived">Archived items</TabsContent>
+    </Tabs>
   ),
 };
 
 export const UnderlineWithBadge: Story = {
   render: () => (
-    <ThemeComparison>
-      <Tabs defaultValue="all">
-        <TabsList variant="underline">
-          <TabsTrigger
-            value="all"
-            label="All"
-            badge={<Badge label="12" variant="default" />}
-          />
-          <TabsTrigger
-            value="active"
-            label="Active"
-            badge={<Badge label="5" variant="default" />}
-          />
-          <TabsTrigger value="archived" label="Archived" />
-        </TabsList>
-        <TabsContent value="all">All items</TabsContent>
-        <TabsContent value="active">Active items</TabsContent>
-        <TabsContent value="archived">Archived items</TabsContent>
-      </Tabs>
-    </ThemeComparison>
+    <Tabs defaultValue="all">
+      <TabsList variant="underline">
+        <TabsTrigger
+          value="all"
+          label="All"
+          badge={<Badge label="12" variant="default" />}
+        />
+        <TabsTrigger
+          value="active"
+          label="Active"
+          badge={<Badge label="5" variant="default" />}
+        />
+        <TabsTrigger value="archived" label="Archived" />
+      </TabsList>
+      <TabsContent value="all">All items</TabsContent>
+      <TabsContent value="active">Active items</TabsContent>
+      <TabsContent value="archived">Archived items</TabsContent>
+    </Tabs>
   ),
 };
 
 export const Disabled: Story = {
   render: () => (
-    <ThemeComparison>
-      <Tabs defaultValue="overview">
-        <TabsList>
-          <TabsTrigger value="overview" label="Overview" />
-          <TabsTrigger value="settings" label="Settings" />
-          <TabsTrigger value="admin" label="Admin" disabled />
-        </TabsList>
-        <TabsContent value="overview">Overview content</TabsContent>
-        <TabsContent value="settings">Settings content</TabsContent>
-        <TabsContent value="admin">Admin content</TabsContent>
-      </Tabs>
-    </ThemeComparison>
+    <Tabs defaultValue="overview">
+      <TabsList>
+        <TabsTrigger value="overview" label="Overview" />
+        <TabsTrigger value="settings" label="Settings" />
+        <TabsTrigger value="admin" label="Admin" disabled />
+      </TabsList>
+      <TabsContent value="overview">Overview content</TabsContent>
+      <TabsContent value="settings">Settings content</TabsContent>
+      <TabsContent value="admin">Admin content</TabsContent>
+    </Tabs>
   ),
 };

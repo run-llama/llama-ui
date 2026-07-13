@@ -9,7 +9,6 @@ import {
   Settings,
 } from "lucide-react";
 import { Button } from "../../base/button";
-import { ThemeComparison } from "./theme-comparison";
 
 const meta: Meta<typeof Button> = {
   title: "Base/Button",
@@ -40,11 +39,7 @@ export const Default: Story = {
   args: {
     label: "Click me",
   },
-  render: (args) => (
-    <ThemeComparison>
-      <Button {...args} />
-    </ThemeComparison>
-  ),
+  render: (args) => <Button {...args} />,
 };
 
 export const Destructive: Story = {
@@ -53,11 +48,7 @@ export const Destructive: Story = {
     label: "Delete",
     startIcon: <Trash2 />,
   },
-  render: (args) => (
-    <ThemeComparison>
-      <Button {...args} />
-    </ThemeComparison>
-  ),
+  render: (args) => <Button {...args} />,
 };
 
 export const Outline: Story = {
@@ -66,11 +57,7 @@ export const Outline: Story = {
     label: "View Details",
     endIcon: <ChevronRight />,
   },
-  render: (args) => (
-    <ThemeComparison>
-      <Button {...args} />
-    </ThemeComparison>
-  ),
+  render: (args) => <Button {...args} />,
 };
 
 export const WithStartIcon: Story = {
@@ -78,11 +65,7 @@ export const WithStartIcon: Story = {
     label: "Email",
     startIcon: <Mail />,
   },
-  render: (args) => (
-    <ThemeComparison>
-      <Button {...args} />
-    </ThemeComparison>
-  ),
+  render: (args) => <Button {...args} />,
 };
 
 export const WithEndIcon: Story = {
@@ -90,11 +73,7 @@ export const WithEndIcon: Story = {
     label: "Next Step",
     endIcon: <ArrowRight />,
   },
-  render: (args) => (
-    <ThemeComparison>
-      <Button {...args} />
-    </ThemeComparison>
-  ),
+  render: (args) => <Button {...args} />,
 };
 
 export const WithBothIcons: Story = {
@@ -103,11 +82,7 @@ export const WithBothIcons: Story = {
     startIcon: <Settings />,
     endIcon: <ChevronRight />,
   },
-  render: (args) => (
-    <ThemeComparison>
-      <Button {...args} />
-    </ThemeComparison>
-  ),
+  render: (args) => <Button {...args} />,
 };
 
 export const Loading: Story = {
@@ -116,68 +91,56 @@ export const Loading: Story = {
     isLoading: true,
     startIcon: <Save />, // Should be replaced by spinner
   },
-  render: (args) => (
-    <ThemeComparison>
-      <Button {...args} />
-    </ThemeComparison>
-  ),
+  render: (args) => <Button {...args} />,
 };
 
 export const FocusState: Story = {
   render: () => (
-    <ThemeComparison>
-      <div className="flex flex-col gap-4">
-        <p className="text-sm text-muted-foreground">
-          Tab through the buttons or click to see focus states
-        </p>
-        <div className="flex flex-wrap items-center gap-4">
-          <Button label="Default" autoFocus />
-          <Button variant="destructive" label="Destructive" />
-          <Button variant="outline" label="Outline" />
-          <Button variant="ghost" label="Ghost" />
-          <Button variant="link" label="Link" />
-        </div>
-      </div>
-    </ThemeComparison>
-  ),
-};
-
-export const AllVariants: Story = {
-  render: () => (
-    <ThemeComparison>
+    <div className="flex flex-col gap-4">
+      <p className="text-sm text-muted-foreground">
+        Tab through the buttons or click to see focus states
+      </p>
       <div className="flex flex-wrap items-center gap-4">
-        <Button label="Default" />
+        <Button label="Default" autoFocus />
         <Button variant="destructive" label="Destructive" />
         <Button variant="outline" label="Outline" />
         <Button variant="ghost" label="Ghost" />
         <Button variant="link" label="Link" />
       </div>
-    </ThemeComparison>
+    </div>
+  ),
+};
+
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-center gap-4">
+      <Button label="Default" />
+      <Button variant="destructive" label="Destructive" />
+      <Button variant="outline" label="Outline" />
+      <Button variant="ghost" label="Ghost" />
+      <Button variant="link" label="Link" />
+    </div>
   ),
 };
 
 export const AllSizes: Story = {
   render: () => (
-    <ThemeComparison>
-      <div className="flex flex-wrap items-center gap-4">
-        <Button size="default" label="Default" />
-        <Button size="sm" label="Small" />
-        <Button size="icon" startIcon={<Settings />} label="Icon" />
-        <Button size="icon-sm" startIcon={<Settings />} label="Icon Small" />
-      </div>
-    </ThemeComparison>
+    <div className="flex flex-wrap items-center gap-4">
+      <Button size="default" label="Default" />
+      <Button size="sm" label="Small" />
+      <Button size="icon" startIcon={<Settings />} label="Icon" />
+      <Button size="icon-sm" startIcon={<Settings />} label="Icon Small" />
+    </div>
   ),
 };
 
 export const Disabled: Story = {
   render: () => (
-    <ThemeComparison>
-      <div className="flex flex-wrap items-center gap-4">
-        <Button label="Default" disabled />
-        <Button variant="destructive" label="Destructive" disabled />
-        <Button variant="outline" label="Outline" disabled />
-        <Button variant="ghost" label="Ghost" disabled />
-      </div>
-    </ThemeComparison>
+    <div className="flex flex-wrap items-center gap-4">
+      <Button label="Default" disabled />
+      <Button variant="destructive" label="Destructive" disabled />
+      <Button variant="outline" label="Outline" disabled />
+      <Button variant="ghost" label="Ghost" disabled />
+    </div>
   ),
 };

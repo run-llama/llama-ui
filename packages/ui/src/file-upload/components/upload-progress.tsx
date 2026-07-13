@@ -76,7 +76,7 @@ export function UploadProgress({ files, onClose }: UploadProgressProps) {
               value={stats.totalProgress}
               className={`h-2 mb-2 ${
                 stats.uploading === 0 && stats.completed > 0
-                  ? "[&>[data-slot=progress-indicator]]:bg-green-500"
+                  ? "[&>[data-slot=progress-indicator]]:bg-success"
                   : ""
               }`}
             />
@@ -154,7 +154,7 @@ function FileProgressItem({
               status === "error"
                 ? "bg-destructive"
                 : status === "completed"
-                  ? "bg-green-500"
+                  ? "bg-success"
                   : status === "canceled"
                     ? "bg-muted-foreground"
                     : "bg-primary animate-pulse"
@@ -201,7 +201,7 @@ function FileProgressItem({
             status === "error"
               ? "[&>[data-slot=progress-indicator]]:bg-destructive"
               : status === "completed"
-                ? "[&>[data-slot=progress-indicator]]:bg-green-500"
+                ? "[&>[data-slot=progress-indicator]]:bg-success"
                 : status === "canceled"
                   ? "[&>[data-slot=progress-indicator]]:bg-muted-foreground"
                   : ""
@@ -215,7 +215,7 @@ function FileProgressItem({
               status === "error"
                 ? "text-destructive"
                 : status === "completed"
-                  ? "text-green-600"
+                  ? "text-success"
                   : status === "canceled"
                     ? "text-muted-foreground"
                     : "text-muted-foreground"

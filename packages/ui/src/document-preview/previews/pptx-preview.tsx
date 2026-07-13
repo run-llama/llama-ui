@@ -211,7 +211,7 @@ export function PptxPreview({
   return (
     <div
       ref={containerRef}
-      className={`relative flex h-full flex-col bg-gray-100 ${className ?? ""}`}
+      className={`relative flex h-full flex-col bg-muted ${className ?? ""}`}
     >
       <FileToolbar
         fileName={fileName}
@@ -238,7 +238,7 @@ export function PptxPreview({
             dangerouslySetInnerHTML={{ __html: currentEntry.svg }}
           />
         ) : (
-          <div className="flex flex-col items-center justify-center gap-2 rounded border border-dashed bg-white p-8 text-center">
+          <div className="flex flex-col items-center justify-center gap-2 rounded border border-dashed bg-card p-8 text-center">
             <p className="text-sm text-muted-foreground">
               Slide {currentEntry?.displayIndex ?? currentSlide + 1} could not
               be rendered.

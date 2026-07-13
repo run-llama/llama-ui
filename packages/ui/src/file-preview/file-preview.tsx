@@ -68,7 +68,7 @@ export function FilePreview({
       <Card>
         <div className="flex h-32 items-center justify-center">
           <div className="text-center">
-            <XCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
+            <XCircle className="h-8 w-8 text-destructive mx-auto mb-2" />
             <div className="text-sm text-muted-foreground">
               Error loading file: {error}
             </div>

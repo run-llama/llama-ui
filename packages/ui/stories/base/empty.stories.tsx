@@ -3,7 +3,6 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { BarChart, FileCode2, FileText, Plus, Search } from "lucide-react";
 
 import { Empty } from "../../base/empty";
-import { ThemeComparison } from "./theme-comparison";
 
 const iconMap = {
   FileText: FileText,
@@ -98,16 +97,14 @@ export const Default: Story = {
       : undefined;
 
     return (
-      <ThemeComparison>
-        <Empty
-          title={args.title}
-          description={args.description}
-          icon={icon}
-          primaryAction={primaryAction}
-          secondaryAction={secondaryAction}
-          tertiaryAction={tertiaryAction}
-        />
-      </ThemeComparison>
+      <Empty
+        title={args.title}
+        description={args.description}
+        icon={icon}
+        primaryAction={primaryAction}
+        secondaryAction={secondaryAction}
+        tertiaryAction={tertiaryAction}
+      />
     );
   },
 };
@@ -152,14 +149,12 @@ export const WithButton: Story = {
       : undefined;
 
     return (
-      <ThemeComparison>
-        <Empty
-          title={args.title}
-          description={args.description}
-          icon={icon}
-          secondaryAction={secondaryAction}
-        />
-      </ThemeComparison>
+      <Empty
+        title={args.title}
+        description={args.description}
+        icon={icon}
+        secondaryAction={secondaryAction}
+      />
     );
   },
 };

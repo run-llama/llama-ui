@@ -125,10 +125,8 @@ export function HandlerDetails({ handlerId, onBack }: HandlerDetailsProps) {
           )}
 
           {state.result && (
-            <div className="rounded-lg bg-green-50 dark:bg-green-900/10 p-3">
-              <span className="font-medium text-green-700 dark:text-green-400">
-                Result:
-              </span>
+            <div className="rounded-lg bg-success-muted p-3">
+              <span className="font-medium text-success">Result:</span>
               <pre className="mt-1 text-xs overflow-auto">
                 {JSON.stringify(state.result.data, null, 2)}
               </pre>

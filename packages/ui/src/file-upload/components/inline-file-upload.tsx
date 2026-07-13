@@ -64,10 +64,7 @@ export function FileUpload({
       {showHeader && (
         <div className="text-center">
           <div className="mb-4 flex justify-center">
-            <div
-              className="flex h-12 w-12 items-center justify-center rounded-full"
-              style={{ backgroundColor: "#F3F0FF", color: "#8B5CF6" }}
-            >
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
               <FileText />
             </div>
           </div>
@@ -97,8 +94,8 @@ export function FileUpload({
             className="mt-4 flex w-full flex-1 flex-col"
           >
             <div className="flex h-full min-h-[200px] flex-1 flex-col items-center justify-center gap-4 p-4 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100">
-                <FolderOpen className="h-8 w-8 text-neutral-500" />
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                <FolderOpen className="h-8 w-8 text-muted-foreground" />
               </div>
               <div className="space-y-1">
                 <p className="text-sm font-medium text-muted-foreground">

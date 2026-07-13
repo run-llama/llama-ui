@@ -12,7 +12,6 @@ import {
 
 import { Checkbox, CheckboxGroup } from "../../base/checkbox";
 import { Badge } from "../../base/badge";
-import { ThemeComparison } from "./theme-comparison";
 
 // Icon mapping for Storybook controls
 const iconMap: Record<string, React.ReactNode> = {
@@ -94,37 +93,31 @@ export const Playground: Story = {
     icon: "circle",
   },
   render: (args) => (
-    <ThemeComparison>
-      <Checkbox {...args} badge={<Badge label="New" variant="success" />} />
-    </ThemeComparison>
+    <Checkbox {...args} badge={<Badge label="New" variant="success" />} />
   ),
 };
 
 export const Group: Story = {
   render: () => (
-    <ThemeComparison>
-      <CheckboxGroup>
-        <Checkbox label="Option 1" />
-        <Checkbox label="Option 2" />
-        <Checkbox label="Option 3" disabled />
-      </CheckboxGroup>
-    </ThemeComparison>
+    <CheckboxGroup>
+      <Checkbox label="Option 1" />
+      <Checkbox label="Option 2" />
+      <Checkbox label="Option 3" disabled />
+    </CheckboxGroup>
   ),
 };
 
 export const GroupWithBox: Story = {
   render: () => (
-    <ThemeComparison>
-      <CheckboxGroup variant="box">
-        <Checkbox label="Option 1" description="Description for option 1" />
-        <Checkbox
-          label="Option 2"
-          description="Description for option 2"
-          defaultChecked
-          badge={<Badge label="New" variant="success" />}
-        />
-        <Checkbox label="Option 3" description="Description for option 3" />
-      </CheckboxGroup>
-    </ThemeComparison>
+    <CheckboxGroup variant="box">
+      <Checkbox label="Option 1" description="Description for option 1" />
+      <Checkbox
+        label="Option 2"
+        description="Description for option 2"
+        defaultChecked
+        badge={<Badge label="New" variant="success" />}
+      />
+      <Checkbox label="Option 3" description="Description for option 3" />
+    </CheckboxGroup>
   ),
 };

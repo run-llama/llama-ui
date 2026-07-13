@@ -20,7 +20,7 @@ export function UnsupportedPreview({
         onDownload={handleDownload}
         onRemove={onRemove}
       />
-      <div className="h-full flex-1 overflow-auto bg-gray-50">
+      <div className="h-full flex-1 overflow-auto bg-muted">
         <p className="p-4 text-center text-xs text-muted-foreground">
           This file type is not supported for preview. You can download to view
           it.{" "}

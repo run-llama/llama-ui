@@ -423,7 +423,7 @@ export function TableRenderer<Row extends JsonObject>({
                             <React.Fragment key={itemIdx}>
                               {itemIdx > 0 && ", "}
                               <span
-                                className={`cursor-pointer hover:bg-gray-100 rounded px-0.5 ${getConfidenceBorderClass(confidenceThreshold, itemMetadata?.confidence)}`}
+                                className={`cursor-pointer hover:bg-muted rounded px-0.5 ${getConfidenceBorderClass(confidenceThreshold, itemMetadata?.confidence)}`}
                                 onClick={() =>
                                   onClickField?.({
                                     value: item,

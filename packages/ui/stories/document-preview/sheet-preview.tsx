@@ -178,7 +178,7 @@ export function SheetPreview({
             <div className="flex flex-wrap gap-2">{sheetTabs}</div>
           </div>
         )}
-        <div className="relative flex-1 overflow-auto bg-gray-50">
+        <div className="relative flex-1 overflow-auto bg-muted">
           {loading ? (
             <LoadingState>Loading spreadsheet…</LoadingState>
           ) : error ? (
@@ -198,7 +198,7 @@ export function SheetPreview({
               className="inline-block origin-top-left p-4"
               style={{ transform: `scale(${currentZoom})` }}
             >
-              <table className="border-collapse rounded-md bg-white text-xs shadow-sm">
+              <table className="border-collapse rounded-md bg-card text-xs shadow-sm">
                 <thead>
                   <tr>
                     <th className="bg-muted/60 sticky left-0 top-0 border border-border p-2 font-medium text-muted-foreground">
@@ -226,7 +226,7 @@ export function SheetPreview({
                         (_, columnIndex) => (
                           <td
                             key={columnIndex}
-                            className="border border-border px-3 py-1 text-left align-top text-slate-700"
+                            className="border border-border px-3 py-1 text-left align-top text-foreground"
                           >
                             {formatCellValue(row[columnIndex] ?? "")}
                           </td>

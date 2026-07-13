@@ -70,7 +70,7 @@ export const SelectFileBar = ({
               className={cn(
                 buttonVariants({ variant: "outline", size: "sm" }),
                 "flex shrink-0 items-center gap-1 border-border hover:bg-muted cursor-pointer",
-                isCurrent ? "bg-accent" : "bg-white"
+                isCurrent ? "bg-accent" : "bg-background"
               )}
               onClick={() => onSelect(index)}
               onKeyDown={(e: KeyboardEvent<HTMLDivElement>) => {

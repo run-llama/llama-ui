@@ -115,7 +115,7 @@ function SourceInfo({ node, index }: { node?: SourceNode; index: number }) {
       >
         <SourceNumberButton
           index={index}
-          className="hover:bg-primary hover:text-white"
+          className="hover:bg-primary hover:text-primary-foreground"
         />
       </HoverCardTrigger>
       <HoverCardContent
@@ -207,11 +207,11 @@ function DocumentPreviewCard(props: {
       {onRemove && (
         <div
           className={cn(
-            "absolute -right-2 -top-2 z-10 h-6 w-6 rounded-full bg-gray-500 text-white"
+            "absolute -right-2 -top-2 z-10 h-6 w-6 rounded-full bg-muted-foreground text-background"
           )}
         >
           <XCircleIcon
-            className="h-6 w-6 rounded-full bg-gray-500 text-white"
+            className="h-6 w-6 rounded-full bg-muted-foreground text-background"
             onClick={(e) => {
               e.stopPropagation();
               onRemove();

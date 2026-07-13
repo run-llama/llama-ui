@@ -243,13 +243,20 @@ function DataUpdateTestsComponent() {
       {/* Right panel: JSON comparison */}
       <div style={{ flex: 1, maxWidth: "500px" }}>
         <div style={{ marginBottom: "15px" }}>
-          <h4 style={{ fontSize: "14px", margin: "5px 0", color: "#666" }}>
+          <h4
+            style={{
+              fontSize: "14px",
+              margin: "5px 0",
+              color: "var(--muted-foreground)",
+            }}
+          >
             Original Data:
           </h4>
           <pre
             style={{
               fontSize: "11px",
-              background: "#f5f5f5",
+              background: "var(--muted)",
+              color: "var(--foreground)",
               padding: "8px",
               borderRadius: "4px",
               maxHeight: "150px",
@@ -261,13 +268,20 @@ function DataUpdateTestsComponent() {
         </div>
 
         <div style={{ marginBottom: "15px" }}>
-          <h4 style={{ fontSize: "14px", margin: "5px 0", color: "#666" }}>
+          <h4
+            style={{
+              fontSize: "14px",
+              margin: "5px 0",
+              color: "var(--muted-foreground)",
+            }}
+          >
             Schema:
           </h4>
           <pre
             style={{
               fontSize: "11px",
-              background: "#e8f4fd",
+              background: "var(--info-muted)",
+              color: "var(--foreground)",
               padding: "8px",
               borderRadius: "4px",
               maxHeight: "150px",
@@ -279,19 +293,30 @@ function DataUpdateTestsComponent() {
         </div>
 
         <div>
-          <h4 style={{ fontSize: "14px", margin: "5px 0", color: "#666" }}>
+          <h4
+            style={{
+              fontSize: "14px",
+              margin: "5px 0",
+              color: "var(--muted-foreground)",
+            }}
+          >
             Current Data:
           </h4>
           <pre
             data-testid="current-data"
             style={{
               fontSize: "11px",
-              background: updateCount > 0 ? "#f0f9f0" : "#f5f5f5",
+              background:
+                updateCount > 0 ? "var(--success-muted)" : "var(--muted)",
+              color: "var(--foreground)",
               padding: "8px",
               borderRadius: "4px",
               maxHeight: "200px",
               overflow: "auto",
-              border: updateCount > 0 ? "2px solid #4caf50" : "1px solid #ddd",
+              border:
+                updateCount > 0
+                  ? "2px solid var(--success)"
+                  : "1px solid var(--border)",
             }}
           >
             {JSON.stringify(data, null, 2)}

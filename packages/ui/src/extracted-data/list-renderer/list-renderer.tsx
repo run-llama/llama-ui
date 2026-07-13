@@ -125,8 +125,8 @@ export function ListRenderer<S extends PrimitiveValue>({
 
   if (!data || data.length === 0) {
     return (
-      <div className="border rounded-md bg-white p-4">
-        <div className="text-gray-500 text-sm mb-3">Empty array</div>
+      <div className="border rounded-md bg-card p-4">
+        <div className="text-muted-foreground text-sm mb-3">Empty array</div>
         {onAdd && (
           <Button
             variant="outline"
@@ -145,7 +145,7 @@ export function ListRenderer<S extends PrimitiveValue>({
   );
 
   return (
-    <div className="border rounded-md bg-white overflow-auto">
+    <div className="border rounded-md bg-card overflow-auto">
       <DataPagination
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}

@@ -58,10 +58,10 @@ export function getFieldDisplayInfo(
  */
 export function getFieldLabelClasses(fieldInfo: FieldDisplayInfo): string {
   const baseClasses =
-    "text-sm font-medium text-zinc-900 min-w-0 flex-shrink-0 min-h-8 flex items-center";
+    "text-sm font-medium text-foreground min-w-0 flex-shrink-0 min-h-8 flex items-center";
 
   if (fieldInfo.hasError) {
-    return `${baseClasses} text-red-600`;
+    return `${baseClasses} text-destructive`;
   }
 
   if (fieldInfo.isRequired) {
@@ -83,7 +83,8 @@ export function getFieldLabelText(
   if (isRequired) {
     return (
       <>
-        {name} <span className="text-red-500 relative top-0.5">&nbsp;*</span>
+        {name}{" "}
+        <span className="text-destructive relative top-0.5">&nbsp;*</span>
       </>
     );
   }
