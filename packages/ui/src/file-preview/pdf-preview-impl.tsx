@@ -6,6 +6,7 @@ import { logger } from "@shared/logger";
 import { Button } from "@/base/button";
 import { FileToolbar } from "../document-preview/file-tool-bar";
 import { BoundingBoxOverlay } from "./bounding-box-overlay";
+import { getPdfDocumentOptions, getPdfjsWorkerSrc } from "./pdfjs-config";
 import type { BoundingBox, Highlight } from "./types";
 import {
   calculateHighlightScrollPosition,
@@ -18,10 +19,14 @@ import {
   type FitMode,
 } from "./pdf-preview-utils";
 
-// Configure worker path for PDF.js
-if (typeof window !== "undefined") {
-  pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// Point PDF.js at the worker resolved from the pdfjs-dist package bundled with
+// the application (or at whatever `configurePdfjs` was given). Never a public
+// CDN: the worker executes with the host page's privileges.
+function applyPdfjsWorkerSrc() {
+  if (typeof window === "undefined") return;
+  pdfjs.GlobalWorkerOptions.workerSrc = getPdfjsWorkerSrc() ?? "";
 }
+applyPdfjsWorkerSrc();
 
 // Side-effect CSS imports – ignore TypeScript complaints. Also inconsistent checking between projects. Whatever
 // eslint-disable-next-line
@@ -63,11 +68,6 @@ type PageBaseDims = {
   [key: number]: { width: number; height: number };
 };
 
-const pdfOptions = {
-  cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
-  wasmUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/wasm/`,
-};
-
 // Cache passwords for encrypted PDFs so remounts don't re-prompt
 const pdfPasswordCache = new Map<string, string>();
 
@@ -93,6 +93,11 @@ export const PdfPreviewImpl = ({
   maxDevicePixelRatio = 1.5,
   renderTextLayer = true,
 }: PdfPreviewImplProps) => {
+  // Re-apply in case `configurePdfjs` ran after this (lazily loaded) module
+  // was first evaluated. Idempotent global assignment.
+  applyPdfjsWorkerSrc();
+  const pdfOptions = getPdfDocumentOptions();
+
   const [numPages, setNumPages] = useState<number>();
   const [currentPage, setCurrentPage] = useState<number>(pageRange?.[0] ?? 1);
   const isScaleControlled =

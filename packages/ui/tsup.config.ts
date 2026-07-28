@@ -44,10 +44,17 @@ export default defineConfig({
   target: "es2017",
   splitting: true,
   treeshake: true,
-  esbuildOptions(options) {
+  esbuildOptions(options, context) {
     options.alias = {
       "@": process.cwd(),
       "@shared": path.resolve(process.cwd(), "../../shared"),
     };
+    // The es2017 target makes esbuild lower `import.meta` to `{}`, which would
+    // break the bundler-resolved pdf.js worker URL in src/file-preview.
+    // Preserve it for the ESM output only — emitting it into CJS would be a
+    // syntax error.
+    if (context.format === "esm") {
+      options.supported = { ...options.supported, "import-meta": true };
+    }
   },
 });
