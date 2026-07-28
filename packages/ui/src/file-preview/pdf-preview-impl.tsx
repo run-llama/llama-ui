@@ -821,7 +821,16 @@ export const PdfPreviewImpl = ({
         ref={containerRef}
         className="overflow-auto h-full bg-muted flex-1 min-h-0"
       >
+        {/* Keyed by url so each document gets a fresh <Document> instance.
+            react-pdf's loader schedules `loadingTask.destroy()` on cleanup but
+            does not cancel that task's pending RESOLVE dispatch, so a
+            superseded document can still land in context and then be
+            destroyed — any <Page> mounting against it throws
+            "Cannot read properties of null (reading 'sendWithPromise')".
+            Remounting means the stale resolve dispatches into an unmounted
+            reducer instead, where it is a no-op. */}
         <Document
+          key={url}
           file={file}
           onLoadSuccess={onDocumentLoadSuccess}
           onLoadError={onDocumentLoadError}

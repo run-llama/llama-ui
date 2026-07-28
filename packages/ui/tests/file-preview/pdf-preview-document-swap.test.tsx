@@ -17,6 +17,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 let currentDocumentFile: File | null = null;
 const pageMounts = vi.fn();
+const documentMounts = vi.fn();
 
 vi.mock("react-pdf", () => ({
   pdfjs: { GlobalWorkerOptions: { workerSrc: "" }, version: "0.0.0-test" },
@@ -31,6 +32,9 @@ vi.mock("react-pdf", () => ({
     children?: ReactNode;
   }) => {
     currentDocumentFile = file;
+    useEffect(() => {
+      documentMounts();
+    }, []);
     useEffect(() => {
       if (file) onLoadSuccess?.({ numPages: 3 });
     }, [file, onLoadSuccess]);
@@ -76,6 +80,7 @@ describe("PdfPreviewImpl document swap", () => {
   beforeEach(() => {
     currentDocumentFile = null;
     pageMounts.mockClear();
+    documentMounts.mockClear();
 
     vi.stubGlobal(
       "IntersectionObserver",
@@ -109,6 +114,18 @@ describe("PdfPreviewImpl document swap", () => {
 
     await waitFor(() => expect(screen.getByTestId("page-1")).toBeTruthy());
     expect(currentDocumentFile).not.toBeNull();
+  });
+
+  it("remounts <Document> when the url changes", async () => {
+    const { rerender } = render(<PdfPreviewImpl url="/first.pdf" />);
+    await waitFor(() => expect(screen.getByTestId("page-1")).toBeTruthy());
+    expect(documentMounts).toHaveBeenCalledTimes(1);
+
+    // A superseded document's RESOLVE is not cancelled by react-pdf's cleanup,
+    // so reusing the same <Document> lets a destroyed pdf land in context.
+    // A fresh instance per url makes that dispatch a no-op instead.
+    rerender(<PdfPreviewImpl url="/second.pdf" />);
+    await waitFor(() => expect(documentMounts).toHaveBeenCalledTimes(2));
   });
 
   it("renders no pages while the document is still loading", async () => {
