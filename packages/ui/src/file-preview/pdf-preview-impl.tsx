@@ -623,6 +623,10 @@ export const PdfPreviewImpl = ({
       passwordPromptTimeout.current = null;
     }
     setLoadError(null);
+    // Drop the outgoing document's page count before its replacement arrives.
+    // `numPages` gates the page list below; leaving it set would keep mounting
+    // <Page>s against a document react-pdf has already torn down.
+    setNumPages(undefined);
     setVisiblePages(new Set([pageRange?.[0] ?? 1]));
     setPageHeights({});
     isInitialScaleSet.current = false; // Reset so new document gets auto-scaled
@@ -654,6 +658,7 @@ export const PdfPreviewImpl = ({
     fetchFile();
     return () => {
       setFile(null);
+      setNumPages(undefined);
     };
   }, [url, fileName, pageRange]);
 
@@ -824,7 +829,10 @@ export const PdfPreviewImpl = ({
           loading={null}
           options={pdfOptions}
         >
-          {numPages && numPages > 0 && (
+          {/* `file` is part of the guard on purpose: when it is cleared,
+              react-pdf destroys the document's worker transport, and any
+              <Page> still mounting in that commit calls getPage() on it. */}
+          {file && numPages && numPages > 0 && (
             <VirtualizedPageList
               rangeStart={rangeStart}
               rangeEnd={rangeEnd}
