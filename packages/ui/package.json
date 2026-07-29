@@ -505,6 +505,7 @@
     "mammoth": "^1.9.0",
     "motion": "^12.12.1",
     "lucide-react": "^0.514.0",
+    "pdfjs-dist": "5.4.296",
     "pptx-svg": "^0.5.4",
     "react-day-picker": "^8.10.1",
     "recharts": "^2.15.3",

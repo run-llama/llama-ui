@@ -6,6 +6,7 @@ import { logger } from "@shared/logger";
 import { Button } from "@/base/button";
 import { FileToolbar } from "../document-preview/file-tool-bar";
 import { BoundingBoxOverlay } from "./bounding-box-overlay";
+import { getPdfDocumentOptions, getPdfjsWorkerSrc } from "./pdfjs-config";
 import type { BoundingBox, Highlight } from "./types";
 import {
   calculateHighlightScrollPosition,
@@ -18,10 +19,14 @@ import {
   type FitMode,
 } from "./pdf-preview-utils";
 
-// Configure worker path for PDF.js
-if (typeof window !== "undefined") {
-  pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// Point PDF.js at the worker resolved from the pdfjs-dist package bundled with
+// the application (or at whatever `configurePdfjs` was given). Never a public
+// CDN: the worker executes with the host page's privileges.
+function applyPdfjsWorkerSrc() {
+  if (typeof window === "undefined") return;
+  pdfjs.GlobalWorkerOptions.workerSrc = getPdfjsWorkerSrc() ?? "";
 }
+applyPdfjsWorkerSrc();
 
 // Side-effect CSS imports – ignore TypeScript complaints. Also inconsistent checking between projects. Whatever
 // eslint-disable-next-line
@@ -63,11 +68,6 @@ type PageBaseDims = {
   [key: number]: { width: number; height: number };
 };
 
-const pdfOptions = {
-  cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
-  wasmUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/wasm/`,
-};
-
 // Cache passwords for encrypted PDFs so remounts don't re-prompt
 const pdfPasswordCache = new Map<string, string>();
 
@@ -93,6 +93,11 @@ export const PdfPreviewImpl = ({
   maxDevicePixelRatio = 1.5,
   renderTextLayer = true,
 }: PdfPreviewImplProps) => {
+  // Re-apply in case `configurePdfjs` ran after this (lazily loaded) module
+  // was first evaluated. Idempotent global assignment.
+  applyPdfjsWorkerSrc();
+  const pdfOptions = getPdfDocumentOptions();
+
   const [numPages, setNumPages] = useState<number>();
   const [currentPage, setCurrentPage] = useState<number>(pageRange?.[0] ?? 1);
   const isScaleControlled =
@@ -618,6 +623,10 @@ export const PdfPreviewImpl = ({
       passwordPromptTimeout.current = null;
     }
     setLoadError(null);
+    // Drop the outgoing document's page count before its replacement arrives.
+    // `numPages` gates the page list below; leaving it set would keep mounting
+    // <Page>s against a document react-pdf has already torn down.
+    setNumPages(undefined);
     setVisiblePages(new Set([pageRange?.[0] ?? 1]));
     setPageHeights({});
     isInitialScaleSet.current = false; // Reset so new document gets auto-scaled
@@ -649,6 +658,7 @@ export const PdfPreviewImpl = ({
     fetchFile();
     return () => {
       setFile(null);
+      setNumPages(undefined);
     };
   }, [url, fileName, pageRange]);
 
@@ -811,7 +821,16 @@ export const PdfPreviewImpl = ({
         ref={containerRef}
         className="overflow-auto h-full bg-muted flex-1 min-h-0"
       >
+        {/* Keyed by url so each document gets a fresh <Document> instance.
+            react-pdf's loader schedules `loadingTask.destroy()` on cleanup but
+            does not cancel that task's pending RESOLVE dispatch, so a
+            superseded document can still land in context and then be
+            destroyed — any <Page> mounting against it throws
+            "Cannot read properties of null (reading 'sendWithPromise')".
+            Remounting means the stale resolve dispatches into an unmounted
+            reducer instead, where it is a no-op. */}
         <Document
+          key={url}
           file={file}
           onLoadSuccess={onDocumentLoadSuccess}
           onLoadError={onDocumentLoadError}
@@ -819,7 +838,10 @@ export const PdfPreviewImpl = ({
           loading={null}
           options={pdfOptions}
         >
-          {numPages && numPages > 0 && (
+          {/* `file` is part of the guard on purpose: when it is cleared,
+              react-pdf destroys the document's worker transport, and any
+              <Page> still mounting in that commit calls getPage() on it. */}
+          {file && numPages && numPages > 0 && (
             <VirtualizedPageList
               rangeStart={rangeStart}
               rangeEnd={rangeEnd}
