@@ -12,7 +12,7 @@ import {
   TableCell,
 } from "@/base/table";
 import { Badge } from "@/base/badge";
-import { DataPagination } from "../data-pagination";
+import { DataPagination, paginate } from "../data-pagination";
 import { EditableField } from "../editable-field";
 import { getFieldDisplayInfo } from "../field-display-utils";
 import { getConfidenceBorderClass } from "../confidence-utils";
@@ -359,10 +359,11 @@ export function TableRenderer<Row extends JsonObject>({
     return rows;
   };
 
-  const visibleData = data.slice(
-    (currentPage - 1) * tableRowsPerPage,
-    currentPage * tableRowsPerPage
-  );
+  const visibleRows = paginate({
+    items: data,
+    currentPage,
+    perPage: tableRowsPerPage,
+  });
 
   return (
     <>
@@ -375,7 +376,7 @@ export function TableRenderer<Row extends JsonObject>({
       <Table>
         <TableHeader>{generateHeaderRows()}</TableHeader>
         <TableBody>
-          {visibleData.map((item, rowIndex) => (
+          {visibleRows.map(({ item, index: rowIndex }) => (
             <TableRow key={rowIndex} state="hover">
               {columns.map((column, colIndex) => {
                 const value = getValue(item, column) as
