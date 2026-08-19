@@ -18,7 +18,7 @@ import type { PrimitiveValue, RendererMetadata } from "../types";
 import type { ExtractedFieldMetadata } from "@/src/lib/agent-data";
 import { findFieldSchemaMetadata } from "../metadata-path-utils";
 import { findExtractedFieldMetadata } from "../metadata-lookup";
-import { DataPagination } from "../data-pagination";
+import { DataPagination, paginate } from "../data-pagination";
 import { useState } from "react";
 
 interface ListRendererProps<S extends PrimitiveValue> {
@@ -139,10 +139,11 @@ export function ListRenderer<S extends PrimitiveValue>({
     );
   }
 
-  const visibleData = data.slice(
-    (currentPage - 1) * listItemsPerPage,
-    currentPage * listItemsPerPage
-  );
+  const visibleItems = paginate({
+    items: data,
+    currentPage,
+    perPage: listItemsPerPage,
+  });
 
   return (
     <div className="border rounded-md bg-card overflow-auto">
@@ -154,7 +155,7 @@ export function ListRenderer<S extends PrimitiveValue>({
       />
       <Table>
         <TableBody>
-          {visibleData.map((item, index) => {
+          {visibleItems.map(({ item, index }) => {
             // Check if this specific array item has been changed
             const isChanged = isArrayItemChanged(changedPaths, keyPath, index);
 

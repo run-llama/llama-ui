@@ -8,6 +8,22 @@ import {
 import { cn } from "@/lib";
 import { Dispatch, SetStateAction } from "react";
 
+export function paginate<T>({
+  items,
+  currentPage,
+  perPage,
+}: {
+  items: T[];
+  currentPage: number;
+  perPage: number;
+}): Array<{ item: T; index: number }> {
+  const start = (currentPage - 1) * perPage;
+  return items.slice(start, start + perPage).map((item, offset) => ({
+    item,
+    index: start + offset,
+  }));
+}
+
 export function DataPagination({
   currentPage,
   setCurrentPage,
