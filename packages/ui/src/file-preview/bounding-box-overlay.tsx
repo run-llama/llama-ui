@@ -32,7 +32,14 @@ export function BoundingBoxOverlay({
       viewBox={`0 0 ${containerWidth} ${containerHeight}`}
     >
       {boundingBoxes.map((box) => (
-        <g key={box.id}>
+        <g
+          key={box.id}
+          transform={
+            box.rotation != null && box.rotation % 360 !== 0
+              ? `rotate(${box.rotation} ${box.x + box.width / 2} ${box.y + box.height / 2})`
+              : undefined
+          }
+        >
           <rect
             x={box.x}
             y={box.y}
