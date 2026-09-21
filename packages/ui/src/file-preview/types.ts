@@ -5,6 +5,8 @@ export interface BoundingBox {
   y: number;
   width: number;
   height: number;
+  /** Clockwise degrees around the literal rectangle center. */
+  rotation?: number | null;
   confidence?: number;
   label?: string;
   color?: string;
@@ -31,4 +33,6 @@ export interface Highlight {
   y: number;
   width: number;
   height: number;
+  /** Clockwise degrees around the literal rectangle center. */
+  rotation?: number | null;
 }
