@@ -1,5 +1,11 @@
 # @llamaindex/ui
 
+## 4.7.1
+
+### Patch Changes
+
+- 74e0625: Preserve highlight rotation in PDF and image previews and render bounding boxes around their own centers. Upright highlights retain their existing appearance.
+
 ## 4.7.0
 
 ### Minor Changes
