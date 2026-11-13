@@ -1,5 +1,6 @@
-import { Alert } from "../../base/alert";
+import { Alert, type AlertActionProps } from "../../base/alert";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "@storybook/test";
 import * as React from "react";
 
 const meta: Meta<typeof Alert> = {
@@ -145,4 +146,156 @@ export const AllVariantsWithButtons: Story = {
       />
     </div>
   ),
+};
+
+const variantExamples = {
+  default: {
+    title: "A new parser version is available",
+    description:
+      "It reads tables more accurately. Your saved settings carry over.",
+    actions: ["Switch now", "Read the changelog", "Remind me later"],
+  },
+  error: {
+    title: "Your card was declined",
+    description:
+      "We couldn't charge your card for the automatic credit reload, so your balance stays at 0.",
+    actions: [
+      "Use a different card",
+      "Try again with this card",
+      "Turn off auto-reload",
+    ],
+  },
+  warning: {
+    title: "Credits are running low",
+    description: "Jobs pause when your balance reaches 0.",
+    actions: ["Buy credits", "Change reload amount", "Dismiss"],
+  },
+} as const;
+
+function toActions(labels: readonly string[]): AlertActionProps[] {
+  return labels.map((label) => ({
+    label,
+    onClick: () => console.log(`${label} clicked`),
+  }));
+}
+
+function VariantsWithActions({ count }: { count: 1 | 2 | 3 }) {
+  return (
+    <div className="flex flex-col gap-4">
+      {(["default", "error", "warning"] as const).map((variant) => {
+        const { title, description, actions } = variantExamples[variant];
+        const [primary, secondary, tertiary] = toActions(
+          actions.slice(0, count)
+        );
+        return (
+          <Alert
+            key={variant}
+            variant={variant}
+            title={title}
+            description={description}
+            primaryAction={primary}
+            secondaryAction={secondary}
+            tertiaryAction={tertiary}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+async function expectActionLayout({
+  canvasElement,
+}: {
+  canvasElement: HTMLElement;
+}) {
+  for (const alert of within(canvasElement).getAllByRole("alert")) {
+    await expect(alert.scrollWidth).toBeLessThanOrEqual(alert.clientWidth);
+    for (const text of alert.querySelectorAll("p")) {
+      await expect(text.scrollWidth).toBeLessThanOrEqual(text.clientWidth);
+    }
+    const box = alert.getBoundingClientRect();
+    const buttons = within(alert)
+      .queryAllByRole("button")
+      .map((button) => button.getBoundingClientRect());
+    for (const button of buttons) {
+      await expect(button.left).toBeGreaterThanOrEqual(box.left);
+      await expect(button.right).toBeLessThanOrEqual(box.right);
+    }
+    const [primary, ...others] = buttons;
+    for (const other of others) {
+      await expect(other.top).toBeGreaterThanOrEqual(primary.top);
+      if (other.top === primary.top) {
+        await expect(other.right).toBeLessThanOrEqual(primary.left);
+      }
+    }
+  }
+}
+
+export const OneAction: Story = {
+  render: () => <VariantsWithActions count={1} />,
+  play: expectActionLayout,
+};
+
+export const TwoActions: Story = {
+  render: () => <VariantsWithActions count={2} />,
+  play: expectActionLayout,
+};
+
+export const ThreeActions: Story = {
+  render: () => <VariantsWithActions count={3} />,
+  play: expectActionLayout,
+};
+
+const longTitle =
+  "We couldn't reload your credits. The card charge didn't go through.";
+
+export const PhoneWidth: Story = {
+  render: () => {
+    const [primary, secondary, tertiary] = toActions(
+      variantExamples.error.actions
+    );
+    const [buyCredits, changeAmount] = toActions(
+      variantExamples.warning.actions
+    );
+    return (
+      <div className="flex w-[343px] flex-col gap-4">
+        <Alert
+          variant="error"
+          title={longTitle}
+          description={variantExamples.error.description}
+          primaryAction={primary}
+          secondaryAction={secondary}
+          tertiaryAction={tertiary}
+        />
+        <Alert
+          variant="error"
+          title="Couldn't parse quarterly_financial_statements_2025_final_v3_reviewed.pdf"
+          buttonLabel="Try again"
+          onButtonClick={() => console.log("Try again clicked")}
+        />
+        <Alert
+          variant="warning"
+          title={variantExamples.warning.title}
+          description={variantExamples.warning.description}
+          primaryAction={buyCredits}
+          secondaryAction={changeAmount}
+        />
+        <Alert title="Saved" primaryAction={{ label: "Undo" }} />
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    await expectActionLayout({ canvasElement });
+    const declined = within(canvasElement)
+      .getByText(longTitle)
+      .closest<HTMLElement>('[role="alert"]')!;
+    const textBottom = within(declined)
+      .getByText(variantExamples.error.description)
+      .getBoundingClientRect().bottom;
+    for (const button of within(declined).getAllByRole("button")) {
+      await expect(button.getBoundingClientRect().top).toBeGreaterThan(
+        textBottom
+      );
+    }
+  },
 };
