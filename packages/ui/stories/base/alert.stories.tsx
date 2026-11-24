@@ -214,18 +214,52 @@ async function expectActionLayout({
       await expect(text.scrollWidth).toBeLessThanOrEqual(text.clientWidth);
     }
     const box = alert.getBoundingClientRect();
+    const style = getComputedStyle(alert);
+    const contentLeft =
+      box.left +
+      parseFloat(style.borderLeftWidth) +
+      parseFloat(style.paddingLeft);
+    const contentRight =
+      box.right -
+      parseFloat(style.borderRightWidth) -
+      parseFloat(style.paddingRight);
     const buttons = within(alert)
       .queryAllByRole("button")
       .map((button) => button.getBoundingClientRect());
+    if (buttons.length === 0) {
+      // Without actions, the text gets the alert's full width.
+      const title = alert.querySelector('[data-slot="alert-title"]')!;
+      await expect(title.getBoundingClientRect().right).toBeCloseTo(
+        contentRight,
+        0
+      );
+      continue;
+    }
     for (const button of buttons) {
       await expect(button.left).toBeGreaterThanOrEqual(box.left);
       await expect(button.right).toBeLessThanOrEqual(box.right);
     }
     const [primary, ...others] = buttons;
+    await expect(primary.right).toBeCloseTo(contentRight, 0);
     for (const other of others) {
       await expect(other.top).toBeGreaterThanOrEqual(primary.top);
       if (other.top === primary.top) {
         await expect(other.right).toBeLessThanOrEqual(primary.left);
+      }
+    }
+    const rowTops = new Set(buttons.map((button) => button.top));
+    if (rowTops.size > 1) {
+      // Once the actions stack, each row fills the alert's width.
+      for (const top of rowTops) {
+        const row = buttons.filter((button) => button.top === top);
+        await expect(Math.min(...row.map((b) => b.left))).toBeCloseTo(
+          contentLeft,
+          0
+        );
+        await expect(Math.max(...row.map((b) => b.right))).toBeCloseTo(
+          contentRight,
+          0
+        );
       }
     }
   }
@@ -281,6 +315,11 @@ export const PhoneWidth: Story = {
           secondaryAction={changeAmount}
         />
         <Alert title="Saved" primaryAction={{ label: "Undo" }} />
+        <Alert
+          variant="warning"
+          title="Webhook delivery failed"
+          description="https://hooks.example.com/llamacloud/jobs/quarterly_financial_statements_2025 returned 502."
+        />
       </div>
     );
   },

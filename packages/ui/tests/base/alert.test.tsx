@@ -12,6 +12,15 @@ function expectButtonVariant(
 }
 
 describe("Alert", () => {
+  it("renders only its text when it has no actions", () => {
+    render(<Alert title="Saved" description="Your changes are live." />);
+
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      /^SavedYour changes are live\.$/
+    );
+  });
+
   it("fires each action's own handler", () => {
     const onPrimary = vi.fn();
     const onSecondary = vi.fn();
