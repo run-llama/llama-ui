@@ -6,10 +6,11 @@ import {
   calculateFitToWidthScale,
   calculateInitialScale,
   calculateHighlightScroll,
+  buildSpotlightMaskSvg,
   scrollOffsetForPage,
   pageFromScrollOffset,
 } from "@/src/file-preview/pdf-preview-utils";
-import type { Highlight } from "@/src/file-preview/types";
+import type { BoundingBox, Highlight } from "@/src/file-preview/types";
 
 describe("groupHighlightsByPage", () => {
   it("returns empty object when highlights is undefined", () => {
@@ -464,6 +465,85 @@ describe("calculateHighlightScroll", () => {
         highlight: { ...highlight, rotation: 90 },
       })
     ).toEqual({ top: 210, left: 0 });
+  });
+});
+
+describe("buildSpotlightMaskSvg", () => {
+  const page = { width: 600, height: 800 };
+  const boxOf = (overrides: Partial<BoundingBox> = {}): BoundingBox => ({
+    id: "a",
+    x: 100,
+    y: 200,
+    width: 300,
+    height: 100,
+    ...overrides,
+  });
+  // Holes are the black shapes inside the SVG's mask.
+  const holes = (svg: string | null) =>
+    [
+      ...new DOMParser()
+        .parseFromString(svg!, "image/svg+xml")
+        .querySelectorAll('mask rect[fill="black"]'),
+    ].map((rect) => ({
+      x: Number(rect.getAttribute("x")),
+      y: Number(rect.getAttribute("y")),
+      width: Number(rect.getAttribute("width")),
+      height: Number(rect.getAttribute("height")),
+      transform: rect.getAttribute("transform"),
+    }));
+
+  it("returns no mask when the page has no highlights", () => {
+    // Catches: a page without highlights getting a hole (or an empty mask
+    // that hides the veil) when it should be fully veiled.
+    expect(buildSpotlightMaskSvg([], page, 1)).toBeNull();
+  });
+
+  it("pads each hole by 4 CSS px at any zoom", () => {
+    // Catches: the hole clipping the text it is meant to keep sharp, or the
+    // padding growing with zoom. 4px is 4 page units at 1x and 2 at 2x.
+    expect(holes(buildSpotlightMaskSvg([boxOf()], page, 1))).toEqual([
+      { x: 96, y: 196, width: 308, height: 108, transform: null },
+    ]);
+    expect(holes(buildSpotlightMaskSvg([boxOf()], page, 2))).toEqual([
+      { x: 98, y: 198, width: 304, height: 104, transform: null },
+    ]);
+  });
+
+  it("grows a tiny highlight to 40x18 CSS px around its center", () => {
+    // Catches: a one-character source leaving a pinhole, or the minimum box
+    // growing from the corner so the hole misses the source.
+    const tiny = boxOf({ width: 10, height: 4 });
+    expect(holes(buildSpotlightMaskSvg([tiny], page, 1))).toEqual([
+      { x: 85, y: 193, width: 40, height: 18, transform: null },
+    ]);
+    expect(holes(buildSpotlightMaskSvg([tiny], page, 2))).toEqual([
+      { x: 95, y: 197.5, width: 20, height: 9, transform: null },
+    ]);
+  });
+
+  it("rotates the hole around the highlight's center", () => {
+    // Catches: an upright hole over a rotated source.
+    expect(
+      holes(buildSpotlightMaskSvg([boxOf({ rotation: 30 })], page, 1))[0]
+        .transform
+    ).toBe("rotate(30 250 250)");
+  });
+
+  it("cuts one hole per highlight in the page's own units", () => {
+    // Catches: holes dropped for multi-box sources, or a viewBox that does
+    // not match the page so holes land in the wrong place when stretched.
+    const svg = buildSpotlightMaskSvg(
+      [boxOf(), boxOf({ id: "b", y: 500 })],
+      page,
+      1.5
+    );
+    expect(holes(svg)).toHaveLength(2);
+    const root = new DOMParser().parseFromString(
+      svg!,
+      "image/svg+xml"
+    ).documentElement;
+    expect(root.getAttribute("viewBox")).toBe("0 0 600 800");
+    expect(root.getAttribute("preserveAspectRatio")).toBe("none");
   });
 });
 

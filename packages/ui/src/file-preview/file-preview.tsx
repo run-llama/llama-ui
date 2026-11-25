@@ -1,5 +1,5 @@
 import { Card } from "@/base/card";
-import type { BoundingBox, Highlight } from "./types";
+import type { BoundingBox, Highlight, HighlightStyle } from "./types";
 import { ImagePreview } from "./image-preview";
 import { useFileData, type FileData } from "./use-file-data";
 import { Clock, XCircle } from "lucide-react";
@@ -33,6 +33,8 @@ export interface FilePreviewProps {
   onBoundingBoxClick?: (box: BoundingBox, pageNumber?: number) => void;
   fileId: string;
   highlight?: Highlight;
+  /** How the highlight is painted on PDFs. Defaults to "outline". */
+  highlightStyle?: HighlightStyle;
   mockData?: FileData; // For Storybook
 }
 
@@ -40,6 +42,7 @@ export interface FilePreviewProps {
 export function FilePreview({
   onBoundingBoxClick,
   highlight,
+  highlightStyle,
   fileId,
   mockData,
 }: FilePreviewProps) {
@@ -108,6 +111,7 @@ export function FilePreview({
       <PdfPreview
         url={data?.url || ""}
         highlights={highlight ? [highlight] : undefined}
+        highlightStyle={highlightStyle}
       />
     );
   }

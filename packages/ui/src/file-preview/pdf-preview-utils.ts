@@ -159,6 +159,19 @@ export function calculateInitialScale(
   return Math.min(scaleToFitWidth, scaleToFitHeight);
 }
 
+/**
+ * `transform` attribute that turns a box clockwise around its own center, or
+ * undefined for an upright box. Shared by everything that draws a box in page
+ * units so outlines and spotlight holes rotate identically.
+ */
+export function boxRotationTransform(
+  box: Pick<BoundingBox, "x" | "y" | "width" | "height" | "rotation">
+): string | undefined {
+  return box.rotation != null && box.rotation % 360 !== 0
+    ? `rotate(${box.rotation} ${box.x + box.width / 2} ${box.y + box.height / 2})`
+    : undefined;
+}
+
 // Axis-aligned extent of a box after its rotation, in the box's own units.
 function rotatedExtent(
   box: Pick<BoundingBox, "x" | "y" | "width" | "height" | "rotation">
@@ -251,4 +264,75 @@ export function calculateHighlightScroll(
     Math.abs(top - params.scrollTop) >= 1 ||
     Math.abs(left - params.scrollLeft) >= 1;
   return moves ? { top, left } : null;
+}
+
+const SPOTLIGHT_PADDING_PX = 4;
+const SPOTLIGHT_MIN_WIDTH_PX = 40;
+const SPOTLIGHT_MIN_HEIGHT_PX = 18;
+
+/**
+ * Grows each highlight into the area a spotlight keeps sharp: padded by a few
+ * CSS px and never smaller than a readable minimum, centered on the original
+ * box. Sizes are CSS px converted to page units with `scale`, so the padding
+ * looks the same at every zoom. Rotation is carried through unchanged.
+ */
+export function spotlightBoxes(
+  boxes: BoundingBox[],
+  scale: number
+): BoundingBox[] {
+  return boxes.map((box) => {
+    const width = Math.max(
+      box.width + (2 * SPOTLIGHT_PADDING_PX) / scale,
+      SPOTLIGHT_MIN_WIDTH_PX / scale
+    );
+    const height = Math.max(
+      box.height + (2 * SPOTLIGHT_PADDING_PX) / scale,
+      SPOTLIGHT_MIN_HEIGHT_PX / scale
+    );
+    return {
+      ...box,
+      x: box.x + (box.width - width) / 2,
+      y: box.y + (box.height - height) / 2,
+      width,
+      height,
+    };
+  });
+}
+
+const round = (value: number) => Math.round(value * 100) / 100;
+
+/**
+ * Builds the SVG used as a CSS mask for the spotlight veil: opaque everywhere
+ * on the page except over the spotlight boxes, where it is transparent so the
+ * veil lets the page show through sharp. The SVG uses the page's own units as
+ * its viewBox and is stretched over the page by the caller.
+ *
+ * Returns null when there are no boxes; the veil then covers the whole page.
+ */
+export function buildSpotlightMaskSvg(
+  boxes: BoundingBox[],
+  page: { width: number; height: number },
+  scale: number
+): string | null {
+  if (boxes.length === 0) return null;
+  const radius = round(3 / scale);
+  const holes = spotlightBoxes(boxes, scale)
+    .map((box) => {
+      const transform = boxRotationTransform(box);
+      return (
+        `<rect x="${round(box.x)}" y="${round(box.y)}" ` +
+        `width="${round(box.width)}" height="${round(box.height)}" ` +
+        `rx="${radius}" fill="black"` +
+        (transform ? ` transform="${transform}"` : "") +
+        "/>"
+      );
+    })
+    .join("");
+  const size = `width="${page.width}" height="${page.height}"`;
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${page.width} ${page.height}" preserveAspectRatio="none">` +
+    `<mask id="holes"><rect ${size} fill="white"/>${holes}</mask>` +
+    `<rect ${size} mask="url(#holes)"/>` +
+    "</svg>"
+  );
 }

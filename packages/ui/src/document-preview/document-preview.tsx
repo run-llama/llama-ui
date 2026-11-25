@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { DropzoneProps } from "react-dropzone";
 import { cn } from "@/lib/utils";
 import { PdfPreview } from "../file-preview";
-import type { Highlight } from "../file-preview/types";
+import type { Highlight, HighlightStyle } from "../file-preview/types";
 import { FileUpload } from "./file-upload";
 import {
   checkUrl,
@@ -46,6 +46,9 @@ export type PreviewComponentProps = {
   onRemove?: () => void;
   className?: string;
   highlights?: Highlight[];
+  /** How `highlights` should be painted. Previews that cannot spotlight keep
+   *  their outline. */
+  highlightStyle?: HighlightStyle;
   scale?: number;
   onScaleChange?: (scale: number) => void;
 };
@@ -58,6 +61,7 @@ function PdfPreviewWrapper({
   contentUrl,
   onRemove,
   highlights,
+  highlightStyle,
   scale,
   onScaleChange,
 }: PreviewComponentProps) {
@@ -67,6 +71,7 @@ function PdfPreviewWrapper({
       onRemove={onRemove}
       fileName={fileName}
       highlights={highlights}
+      highlightStyle={highlightStyle}
       scale={scale}
       onScaleChange={onScaleChange}
       toolbarClassName="[&>div]:border-t-0 [&>div]:border-r-0 [&>div]:border-l-0"
@@ -175,6 +180,9 @@ interface DocumentPreviewItemProps {
   onRemove?: () => void;
   allowRemoval?: boolean;
   highlights?: Highlight[];
+  /** How highlights are painted. "spotlight" veils the document and keeps
+   *  only the highlighted areas sharp (PDF previews). Defaults to "outline". */
+  highlightStyle?: HighlightStyle;
   previews?: PreviewsMap;
   scale?: number;
   onScaleChange?: (scale: number) => void;
@@ -186,6 +194,7 @@ function DocumentPreviewItem({
   allowRemoval = true,
   fileName,
   highlights,
+  highlightStyle,
   previews,
   scale,
   onScaleChange,
@@ -265,6 +274,7 @@ function DocumentPreviewItem({
       contentUrl={resolvedUrl}
       onRemove={removalHandler}
       highlights={highlights}
+      highlightStyle={highlightStyle}
       scale={scale}
       onScaleChange={onScaleChange}
     />
@@ -490,6 +500,7 @@ export function DocumentPreview(props: DocumentPreviewProps) {
             onRemove={() => handleRemoveAt(currentPreviewIndex)}
             allowRemoval={allowRemoval && !allowMultiple}
             highlights={props.highlights}
+            highlightStyle={props.highlightStyle}
             previews={previews}
             scale={scale}
             onScaleChange={onScaleChange}

@@ -4,7 +4,7 @@ import { Clock } from "lucide-react";
 import { lazy, memo, Suspense } from "react";
 import type { PdfPreviewImplProps } from "./pdf-preview-impl";
 import type { FitMode } from "./pdf-preview-utils";
-import type { Highlight } from "./types";
+import type { Highlight, HighlightStyle } from "./types";
 
 const PdfPreviewLazy = lazy<React.ComponentType<PdfPreviewImplProps>>(() =>
   import("./pdf-preview-impl").then((module) => ({
@@ -16,6 +16,7 @@ const PdfPreview = memo(
   ({
     url,
     highlights,
+    highlightStyle,
     fileName,
     toolbarClassName,
     onRemove,
@@ -28,6 +29,9 @@ const PdfPreview = memo(
   }: {
     url: string;
     highlights?: Highlight[];
+    /** How highlights are painted. "spotlight" veils every page and keeps only
+     *  the highlighted areas sharp. Defaults to "outline". */
+    highlightStyle?: HighlightStyle;
     fileName?: string | null;
     toolbarClassName?: string;
     onRemove?: () => void;
@@ -64,6 +68,7 @@ const PdfPreview = memo(
         <PdfPreviewLazy
           url={url}
           highlights={highlights}
+          highlightStyle={highlightStyle}
           fileName={fileName}
           toolbarClassName={toolbarClassName}
           onRemove={onRemove}

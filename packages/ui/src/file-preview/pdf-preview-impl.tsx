@@ -6,8 +6,9 @@ import { logger } from "@shared/logger";
 import { Button } from "@/base/button";
 import { FileToolbar } from "../document-preview/file-tool-bar";
 import { BoundingBoxOverlay } from "./bounding-box-overlay";
+import { SpotlightOverlay } from "./spotlight-overlay";
 import { getPdfDocumentOptions, getPdfjsWorkerSrc } from "./pdfjs-config";
-import type { BoundingBox, Highlight } from "./types";
+import type { BoundingBox, Highlight, HighlightStyle } from "./types";
 import {
   calculateHighlightScroll,
   calculateInitialScale,
@@ -42,6 +43,9 @@ export interface PdfPreviewImplProps {
   onDownload?: () => void;
   onRemove?: () => void;
   highlights?: Highlight[];
+  /** How highlights are painted. "spotlight" veils every page and keeps only
+   *  the highlighted areas sharp. Defaults to "outline". */
+  highlightStyle?: HighlightStyle;
   toolbarClassName?: string;
   /** How the PDF should fit on initial load. Defaults to "page" (fit entire page). */
   fitMode?: FitMode;
@@ -79,6 +83,7 @@ const PAGE_GAP = 16;
 // How long a smooth scroll is assumed to be running when the browser has no
 // `scrollend` event to say it finished.
 const SMOOTH_SCROLL_MAX_MS = 1000;
+const NO_BOXES: BoundingBox[] = [];
 const PENDING_HIGHLIGHT_TIMEOUT_MS = 2000; // Max time to wait for page dimensions before giving up
 
 export const PdfPreviewImpl = ({
@@ -87,6 +92,7 @@ export const PdfPreviewImpl = ({
   onDownload,
   onRemove,
   highlights,
+  highlightStyle = "outline",
   toolbarClassName,
   fitMode = "width",
   pageRange,
@@ -896,6 +902,7 @@ export const PdfPreviewImpl = ({
               handleLoadPage={handleLoadPage}
               handleClickOnPage={handleClickOnPage}
               showHighlights={showHighlights}
+              highlightStyle={highlightStyle}
               highlightsByPage={highlightsByPage}
               pageBaseDims={pageBaseDims}
             />
@@ -921,6 +928,7 @@ function VirtualizedPageList({
   handleLoadPage,
   handleClickOnPage,
   showHighlights,
+  highlightStyle,
   highlightsByPage,
   pageBaseDims,
 }: {
@@ -938,6 +946,7 @@ function VirtualizedPageList({
   handleLoadPage: (page: PageCallback) => void;
   handleClickOnPage: () => void;
   showHighlights: boolean;
+  highlightStyle: HighlightStyle;
   highlightsByPage: { [page: number]: BoundingBox[] };
   pageBaseDims: PageBaseDims;
 }) {
@@ -952,6 +961,8 @@ function VirtualizedPageList({
     }
     return pages;
   }, [rangeStart, rangeEnd]);
+
+  const hasHighlights = Object.keys(highlightsByPage).length > 0;
 
   return (
     <>
@@ -1000,7 +1011,15 @@ function VirtualizedPageList({
                   loading=""
                   noData=""
                 />
-                {showHighlights &&
+                {highlightStyle === "spotlight" ? (
+                  <SpotlightOverlay
+                    boundingBoxes={highlightsByPage[pageNumber] ?? NO_BOXES}
+                    active={showHighlights && hasHighlights}
+                    zoom={scale}
+                    pageDims={pageBaseDims[pageNumber]}
+                  />
+                ) : (
+                  showHighlights &&
                   highlightsByPage[pageNumber] &&
                   pageBaseDims[pageNumber] && (
                     <BoundingBoxOverlay
@@ -1009,7 +1028,8 @@ function VirtualizedPageList({
                       containerWidth={pageBaseDims[pageNumber].width}
                       containerHeight={pageBaseDims[pageNumber].height}
                     />
-                  )}
+                  )
+                )}
               </div>
             ) : (
               <div className="relative inline-block w-full h-full bg-muted flex items-center justify-center">
