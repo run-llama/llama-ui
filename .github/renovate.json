@@ -1,5 +1,19 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "description": "Self-hosted Renovate (run-llama/platform, renovate-org.yml) keeps this repo's GitHub Actions current, and nothing else. Actions are pinned to commit SHAs and the repo refuses unpinned ones, so Renovate is what moves those pins forward. Version updates merge once every check passes; digest-only moves (a re-pointed tag) always wait for a person. Part of hardening OSS package publishing (Linear INF-459). Questions: #infra.",
-  "enabledManagers": ["github-actions"]
+  "enabledManagers": [
+    "github-actions"
+  ],
+  "packageRules": [
+    {
+      "description": "The Playwright container must match the playwright npm version in packages/ui/package.json (its browsers are built for that release), and Renovate does not manage npm here. Bump the image together with the npm package by hand.",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackageNames": [
+        "mcr.microsoft.com/playwright"
+      ],
+      "enabled": false
+    }
+  ]
 }
