@@ -16,6 +16,7 @@ import {
   findClosestPage,
   groupHighlightsByPage,
   pageFromScrollOffset,
+  pagesInViewport,
   scrollOffsetForPage,
   type FitMode,
 } from "./pdf-preview-utils";
@@ -295,6 +296,7 @@ export const PdfPreviewImpl = ({
     (pageNumber: number) => {
       const targetPage = Math.min(Math.max(pageNumber, rangeStart), rangeEnd);
       setCurrentPage(targetPage);
+      smoothScrollTarget.current = null;
 
       const visibleRange = calculateVisiblePageRange(
         targetPage,
@@ -363,9 +365,8 @@ export const PdfPreviewImpl = ({
     return () => cancelAnimationFrame(rafId);
   }, [scrollTargetPage]);
 
-  // Scroll a highlight into view, centered. Does nothing when it is already
-  // fully visible, so stepping between on-screen highlights keeps the document
-  // still.
+  // Scroll a highlight into view. Does nothing when it is already fully
+  // visible, so stepping between on-screen highlights keeps the document still.
   const scrollHighlightIntoView = useCallback(
     (highlight: Highlight) => {
       const container = containerRef.current;
@@ -414,7 +415,6 @@ export const PdfPreviewImpl = ({
         scrollBehavior === "smooth"
           ? { ...target, expiresAt: performance.now() + SMOOTH_SCROLL_MAX_MS }
           : null;
-      setCurrentPage(highlight.page);
       container.scrollTo({ ...target, behavior: scrollBehavior });
     },
     [scale, pageBaseDims]
@@ -431,18 +431,23 @@ export const PdfPreviewImpl = ({
       rangeEnd
     );
 
-    // Mount the page if it is outside the virtualized window, so it can be
-    // measured and can paint its highlight.
-    setVisiblePages((prev) =>
-      prev.has(targetPage)
-        ? prev
-        : new Set(
-            calculateVisiblePageRange(
-              targetPage,
-              rangeEnd,
-              VIRTUALIZATION_BUFFER
-            )
-          )
+    setCurrentPage(targetPage);
+    // Mount the pages around the target and prune the rest. Pages on screen
+    // stay mounted: an in-view highlight does not scroll, and they would
+    // otherwise blank out under the user.
+    const container = containerRef.current;
+    const onScreen = container
+      ? pagesInViewport(pageRefs.current, container.getBoundingClientRect())
+      : [];
+    setVisiblePages(
+      new Set([
+        ...calculateVisiblePageRange(
+          targetPage,
+          rangeEnd,
+          VIRTUALIZATION_BUFFER
+        ),
+        ...onScreen,
+      ])
     );
     setShowHighlights(true);
 
@@ -465,7 +470,7 @@ export const PdfPreviewImpl = ({
     // clear pending highlight and scroll to page instead
     const timeoutId = setTimeout(() => {
       setPendingHighlight(null);
-      setCurrentPage(targetPage);
+      smoothScrollTarget.current = null;
       const el = pageRefs.current[targetPage];
       if (el) {
         el.scrollIntoView({ behavior: "instant", block: "center" });
@@ -495,6 +500,7 @@ export const PdfPreviewImpl = ({
   useEffect(() => {
     setPageHeights({});
     setVisiblePages((prev) => new Set(prev));
+    smoothScrollTarget.current = null;
   }, [scale]);
 
   // store page viewport to use for bounding box overlay
@@ -641,15 +647,22 @@ export const PdfPreviewImpl = ({
       });
     };
 
-    const handleScrollEnd = () => {
+    // A smooth scroll stops heading to its landing position once it ends or
+    // the user scrolls by wheel, touch or keyboard.
+    const forgetLanding = () => {
       smoothScrollTarget.current = null;
     };
+    const landingEnders = ["scrollend", "wheel", "touchstart", "keydown"];
 
     container.addEventListener("scroll", handleScroll);
-    container.addEventListener("scrollend", handleScrollEnd);
+    landingEnders.forEach((type) =>
+      container.addEventListener(type, forgetLanding, { passive: true })
+    );
     return () => {
       container.removeEventListener("scroll", handleScroll);
-      container.removeEventListener("scrollend", handleScrollEnd);
+      landingEnders.forEach((type) =>
+        container.removeEventListener(type, forgetLanding)
+      );
       if (rafId !== null) cancelAnimationFrame(rafId);
     };
   }, [numPages, rangeStart, rangeEnd]);
@@ -662,6 +675,7 @@ export const PdfPreviewImpl = ({
       return;
     }
     lastLoadedUrl.current = url;
+    smoothScrollTarget.current = null;
     passwordCancelled.current = false;
     if (passwordPromptTimeout.current !== null) {
       clearTimeout(passwordPromptTimeout.current);
@@ -962,7 +976,14 @@ function VirtualizedPageList({
     return pages;
   }, [rangeStart, rangeEnd]);
 
-  const hasHighlights = Object.keys(highlightsByPage).length > 0;
+  // Highlights on pages outside the rendered range paint nothing, so they do
+  // not turn the spotlight on either.
+  const spotlightOn =
+    showHighlights &&
+    Object.keys(highlightsByPage).some((page) => {
+      const pageNumber = Number(page);
+      return pageNumber >= rangeStart && pageNumber <= rangeEnd;
+    });
 
   return (
     <>
@@ -1011,25 +1032,24 @@ function VirtualizedPageList({
                   loading=""
                   noData=""
                 />
-                {highlightStyle === "spotlight" ? (
-                  <SpotlightOverlay
-                    boundingBoxes={highlightsByPage[pageNumber] ?? NO_BOXES}
-                    active={showHighlights && hasHighlights}
-                    zoom={scale}
-                    pageDims={pageBaseDims[pageNumber]}
-                  />
-                ) : (
-                  showHighlights &&
-                  highlightsByPage[pageNumber] &&
-                  pageBaseDims[pageNumber] && (
-                    <BoundingBoxOverlay
-                      boundingBoxes={highlightsByPage[pageNumber]}
-                      zoom={scale}
-                      containerWidth={pageBaseDims[pageNumber].width}
-                      containerHeight={pageBaseDims[pageNumber].height}
-                    />
-                  )
-                )}
+                {highlightStyle === "spotlight"
+                  ? spotlightOn && (
+                      <SpotlightOverlay
+                        boundingBoxes={highlightsByPage[pageNumber] ?? NO_BOXES}
+                        zoom={scale}
+                        pageDims={pageBaseDims[pageNumber]}
+                      />
+                    )
+                  : showHighlights &&
+                    highlightsByPage[pageNumber] &&
+                    pageBaseDims[pageNumber] && (
+                      <BoundingBoxOverlay
+                        boundingBoxes={highlightsByPage[pageNumber]}
+                        zoom={scale}
+                        containerWidth={pageBaseDims[pageNumber].width}
+                        containerHeight={pageBaseDims[pageNumber].height}
+                      />
+                    )}
               </div>
             ) : (
               <div className="relative inline-block w-full h-full bg-muted flex items-center justify-center">
