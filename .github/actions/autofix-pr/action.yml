@@ -80,6 +80,11 @@ runs:
       with:
         app-id: ${{ inputs.app-id }}
         private-key: ${{ inputs.private-key }}
+        # This repository only (the default), and only what the steps below use: push the fix
+        # branch, open/close the fix PR and label it, and post or edit the PR comment.
+        permission-contents: write
+        permission-pull-requests: write
+        permission-issues: write
 
     - name: Compute defaults
       id: defaults
