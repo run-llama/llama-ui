@@ -30,7 +30,10 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '22'
-          cache: 'pnpm'
+          # No dependency cache in a job that publishes or holds an app token: a cache written
+          # by another workflow could poison it (zizmor cache-poisoning). setup-node v5+ caches
+          # by default, hence the explicit false.
+          package-manager-cache: false
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
