@@ -9,6 +9,9 @@ on:
         description: "Version to deploy"
         required: true
 
+permissions:
+  contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -19,6 +22,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Generate GitHub App Token
         id: app-token
@@ -27,6 +31,9 @@ jobs:
           app-id: ${{ secrets.CI_BOT_APP_ID }}
           private-key: ${{ secrets.CI_BOT_PRIVATE_KEY }}
           owner: run-llama
+          # Only what the dispatch below needs: repository_dispatch on workflows-py.
+          repositories: workflows-py
+          permission-contents: write
 
       - name: Dispatch to workflows-py
         uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
