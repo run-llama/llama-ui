@@ -3,6 +3,7 @@ import {
   groupHighlightsByPage,
   calculateVisiblePageRange,
   findClosestPage,
+  pagesInViewport,
   calculateFitToWidthScale,
   calculateInitialScale,
   calculateHighlightScroll,
@@ -168,6 +169,29 @@ describe("findClosestPage", () => {
     // Page 3 center is at 1200 - distance 950
     const result = findClosestPage(pageRefs, createContainerRect(0, 500));
     expect(result).toBe(2);
+  });
+});
+
+describe("pagesInViewport", () => {
+  const row = (top: number, height: number) =>
+    ({
+      getBoundingClientRect: () => ({ top, bottom: top + height }),
+    }) as HTMLDivElement;
+
+  it("returns every page that overlaps the viewport, and no others", () => {
+    // Catches: on-screen pages pruned from the mounted set (blanking under
+    // the user), or only the page at the viewport center being kept.
+    // Viewport 100..700; 400px pages 416px apart starting at -500.
+    const pageRefs = {
+      1: row(-500, 400),
+      2: row(-84, 400),
+      3: row(332, 400),
+      4: row(748, 400),
+      5: null,
+    };
+    expect(
+      pagesInViewport(pageRefs, { top: 100, bottom: 700 } as DOMRect)
+    ).toEqual([2, 3]);
   });
 });
 
@@ -378,15 +402,97 @@ describe("calculateHighlightScroll", () => {
     });
   });
 
-  it("centers a highlight that is above the viewport", () => {
-    // Catches: only checking the bottom edge. 400 - (600 - 50) / 2.
+  it("centers a highlight above the viewport that the page top would not show", () => {
+    // Catches: only checking the bottom edge. From the page top the box
+    // (700..750) is below the 600px fold, so it centers: 700 - (600 - 50) / 2.
     expect(
       calculateHighlightScroll({
         ...base,
         scrollTop: 1000,
-        highlight: box(400),
+        highlight: box(700),
       })
-    ).toEqual({ top: 125, left: 0 });
+    ).toEqual({ top: 425, left: 0 });
+  });
+
+  describe("an out-of-view highlight on a page that fits the viewport", () => {
+    // 1000px pages 1016px apart in an 800px viewport, scrolled to the top.
+    const paged = {
+      ...base,
+      viewportHeight: 800,
+      pageTop: 2032,
+      scrollHeight: 5080,
+    };
+
+    it("lands on the page top whether the box is high or low on the page", () => {
+      // Catches: the same page landing differently per box (a box 600px down
+      // used to center at pageTop + 225). Both give 2032 - 16.
+      expect(
+        calculateHighlightScroll({ ...paged, highlight: box(100) })
+      ).toEqual({ top: 2016, left: 0 });
+      expect(
+        calculateHighlightScroll({ ...paged, highlight: box(600) })
+      ).toEqual({ top: 2016, left: 0 });
+    });
+
+    it("centers a box the page top would leave below the fold", () => {
+      // Catches: page-top framing hiding the highlight on a tall page. The box
+      // is 1500px into a 2000px page: 2032 + 1500 - (800 - 50) / 2.
+      expect(
+        calculateHighlightScroll({ ...paged, highlight: box(1500) })
+      ).toEqual({ top: 3157, left: 0 });
+    });
+  });
+
+  describe("a one-unit go-to-page marker", () => {
+    const marker = { x: 0, y: 0, width: 1, height: 1 };
+    // 1000px pages 1016px apart in an 800px viewport. Page 4 starts at 3048
+    // and peeks 152px into the bottom of the viewport.
+    const peeking = {
+      ...base,
+      viewportHeight: 800,
+      pageTop: 3048,
+      scrollTop: 2400,
+      scrollHeight: 5080,
+      highlight: marker,
+    };
+
+    it("brings its page to the top even when the marker is on screen", () => {
+      // Catches: a segment click doing nothing because the page's first pixel
+      // is already visible. 3048 - 16.
+      expect(calculateHighlightScroll(peeking)).toEqual({ top: 3032, left: 0 });
+    });
+
+    it("keeps the horizontal scroll of a zoomed page", () => {
+      // Catches: the marker's x of 0 dragging a zoomed page back to its left
+      // edge on every segment click.
+      expect(
+        calculateHighlightScroll({
+          ...peeking,
+          scrollLeft: 300,
+          scrollWidth: 1600,
+        })
+      ).toEqual({ top: 3032, left: 300 });
+    });
+
+    it("stays put when its page is already at the top", () => {
+      // Catches: a no-op scroll (and a restarted animation) per repeated click.
+      expect(
+        calculateHighlightScroll({ ...peeking, scrollTop: 3032.4 })
+      ).toBeNull();
+    });
+
+    it("leaves a small real box in view alone", () => {
+      // Catches: a small real box (a checkbox, in view at 30px) sent to the
+      // page top as if it were a marker.
+      expect(
+        calculateHighlightScroll({
+          ...peeking,
+          scale: 3,
+          scrollTop: 3040,
+          highlight: { x: 50, y: 50, width: 10, height: 10 },
+        })
+      ).toBeNull();
+    });
   });
 
   it("treats a highlight touching the viewport edge as out of view", () => {
@@ -427,20 +533,6 @@ describe("calculateHighlightScroll", () => {
       top: 450,
       left: 0,
     });
-  });
-
-  it("navigates to a one-unit go-to-page highlight on a far page", () => {
-    // Catches: degenerate {x:0, y:0, width:1, height:1} callers losing
-    // navigation, or landing with the previous page filling the upper half.
-    // The page starts 16px below the viewport top: 3000 - 16.
-    expect(
-      calculateHighlightScroll({
-        ...base,
-        pageTop: 3000,
-        scrollHeight: 4000,
-        highlight: { x: 0, y: 0, width: 1, height: 1 },
-      })
-    ).toEqual({ top: 2984, left: 0 });
   });
 
   it("centers horizontally only when the highlight is off to the side", () => {
