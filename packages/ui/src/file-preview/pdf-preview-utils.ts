@@ -159,78 +159,96 @@ export function calculateInitialScale(
   return Math.min(scaleToFitWidth, scaleToFitHeight);
 }
 
+// Axis-aligned extent of a box after its rotation, in the box's own units.
+function rotatedExtent(
+  box: Pick<BoundingBox, "x" | "y" | "width" | "height" | "rotation">
+): { x: number; y: number; width: number; height: number } {
+  const radians = ((box.rotation ?? 0) * Math.PI) / 180;
+  const cos = Math.abs(Math.cos(radians));
+  const sin = Math.abs(Math.sin(radians));
+  const width = box.width * cos + box.height * sin;
+  const height = box.width * sin + box.height * cos;
+  return {
+    x: box.x + (box.width - width) / 2,
+    y: box.y + (box.height - height) / 2,
+    width,
+    height,
+  };
+}
+
 export interface HighlightScrollParams {
-  /** Top offset of the page element relative to scroll container */
-  pageTop: number;
-  /** Height of the page in scaled pixels */
-  pageHeight: number;
-  /** Y position of highlight on page (unscaled) */
-  highlightY: number;
-  /** Height of highlight (unscaled) */
-  highlightHeight: number;
-  /** Current scale factor */
+  /** Highlight in unscaled page units. */
+  highlight: Pick<Highlight, "x" | "y" | "width" | "height" | "rotation">;
+  /** Current scale factor (page units to CSS px). */
   scale: number;
-  /** Height of the viewport/container */
+  /** Page's top-left corner in scroll-content px (its position at scroll 0). */
+  pageTop: number;
+  pageLeft: number;
+  /** Scroll position the container is at, or is already animating toward. */
+  scrollTop: number;
+  scrollLeft: number;
   viewportHeight: number;
-  /** Total scrollable height of container */
+  viewportWidth: number;
   scrollHeight: number;
-  /** Minimum distance from viewport edge */
-  minEdgeDistance: number;
+  scrollWidth: number;
+  /** A box closer than this to a viewport edge counts as out of view. */
+  margin?: number;
+}
+
+// Scroll offset for one axis: unchanged while the box sits inside the viewport
+// (less `margin`), otherwise the offset that centers it, clamped to the range.
+function axisScroll(
+  boxStart: number,
+  boxSize: number,
+  scroll: number,
+  viewportSize: number,
+  scrollSize: number,
+  margin: number
+): number {
+  const inView =
+    boxStart >= scroll + margin &&
+    boxStart + boxSize <= scroll + viewportSize - margin;
+  if (inView) return scroll;
+  // A box larger than the viewport is aligned to its leading edge.
+  const lead = boxSize <= viewportSize ? (viewportSize - boxSize) / 2 : margin;
+  const maxScroll = Math.max(0, scrollSize - viewportSize);
+  return Math.max(0, Math.min(boxStart - lead, maxScroll));
 }
 
 /**
- * Calculates optimal scroll position to show a highlight.
- * Uses smart positioning that averages between centering the highlight
- * and centering the page, while ensuring minimum distance from viewport edges.
+ * Decides whether the scroll container has to move to show a highlight.
  *
- * @returns The target scrollTop value, or null if calculation cannot be performed
+ * Returns null when the highlight (its rotated extent) is already fully inside
+ * the viewport, so stepping between highlights that are both on screen leaves
+ * the document still. Otherwise returns the scroll position that centers the
+ * highlight on each axis where it is out of view, clamped to the scroll range.
+ * Also null when that position is where the container already is.
  */
-export function calculateHighlightScrollPosition(
+export function calculateHighlightScroll(
   params: HighlightScrollParams
-): number {
-  const {
-    pageTop,
-    pageHeight,
-    highlightY,
-    highlightHeight,
-    scale,
-    viewportHeight,
-    scrollHeight,
-    minEdgeDistance,
-  } = params;
+): { top: number; left: number } | null {
+  const { scale, margin = 8 } = params;
+  const extent = rotatedExtent(params.highlight);
 
-  // Calculate highlight bounds in scaled pixels relative to container
-  const highlightTopAbsolute = pageTop + highlightY * scale;
-  const highlightBottomAbsolute =
-    pageTop + (highlightY + highlightHeight) * scale;
-  const highlightCenterAbsolute =
-    (highlightTopAbsolute + highlightBottomAbsolute) / 2;
+  const top = axisScroll(
+    params.pageTop + extent.y * scale,
+    extent.height * scale,
+    params.scrollTop,
+    params.viewportHeight,
+    params.scrollHeight,
+    margin
+  );
+  const left = axisScroll(
+    params.pageLeft + extent.x * scale,
+    extent.width * scale,
+    params.scrollLeft,
+    params.viewportWidth,
+    params.scrollWidth,
+    margin
+  );
 
-  // Calculate page center for averaging
-  const pageCenterAbsolute = pageTop + pageHeight / 2;
-
-  // Scroll position to center the highlight in viewport
-  const scrollToCenterHighlight = highlightCenterAbsolute - viewportHeight / 2;
-
-  // Scroll position to center the page in viewport
-  const scrollToCenterPage = pageCenterAbsolute - viewportHeight / 2;
-
-  // Average the two positions (bias toward highlight)
-  let targetScroll = (scrollToCenterHighlight + scrollToCenterPage) / 2;
-
-  // Check where highlight ends up and enforce minimum edge distance
-  const highlightTopInViewport = highlightTopAbsolute - targetScroll;
-  const highlightBottomInViewport = highlightBottomAbsolute - targetScroll;
-
-  if (highlightTopInViewport < minEdgeDistance) {
-    // Highlight too close to top - scroll up (reduce scroll value)
-    targetScroll = highlightTopAbsolute - minEdgeDistance;
-  } else if (highlightBottomInViewport > viewportHeight - minEdgeDistance) {
-    // Highlight too close to bottom - scroll down
-    targetScroll = highlightBottomAbsolute - (viewportHeight - minEdgeDistance);
-  }
-
-  // Clamp to valid scroll range
-  const maxScroll = scrollHeight - viewportHeight;
-  return Math.max(0, Math.min(targetScroll, maxScroll));
+  const moves =
+    Math.abs(top - params.scrollTop) >= 1 ||
+    Math.abs(left - params.scrollLeft) >= 1;
+  return moves ? { top, left } : null;
 }
