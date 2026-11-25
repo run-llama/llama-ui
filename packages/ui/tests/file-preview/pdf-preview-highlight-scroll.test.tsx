@@ -114,11 +114,12 @@ it("scrolls only for a highlight that is off screen", async () => {
   rerender(preview(1, 400));
   expect(scrollTo).not.toHaveBeenCalled();
 
-  // Page 3 starts at 1632: 1632 + 100 - (600 - 50) / 2.
+  // Page 3 starts at 1632 and the box is near its top, so the page is brought
+  // to 16px below the viewport top: 1632 - 16.
   rerender(preview(3, 100));
   await waitFor(() =>
     expect(scrollTo).toHaveBeenCalledWith({
-      top: 1457,
+      top: 1616,
       left: 0,
       behavior: "instant",
     })

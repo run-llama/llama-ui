@@ -431,7 +431,8 @@ describe("calculateHighlightScroll", () => {
 
   it("navigates to a one-unit go-to-page highlight on a far page", () => {
     // Catches: degenerate {x:0, y:0, width:1, height:1} callers losing
-    // navigation. 3000 - (600 - 1) / 2, inside the 4000 - 600 scroll range.
+    // navigation, or landing with the previous page filling the upper half.
+    // The page starts 16px below the viewport top: 3000 - 16.
     expect(
       calculateHighlightScroll({
         ...base,
@@ -439,7 +440,7 @@ describe("calculateHighlightScroll", () => {
         scrollHeight: 4000,
         highlight: { x: 0, y: 0, width: 1, height: 1 },
       })
-    ).toEqual({ top: 2700.5, left: 0 });
+    ).toEqual({ top: 2984, left: 0 });
   });
 
   it("centers horizontally only when the highlight is off to the side", () => {

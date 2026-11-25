@@ -208,6 +208,8 @@ export interface HighlightScrollParams {
   margin?: number;
 }
 
+const PAGE_TOP_GAP_PX = 16;
+
 // Scroll offset for one axis: unchanged while the box sits inside the viewport
 // (less `margin`), otherwise the offset that centers it, clamped to the range.
 function axisScroll(
@@ -243,7 +245,7 @@ export function calculateHighlightScroll(
   const { scale, margin = 8 } = params;
   const extent = rotatedExtent(params.highlight);
 
-  const top = axisScroll(
+  const centeredTop = axisScroll(
     params.pageTop + extent.y * scale,
     extent.height * scale,
     params.scrollTop,
@@ -251,6 +253,16 @@ export function calculateHighlightScroll(
     params.scrollHeight,
     margin
   );
+  // A highlight near the top of its page would center with the previous page
+  // filling the upper half; start at the highlight's own page instead.
+  const maxTop = Math.max(0, params.scrollHeight - params.viewportHeight);
+  const top =
+    centeredTop === params.scrollTop
+      ? centeredTop
+      : Math.max(
+          centeredTop,
+          Math.min(params.pageTop - PAGE_TOP_GAP_PX, maxTop)
+        );
   const left = axisScroll(
     params.pageLeft + extent.x * scale,
     extent.width * scale,
