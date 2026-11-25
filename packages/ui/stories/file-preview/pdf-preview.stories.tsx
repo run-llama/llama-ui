@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { expect, within, userEvent, waitFor } from "@storybook/test";
 import { PdfPreview } from "../../src/file-preview/pdf-preview";
 
@@ -18,6 +18,12 @@ const meta: Meta<typeof PdfPreview> = {
       control: "object",
       description:
         "Optional array of highlights: [{ page, x, y, width, height }] in PDF page coordinates",
+    },
+    highlightStyle: {
+      control: "radio",
+      options: ["outline", "spotlight"],
+      description:
+        'How highlights are painted. "spotlight" veils every page and keeps only the highlighted areas sharp.',
     },
     onRemove: {
       action: "remove",
@@ -149,6 +155,90 @@ function InteractiveHighlightExample(props: Parameters<typeof PdfPreview>[0]) {
     </div>
   );
 }
+
+// Two sources on page 1 that fit on screen together, a tiny one, a rotated one
+// and one on a far page. Stepping between the first two must not scroll.
+const SPOTLIGHT_SOURCES = {
+  "Title (page 1)": { page: 1, x: 80, y: 70, width: 450, height: 40 },
+  "Abstract (page 1)": { page: 1, x: 55, y: 240, width: 240, height: 150 },
+  "Tiny (page 1)": { page: 1, x: 320, y: 300, width: 12, height: 6 },
+  "Rotated (page 1)": {
+    page: 1,
+    x: 330,
+    y: 420,
+    width: 200,
+    height: 30,
+    rotation: 20,
+  },
+  "Far (page 4)": { page: 4, x: 60, y: 500, width: 240, height: 80 },
+};
+
+function SpotlightExample(props: Parameters<typeof PdfPreview>[0]) {
+  const [source, setSource] = useState<keyof typeof SPOTLIGHT_SOURCES | null>(
+    "Title (page 1)"
+  );
+  const [highlightStyle, setHighlightStyle] = useState(
+    props.highlightStyle ?? "spotlight"
+  );
+  const highlights = useMemo(
+    () => (source ? [SPOTLIGHT_SOURCES[source]] : undefined),
+    [source]
+  );
+
+  return (
+    <div className="h-screen flex">
+      <div className="w-64 p-4 border-r space-y-2">
+        <div className="font-medium mb-2">Hover or click a source</div>
+        {(
+          Object.keys(SPOTLIGHT_SOURCES) as (keyof typeof SPOTLIGHT_SOURCES)[]
+        ).map((name) => (
+          <button
+            key={name}
+            data-testid={`source-${name}`}
+            className={`px-2 py-1 border rounded w-full text-left ${
+              source === name ? "bg-muted" : ""
+            }`}
+            onMouseEnter={() => setSource(name)}
+            onClick={() => setSource(name)}
+          >
+            {name}
+          </button>
+        ))}
+        <button
+          className="px-2 py-1 border rounded w-full text-left"
+          onClick={() => setSource(null)}
+        >
+          Clear
+        </button>
+        <label className="flex items-center gap-2 pt-2 text-sm">
+          <input
+            type="checkbox"
+            checked={highlightStyle === "spotlight"}
+            onChange={(event) =>
+              setHighlightStyle(event.target.checked ? "spotlight" : "outline")
+            }
+          />
+          Spotlight
+        </label>
+      </div>
+      <div className="flex-1">
+        <PdfPreview
+          {...props}
+          highlights={highlights}
+          highlightStyle={highlightStyle}
+        />
+      </div>
+    </div>
+  );
+}
+
+export const Spotlight: Story = {
+  args: {
+    url: "https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf",
+    highlightStyle: "spotlight",
+  },
+  render: (args) => <SpotlightExample {...args} />,
+};
 
 // Interactive Test Component similar to DataUpdateTestsComponent
 function PdfHighlightTestsComponent(props: Parameters<typeof PdfPreview>[0]) {
