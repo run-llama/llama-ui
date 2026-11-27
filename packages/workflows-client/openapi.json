@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Workflows API",
-    "version": "0.3.2"
+    "version": "0.6.4"
   },
   "components": {
     "schemas": {
@@ -138,7 +138,7 @@
     "/workflows/{name}/run": {
       "post": {
         "summary": "Run workflow (wait)",
-        "description": "Runs the specified workflow synchronously and returns the final result.\nThe request body may include an optional serialized start event, an optional\ncontext object, and optional keyword arguments passed to the workflow run.\n",
+        "description": "Runs the specified workflow synchronously and returns the final result.\nThe request body may include an optional serialized start event and optional\nkeyword arguments passed to the workflow run.\n",
         "parameters": [
           {
             "in": "path",
@@ -160,10 +160,6 @@
                   "start_event": {
                     "type": "object",
                     "description": "Plain JSON object representing the start event (e.g., {\"message\": \"...\"})."
-                  },
-                  "context": {
-                    "type": "object",
-                    "description": "Serialized workflow Context."
                   },
                   "handler_id": {
                     "type": "string",
@@ -226,10 +222,6 @@
                   "start_event": {
                     "type": "object",
                     "description": "Plain JSON object representing the start event (e.g., {\"message\": \"...\"})."
-                  },
-                  "context": {
-                    "type": "object",
-                    "description": "Serialized workflow Context."
                   },
                   "handler_id": {
                     "type": "string",

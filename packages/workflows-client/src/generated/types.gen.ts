@@ -60,12 +60,6 @@ export type PostWorkflowsByNameRunData = {
       [key: string]: unknown;
     };
     /**
-     * Serialized workflow Context.
-     */
-    context?: {
-      [key: string]: unknown;
-    };
-    /**
      * Workflow handler identifier to continue from a previous completed run.
      */
     handler_id?: string;
@@ -117,12 +111,6 @@ export type PostWorkflowsByNameRunNowaitData = {
      * Plain JSON object representing the start event (e.g., {"message": "..."}).
      */
     start_event?: {
-      [key: string]: unknown;
-    };
-    /**
-     * Serialized workflow Context.
-     */
-    context?: {
       [key: string]: unknown;
     };
     /**
