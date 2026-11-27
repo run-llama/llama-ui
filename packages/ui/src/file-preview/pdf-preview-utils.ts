@@ -121,6 +121,24 @@ export function findClosestPage(
 }
 
 /**
+ * Pages whose row overlaps the scroll container's viewport.
+ */
+export function pagesInViewport(
+  pageRefs: { [key: number]: HTMLDivElement | null },
+  containerRect: DOMRect
+): number[] {
+  const pages: number[] = [];
+  Object.entries(pageRefs).forEach(([pageNumber, element]) => {
+    if (!element) return;
+    const rect = element.getBoundingClientRect();
+    if (rect.bottom > containerRect.top && rect.top < containerRect.bottom) {
+      pages.push(parseInt(pageNumber));
+    }
+  });
+  return pages;
+}
+
+/**
  * How the PDF should fit within the container on initial load
  */
 export type FitMode = "width" | "page";
@@ -159,78 +177,204 @@ export function calculateInitialScale(
   return Math.min(scaleToFitWidth, scaleToFitHeight);
 }
 
+/**
+ * `transform` attribute that turns a box clockwise around its own center, or
+ * undefined for an upright box. Shared by everything that draws a box in page
+ * units so outlines and spotlight holes rotate identically.
+ */
+export function boxRotationTransform(
+  box: Pick<BoundingBox, "x" | "y" | "width" | "height" | "rotation">
+): string | undefined {
+  return box.rotation != null && box.rotation % 360 !== 0
+    ? `rotate(${box.rotation} ${box.x + box.width / 2} ${box.y + box.height / 2})`
+    : undefined;
+}
+
+// Axis-aligned extent of a box after its rotation, in the box's own units.
+function rotatedExtent(
+  box: Pick<BoundingBox, "x" | "y" | "width" | "height" | "rotation">
+): { x: number; y: number; width: number; height: number } {
+  const radians = ((box.rotation ?? 0) * Math.PI) / 180;
+  const cos = Math.abs(Math.cos(radians));
+  const sin = Math.abs(Math.sin(radians));
+  const width = box.width * cos + box.height * sin;
+  const height = box.width * sin + box.height * cos;
+  return {
+    x: box.x + (box.width - width) / 2,
+    y: box.y + (box.height - height) / 2,
+    width,
+    height,
+  };
+}
+
 export interface HighlightScrollParams {
-  /** Top offset of the page element relative to scroll container */
-  pageTop: number;
-  /** Height of the page in scaled pixels */
-  pageHeight: number;
-  /** Y position of highlight on page (unscaled) */
-  highlightY: number;
-  /** Height of highlight (unscaled) */
-  highlightHeight: number;
-  /** Current scale factor */
+  /** Highlight in unscaled page units. */
+  highlight: Pick<Highlight, "x" | "y" | "width" | "height" | "rotation">;
+  /** Current scale factor (page units to CSS px). */
   scale: number;
-  /** Height of the viewport/container */
+  /** Page's top-left corner in scroll-content px (its position at scroll 0). */
+  pageTop: number;
+  pageLeft: number;
+  /** Scroll position the container is at, or is already animating toward. */
+  scrollTop: number;
+  scrollLeft: number;
   viewportHeight: number;
-  /** Total scrollable height of container */
+  viewportWidth: number;
   scrollHeight: number;
-  /** Minimum distance from viewport edge */
-  minEdgeDistance: number;
+  scrollWidth: number;
+  /** A box closer than this to a viewport edge counts as out of view. */
+  margin?: number;
+}
+
+// A page lands this far below the viewport top when a scroll starts at it.
+const PAGE_TOP_GAP_PX = 16;
+// A highlight smaller than this on both axes (CSS px) marks a page to go to.
+const PAGE_MARKER_MAX_PX = 4;
+
+const clamp = (value: number, max: number) => Math.max(0, Math.min(value, max));
+
+const fitsViewport = (
+  boxStart: number,
+  boxSize: number,
+  scroll: number,
+  viewportSize: number,
+  margin: number
+) =>
+  boxStart >= scroll + margin &&
+  boxStart + boxSize <= scroll + viewportSize - margin;
+
+// Scroll offset that centers a box on one axis. A box larger than the viewport
+// is aligned to its leading edge.
+function centeredScroll(
+  boxStart: number,
+  boxSize: number,
+  viewportSize: number,
+  maxScroll: number,
+  margin: number
+): number {
+  const lead = boxSize <= viewportSize ? (viewportSize - boxSize) / 2 : margin;
+  return clamp(boxStart - lead, maxScroll);
 }
 
 /**
- * Calculates optimal scroll position to show a highlight.
- * Uses smart positioning that averages between centering the highlight
- * and centering the page, while ensuring minimum distance from viewport edges.
+ * Decides whether the scroll container has to move to show a highlight.
+ * Returns the scroll position to move to, or null to stay put.
  *
- * @returns The target scrollTop value, or null if calculation cannot be performed
+ * - A page marker (a highlight under ~4 CSS px on both axes, such as the
+ *   `{x: 0, y: 0, width: 1, height: 1}` box callers use for "go to page N")
+ *   scrolls vertically so its page starts just below the viewport top. The
+ *   horizontal position is kept.
+ * - A highlight whose rotated extent is fully inside the viewport stays put,
+ *   so stepping between highlights that are both on screen leaves the document
+ *   still.
+ * - A highlight that is out of view vertically shows its page from the top
+ *   when the highlight is then visible, and is centered otherwise. It is
+ *   centered horizontally only when it is out of view horizontally.
+ *
+ * Every position is clamped to the scroll range, and a move of under 1px is
+ * reported as null.
  */
-export function calculateHighlightScrollPosition(
+export function calculateHighlightScroll(
   params: HighlightScrollParams
-): number {
-  const {
-    pageTop,
-    pageHeight,
-    highlightY,
-    highlightHeight,
-    scale,
-    viewportHeight,
-    scrollHeight,
-    minEdgeDistance,
-  } = params;
+): { top: number; left: number } | null {
+  const { scale, margin = 8, scrollTop, scrollLeft } = params;
+  const extent = rotatedExtent(params.highlight);
+  const boxTop = params.pageTop + extent.y * scale;
+  const boxLeft = params.pageLeft + extent.x * scale;
+  const boxHeight = extent.height * scale;
+  const boxWidth = extent.width * scale;
+  const maxTop = Math.max(0, params.scrollHeight - params.viewportHeight);
+  const maxLeft = Math.max(0, params.scrollWidth - params.viewportWidth);
+  const pageStart = clamp(params.pageTop - PAGE_TOP_GAP_PX, maxTop);
 
-  // Calculate highlight bounds in scaled pixels relative to container
-  const highlightTopAbsolute = pageTop + highlightY * scale;
-  const highlightBottomAbsolute =
-    pageTop + (highlightY + highlightHeight) * scale;
-  const highlightCenterAbsolute =
-    (highlightTopAbsolute + highlightBottomAbsolute) / 2;
-
-  // Calculate page center for averaging
-  const pageCenterAbsolute = pageTop + pageHeight / 2;
-
-  // Scroll position to center the highlight in viewport
-  const scrollToCenterHighlight = highlightCenterAbsolute - viewportHeight / 2;
-
-  // Scroll position to center the page in viewport
-  const scrollToCenterPage = pageCenterAbsolute - viewportHeight / 2;
-
-  // Average the two positions (bias toward highlight)
-  let targetScroll = (scrollToCenterHighlight + scrollToCenterPage) / 2;
-
-  // Check where highlight ends up and enforce minimum edge distance
-  const highlightTopInViewport = highlightTopAbsolute - targetScroll;
-  const highlightBottomInViewport = highlightBottomAbsolute - targetScroll;
-
-  if (highlightTopInViewport < minEdgeDistance) {
-    // Highlight too close to top - scroll up (reduce scroll value)
-    targetScroll = highlightTopAbsolute - minEdgeDistance;
-  } else if (highlightBottomInViewport > viewportHeight - minEdgeDistance) {
-    // Highlight too close to bottom - scroll down
-    targetScroll = highlightBottomAbsolute - (viewportHeight - minEdgeDistance);
+  let top = scrollTop;
+  let left = scrollLeft;
+  if (boxWidth < PAGE_MARKER_MAX_PX && boxHeight < PAGE_MARKER_MAX_PX) {
+    top = pageStart;
+  } else {
+    const { viewportHeight, viewportWidth } = params;
+    if (!fitsViewport(boxTop, boxHeight, scrollTop, viewportHeight, margin)) {
+      top = fitsViewport(boxTop, boxHeight, pageStart, viewportHeight, margin)
+        ? pageStart
+        : centeredScroll(boxTop, boxHeight, viewportHeight, maxTop, margin);
+    }
+    if (!fitsViewport(boxLeft, boxWidth, scrollLeft, viewportWidth, margin)) {
+      left = centeredScroll(boxLeft, boxWidth, viewportWidth, maxLeft, margin);
+    }
   }
 
-  // Clamp to valid scroll range
-  const maxScroll = scrollHeight - viewportHeight;
-  return Math.max(0, Math.min(targetScroll, maxScroll));
+  const moves =
+    Math.abs(top - scrollTop) >= 1 || Math.abs(left - scrollLeft) >= 1;
+  return moves ? { top, left } : null;
+}
+
+const SPOTLIGHT_PADDING_PX = 4;
+const SPOTLIGHT_MIN_WIDTH_PX = 40;
+const SPOTLIGHT_MIN_HEIGHT_PX = 18;
+
+/**
+ * Grows each highlight into the area a spotlight keeps sharp: padded by a few
+ * CSS px and never smaller than a readable minimum, centered on the original
+ * box. Sizes are CSS px converted to page units with `scale`, so the padding
+ * looks the same at every zoom. Rotation is carried through unchanged.
+ */
+export function spotlightBoxes(
+  boxes: BoundingBox[],
+  scale: number
+): BoundingBox[] {
+  return boxes.map((box) => {
+    const width = Math.max(
+      box.width + (2 * SPOTLIGHT_PADDING_PX) / scale,
+      SPOTLIGHT_MIN_WIDTH_PX / scale
+    );
+    const height = Math.max(
+      box.height + (2 * SPOTLIGHT_PADDING_PX) / scale,
+      SPOTLIGHT_MIN_HEIGHT_PX / scale
+    );
+    return {
+      ...box,
+      x: box.x + (box.width - width) / 2,
+      y: box.y + (box.height - height) / 2,
+      width,
+      height,
+    };
+  });
+}
+
+const round = (value: number) => Math.round(value * 100) / 100;
+
+/**
+ * Builds the SVG used as a CSS mask for the spotlight veil: opaque everywhere
+ * on the page except over the spotlight boxes, where it is transparent so the
+ * veil lets the page show through sharp. The SVG uses the page's own units as
+ * its viewBox and is stretched over the page by the caller.
+ *
+ * Returns null when there are no boxes; the veil then covers the whole page.
+ */
+export function buildSpotlightMaskSvg(
+  boxes: BoundingBox[],
+  page: { width: number; height: number },
+  scale: number
+): string | null {
+  if (boxes.length === 0) return null;
+  const radius = round(3 / scale);
+  const holes = spotlightBoxes(boxes, scale)
+    .map((box) => {
+      const transform = boxRotationTransform(box);
+      return (
+        `<rect x="${round(box.x)}" y="${round(box.y)}" ` +
+        `width="${round(box.width)}" height="${round(box.height)}" ` +
+        `rx="${radius}" fill="black"` +
+        (transform ? ` transform="${transform}"` : "") +
+        "/>"
+      );
+    })
+    .join("");
+  const size = `width="${page.width}" height="${page.height}"`;
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${page.width} ${page.height}" preserveAspectRatio="none">` +
+    `<mask id="holes"><rect ${size} fill="white"/>${holes}</mask>` +
+    `<rect ${size} mask="url(#holes)"/>` +
+    "</svg>"
+  );
 }

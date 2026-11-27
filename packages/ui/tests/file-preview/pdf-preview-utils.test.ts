@@ -3,13 +3,15 @@ import {
   groupHighlightsByPage,
   calculateVisiblePageRange,
   findClosestPage,
+  pagesInViewport,
   calculateFitToWidthScale,
   calculateInitialScale,
-  calculateHighlightScrollPosition,
+  calculateHighlightScroll,
+  buildSpotlightMaskSvg,
   scrollOffsetForPage,
   pageFromScrollOffset,
 } from "@/src/file-preview/pdf-preview-utils";
-import type { Highlight } from "@/src/file-preview/types";
+import type { BoundingBox, Highlight } from "@/src/file-preview/types";
 
 describe("groupHighlightsByPage", () => {
   it("returns empty object when highlights is undefined", () => {
@@ -167,6 +169,29 @@ describe("findClosestPage", () => {
     // Page 3 center is at 1200 - distance 950
     const result = findClosestPage(pageRefs, createContainerRect(0, 500));
     expect(result).toBe(2);
+  });
+});
+
+describe("pagesInViewport", () => {
+  const row = (top: number, height: number) =>
+    ({
+      getBoundingClientRect: () => ({ top, bottom: top + height }),
+    }) as HTMLDivElement;
+
+  it("returns every page that overlaps the viewport, and no others", () => {
+    // Catches: on-screen pages pruned from the mounted set (blanking under
+    // the user), or only the page at the viewport center being kept.
+    // Viewport 100..700; 400px pages 416px apart starting at -500.
+    const pageRefs = {
+      1: row(-500, 400),
+      2: row(-84, 400),
+      3: row(332, 400),
+      4: row(748, 400),
+      5: null,
+    };
+    expect(
+      pagesInViewport(pageRefs, { top: 100, bottom: 700 } as DOMRect)
+    ).toEqual([2, 3]);
   });
 });
 
@@ -344,140 +369,274 @@ describe("calculateInitialScale", () => {
   });
 });
 
-describe("calculateHighlightScrollPosition", () => {
-  const baseParams = {
-    pageTop: 0,
-    pageHeight: 800,
-    highlightY: 400,
-    highlightHeight: 50,
+describe("calculateHighlightScroll", () => {
+  // One 600x800 page at the top-left of a 800x600 viewport, 2000px of content.
+  const base = {
     scale: 1,
+    pageTop: 0,
+    pageLeft: 0,
+    scrollTop: 0,
+    scrollLeft: 0,
     viewportHeight: 600,
-    scrollHeight: 1200,
-    minEdgeDistance: 60,
+    viewportWidth: 800,
+    scrollHeight: 2000,
+    scrollWidth: 800,
   };
+  const box = (y: number, height = 50) => ({ x: 100, y, width: 200, height });
 
-  it("centers highlight when in middle of page", () => {
-    const result = calculateHighlightScrollPosition(baseParams);
-    // Highlight center at 425, page center at 400
-    // scrollToCenterHighlight = 425 - 300 = 125
-    // scrollToCenterPage = 400 - 300 = 100
-    // average = 112.5
-    expect(result).toBe(112.5);
+  it("leaves the document still when the highlight is fully on screen", () => {
+    // Catches: the pane jumping while the user hovers between visible fields.
+    expect(
+      calculateHighlightScroll({ ...base, highlight: box(100) })
+    ).toBeNull();
+    expect(
+      calculateHighlightScroll({ ...base, highlight: box(400) })
+    ).toBeNull();
   });
 
-  it("respects minimum edge distance for highlight at top of page", () => {
-    const result = calculateHighlightScrollPosition({
-      ...baseParams,
-      highlightY: 10,
-      highlightHeight: 30,
+  it("centers a highlight that is cut off by the bottom edge", () => {
+    // Catches: a half-hidden source treated as visible. 580 - (600 - 50) / 2.
+    expect(calculateHighlightScroll({ ...base, highlight: box(580) })).toEqual({
+      top: 305,
+      left: 0,
     });
-    // Highlight top at 10, should be at least 60px from top of viewport
-    // So scroll should be at most 10 - 60 = -50, clamped to 0
-    expect(result).toBe(0);
   });
 
-  it("respects minimum edge distance for highlight at bottom of page", () => {
-    const result = calculateHighlightScrollPosition({
-      ...baseParams,
-      pageTop: 0,
-      pageHeight: 800,
-      highlightY: 750,
-      highlightHeight: 40,
-      viewportHeight: 400,
-      scrollHeight: 1000,
-    });
-    // Highlight bottom at 790
-    // Should be at least 60px from bottom of viewport (400 - 60 = 340)
-    // So highlight bottom should be at scroll + 340
-    // scroll = 790 - 340 = 450
-    expect(result).toBe(450);
+  it("centers a highlight above the viewport that the page top would not show", () => {
+    // Catches: only checking the bottom edge. From the page top the box
+    // (700..750) is below the 600px fold, so it centers: 700 - (600 - 50) / 2.
+    expect(
+      calculateHighlightScroll({
+        ...base,
+        scrollTop: 1000,
+        highlight: box(700),
+      })
+    ).toEqual({ top: 425, left: 0 });
   });
 
-  it("applies scale correctly", () => {
-    const result = calculateHighlightScrollPosition({
-      ...baseParams,
-      scale: 2,
-      pageHeight: 1600, // 800 * 2 (already scaled)
-      scrollHeight: 2400,
+  describe("an out-of-view highlight on a page that fits the viewport", () => {
+    // 1000px pages 1016px apart in an 800px viewport, scrolled to the top.
+    const paged = {
+      ...base,
+      viewportHeight: 800,
+      pageTop: 2032,
+      scrollHeight: 5080,
+    };
+
+    it("lands on the page top whether the box is high or low on the page", () => {
+      // Catches: the same page landing differently per box (a box 600px down
+      // used to center at pageTop + 225). Both give 2032 - 16.
+      expect(
+        calculateHighlightScroll({ ...paged, highlight: box(100) })
+      ).toEqual({ top: 2016, left: 0 });
+      expect(
+        calculateHighlightScroll({ ...paged, highlight: box(600) })
+      ).toEqual({ top: 2016, left: 0 });
     });
-    // At scale 2:
-    // Highlight top = 0 + 400 * 2 = 800
-    // Highlight bottom = 0 + (400 + 50) * 2 = 900
-    // Highlight center = 850
-    // Page center = 800
-    // scrollToCenterHighlight = 850 - 300 = 550
-    // scrollToCenterPage = 800 - 300 = 500
-    // average = 525
-    expect(result).toBe(525);
+
+    it("centers a box the page top would leave below the fold", () => {
+      // Catches: page-top framing hiding the highlight on a tall page. The box
+      // is 1500px into a 2000px page: 2032 + 1500 - (800 - 50) / 2.
+      expect(
+        calculateHighlightScroll({ ...paged, highlight: box(1500) })
+      ).toEqual({ top: 3157, left: 0 });
+    });
   });
 
-  it("clamps to minimum scroll (0)", () => {
-    const result = calculateHighlightScrollPosition({
-      ...baseParams,
-      pageTop: 0,
-      highlightY: 0,
-      highlightHeight: 20,
+  describe("a one-unit go-to-page marker", () => {
+    const marker = { x: 0, y: 0, width: 1, height: 1 };
+    // 1000px pages 1016px apart in an 800px viewport. Page 4 starts at 3048
+    // and peeks 152px into the bottom of the viewport.
+    const peeking = {
+      ...base,
+      viewportHeight: 800,
+      pageTop: 3048,
+      scrollTop: 2400,
+      scrollHeight: 5080,
+      highlight: marker,
+    };
+
+    it("brings its page to the top even when the marker is on screen", () => {
+      // Catches: a segment click doing nothing because the page's first pixel
+      // is already visible. 3048 - 16.
+      expect(calculateHighlightScroll(peeking)).toEqual({ top: 3032, left: 0 });
     });
-    // Would result in negative scroll, should be clamped to 0
-    expect(result).toBeGreaterThanOrEqual(0);
+
+    it("keeps the horizontal scroll of a zoomed page", () => {
+      // Catches: the marker's x of 0 dragging a zoomed page back to its left
+      // edge on every segment click.
+      expect(
+        calculateHighlightScroll({
+          ...peeking,
+          scrollLeft: 300,
+          scrollWidth: 1600,
+        })
+      ).toEqual({ top: 3032, left: 300 });
+    });
+
+    it("stays put when its page is already at the top", () => {
+      // Catches: a no-op scroll (and a restarted animation) per repeated click.
+      expect(
+        calculateHighlightScroll({ ...peeking, scrollTop: 3032.4 })
+      ).toBeNull();
+    });
+
+    it("leaves a small real box in view alone", () => {
+      // Catches: a small real box (a checkbox, in view at 30px) sent to the
+      // page top as if it were a marker.
+      expect(
+        calculateHighlightScroll({
+          ...peeking,
+          scale: 3,
+          scrollTop: 3040,
+          highlight: { x: 50, y: 50, width: 10, height: 10 },
+        })
+      ).toBeNull();
+    });
   });
 
-  it("clamps to maximum scroll", () => {
-    const result = calculateHighlightScrollPosition({
-      ...baseParams,
-      pageTop: 800,
-      pageHeight: 800,
-      highlightY: 700,
-      scrollHeight: 1000,
-      viewportHeight: 400,
-    });
-    // Max scroll = 1000 - 400 = 600
-    expect(result).toBeLessThanOrEqual(600);
+  it("treats a highlight touching the viewport edge as out of view", () => {
+    // Catches: a box flush against the edge (bottom at 596 of 600) left there.
+    expect(
+      calculateHighlightScroll({ ...base, highlight: box(546) })
+    ).not.toBeNull();
+    expect(
+      calculateHighlightScroll({ ...base, highlight: box(540) })
+    ).toBeNull();
   });
 
-  it("handles highlight taller than viewport", () => {
-    const result = calculateHighlightScrollPosition({
-      ...baseParams,
-      highlightY: 200,
-      highlightHeight: 500, // Taller than viewport (600)
-      viewportHeight: 400,
-    });
-    // Should still produce a valid scroll value
-    expect(result).toBeGreaterThanOrEqual(0);
-    expect(result).toBeLessThanOrEqual(baseParams.scrollHeight - 400);
+  it("clamps the target to the top of the scroll range", () => {
+    // Catches: a negative scrollTop for a highlight near the document start.
+    expect(
+      calculateHighlightScroll({ ...base, scrollTop: 500, highlight: box(20) })
+    ).toEqual({ top: 0, left: 0 });
   });
 
-  it("handles page at non-zero offset", () => {
-    const result = calculateHighlightScrollPosition({
-      ...baseParams,
-      pageTop: 500, // Page starts 500px down
-      highlightY: 100,
-    });
-    // Highlight absolute position = 500 + 100 = 600
-    // Highlight center = 625
-    // Page center = 500 + 400 = 900
-    // Calculation should account for pageTop offset
-    expect(result).toBeGreaterThan(0);
+  it("clamps the target to the bottom of the scroll range", () => {
+    // Catches: scrolling past the end. Max scroll is 2000 - 600.
+    expect(
+      calculateHighlightScroll({ ...base, highlight: box(1950, 40) })
+    ).toEqual({ top: 1400, left: 0 });
   });
 
-  it("handles very small viewport", () => {
-    const result = calculateHighlightScrollPosition({
-      ...baseParams,
-      viewportHeight: 100,
-      minEdgeDistance: 10,
-    });
-    // Should still work with small viewport
-    expect(result).toBeGreaterThanOrEqual(0);
+  it("does not ask for a scroll to where the container already is", () => {
+    // Catches: endless no-op scrolls for a box in the top margin at scroll 0.
+    expect(calculateHighlightScroll({ ...base, highlight: box(2) })).toBeNull();
   });
 
-  it("handles zero scroll height edge case", () => {
-    const result = calculateHighlightScrollPosition({
-      ...baseParams,
-      scrollHeight: 600, // Same as viewport, no scrolling possible
-      viewportHeight: 600,
+  it("applies the scale to the highlight", () => {
+    // Catches: comparing unscaled page units against viewport px. At 2x the
+    // box spans 700..800, below the 600px fold: 700 - (600 - 100) / 2.
+    const highlight = box(350);
+    expect(calculateHighlightScroll({ ...base, highlight })).toBeNull();
+    expect(calculateHighlightScroll({ ...base, scale: 2, highlight })).toEqual({
+      top: 450,
+      left: 0,
     });
-    // Max scroll = 0, should clamp to 0
-    expect(result).toBe(0);
+  });
+
+  it("centers horizontally only when the highlight is off to the side", () => {
+    // Catches: a zoomed-in page keeping its highlight off screen to the right.
+    // 1000 - (800 - 200) / 2; the vertical position is fine and stays put.
+    expect(
+      calculateHighlightScroll({
+        ...base,
+        scrollWidth: 1600,
+        highlight: { x: 1000, y: 100, width: 200, height: 50 },
+      })
+    ).toEqual({ top: 0, left: 700 });
+  });
+
+  it("uses the rotated extent of the highlight", () => {
+    // Catches: a 300x20 box turned 90 degrees judged by its unrotated 20px
+    // height. Rotated it spans 360..660 around its center: 360 - 150.
+    const highlight = { x: 100, y: 500, width: 300, height: 20 };
+    expect(calculateHighlightScroll({ ...base, highlight })).toBeNull();
+    expect(
+      calculateHighlightScroll({
+        ...base,
+        highlight: { ...highlight, rotation: 90 },
+      })
+    ).toEqual({ top: 210, left: 0 });
+  });
+});
+
+describe("buildSpotlightMaskSvg", () => {
+  const page = { width: 600, height: 800 };
+  const boxOf = (overrides: Partial<BoundingBox> = {}): BoundingBox => ({
+    id: "a",
+    x: 100,
+    y: 200,
+    width: 300,
+    height: 100,
+    ...overrides,
+  });
+  // Holes are the black shapes inside the SVG's mask.
+  const holes = (svg: string | null) =>
+    [
+      ...new DOMParser()
+        .parseFromString(svg!, "image/svg+xml")
+        .querySelectorAll('mask rect[fill="black"]'),
+    ].map((rect) => ({
+      x: Number(rect.getAttribute("x")),
+      y: Number(rect.getAttribute("y")),
+      width: Number(rect.getAttribute("width")),
+      height: Number(rect.getAttribute("height")),
+      transform: rect.getAttribute("transform"),
+    }));
+
+  it("returns no mask when the page has no highlights", () => {
+    // Catches: a page without highlights getting a hole (or an empty mask
+    // that hides the veil) when it should be fully veiled.
+    expect(buildSpotlightMaskSvg([], page, 1)).toBeNull();
+  });
+
+  it("pads each hole by 4 CSS px at any zoom", () => {
+    // Catches: the hole clipping the text it is meant to keep sharp, or the
+    // padding growing with zoom. 4px is 4 page units at 1x and 2 at 2x.
+    expect(holes(buildSpotlightMaskSvg([boxOf()], page, 1))).toEqual([
+      { x: 96, y: 196, width: 308, height: 108, transform: null },
+    ]);
+    expect(holes(buildSpotlightMaskSvg([boxOf()], page, 2))).toEqual([
+      { x: 98, y: 198, width: 304, height: 104, transform: null },
+    ]);
+  });
+
+  it("grows a tiny highlight to 40x18 CSS px around its center", () => {
+    // Catches: a one-character source leaving a pinhole, or the minimum box
+    // growing from the corner so the hole misses the source.
+    const tiny = boxOf({ width: 10, height: 4 });
+    expect(holes(buildSpotlightMaskSvg([tiny], page, 1))).toEqual([
+      { x: 85, y: 193, width: 40, height: 18, transform: null },
+    ]);
+    expect(holes(buildSpotlightMaskSvg([tiny], page, 2))).toEqual([
+      { x: 95, y: 197.5, width: 20, height: 9, transform: null },
+    ]);
+  });
+
+  it("rotates the hole around the highlight's center", () => {
+    // Catches: an upright hole over a rotated source.
+    expect(
+      holes(buildSpotlightMaskSvg([boxOf({ rotation: 30 })], page, 1))[0]
+        .transform
+    ).toBe("rotate(30 250 250)");
+  });
+
+  it("cuts one hole per highlight in the page's own units", () => {
+    // Catches: holes dropped for multi-box sources, or a viewBox that does
+    // not match the page so holes land in the wrong place when stretched.
+    const svg = buildSpotlightMaskSvg(
+      [boxOf(), boxOf({ id: "b", y: 500 })],
+      page,
+      1.5
+    );
+    expect(holes(svg)).toHaveLength(2);
+    const root = new DOMParser().parseFromString(
+      svg!,
+      "image/svg+xml"
+    ).documentElement;
+    expect(root.getAttribute("viewBox")).toBe("0 0 600 800");
+    expect(root.getAttribute("preserveAspectRatio")).toBe("none");
   });
 });
 

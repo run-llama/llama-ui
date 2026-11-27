@@ -36,3 +36,11 @@ export interface Highlight {
   /** Clockwise degrees around the literal rectangle center. */
   rotation?: number | null;
 }
+
+/**
+ * How highlights are painted on a preview.
+ * - "outline": a tinted box over each highlight.
+ * - "spotlight": the whole document is veiled (faded and blurred) and only the
+ *   highlighted areas stay sharp, each marked with a thin ring.
+ */
+export type HighlightStyle = "outline" | "spotlight";
